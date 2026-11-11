@@ -14,9 +14,9 @@ Open **http://localhost:4173**. There are no npm dependencies to install. Openin
 
 ## Host on GitHub Pages
 
-Repository: [MelchiorDahrk/DnD-App](https://github.com/MelchiorDahrk/DnD-App). Once Pages is enabled and the first deployment succeeds, the app will be available at **https://melchiordahrk.github.io/DnD-App/**.
+Repository: [MelchiorDahrk/DnD-App](https://github.com/MelchiorDahrk/DnD-App). App URL: **[Open Questlog](https://melchiordahrk.github.io/DnD-App/)**.
 
-GitHub Pages requires a public repository on GitHub Free, or a plan that supports Pages for private repositories. The repository's current private visibility and plan must support Pages before deployment can finish.
+This public repository uses GitHub Actions to publish the app to GitHub Pages automatically after a push to `main`. Check the [deployment workflow](https://github.com/MelchiorDahrk/DnD-App/actions/workflows/deploy.yml) for deployment status or to publish manually.
 
 1. Push this project's source to `main`, including `.github/workflows/deploy.yml`.
 2. Open [Settings → Pages](https://github.com/MelchiorDahrk/DnD-App/settings/pages), then under **Build and deployment → Source** choose **GitHub Actions**.
