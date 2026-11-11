@@ -1,0 +1,14 @@
+{
+  "name": "questlog-character-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A pocket-sized, offline-ready 2024 D&D 5e character journal.",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "start": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check app.js && node --check model.js && node --check art.js && node --check icons.js && node --check sw.js"
+  }
+}
