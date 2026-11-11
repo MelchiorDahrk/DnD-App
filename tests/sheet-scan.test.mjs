@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import http from 'node:http';
 import {SHEET_SCAN_SCHEMA,characterFromScan,validateScanImages,scanServiceURL} from '../sheet-scan.js';
-import {attackBonus,initiative,passivePerception,parseBackup} from '../model.js';
+import {SAVE_VERSION,attackBonus,initiative,passivePerception,parseBackup} from '../model.js';
 import {extractSheet,createScanHandler} from '../scripts/scan-api.mjs';
 
 function empty(schema){
@@ -27,7 +27,7 @@ test('handwritten sheet totals, equipment and older features survive a valid bac
   assert.deepEqual(c.attacks.map(a=>attackBonus(c,a)),[5,7]);assert.equal(c.attacks[1].bonus,5);
   assert.equal(c.items[0].qty,40);assert.equal(c.items[0].weight,0);assert.equal(c.features[0].maxUses,1);assert.equal(c.features[0].reset,'short');
   assert.ok(warnings.some(v=>/Current HP/.test(v)));assert.ok(warnings.some(v=>/weights/.test(v)));
-  const restored=parseBackup(JSON.stringify({version:1,characters:[c],activeId:c.id,settings:{sound:false}})).characters[0];
+  const restored=parseBackup(JSON.stringify({version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}})).characters[0];
   assert.equal(restored.personalityTraits,scan.personalityTraits);assert.equal(restored.electrum,100);assert.match(restored.notes[0].body,/shield/);
 });
 

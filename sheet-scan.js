@@ -1,4 +1,4 @@
-import {ABILITIES, SKILLS, CLASSES, COINS, SHEET_TEXT, CONDITIONS, makeCharacter, uid, mod, proficiency, validDiceFormula, parseBackup} from './model.js';
+import {SAVE_VERSION, ABILITIES, SKILLS, CLASSES, COINS, SHEET_TEXT, CONDITIONS, makeCharacter, uid, mod, proficiency, validDiceFormula, parseBackup} from './model.js';
 
 export const SCAN_LIMITS = {pages:6, fileBytes:15000000, imageBytes:3000000, bodyBytes:18000000};
 const text = (maxLength=20000) => ({type:['string','null'],maxLength});
@@ -15,11 +15,11 @@ export const SHEET_SCAN_SCHEMA = object({
   level:number(1,20),xp:number(0,100000000),stats:object(Object.fromEntries(Object.keys(ABILITIES).map(k=>[k,number(1,30)]))),
   maxHp:number(1,9999),hp:number(0,9999),tempHp:number(0,9999),ac:number(0,99),speed:number(0,999),
   initiative:number(-99,99),passivePerception:number(-99,199),hitDie:{type:['integer','null'],enum:[6,8,10,12,null]},hitDice:number(0,20),inspiration:bool,
-  deathSuccess:number(0,3),deathFailure:number(0,3),exhaustion:number(0,6),
+  deathSuccess:number(0,3),deathFailure:number(0,3),exhaustion:number(0,6),initiativeAdvantage:bool,
   saves:list({type:'string',enum:Object.keys(ABILITIES)}),skills:list({type:'string',enum:Object.keys(SKILLS)}),expertise:list({type:'string',enum:Object.keys(SKILLS)}),conditions:list({type:'string',enum:CONDITIONS}),
   ...Object.fromEntries(Object.keys(COINS).map(k=>[k,number(0,100000000)])),
   ...Object.fromEntries(Object.keys(SHEET_TEXT).map(k=>[k,text()])),
-  attacks:list(object({name:text(200),ability:choice(Object.keys(ABILITIES)),attackBonus:number(-99,99),proficient:bool,damage:text(30),type:text(100),range:text(100),notes:text()})),
+  attacks:list(object({name:text(200),ability:choice(Object.keys(ABILITIES)),attackBonus:number(-99,99),proficient:bool,damage:text(30),type:text(100),range:text(100),notes:text(),rollMode:choice(['normal','advantage','disadvantage'])})),
   items:list(object({name:text(200),category:choice(['Weapon','Armor','Gear','Consumable','Treasure']),qty:number(0,99999),weight:{type:['number','null'],minimum:0,maximum:99999},equipped:bool,description:text()})),
   features:list(object({name:text(200),description:text(),maxUses:number(0,99),used:number(0,99),reset:choice(['short','long','manual']),rollFormula:text(30)})),
   spells:list(object({name:text(200),level:number(0,9),school:text(2000),castingTime:text(2000),range:text(2000),duration:text(2000),concentration:bool,prepared:bool,notes:text()})),
@@ -77,7 +77,7 @@ export function characterFromScan(scan) {
   c.hp=scan.hp??c.maxHp;
   if(scan.hp===null)warnings.push('Current HP was blank or unreadable; started at maximum HP.');
   if(c.hp>c.maxHp){warnings.push(`Written current HP (${c.hp}) exceeded maximum (${c.maxHp}); limited to maximum. Check both.`);c.hp=c.maxHp;}
-  c.saves=[...new Set(scan.saves)];c.skills=[...new Set(scan.skills)];c.expertise=[...new Set(scan.expertise)];c.conditions=[...new Set(scan.conditions)];
+  c.saves=[...new Set(scan.saves)];c.skills=[...new Set(scan.skills)];c.expertise=[...new Set(scan.expertise)];c.conditions=[...new Set(scan.conditions)];c.initiativeAdvantage=scan.initiativeAdvantage??false;
   c.initiativeBonus=scan.initiative===null?0:scan.initiative-mod(c.stats.dex)+2*c.exhaustion;
   const perception=mod(c.stats.wis)+(c.expertise.includes('Perception')?2:c.skills.includes('Perception')?1:0)*proficiency(c.level)-2*c.exhaustion;
   c.passivePerceptionBonus=scan.passivePerception===null?0:scan.passivePerception-10-perception;
@@ -87,17 +87,17 @@ export function characterFromScan(scan) {
     const formula=v.rollFormula||'';
     if(formula&&!validDiceFormula(formula))warnings.push(`${v.name}: roll formula was not understood and is preserved in its description.`);
     if((v.used??0)>(v.maxUses??0))warnings.push(`${v.name}: used charges exceeded the maximum; limited to maximum. Review both values.`);
-    return {id:uid(),name:v.name,description:(v.description||'')+(formula&&!validDiceFormula(formula)?`\nWritten roll: ${formula}`:''),maxUses:v.maxUses??0,used:Math.min(v.used??0,v.maxUses??0),reset:v.reset||'manual',wiki:'',rollFormula:validDiceFormula(formula)?formula:''};
+    return {id:uid(),name:v.name,description:(v.description||'')+(formula&&!validDiceFormula(formula)?`\nWritten roll: ${formula}`:''),maxUses:v.maxUses??0,used:Math.min(v.used??0,v.maxUses??0),reset:v.reset||'manual',wiki:'',rollFormula:validDiceFormula(formula)?formula:'',shortRestRecovery:0};
   });
   c.attacks=[];
   for(const v of scan.attacks.filter(v=>v.name?.trim())){
     if(!v.damage||!validDiceFormula(v.damage)){
       warnings.push(`${v.name}: unreadable damage; kept as a feature note so no damage dice are invented.`);
-      c.features.push({id:uid(),name:v.name,description:`Attack bonus: ${v.attackBonus??'unreadable'}\nDamage: ${v.damage||'unreadable'} ${v.type||''}\n${v.notes||''}`,maxUses:0,used:0,reset:'manual',rollFormula:'',wiki:''});continue;
+      c.features.push({id:uid(),name:v.name,description:`Attack bonus: ${v.attackBonus??'unreadable'}\nDamage: ${v.damage||'unreadable'} ${v.type||''}\n${v.notes||''}`,maxUses:0,used:0,reset:'manual',rollFormula:'',shortRestRecovery:0,wiki:''});continue;
     }
     const ability=v.ability||'str',proficient=v.proficient??false;
     if(v.ability===null||v.proficient===null||v.attackBonus===null)warnings.push(`${v.name}: review attack ability, proficiency, and bonus.`);
-    c.attacks.push({id:uid(),name:v.name,ability,proficient,bonus:(v.attackBonus??mod(c.stats[ability]))-mod(c.stats[ability])-(proficient?proficiency(c.level):0)+2*c.exhaustion,damage:v.damage,type:v.type||'',range:v.range||'',notes:v.notes||''});
+    c.attacks.push({id:uid(),name:v.name,ability,proficient,bonus:(v.attackBonus??mod(c.stats[ability]))-mod(c.stats[ability])-(proficient?proficiency(c.level):0)+2*c.exhaustion,damage:v.damage,type:v.type||'',range:v.range||'',notes:v.notes||'',rollMode:v.rollMode||'normal'});
   }
   c.spells=scan.spells.filter(v=>v.name?.trim()).map(v=>({id:uid(),name:v.name,level:v.level??0,school:v.school||'Other',castingTime:v.castingTime||'',range:v.range||'',duration:v.duration||'',concentration:v.concentration??false,prepared:v.prepared??false,notes:v.notes||'',wiki:''}));
   for(const v of scan.spells)if(v.name&&v.level===null)warnings.push(`${v.name}: spell level was unreadable; review its starting value of 0.`);
@@ -112,7 +112,7 @@ export function characterFromScan(scan) {
 }
 
 export function validateScannedCharacter(c) {
-  parseBackup(JSON.stringify({version:1,characters:[c],activeId:c.id,settings:{sound:false}}));
+  parseBackup(JSON.stringify({version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}}));
   return c;
 }
 

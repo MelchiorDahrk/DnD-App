@@ -1,4 +1,5 @@
-export const STORAGE_KEY = 'questlog.v1';
+export const SAVE_VERSION = 2;
+export const STORAGE_KEY = `questlog.v${SAVE_VERSION}`;
 export const RULES_URL = 'https://www.dndbeyond.com/sources/dnd/br-2024';
 export const ABILITIES = {str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence', wis:'Wisdom', cha:'Charisma'};
 export const SKILLS = {Acrobatics:'dex','Animal Handling':'wis',Arcana:'int',Athletics:'str',Deception:'cha',History:'int',Insight:'wis',Intimidation:'cha',Investigation:'int',Medicine:'wis',Nature:'int',Perception:'wis',Performance:'cha',Persuasion:'cha',Religion:'int','Sleight of Hand':'dex',Stealth:'dex',Survival:'wis'};
@@ -19,8 +20,8 @@ export const abilityCheckBonus = (c,ability) => mod(c.stats[ability]) - exhausti
 export const saveBonus = (c,ability) => abilityCheckBonus(c,ability) + (c.saves.includes(ability) ? proficiency(c.level) : 0);
 export const attackBonus = (c,a) => abilityCheckBonus(c,a.ability) + a.bonus + (a.proficient ? proficiency(c.level) : 0);
 export function skillBonus(c, skill) { return abilityCheckBonus(c,SKILLS[skill]) + (c.expertise.includes(skill) ? 2 : c.skills.includes(skill) ? 1 : 0) * proficiency(c.level); }
-export const initiative = c => abilityCheckBonus(c,'dex') + (c.initiativeBonus ?? 0);
-export const passivePerception = c => 10 + skillBonus(c,'Perception') + (c.passivePerceptionBonus ?? 0);
+export const initiative = c => abilityCheckBonus(c,'dex') + c.initiativeBonus;
+export const passivePerception = c => 10 + skillBonus(c,'Perception') + c.passivePerceptionBonus;
 export function validDiceFormula(value) {
   if (typeof value!=='string') return false;
   const m=value.toLowerCase().replace(/\s/g,'').match(/^(\d{0,2})d(\d{1,3})([+-]\d{1,4})?$/);
@@ -44,16 +45,7 @@ export function wikiURL(label, category = '') {
   return `${RULES_URL}/${sections[category] || sections[key] || 'rules-glossary'}`;
 }
 export function referenceURL(url,label,category='') {
-  // Old generated wiki links resolve to the current rules; custom references stay intact.
-  const safe=safeURL(url);
-  if (!safe) return url ? '' : wikiURL(label,category);
-  const parsed=new URL(safe);
-  if (parsed.hostname!=='dnd5e.wikidot.com') return safe;
-  const path=parsed.pathname.slice(1);
-  const known={weapons:'weapons',armor:'armor','adventuring-gear':'adventuring-gear','wondrous-items':'wondrous-items','wondrous-items:potion-of-healing':'equipment','ranger:hunter':'Ranger'};
-  if (Object.hasOwn(known,path)) return wikiURL(known[path]);
-  const slug=label.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-  return path===`${category?category+':':''}${slug}` ? wikiURL(label,category) : safe;
+  return url ? safeURL(url) : wikiURL(label,category);
 }
 export function safeURL(url) {
   try { const u = new URL(url); return ['https:','http:'].includes(u.protocol) ? u.href : ''; } catch { return ''; }
@@ -64,7 +56,7 @@ export function makeCharacter(values = {}) {
   const maxHp = CLASSES[cls] + mod(stats.con);
   return {
     ...sheetDefaults(),id:uid(),name:'New adventurer',race:'Human',class:cls,subclass:'',background:'',alignment:'Neutral Good',campaign:'A new adventure',level:1,xp:0,
-    stats,hp:maxHp,maxHp,tempHp:0,ac:12,speed:30,gold:0,silver:0,copper:0,inspiration:false,
+    stats,hp:maxHp,maxHp,tempHp:0,ac:12,speed:30,gold:0,silver:0,copper:0,inspiration:false,initiativeAdvantage:false,
     hitDie:CLASSES[cls],hitDice:1,skills:[],expertise:[],saves:[],conditions:[],exhaustion:0,
     items:[],spells:[],slots:Array.from({length:9},()=>({max:0,used:0})),notes:[],features:[],attacks:[],
     concentration:'',spellAbility:'auto',deathSuccess:0,deathFailure:0,...values,class:cls
@@ -114,9 +106,10 @@ export function demoCharacter() {
     {id:uid(),name:'Savage Attacker (Origin feat)',description:'Soldier background feat: once per turn when a weapon attack hits, roll the weapon’s damage dice twice and use either roll. Resolve this manually.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('feats')},
     {id:uid(),name:'Wood Elf: Longstrider',description:'One free Longstrider casting per Long Rest. Choose No slot and spend this use; Wisdom is the chosen lineage spellcasting ability.',maxUses:1,used:0,reset:'long',wiki:wikiURL('species')}
   ];
+  c.features = c.features.map(f=>({rollFormula:'',shortRestRecovery:0,...f}));
+  c.attacks = c.attacks.map(a=>({rollMode:'normal',...a}));
   return c;
 }
-export function initialState() { const c = demoCharacter(); return {version:1,characters:[c],activeId:c.id,settings:{sound:false}}; }
 
 // Unbiased integer dice. Rejection sampling avoids modulo bias.
 export function randomDie(sides, random = array => crypto.getRandomValues(array)) {
@@ -177,8 +170,6 @@ const integerIn = (v,min,max) => Number.isInteger(v)&&numberIn(v,min,max);
 const string = (v,max=20000) => typeof v==='string'&&v.length<=max;
 function validateCharacter(c) {
   requireThat(c && typeof c==='object' && string(c.id,100) && /^[a-zA-Z0-9_-]+$/.test(c.id) && string(c.name,120) && c.name.trim(),'each character needs a safe ID and a name.');
-  // Version 1 saves predate these fields. Only missing values receive defaults.
-  for (const [key,value] of Object.entries(sheetDefaults())) if(c[key]===undefined)c[key]=value;
   requireThat(string(c.playerName,120),'invalid player name.');
   for (const key of Object.keys(SHEET_TEXT)) requireThat(string(c[key]),`invalid ${key}.`);
   for (const key of ['electrum','platinum']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
@@ -191,7 +182,8 @@ function validateCharacter(c) {
   for (const key of ['ac','speed','gold','silver','copper']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
   requireThat([6,8,10,12].includes(c.hitDie)&&integerIn(c.hitDice,0,c.level),'invalid hit dice.');
   requireThat(typeof c.inspiration==='boolean','invalid inspiration.');
-  requireThat(c.spellAbility===undefined||c.spellAbility==='auto'||Object.hasOwn(ABILITIES,c.spellAbility),'invalid casting ability.');
+  requireThat(typeof c.initiativeAdvantage==='boolean','invalid initiative advantage.');
+  requireThat(c.spellAbility==='auto'||Object.hasOwn(ABILITIES,c.spellAbility),'invalid casting ability.');
   for (const [key,values] of [['skills',Object.keys(SKILLS)],['expertise',Object.keys(SKILLS)],['saves',Object.keys(ABILITIES)],['conditions',CONDITIONS]]) requireThat(Array.isArray(c[key])&&c[key].length<=30&&c[key].every(v=>values.includes(v)),`invalid ${key}.`);
   requireThat(integerIn(c.exhaustion,0,6)&&integerIn(c.deathSuccess,0,3)&&integerIn(c.deathFailure,0,3),'invalid condition counters.');
   requireThat(Array.isArray(c.slots)&&c.slots.length===9&&c.slots.every(s=>s&&integerIn(s.max,0,99)&&integerIn(s.used,0,s.max)),'invalid spell slots.');
@@ -203,11 +195,12 @@ function validateCharacter(c) {
   c.items.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&['Weapon','Armor','Gear','Consumable','Treasure'].includes(v.category)&&integerIn(v.qty,0,99999)&&numberIn(v.weight,0,99999)&&typeof v.equipped==='boolean'&&string(v.description)&&string(v.wiki,2000),'invalid item.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
   c.notes.forEach(v=>requireThat(string(v.title,200)&&v.title.trim()&&string(v.body,100000)&&string(v.tag,100)&&typeof v.pinned==='boolean'&&string(v.updated,100)&&!Number.isNaN(Date.parse(v.updated)),'invalid note.'));
-  c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,99)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&(v.rollFormula===undefined||v.rollFormula===''||(string(v.rollFormula,30)&&validDiceFormula(v.rollFormula))),'invalid feature.'));
-  c.features.forEach(v=>requireThat(v.shortRestRecovery===undefined||integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));
+  c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,99)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&string(v.rollFormula,30)&&(v.rollFormula===''||validDiceFormula(v.rollFormula)),'invalid feature.'));
+  c.features.forEach(v=>requireThat(integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));
   c.attacks.forEach(v=>{
     requireThat(string(v.name,200)&&v.name.trim()&&Object.hasOwn(ABILITIES,v.ability)&&integerIn(v.bonus,-99,99)&&typeof v.proficient==='boolean'&&string(v.damage,30)&&string(v.type,100)&&string(v.range,100),'invalid attack.');
-    requireThat(v.notes===undefined||string(v.notes),'invalid attack notes.');
+    requireThat(string(v.notes),'invalid attack notes.');
+    requireThat(['normal','advantage','disadvantage'].includes(v.rollMode),'invalid attack roll mode.');
     requireThat(validDiceFormula(v.damage),'invalid attack damage.');
   });
   return c;
@@ -216,7 +209,8 @@ export function parseBackup(text) {
   requireThat(typeof text==='string'&&text.length<=2000000,'file is too large (2 MB maximum).');
   let data;
   try {data=JSON.parse(text);} catch {throw new Error('This file isn’t valid JSON. Choose a Questlog backup.');}
-  requireThat(data?.version===1&&Array.isArray(data.characters)&&data.characters.length>0&&data.characters.length<=100,'expected a version 1 Questlog backup with 1–100 characters.');
+  requireThat(data?.version===SAVE_VERSION,`only version ${SAVE_VERSION} Questlog saves are supported. Older saves cannot be loaded or imported.`);
+  requireThat(Array.isArray(data.characters)&&data.characters.length>0&&data.characters.length<=100,'expected 1–100 characters.');
   data.characters.forEach(validateCharacter);
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
   requireThat(data.characters.some(c=>c.id===data.activeId),'active character is missing.');
