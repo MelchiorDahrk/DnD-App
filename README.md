@@ -31,6 +31,7 @@ Alternatively, this is a buildless app: publish the repository root with GitHub 
 ## At the table
 
 - **Characters:** starts with Lyra, a level 3 Wood Elf Ranger. Open the character switcher to create your own adventurers. Edit player name, species, class, subclass, background, alignment, campaign, level, and XP. When copying an existing higher-level sheet, set its HP in **Edit stats**.
+- **Scan a sheet:** open the character switcher or **Settings & backup → Scan a sheet**. Take a photo or choose up to six JPG, PNG, or WebP photos of one character’s printed or handwritten 5e sheet. Review and correct the extracted fields, compare the original photos, then create a new character. Existing characters are preserved. Scanning needs an online scan service; see setup below.
 - **Character sheet:** edit scores and combat stats; roll checks, saving throws, attacks, damage, and initiative. Cycle skill dots through untrained, proficiency, and expertise.
 - **Paper sheet details:** dedicated personality traits, ideals, bonds, flaws, languages, armor/weapon/tool proficiencies, senses, and armor/shield notes. Edit initiative and passive Perception adjustments for features, equipment, or table rulings. [Full coverage map](docs/character-sheet-coverage.md).
 - **Features & resources:** track maneuvers and rest-based charges. Add an optional dice formula such as `1d8` for superiority dice or `1d10+3` for Second Wind. Rolling spends one use and prevents further rolls when exhausted; apply healing or damage separately. Short/long rests refresh the appropriate resources.
@@ -44,7 +45,7 @@ Alternatively, this is a buildless app: publish the repository root with GitHub 
 
 ## Saves, backups, and offline use
 
-Data is saved automatically in this browser's local storage. **There is no account, server, or automatic sync between devices.** Use **Settings & backup → Export** to download a JSON backup, then import it on another device. Import adds characters and preserves existing ones; duplicate IDs become separate copies.
+Data is saved automatically in this browser's local storage. **Character tracking needs no account or server, and there is no automatic sync between devices.** Optional photo scanning uses an online service. Use **Settings & backup → Export** to download a JSON backup, then import it on another device. Import adds characters and preserves existing ones; duplicate IDs become separate copies.
 
 Clearing browser data, using private browsing, changing the site's address, or switching browsers can remove access to local saves. Export backups regularly. The app shows an explicit warning when browser storage fails; changes then remain in memory and can still be exported. It will not silently overwrite unreadable saved data.
 
@@ -52,7 +53,35 @@ Backups are validated before import. Each browser supports up to 100 characters 
 
 Older version 1 saves remain compatible. Missing paper-sheet fields start empty, extra coin types and bonus adjustments start at zero, and existing character values are preserved. All new fields are included in export/import.
 
-After the first online visit and the **Ready for offline adventures** message, a service worker caches the app, local icons, and original artwork. Character tracking and dice then work offline on HTTPS hosts or localhost. Reference pages need internet access. The app has no remote fonts, scripts, analytics, or runtime dependencies. For future code releases, bump the cache name in `sw.js` when changing the offline asset set.
+After the first online visit and the **Ready for offline adventures** message, a service worker caches the app, local icons, and original artwork. Character tracking and dice then work offline on HTTPS hosts or localhost. Reference pages and photo scanning need internet access. The app has no remote fonts, scripts, analytics, or runtime dependencies. For future code releases, bump the cache name in `sw.js` when changing the offline asset set.
+
+## Sheet scanning setup
+
+Character tracking stays static and offline. Handwriting transcription is an optional server feature using the [OpenAI vision API](https://developers.openai.com/api/docs/guides/images-vision) and [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The API key stays on the server; never put it in browser code, a backup, or GitHub Pages build variables. No additional npm dependencies are needed.
+
+For local scanning, set the key in the terminal running Questlog, then start the app. In PowerShell:
+
+```powershell
+$env:OPENAI_API_KEY = '<your API key>'
+npm run dev
+```
+
+Open **http://127.0.0.1:4173** and choose **Scan a sheet**. The default service URL uses this host. `OPENAI_SCAN_MODEL` optionally overrides the default `gpt-4.1`; choose a model supporting image input and strict Structured Outputs. An API account with model access and credits is required. A ChatGPT subscription by itself does not configure this server. If no key is configured, scanning explains the setup needed and leaves all characters untouched.
+
+**GitHub Pages cannot run the scan endpoint.** To scan from the hosted app, deploy this Node app to an HTTPS Node host and configure these server environment variables:
+
+- `OPENAI_API_KEY`: the server’s API key.
+- `HOST=0.0.0.0` and the host’s `PORT`: allow the Node host to serve the app. Local development defaults to loopback only.
+- `SCAN_ACCESS_TOKEN`: a private service access code. Remote scanning is disabled until one is configured. This is a separate code, not the OpenAI API key.
+- `SCAN_ALLOWED_ORIGINS=https://melchiordahrk.github.io`: the exact website origin allowed to call the service. Use comma-separated origins for additional frontends. Same-origin requests are allowed automatically.
+
+Run `npm start` on that host. In **Scan a sheet → Connect a scan service** on GitHub Pages, enter `https://your-node-host.example/api/scan-sheet` and the service access code. Only the service URL is remembered during this page session. The access code stays in the open dialog and is cleared when it closes. The same server also serves Questlog directly if you prefer hosting everything together. No deployment or credentials are included in the repository.
+
+The endpoint accepts `POST /api/scan-sheet` with `{ "images": ["data:image/jpeg;base64,..."] }`, returning `{ "scan": ... }` using the schema in `sheet-scan.js`. It validates image types and sizes, enforces origins and the service code, limits concurrent scans to two and attempts to ten per ten minutes per connection address, and times out inference after two minutes. On proxied hosts the connection address may be shared; use host-level per-user quotas/authentication for a larger audience. The frontend also supports `/dist/` previews.
+
+Photos are resized in the browser and sent to the selected service and OpenAI only after **Scan & review**. Questlog does not write photos to disk, logs, local storage, service-worker caches, or backups. Requests use `store: false`; the service provider’s API data policies still apply. Closing the dialog cancels the client request and releases its photos. Saved characters contain the reviewed text and stats plus editable transcription/review notes.
+
+Unknown important fields are flagged with starting values for review. Blank current HP starts at maximum, unreadable equipment weights start at zero, and attacks with unreadable damage stay as feature notes instead of gaining invented dice. Written initiative, attack totals, and passive Perception are mapped to the tracker’s bonus adjustments. Separate shield annotations remain notes when their inclusion in AC is unclear. Printed and handwritten values are transcribed without rebuilding older characters under newer rules. Photos should be of the same character; PDF and HEIC files must first be exported as JPG/PNG/WebP. Always review the transcription before creating the character.
 
 ## Rules scope
 
@@ -82,6 +111,6 @@ npm run build
 
 The output is `dist/`. The same app can be previewed at `http://localhost:4173/dist/` after building, which also exercises repository-subpath hosting.
 
-Source layout: `app.js` handles views and interactions, `model.js` contains character and dice logic plus backup validation, `styles.css` contains the responsive design, `art.js` and `icons.js` contain original SVG assets, and `sw.js` enables offline use. `scripts/` contains the dependency-free server and build tools. `tests/` covers rules calculations and backup integrity.
+Source layout: `app.js` handles views and interactions, `model.js` contains character and dice logic plus backup validation, `sheet-scan.js` defines extraction and import validation, and `sheet-scan-ui.js` handles photo capture and review. `styles.css` contains the responsive design, `art.js` and `icons.js` contain original SVG assets, and `sw.js` enables offline use. `scripts/` contains the dependency-free server, optional vision endpoint, and build tools. `tests/` covers rules calculations, backup integrity, and sheet scanning.
 
 Design research: the familiar sheet/inventory/spell/journal organization was informed by [D&D Beyond's sheet sections](https://dndbeyond-support.wizards.com/hc/en-us/articles/7747193946388-Sheet-Sections). Questlog's visual design and pixel artwork are original. Questlog is an independent fan project and is not affiliated with Wizards of the Coast.

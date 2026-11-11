@@ -1,6 +1,6 @@
 # Session character sheet coverage
 
-The supplied photograph is the reference for field coverage. Every printed section and type of handwritten addition has a place in the app. This is a coverage audit, not an automatic transcription of faint or ambiguous handwriting.
+The supplied photograph is the reference for field coverage. Every printed section and type of handwritten addition has a place in the app. **Scan a sheet**, available from the character switcher and Settings, now transcribes photos through an optional online scan service and opens an editable review before creating a new character. Ambiguous handwriting is flagged; original photos can be expanded for comparison. See [scanning setup](../README.md#sheet-scanning-setup).
 
 | Paper sheet | App location and behavior |
 | --- | --- |
