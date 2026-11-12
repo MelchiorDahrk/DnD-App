@@ -50,6 +50,12 @@ substring matching. `itemFromEquipment()` creates independent inventory IDs,
 so icon lookup deliberately uses names. Both legacy and new inventory items
 work without changing version 2 data. Renaming to an unmapped name uses an SVG.
 
+Equipment uses a straight-on camera instead of the portrait picker's angled
+view. Set an entry's optional `view.yaw` or `view.pitch` in degrees to show its
+broad face: blades and bows typically use `yaw: 90`, while flat trays use
+`pitch: 90`. Unspecified angles are zero. Assembly placements can rotate each
+part separately so their side-by-side spacing stays intact.
+
 The mapping covers every one of the 63 inventory entries on Melchior, Balin and
 Teyla, including explicit plural names and named magic items. It also covers
 common blades, axes, polearms, bows, shields, staves, wands, bottles, books,

@@ -163,8 +163,10 @@ try {
     const [x,y,right,bottom]=px.bounds;
     assert.ok(x>0&&y>0&&right<159&&bottom<159,`${key}: no clipped edges`);
     assert.ok(Math.abs((x+right)/2-79.5)<19&&Math.abs((y+bottom)/2-79.5)<19,`${key}: centered`);
+    const broadsideRatio={handaxe:0.36,battleaxe:0.24,greataxe:0.6}[key];
+    if(broadsideRatio)assert.ok((right-x+1)/(bottom-y+1)>=broadsideRatio,`${key}: the broad blade face must be visible`);
   }
-  console.log('PASS all mapped equipment thumbnails contain centered geometry and transparent corners');
+  console.log('PASS all mapped equipment thumbnails contain centered geometry and transparent corners; axes show their broad blades');
   const review=await browser.newPage();
   await review.setViewport({width:1000,height:1100});
   await review.setContent(`<style>body{margin:24px;background:#eef1e5;font:14px Georgia;color:#254937}main{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}figure{margin:0;padding:9px;text-align:center;background:#fffef9;border-radius:7px}figure:nth-child(even){background:#254937;color:#eef1e5}img{width:88px;height:88px;object-fit:contain}figcaption{font-size:12px}</style><h1>Questlog LEGO equipment</h1><main>${Object.keys(EQUIPMENT_ICONS).map(key=>`<figure><img src="${new URL(`assets/equipment/${key}.webp`,base).href}"><figcaption>${key}</figcaption></figure>`).join('')}</main>`);

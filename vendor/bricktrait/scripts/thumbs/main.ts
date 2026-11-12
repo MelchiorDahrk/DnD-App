@@ -1,6 +1,6 @@
 // Renders part thumbnails for scripts/build-thumbs.mjs, with the app's own code.
 import { library, STANDARD_LEGS, type Part, type Placement } from '../../src/lib/ldraw';
-import { Stage } from '../../src/lib/scene';
+import { Stage, type View } from '../../src/lib/scene';
 import { drawThumb } from '../../src/lib/thumb-render';
 import { THUMB_COLORS } from '../../src/lib/thumbs';
 
@@ -9,7 +9,7 @@ declare global {
 		/** Every part that gets a thumbnail, with its colour */
 		thumbsReady: Promise<{ id: string; color: number }[]>;
 		/** WebP data URLs, in order */
-		renderThumbs: (items: { id: string; color: number; parts?: Placement[] }[]) => Promise<string[]>;
+		renderThumbs: (items: { id: string; color: number; parts?: Placement[]; view?: View }[]) => Promise<string[]>;
 	}
 }
 
@@ -25,9 +25,9 @@ window.thumbsReady = library.init().then(() => {
 
 window.renderThumbs = async (items) => {
 	const out: string[] = [];
-	for (const { id, color, parts } of items) {
+	for (const { id, color, parts, view } of items) {
 		try {
-			out.push((await drawThumb(stage, id, color, parts)).toDataURL('image/webp', 0.9));
+			out.push((await drawThumb(stage, id, color, parts, view)).toDataURL('image/webp', 0.9));
 		} catch {
 			out.push('');
 		}

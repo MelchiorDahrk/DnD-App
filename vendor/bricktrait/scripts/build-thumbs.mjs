@@ -9,14 +9,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
 import { createServer } from 'vite';
-import { EQUIPMENT_ICONS, equipmentIconParts } from '../../../equipment-icons.js';
+import { EQUIPMENT_ICONS, equipmentIconParts, equipmentIconView } from '../../../equipment-icons.js';
 
 const equipment = process.argv.includes('--equipment');
 const OUT = equipment ? path.resolve('../../assets/equipment') : path.resolve('static/thumbs');
 const BATCH = 40;
 // Files that change how a thumbnail looks (new parts are simply added).
 // Other changes that matter bump THUMB_VERSION in thumb-render.ts.
-const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts'];
+const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts', 'scripts/thumbs/main.ts'];
 if (equipment) INPUTS.push('../../equipment-icons.js', 'static/ldraw/catalog.json');
 
 const CHROME =
@@ -43,7 +43,7 @@ if (!equipment && changed) {
 fs.mkdirSync(OUT, { recursive: true });
 const mapped = Object.entries(EQUIPMENT_ICONS).map(([key, item]) => {
 	const parts = equipmentIconParts(item);
-	return {id:parts[0].id,color:parts[0].color,parts,key};
+	return {id:parts[0].id,color:parts[0].color,parts,view:equipmentIconView(item),key};
 });
 const filename = item => path.join(OUT, `${equipment ? item.key : item.id}.webp`);
 if (equipment && !changed && mapped.every(item => fs.existsSync(filename(item)))) {
