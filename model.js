@@ -1,4 +1,5 @@
 import {validPortrait} from './portrait.js';
+import {validSheetLayout} from './sheet-layout.js';
 
 export const SAVE_VERSION = 2;
 export const STORAGE_KEY = `questlog.v${SAVE_VERSION}`;
@@ -181,6 +182,7 @@ function validateCharacter(c) {
   requireThat(c && typeof c==='object' && string(c.id,100) && /^[a-zA-Z0-9_-]+$/.test(c.id) && string(c.name,120) && c.name.trim(),'each character needs a safe ID and a name.');
   requireThat(string(c.playerName,120),'invalid player name.');
   requireThat(c.portrait===undefined||validPortrait(c.portrait),'invalid character portrait.');
+  requireThat(c.sheetLayout===undefined||validSheetLayout(c.sheetLayout),'invalid character sheet layout.');
   for (const key of Object.keys(SHEET_TEXT)) requireThat(string(c[key]),`invalid ${key}.`);
   for (const key of ['electrum','platinum']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
   for (const key of ['initiativeBonus','passivePerceptionBonus']) requireThat(integerIn(c[key],-99,99),`invalid ${key}.`);

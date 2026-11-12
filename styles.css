@@ -31,6 +31,37 @@ dialog{border:1px solid #dbe2cd;background:var(--paper);border-radius:15px;paddi
 @media(max-width:760px){.sheet-copy dt{font-size:11px}.hero-player{font-size:9px}.combat-notes{padding:13px 18px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+/* Collapsible sheet sections retain usable favorite entries. */
+.sheet-layout-help{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 18px}
+.sheet-layout-help>.icon{width:15px;height:15px;flex-shrink:0;color:#a28d51}
+.ability-section{margin-bottom:25px}.ability-section .ability-grid{margin-bottom:0}
+.skills-grid>[data-sheet-section]{align-self:start}
+[data-sheet-section] .panel-heading h2,[data-sheet-section] .section-heading h2{min-width:0;flex:1}
+.sheet-section-toggle{display:flex;align-items:center;gap:7px;min-height:30px;padding:0;text-align:left;font:inherit;flex-wrap:wrap;line-height:1.5}
+.sheet-section-toggle>.icon{flex-shrink:0;width:15px;height:15px;color:#8a9770}
+.sheet-section-toggle .sheet-chevron{width:12px;height:12px;transition:transform .18s}
+.is-collapsed .sheet-chevron{transform:rotate(-90deg)}
+.sheet-favorite-count{font-family:var(--mono);font-size:8px;font-weight:400;white-space:nowrap;color:#697c51;background:#eef2e5;border-radius:4px;padding:2px 5px}
+.sheet-favorite{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:28px;height:28px;padding:6px;border-radius:5px;color:#a5ac96}
+.sheet-favorite>.icon{width:15px;height:15px}.sheet-favorite:hover{background:#f1f3e8;color:#7c875f}
+.sheet-favorite.active{color:#8f7133;background:#faf1d8}.sheet-favorite.active>.icon{fill:#e5cf88}
+.sheet-favorite:focus-visible,.sheet-section-toggle:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+.sheet-tile{min-width:0}.ability-entry{position:relative}.ability-entry .ability-card{width:100%;height:100%}
+.ability-entry>.sheet-favorite{position:absolute;top:4px;right:4px}.ability-entry .roll-hint{display:none}
+.combat-entry{display:flex;align-items:center;flex-direction:column}.combat-entry>.combat-stat{width:100%;flex:1}
+.combat-grid .sheet-favorite{margin-top:8px}.hp-block>.sheet-favorite{display:flex}
+.is-collapsed .combat-grid{grid-template-columns:repeat(auto-fit,minmax(85px,1fr))}.is-collapsed .hp-block{border-right:0;padding-right:0}
+.sheet-inline-entry{display:flex;align-items:center;gap:4px;min-width:0}
+.sheet-section-body .sheet-copy dt{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sheet-section-body .note-preview-tag .sheet-favorite{margin-left:auto}
+.sheet-section-body .combat-notes{display:flex;align-items:flex-start;gap:12px}.combat-notes>span{flex:1;min-width:0}
+.is-collapsed .panel-heading{border-bottom:0}.is-collapsed:has(.sheet-section-body:not([hidden])) .panel-heading{border-bottom:1px solid #edf0e4}
+.is-collapsed .hint{display:none}.is-collapsed .sheet-copy>div{margin-top:0;padding-top:0;border-top:0}
+.is-collapsed .sheet-copy>div:not([hidden])~div:not([hidden]){margin-top:19px;padding-top:16px;border-top:1px solid var(--line)}
+.sheet-section-body[hidden],.sheet-section-body [hidden],.sheet-favorite-count[hidden]{display:none!important}
+@media(max-width:760px){.sheet-layout-help{font-size:10px;align-items:flex-start}.sheet-favorite{width:32px;height:32px}.sheet-section-toggle{gap:6px}.sheet-section-toggle>.icon:not(.sheet-chevron){display:none}.ability-entry>.sheet-favorite{top:2px;right:2px}.ability-entry .ability-label{padding-right:18px;text-align:left;font-size:6px;letter-spacing:0}.sheet-favorite-count{font-size:7px}}
+@media(max-width:600px){[data-sheet-section="attacks"] .action-row{flex-wrap:wrap}[data-sheet-section="attacks"] .action-rolls{order:4;width:100%;padding-left:42px}[data-sheet-section="attacks"] .action-info{flex-basis:45%}}
+
 /* Character portraits rendered by the integrated Bricktrait editor. */
 .character-portrait{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
 .mini-avatar .character-portrait{width:100%;height:100%;margin:0;object-fit:cover}
