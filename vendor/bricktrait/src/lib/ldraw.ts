@@ -2,7 +2,7 @@ import { Group, LineSegments, Mesh } from 'three';
 import { LDrawLoader } from 'three/addons/loaders/LDrawLoader.js';
 import { LDrawConditionalLineMaterial } from 'three/addons/materials/LDrawConditionalLineMaterial.js';
 
-export type Category = 'head' | 'headgear' | 'neck' | 'back' | 'torso' | 'legs' | 'hand' | 'body';
+export type Category = 'head' | 'headgear' | 'neck' | 'back' | 'torso' | 'legs' | 'hand' | 'body' | 'equipment';
 
 export interface Part {
 	id: string;

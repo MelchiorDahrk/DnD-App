@@ -3,6 +3,7 @@ import {resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {checkFantasyCatalog} from './check-fantasy-catalog.mjs';
+import {EQUIPMENT_ICONS,equipmentIconParts} from '../equipment-icons.js';
 
 const root=resolve(import.meta.dirname,'..');
 const vendor=resolve(root,'vendor/bricktrait');
@@ -16,7 +17,9 @@ function run(script, ...args) {
 
 export async function buildPortraitMaker() {
   // Generated LDraw data is cached between builds; all runtime assets are self-hosted.
-  if(!await exists(resolve(vendor,'static/ldraw/.questlog-parts-complete'))) {
+  const iconParts=[...new Set(Object.values(EQUIPMENT_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)))];
+  if(!await exists(resolve(vendor,'static/ldraw/.questlog-parts-complete')) ||
+    !(await Promise.all(iconParts.map(id=>exists(resolve(vendor,'static/ldraw/p',`${id}.ldr`))))).every(Boolean)) {
     await mkdir(resolve(root,'.cache'),{recursive:true});
     run('fetch-ldraw.mjs');
     run('build-parts.mjs');

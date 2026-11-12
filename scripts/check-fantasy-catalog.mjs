@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import rules from '../vendor/bricktrait/fantasy-catalog.json' with {type:'json'};
-import {EQUIPMENT_ICONS} from '../equipment-icons.js';
+import {EQUIPMENT_ICONS,equipmentIconParts} from '../equipment-icons.js';
 import {fantasyCatalog,isFantasyPart} from '../vendor/bricktrait/src/lib/fantasy-catalog.js';
 
 export function checkFantasyCatalog() {
@@ -15,8 +15,8 @@ export function checkFantasyCatalog() {
   const allowed=fantasyCatalog([...byId.values()]);
   if(!isFantasyPart(byId.get('standard')))throw new Error('Keep standard hips/legs approved: they are the default and randomizer fallback.');
   for(const cat of ['head','headgear','neck','back','torso','legs','hand'])if(!allowed.some(p=>p.cat===cat))throw new Error(`Empty fantasy slot: ${cat}`);
-  for(const [key,{part}] of Object.entries(EQUIPMENT_ICONS)) {
-    if(!byId.has(part)||!isFantasyPart(byId.get(part)))throw new Error(`Equipment icon ${key} needs approved LDraw part ${part}`);
+  for(const [key,entry] of Object.entries(EQUIPMENT_ICONS))for(const {id} of equipmentIconParts(entry)) {
+    if(!byId.has(id))throw new Error(`Equipment icon ${key} needs LDraw part ${id}`);
   }
   console.log(`Validated ${allowed.length} fantasy parts and ${Object.keys(EQUIPMENT_ICONS).length} equipment icon mappings`);
 }

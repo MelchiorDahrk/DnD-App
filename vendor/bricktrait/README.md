@@ -31,7 +31,8 @@ category-based selection allowlist. Full LDraw metadata and geometry are retaine
 for old designs. Embedded previews and saved WebPs enforce transparent,
 square, borderless composition; old saves are updated only on **Use portrait**.
 The embedded editor hides scene controls while the standalone page retains them.
-The existing thumbnail renderer also pre-renders 36 mapped inventory accessories;
+The existing thumbnail renderer also pre-renders 58 mapped inventory accessories
+and small brick assemblies, covering all 63 default inventory entries;
 the rest of the editor's thumbnails continue rendering on demand.
 See [maintenance and testing notes](../../docs/fantasy-portraits.md).
 

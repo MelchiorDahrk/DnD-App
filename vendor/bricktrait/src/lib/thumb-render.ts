@@ -1,6 +1,6 @@
 // How one part thumbnail is drawn, shared by the app and scripts/build-thumbs.mjs.
 // Any change here (or in scene.ts) makes the build render every thumbnail again.
-import { library, standardLegs, STANDARD_LEGS } from './ldraw';
+import { library, standardLegs, STANDARD_LEGS, type Placement } from './ldraw';
 import type { Stage } from './scene';
 
 export const THUMB_SIZE = 160;
@@ -10,8 +10,8 @@ export const THUMB_SIZE = 160;
  */
 export const THUMB_VERSION = 1;
 
-export async function drawThumb(stage: Stage, id: string, color: number) {
-	const parts = id === STANDARD_LEGS ? standardLegs(color, color) : [{ id, color }];
+export async function drawThumb(stage: Stage, id: string, color: number, assembly?: Placement[]) {
+	const parts = assembly ?? (id === STANDARD_LEGS ? standardLegs(color, color) : [{ id, color }]);
 	stage.setModel(await library.build(parts));
 	stage.fit({ yaw: -25, pitch: 12, zoom: 1 });
 	const canvas = stage.render(THUMB_SIZE);

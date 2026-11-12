@@ -125,4 +125,4 @@ The portrait editor reuses [Bricktrait by Maxichance](https://github.com/Maxicha
 
 `npm run test:portraits` exercises the real editor, per-character saves, cancellation, reopening, backup import, mobile layout, and offline use in a headless Chromium browser. Start `npm run dev` first. It detects Microsoft Edge or Chrome, or uses `BROWSER_PATH`; `PORTRAIT_TEST_URL` can point at a build preview, including `/dist/` to verify relative asset paths.
 
-Fantasy catalog and equipment icon maintenance, build requirements, and regression coverage: [Fantasy Bricktrait guide](docs/fantasy-portraits.md). Inventory and sheet pack previews use 36 small, bundled LEGO accessory thumbnails for explicitly mapped equipment names; other items retain SVG icons.
+Fantasy catalog and equipment icon maintenance, build requirements, and regression coverage: [Fantasy Bricktrait guide](docs/fantasy-portraits.md). Inventory, sheet pack previews, and mapped weapon attacks use 58 small, bundled LEGO thumbnails. Every item in the three default inventories has a mapping, including plurals, kits, supplies, armor and named magic items; unmapped custom items retain SVG icons.

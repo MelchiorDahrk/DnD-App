@@ -6,6 +6,7 @@ import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {parseBackup} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
+import {equipmentIconURL} from '../equipment-icons.js';
 
 const root=resolve(import.meta.dirname,'..');
 const port=process.env.SHEET_TEST_PORT || '4187';
@@ -40,6 +41,38 @@ try {
   const visibleKeys=section=>page.$$eval(`${sectionSelector(section)} [data-sheet-entry]`,nodes=>nodes.filter(node=>node.getBoundingClientRect().height>0).map(node=>node.dataset.sheetEntry));
   const selected={};
   const original=await state();
+
+  // Every shipped item must render through the sheet, including entries beyond
+  // the compact pack preview. Favorites expose them without changing inventories.
+  const coverage=structuredClone(original);
+  for(const c of coverage.characters)c.sheetLayout={collapsed:[],favorites:{pack:c.items.map(item=>item.id)}};
+  for(const c of coverage.characters) {
+    coverage.activeId=c.id;
+    await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),coverage);
+    await page.reload({waitUntil:'networkidle0'});
+    assert.equal(await page.$('canvas'),null,'Sheet icons must not initialize WebGL');
+    for(const item of c.items) {
+      const selector=`${entrySelector('pack',item.id)} .equipment-icon img`;
+      assert.ok(await page.$(selector),`${c.name}: sheet icon for ${item.name}`);
+      const loaded=await page.$eval(selector,async img=>{img.scrollIntoView({block:'center'});await img.decode();return img.naturalWidth===160&&img.naturalHeight===160;});
+      assert.ok(loaded,`${c.name}: visible WebP for ${item.name}`);
+      assert.equal(await page.$eval(selector,img=>img.getAttribute('src')),equipmentIconURL(item));
+    }
+    for(const attack of c.attacks)if(equipmentIconURL(attack)) {
+      const selector=`${entrySelector('attacks',attack.id)} .equipment-icon img`;
+      assert.ok(await page.$(selector),`${c.name}: sheet weapon icon for ${attack.name}`);
+      await page.$eval(selector,img=>{img.scrollIntoView({block:'center'});return img.decode();});
+    }
+    await page.setViewport({width:390,height:844});
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${c.name}: mobile sheet icons fit`);
+    await page.setViewport({width:1440,height:1100});
+  }
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
+  await page.reload({waitUntil:'networkidle0'});
+  await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
+  await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>Promise.all(imgs.map(img=>img.decode())));
+  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth===160)),'Normal sheet pack preview shows LEGO icons');
+  console.log('PASS all 63 default inventory entries and mapped weapons show loaded LEGO icons on desktop/mobile sheets without WebGL');
 
   for (const width of [390,320]) {
     await page.setViewport({width,height:844});

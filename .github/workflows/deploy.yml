@@ -35,7 +35,10 @@ jobs:
             .cache/ldraw
             .cache/ldraw-unofficial
             vendor/bricktrait/static/ldraw
-          key: bricktrait-ldraw-f333d939-v1
+          key: bricktrait-ldraw-f333d939-v2-${{ hashFiles('equipment-icons.js', 'vendor/bricktrait/scripts/build-parts.mjs') }}
+          restore-keys: |
+            bricktrait-ldraw-f333d939-v2-
+            bricktrait-ldraw-f333d939-v1
       - name: Check source
         run: npm run check
       - name: Run tests
@@ -48,11 +51,13 @@ jobs:
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
+          SHEET_TEST_URL: http://127.0.0.1:4173/DnD-App/
         run: |
           ln -s dist DnD-App
           node scripts/serve.mjs > /tmp/questlog-server.log 2>&1 &
           for attempt in 1 2 3 4 5; do curl --silent --fail http://127.0.0.1:4173/DnD-App/ > /dev/null && break; sleep 1; done
           npm run test:portraits
+          npm run test:sheet
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

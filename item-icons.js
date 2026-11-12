@@ -1,8 +1,8 @@
 import {equipmentIconURL} from './equipment-icons.js';
 import {icon} from './icons.js';
 
-export function itemIconMarkup(item) {
-  const fallback = icon({Weapon:'sword',Armor:'shield',Consumable:'heart',Treasure:'spark',Gear:'bag'}[item.category] || 'bag');
+export function itemIconMarkup(item, fallbackName) {
+  const fallback = icon(fallbackName || {Weapon:'sword',Armor:'shield',Consumable:'heart',Treasure:'spark',Gear:'bag'}[item.category] || 'bag');
   const url = equipmentIconURL(item);
   return url ? `<span class="equipment-icon">${fallback}<img src="${url}" alt="" width="160" height="160" loading="lazy" decoding="async"></span>` : fallback;
 }

@@ -8,6 +8,11 @@
 //   CREDITS.txt     authors of every file shipped, plus the library licences
 import fs from 'node:fs';
 import path from 'node:path';
+import {EQUIPMENT_ICONS,equipmentIconParts} from '../../../equipment-icons.js';
+
+// Explicit icon-only dependencies (tiles, gems, bars, etc.) use the same packer
+// and attribution pipeline; they never enter the portrait selection allowlist.
+const iconParts = new Set(Object.values(EQUIPMENT_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)));
 
 const LDRAW = path.resolve(process.env.LDRAW_DIR ?? '.ldraw');
 // Parts still in review on the LDraw parts tracker, used when present. The
@@ -292,7 +297,7 @@ for (const root of ROOTS) {
 		const key = `${root.prefix}parts/${file}`;
 		const desc = header(read(key));
 		if (/^[~=_|]/.test(desc) || /obsolete|moved to/i.test(desc)) continue;
-		const group = classify(desc);
+		const group = classify(desc) ?? (iconParts.has(file.slice(0,-4)) ? {cat:'equipment'} : null);
 		if (!group) continue;
 		// The file found for this name must be this one (official first)
 		if (resolve(file)?.key !== key) continue;
