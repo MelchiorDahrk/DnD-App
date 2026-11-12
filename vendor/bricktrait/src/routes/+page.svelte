@@ -15,6 +15,7 @@
 	import { renderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
 	import { RING_PRESETS, setBackdropImage, transparentStyle } from '#lib/compose.ts';
 	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
+	import { applyPortraitSelections } from '../../../../portrait-scan.js';
 	import { fromHash, initial, portrait, randomize, toHash } from '#lib/state.svelte.ts';
 	import { history as timeline, hold, redo, release, track, undo } from '#lib/history.svelte.ts';
 	import { used } from '#lib/prefs.svelte.ts';
@@ -128,6 +129,17 @@
 				Object.assign(portrait, design);
 			}
 			if (event.data.type === 'questlog:portrait-request-save') void saveToCharacter();
+			if (event.data.type === 'questlog:portrait-apply-selections' && ready && webglAvailable()) {
+				try {
+					const figure = applyPortraitSelections($state.snapshot(portrait.figure), event.data.selections, [...selectable, standard], colors.filter((c) => !c.alpha));
+					hold();
+					portrait.figure = figure;
+					release();
+					send('questlog:portrait-selections-applied');
+				} catch (error) {
+					send('questlog:portrait-selections-error', { message: error instanceof Error ? error.message : 'Could not apply suggestions.' });
+				}
+			}
 		}
 		window.addEventListener('message', receive);
 		if (embedded) send('questlog:portrait-ready');
@@ -135,7 +147,7 @@
 	});
 
 	$effect(() => {
-		if (embedded && ready) send('questlog:portrait-loaded', { webgl: webglAvailable() });
+		if (embedded && ready) send('questlog:portrait-loaded', { webgl: webglAvailable(), catalog: $state.snapshot([...selectable, standard]), colors: $state.snapshot(colors.filter((c) => !c.alpha)) });
 	});
 	// The panel next to the portrait: what is being edited
 	type Mode = 'parts' | 'pose' | 'camera' | 'scene';

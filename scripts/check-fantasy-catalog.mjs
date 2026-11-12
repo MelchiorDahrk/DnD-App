@@ -1,6 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import rules from '../vendor/bricktrait/fantasy-catalog.json' with {type:'json'};
+import cmfs from '../vendor/bricktrait/cmf-catalog.json' with {type:'json'};
 import {EQUIPMENT_ICONS,equipmentIconParts} from '../equipment-icons.js';
 import {fantasyCatalog,isFantasyPart} from '../vendor/bricktrait/src/lib/fantasy-catalog.js';
 
@@ -9,7 +10,7 @@ export function checkFantasyCatalog() {
   const all=JSON.parse(readFileSync(resolve(root,'vendor/bricktrait/static/ldraw/catalog.json'),'utf8'));
   const byId=new Map(all.map(p=>[p.id,p]));
   byId.set('standard',{id:'standard',cat:'legs'});
-  for(const groups of [rules.categories,rules.include])for(const [cat,entries] of Object.entries(groups))for(const id of Object.keys(entries)) {
+  for(const groups of [rules.categories,rules.include,cmfs.categories])for(const [cat,entries] of Object.entries(groups))for(const id of Object.keys(entries)) {
     if(byId.get(id)?.cat!==cat)throw new Error(`Fantasy allowlist: missing or miscategorized ${cat}/${id}`);
   }
   const allowed=fantasyCatalog([...byId.values()]);

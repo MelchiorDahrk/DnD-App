@@ -57,6 +57,7 @@ jobs:
           node scripts/serve.mjs > /tmp/questlog-server.log 2>&1 &
           for attempt in 1 2 3 4 5; do curl --silent --fail http://127.0.0.1:4173/DnD-App/ > /dev/null && break; sleep 1; done
           npm run test:portraits
+          npm run test:portrait-photos
           npm run test:sheet
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4

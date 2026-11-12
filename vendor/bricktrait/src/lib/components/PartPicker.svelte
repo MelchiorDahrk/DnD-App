@@ -4,7 +4,7 @@
 	import { isFavourite, prefs, toggleFavourite } from '#lib/prefs.svelte.ts';
 	import { t, tn } from '#lib/i18n.svelte.ts';
 	import Thumb from './Thumb.svelte';
-	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
+	import { fantasyCatalog, isCMFPart, isClassicFantasyPart } from '#lib/fantasy-catalog.js';
 
 	let {
 		parts,
@@ -29,6 +29,7 @@
 	let view: View = $state('all');
 	let kind = $state('');
 	let theme = $state('');
+	let collection = $state('');
 	let flag = $state(false);
 	let sort: Sort = $state('classic');
 	let limit = $state(PAGE);
@@ -54,6 +55,8 @@
 
 	const shown = $derived.by(() => {
 		let list = approved;
+		if (collection === 'cmf') list = list.filter(isCMFPart);
+		if (collection === 'fantasy') list = list.filter((p) => isClassicFantasyPart(p));
 		if (view === 'favourites') list = list.filter((p) => prefs.favourites.includes(p.id));
 		if (view === 'recent') {
 			const order = new Map(prefs.recent.map((id, i) => [id, i]));
@@ -71,7 +74,7 @@
 
 	$effect(() => {
 		// Back to the top whenever the list changes
-		void [query, view, kind, theme, flag, sort, parts];
+		void [query, view, kind, theme, collection, flag, sort, parts];
 		limit = PAGE;
 		focus = Math.max(
 			0,
@@ -152,6 +155,14 @@
 	</div>
 
 	<div class="sub-filters">
+		<label class="select">
+			<span class="sr-only">Part collection</span>
+			<select aria-label="Part collection" bind:value={collection}>
+				<option value="">Fantasy + CMFs</option>
+				<option value="fantasy">Fantasy</option>
+				<option value="cmf">CMFs · Collectible Minifigures</option>
+			</select>
+		</label>
 		{#if themes.length > 1}
 			<label class="select">
 				<span class="sr-only">{t('theme')}</span>

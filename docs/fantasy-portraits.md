@@ -20,7 +20,7 @@ migration runs. The standalone Bricktrait page retains its scene controls.
 ## Maintain the part allowlist
 
 Edit [`vendor/bricktrait/fantasy-catalog.json`](../vendor/bricktrait/fantasy-catalog.json).
-It contains **527 approved parts** grouped by the existing `head`, `headgear`,
+It contains **527 fantasy parts** grouped by the existing `head`, `headgear`,
 `torso`, `legs`, `neck`, `back`, and `hand` categories. Each ID has a readable
 description for review. Descriptions and theme metadata do not decide eligibility.
 
@@ -33,6 +33,41 @@ Add an ID to the correct category or `include` without changing a component.
 Find IDs and descriptions in the generated `portrait-maker/ldraw/catalog.json`.
 Rebuild after editing. The build fails on unknown IDs, category mismatches, empty
 slots, and equipment mappings that refer to unavailable parts.
+
+The independent [`vendor/bricktrait/cmf-catalog.json`](../vendor/bricktrait/cmf-catalog.json)
+snapshot adds **365 CMF-associated parts**, giving **862** unique selectable
+parts across both collections. It records IDs associated with Collectible
+Minifigures by LDraw header keywords, plus reviewed mohawk and D&D CMF additions.
+Shared moulds can appear in both collections. Tags and model coverage are
+incomplete: this is not an inventory of every CMF series. The existing explicit
+exclusions take precedence across both collections. Refresh the snapshot with
+`node scripts/update-cmf-catalog.mjs` after the LDraw catalog is prepared; review
+the resulting diff. No catalog or CMF metadata is fetched at runtime.
+
+The picker defaults to **Fantasy + CMFs**, with separate **Fantasy** and **CMFs**
+collection filters. CMF search terms are indexed independently of theme, so
+Castle, Monsters and other theme filters remain usable. All browser views and
+randomization use the combined explicit catalog. Existing excluded saved parts
+remain renderable as before.
+
+## Photo suggestions
+
+The host portrait dialog accepts up to three photos of one minifigure. It resizes
+them before an explicit **Suggest selections** request to `/api/suggest-portrait`.
+The secure Node service uses its own catalog and a strict JSON response schema;
+it never accepts a client-provided catalog. Both the host and embedded editor
+validate IDs, categories, colours and duplicate slots before applying a selection.
+Only checked matches change the figure; uncertain colours preserve existing values.
+Apply is one undoable change and preserves camera and pose. The existing save and
+cancel boundary remains authoritative. The bridge retains its same-origin,
+source-window and per-dialog session checks.
+
+Photos and service access codes exist only in the open dialog, and are never
+part of the saved portrait, backups, service-worker cache or logs. Closing or
+stopping analysis aborts the client request. Photo text is untrusted reference
+data, never instructions. Setup, service hosting and API policy details are in
+the [README](../README.md#portrait-photo-setup). GitHub Pages needs a separately
+hosted photo service; manual editing and cached portraits still work offline.
 
 Browsing, filter counts, search, favourites, recent parts and randomization all
 use the allowlist. Full catalog metadata and geometry stay available to the

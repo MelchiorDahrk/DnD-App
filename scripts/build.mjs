@@ -4,7 +4,7 @@ const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
-for(const file of ['level-up.js','level-up-ui.js','progression-data.js','progression-options.js'])await copyFile(resolve(root,file),resolve(out,file));
+for(const file of ['level-up.js','level-up-ui.js','progression-data.js','progression-options.js','portrait-scan.js','portrait-photo-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['index.html','styles.css','app.js','vfx.js','vfx.css','model.js','sheet-layout.js','portrait.js','portrait-ui.js','catalog.js','feature-catalog.js','catalog-ui.js','default-characters.js','sheet-scan.js','sheet-scan-ui.js','icons.js','equipment-icons.js','item-icons.js','art.js','sw.js','manifest.webmanifest','.nojekyll'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['icon.svg','icon-192.png','icon-512.png','portrait-adventurer.webp'])await copyFile(resolve(root,'assets',file),resolve(out,'assets',file));
 await cp(resolve(root,'portrait-maker'),resolve(out,'portrait-maker'),{recursive:true});

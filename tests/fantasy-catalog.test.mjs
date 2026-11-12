@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import rules from '../vendor/bricktrait/fantasy-catalog.json' with {type:'json'};
-import {fantasyCatalog,isFantasyPart} from '../vendor/bricktrait/src/lib/fantasy-catalog.js';
+import cmfs from '../vendor/bricktrait/cmf-catalog.json' with {type:'json'};
+import {fantasyCatalog,isFantasyPart,isCMFPart,isClassicFantasyPart} from '../vendor/bricktrait/src/lib/fantasy-catalog.js';
 import {search} from '../vendor/bricktrait/src/lib/search.ts';
 import {state} from './helpers/bricktrait-state.mjs';
 
@@ -49,4 +50,17 @@ test('legacy share links preserve excluded equipped parts and all figure, pose a
   assert.deepEqual(state.fromHash(state.toHash(design)),design);
   const legacy=btoa(JSON.stringify([design.figure,design.view,design.style]));
   assert.deepEqual(state.fromHash(legacy),design);
+});
+
+test('CMF-associated parts extend browsing and search without changing fantasy membership or exclusion priority',()=>{
+  const cmfParts=Object.entries(cmfs.categories).flatMap(([cat,entries])=>Object.entries(entries).map(([id,name])=>({id,name,cat})));
+  assert.ok(cmfParts.length>=350);
+  for(const id of ['93563','973pc25','973pca3','16709p0l']){
+    const part=cmfParts.find(p=>p.id===id);assert.ok(part,id);assert.ok(isCMFPart(part));assert.ok(isFantasyPart(part));
+    assert.equal(isClassicFantasyPart(part),false);
+  }
+  const searchable=fantasyCatalog(cmfParts);
+  assert.deepEqual(search(searchable,'cmf'),searchable);
+  assert.deepEqual(search(searchable,'collectible minifigures'),searchable);
+  for(const id of Object.keys(rules.exclude))assert.equal(isFantasyPart({id,cat:'torso'}),false);
 });

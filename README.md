@@ -60,6 +60,56 @@ Backups are validated before import. Each browser supports up to 100 characters 
 
 After the first online visit and the **Ready for offline adventures** message, a service worker caches the app, local icons, and original artwork. Character tracking and dice then work offline on HTTPS hosts or localhost. Reference pages and photo scanning need internet access. The app makes no requests to remote fonts, scripts, analytics, or Bricktrait services. The editor’s bundled dependencies and LDraw models are served from this site. The portrait maker requires WebGL. Its editor and parts cache as you use them: reopen once online before using the maker offline; parts you have not loaded yet need a connection. Saved portrait images always remain available with the sheet. For future code releases, bump the cache name in `sw.js` when changing the offline asset set.
 
+## Portrait photo setup
+
+Open the portrait maker and expand **Start from a LEGO photo**. Choose or take
+up to three JPG, PNG, or WebP photos of the **same** minifigure (15 MB each), then
+choose **Suggest selections**. Review the suggested face, hair, clothing,
+colours, and accessories, with confidence and approximation notes. Low-confidence
+matches start unchecked. **Apply selected suggestions** changes only the selected
+slots; pose and camera stay as they were. Undo/redo works, and the character is
+saved only when you choose **Use portrait**. Cancel discards the changes.
+
+The parts browser now includes **862** fantasy and CMF-associated parts, with a
+**Part collection** filter for **Fantasy + CMFs**, **Fantasy**, or **CMFs ·
+Collectible Minifigures**. Search accepts `cmf` and `collectible minifigures`.
+CMF coverage reflects the available LDraw models and source tags, including
+available D&D CMF pieces; it is not an exhaustive inventory of every series.
+Printed details can require a nearby substitute. Manual editing remains available.
+
+Photo suggestions reuse the secure sheet scanning server described below.
+Set `OPENAI_API_KEY` in the terminal running `npm run dev` or `npm start`.
+`OPENAI_PORTRAIT_MODEL` optionally overrides `OPENAI_SCAN_MODEL` / the existing
+`gpt-4.1` default. The model must accept images and strict Structured Outputs.
+See the official OpenAI documentation for [image inputs](https://developers.openai.com/api/docs/guides/images-vision)
+and [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+
+**GitHub Pages needs a separate HTTPS photo service.** In **Connect a photo
+service**, enter `https://your-node-host.example/api/suggest-portrait` and its
+service access code. An existing `/api/scan-sheet` service URL is also accepted
+and converted to `/api/suggest-portrait`; update that server to this version.
+The same `SCAN_ACCESS_TOKEN` and `SCAN_ALLOWED_ORIGINS` settings protect both
+endpoints. The API key stays on the server. The access code stays in the open
+dialog and is cleared when it closes; only the service URL is remembered for
+the page session.
+
+`POST /api/suggest-portrait` accepts `{ "images": ["data:image/jpeg;base64,..."] }`
+and returns `{ "suggestions": ... }` using the schema in `portrait-scan.js`.
+The server supplies its actual selectable parts and colours, then validates
+every returned slot, ID and colour. The browser and editor validate again
+before applying reviewed choices. Text inside photos is treated as reference
+data, never instructions. Analysis requires internet and may use API credits.
+Original photos are resized in the browser, held only in the dialog, and excluded
+from local storage, backups, logs, and service-worker caches. Requests use
+`store: false`; provider API data policies still apply. Closing the dialog or
+choosing **Stop analysis** cancels the client request.
+
+`npm run test:portrait-photos` covers upload preparation, mocked suggestions,
+CMF filtering/search, review/apply, undo/redo, cancellation, mobile layout,
+save behaviour, and exclusion of reference photos from backups. It uses the
+same browser and URL settings as `test:portraits`. Live provider accuracy
+requires a configured service and representative minifigure photos.
+
 ## Sheet scanning setup
 
 Character tracking stays static and offline. Handwriting transcription is an optional server feature using the [OpenAI vision API](https://developers.openai.com/api/docs/guides/images-vision) and [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs). The API key stays on the server; never put it in browser code, a backup, or GitHub Pages build variables. No additional npm dependencies are needed.

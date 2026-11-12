@@ -30,6 +30,7 @@ export async function buildPortraitMaker() {
   await build({configFile:resolve(vendor,'vite.config.js')});
   await cp(resolve(vendor,'LICENSE'),resolve(root,'portrait-maker/LICENSE'));
   await cp(resolve(vendor,'fantasy-catalog.json'),resolve(root,'portrait-maker/fantasy-catalog.json'));
+  await cp(resolve(vendor,'cmf-catalog.json'),resolve(root,'portrait-maker/cmf-catalog.json'));
   for(const [name,file] of [['three','three/LICENSE'],['svelte','svelte/LICENSE.md'],['fflate','fflate/LICENSE'],['archivo','@fontsource-variable/archivo/LICENSE'],['ibm-plex-mono','@fontsource/ibm-plex-mono/LICENSE']]) {
     await mkdir(resolve(root,'portrait-maker/licenses'),{recursive:true});
     await cp(resolve(root,'node_modules',file),resolve(root,'portrait-maker/licenses',`${name}.txt`));
