@@ -1,4 +1,5 @@
 const paths = {
+  stud: '<g stroke-width="1"><path d="M3 11v5c0 2.5 4 4.5 9 4.5s9-2 9-4.5v-5" fill="currentColor"/><path d="M3 11v5c0 2.5 4 4.5 9 4.5s9-2 9-4.5v-5" fill="#000" fill-opacity=".16" stroke="#000" stroke-opacity=".2"/><ellipse cx="12" cy="11" rx="9" ry="4.5" fill="currentColor" stroke="#fff" stroke-opacity=".45"/><path d="M7.5 7.5v3c0 1.25 2 2.25 4.5 2.25s4.5-1 4.5-2.25v-3" fill="currentColor" stroke="#000" stroke-opacity=".25"/><ellipse cx="12" cy="7.5" rx="4.5" ry="2.25" fill="currentColor" stroke="#fff" stroke-opacity=".65"/></g>',
   scan: '<path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M3 12h18"/><path d="M8 8h8m-8 8h8"/>',
   dice: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10M12 2 8 9l-5 8m9-15 4 7 5 8M8 9h8l-4 13Z"/>',
   sheet: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 16h6M9 12h2m4 0h.01"/>',
