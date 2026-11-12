@@ -24,7 +24,9 @@ export const initiative = c => abilityCheckBonus(c,'dex') + c.initiativeBonus;
 export const passivePerception = c => 10 + skillBonus(c,'Perception') + c.passivePerceptionBonus;
 export function validDiceFormula(value) {
   if (typeof value!=='string') return false;
-  const m=value.toLowerCase().replace(/\s/g,'').match(/^(\d{0,2})d(\d{1,3})([+-]\d{1,4})?$/);
+  const input=value.toLowerCase().replace(/\s/g,'');
+  if (/^\d{1,4}$/.test(input)) return true;
+  const m=input.match(/^(\d{0,2})d(\d{1,3})([+-]\d{1,4})?$/);
   return !!m && Number(m[1]||1)>=1 && Number(m[1]||1)<=50 && Number(m[2])>=2 && Number(m[2])<=100;
 }
 export function rollFeature(feature, roller = randomDie) {
@@ -120,8 +122,13 @@ export function randomDie(sides, random = array => crypto.getRandomValues(array)
 }
 export function rollDice(expression, mode = 'normal', roller = randomDie) {
   const input = String(expression).toLowerCase().replace(/\s/g,'');
+  if (!['normal','advantage','disadvantage'].includes(mode)) throw new Error('Unknown roll mode.');
+  if (/^\d{1,4}$/.test(input)) {
+    if (mode!=='normal') throw new Error('Advantage and disadvantage use one d20.');
+    return {expression:input,rolls:[],total:Number(input),bonus:0,mode,natural:null};
+  }
   const match = input.match(/^(\d{0,2})d(\d{1,3})([+-]\d{1,4})?$/);
-  if (!match) throw new Error('Use dice notation like 1d20+4 or 2d6.');
+  if (!match) throw new Error('Use dice notation like 1d20+4 or 2d6, or a fixed amount from 0 to 9999.');
   const count = Number(match[1] || 1), sides = Number(match[2]), bonus = Number(match[3] || 0);
   if (count < 1 || count > 50 || sides < 2 || sides > 100) throw new Error('Choose 1–50 dice, with 2–100 sides.');
   if (!['normal','advantage','disadvantage'].includes(mode)) throw new Error('Unknown roll mode.');
