@@ -1,5 +1,5 @@
-const CACHE = 'questlog-app-v6-basic-catalog';
-const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png'];
+const CACHE = 'questlog-app-v7-bricktrait-portraits';
+const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('questlog-app-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
@@ -8,5 +8,5 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(event.request).then(response=>{
     if(response.ok&&response.type==='basic') {const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put(event.request,copy)));}
     return response;
-  }).catch(async()=>await caches.match(event.request)||(event.request.mode==='navigate'?await caches.match('./index.html'):Response.error())));
+  }).catch(async()=>await caches.match(event.request)||(event.request.mode==='navigate'&&!new URL(event.request.url).pathname.includes('/portrait-maker/')?await caches.match('./index.html'):Response.error())));
 });

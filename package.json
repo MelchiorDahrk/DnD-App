@@ -5,10 +5,22 @@
   "type": "module",
   "description": "A pocket-sized, offline-ready 2024 D&D 5e character journal.",
   "scripts": {
-    "dev": "node scripts/serve.mjs",
-    "start": "node scripts/serve.mjs",
-    "build": "node scripts/build.mjs",
+    "dev": "node scripts/build-portrait-maker.mjs && node scripts/serve.mjs",
+    "start": "node scripts/build-portrait-maker.mjs && node scripts/serve.mjs",
+    "build": "node scripts/build-portrait-maker.mjs && node scripts/build.mjs",
+    "build:portraits": "node scripts/build-portrait-maker.mjs",
     "test": "node --test tests/*.test.mjs",
-    "check": "node --check app.js && node --check model.js && node --check catalog.js && node --check catalog-ui.js && node --check default-characters.js && node --check sheet-scan.js && node --check sheet-scan-ui.js && node --check scripts/scan-api.mjs && node --check scripts/serve.mjs && node --check art.js && node --check icons.js && node --check sw.js"
+    "check": "node --check app.js && node --check model.js && node --check catalog.js && node --check catalog-ui.js && node --check default-characters.js && node --check sheet-scan.js && node --check sheet-scan-ui.js && node --check scripts/scan-api.mjs && node --check scripts/serve.mjs && node --check art.js && node --check icons.js && node --check sw.js && node --check portrait.js && node --check portrait-ui.js && node --check scripts/build-portrait-maker.mjs && node --check scripts/test-portraits.mjs",
+    "test:portraits": "node scripts/test-portraits.mjs"
+  },
+  "devDependencies": {
+    "@fontsource-variable/archivo": "5.3.0",
+    "@fontsource/ibm-plex-mono": "5.3.0",
+    "@sveltejs/vite-plugin-svelte": "7.2.0",
+    "fflate": "0.8.3",
+    "puppeteer-core": "25.12.0",
+    "svelte": "5.57.1",
+    "three": "0.186.1",
+    "vite": "8.3.0"
   }
 }

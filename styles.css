@@ -30,3 +30,24 @@ dialog{border:1px solid #dbe2cd;background:var(--paper);border-radius:15px;paddi
 @media(max-width:760px){.catalog-picker{padding:14px}.catalog-picker .form-grid,.catalog-browser .form-grid{grid-template-columns:minmax(0,1fr)}.catalog-preview{padding:12px;font-size:12px}.catalog-preview dl>div{grid-template-columns:minmax(78px,1fr) minmax(0,2fr);gap:8px}.catalog-preview dt{font-size:10px}.inventory-stats{font-size:11px}}
 @media(max-width:760px){.sheet-copy dt{font-size:11px}.hero-player{font-size:9px}.combat-notes{padding:13px 18px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Character portraits rendered by the integrated Bricktrait editor. */
+.character-portrait{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
+.mini-avatar .character-portrait{width:100%;height:100%;margin:0;object-fit:cover}
+.avatar-frame{width:106px;height:106px;align-items:center;padding:4px;background:#254937}
+.avatar-frame:after{display:none}
+.portrait-button{cursor:pointer;transition:box-shadow .2s}
+.portrait-button:hover,.portrait-button:focus-visible{box-shadow:0 0 0 3px #cfe48b}
+.portrait-edit-hint{position:absolute;right:3px;bottom:3px;display:grid;place-items:center;width:24px;height:24px;border-radius:5px;background:#173d31e8;color:#e6efd3}
+.portrait-edit-hint .icon{width:14px;height:14px}
+.portrait-details-action{margin-top:18px}
+.portrait-dialog{width:min(1360px,calc(100% - 32px));height:calc(100dvh - 32px);max-height:none;max-width:none;overflow:hidden;padding:0;display:none;flex-direction:column}
+.portrait-dialog[open]{display:flex}
+.portrait-header{display:flex;align-items:center;gap:15px;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--line);flex-shrink:0}
+.portrait-header h2{font-family:Georgia,serif;font-size:23px;font-weight:400;margin:0}
+.portrait-header p{font-size:11px;color:#7a876b;margin:6px 0 0;line-height:1.6}
+.portrait-status,.portrait-error{padding:10px 22px;margin:0;font-size:12px;line-height:1.7;flex-shrink:0}
+.portrait-error{background:#fff0e9;color:#ae5946}
+.portrait-editor{display:block;width:100%;flex:1;min-height:0;border:0;background:#0b0d14}
+@media(max-width:760px){.avatar-frame{width:76px;height:76px;padding:3px}.portrait-dialog{width:100%;height:100dvh;max-height:100dvh;border-radius:0;border:0;margin:0}.portrait-header{padding:12px 16px}.portrait-header h2{font-size:21px}.portrait-header p{font-size:10px}.portrait-edit-hint{width:20px;height:20px}.portrait-edit-hint .icon{width:12px;height:12px}}
+.portrait-header>div:first-child{flex:1;min-width:0}.portrait-header a{text-decoration:underline}.portrait-actions{display:flex;gap:8px;flex-shrink:0}.portrait-actions .btn{min-height:40px}.portrait-actions .portrait-use{min-width:112px}@media(max-width:600px){.portrait-header{flex-wrap:wrap;gap:10px}.portrait-header>div:first-child{flex-basis:100%}.portrait-actions{width:100%;justify-content:flex-end}.portrait-actions .btn{min-height:40px;font-size:11px;padding:10px 14px}}

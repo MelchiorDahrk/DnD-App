@@ -21,6 +21,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+      - name: Install portrait maker dependencies
+        run: npm ci
+      - uses: actions/cache@v4
+        with:
+          path: |
+            .cache/ldraw
+            .cache/ldraw-unofficial
+            vendor/bricktrait/static/ldraw
+          key: bricktrait-ldraw-f333d939-v1
       - name: Check source
         run: npm run check
       - name: Run tests

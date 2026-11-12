@@ -1,0 +1,110 @@
+import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
+import { STANDARD_LEGS, STANDING, type Figure, type Part } from './ldraw';
+import type { View } from './scene';
+import { defaultStyle, type Style } from './compose';
+
+export interface Portrait {
+	figure: Figure;
+	view: View;
+	style: Style;
+}
+
+export const initial: Portrait = {
+	figure: {
+		head: { id: '3626cp01', color: 14 },
+		headgear: { id: '3901', color: 6 },
+		neck: { id: null, color: 6 },
+		back: { id: null, color: 4 },
+		torso: { id: '973p01', color: 15, arms: 4, hands: 14 },
+		legs: { id: STANDARD_LEGS, color: 1, hips: 1 },
+		handR: { id: null, color: 71, spin: 0 },
+		handL: { id: null, color: 71, spin: 0 },
+		pose: { ...STANDING }
+	},
+	view: { yaw: 0, pitch: 0, zoom: 1 },
+	style: { ...defaultStyle }
+};
+
+export const portrait: Portrait = $state(structuredClone(initial));
+
+// Colours that make sense on a minifig, most common first
+export const COMMON_COLORS = [
+	14, 78, 84, 92, 70, 308, 15, 0, 72, 71, 4, 320, 1, 272, 73, 321, 322, 2, 288, 378, 27, 19, 28, 6,
+	25, 484, 191, 226, 29, 26, 85, 379, 330, 297, 179, 383, 334, 47
+];
+
+// --- share links ----------------------------------------------------------
+
+// "#z" + base64url of the deflated JSON. Links without the "z" are the
+// older, uncompressed ones and still open.
+const COMPRESSED = 'z';
+
+const toB64 = (bytes: Uint8Array) =>
+	btoa(String.fromCharCode(...bytes))
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replace(/=+$/, '');
+const fromB64 = (text: string) =>
+	Uint8Array.from(atob(text.replaceAll('-', '+').replaceAll('_', '/')), (c) => c.charCodeAt(0));
+
+export function toHash(p: Portrait) {
+	const json = JSON.stringify([p.figure, p.view, p.style]);
+	return COMPRESSED + toB64(deflateSync(strToU8(json), { level: 9 }));
+}
+
+export function fromHash(hash: string): Portrait | null {
+	try {
+		const text = hash.replace(/^#/, '');
+		const bytes = text.startsWith(COMPRESSED)
+			? inflateSync(fromB64(text.slice(COMPRESSED.length)))
+			: fromB64(text);
+		const [figure, view, style] = JSON.parse(strFromU8(bytes));
+		if (!figure?.head || !figure?.torso) return null;
+		return {
+			// Links made before some slots existed get them empty
+			figure: {
+				...structuredClone(initial.figure),
+				neck: { id: null, color: 6 },
+				back: { id: null, color: 4 },
+				legs: { ...initial.figure.legs },
+				handR: { ...initial.figure.handR },
+				handL: { ...initial.figure.handL },
+				...figure,
+				pose: { ...STANDING, ...figure.pose }
+			},
+			view: { ...initial.view, ...view },
+			style: { ...initial.style, ...style }
+		};
+	} catch {
+		return null;
+	}
+}
+
+// --- random figure --------------------------------------------------------
+
+const pick = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)];
+
+export function randomize(catalog: Part[]) {
+	const of = (cat: string) => catalog.filter((p) => p.cat === cat);
+	const skin = [14, 14, 14, 78, 84, 92, 70];
+	const torso = pick(of('torso'));
+	// Printed heads have faces, plain ones would look empty
+	const head = pick(of('head').filter((p) => /pattern/i.test(p.name)));
+	// Moulded heads are complete on their own
+	const wear = head.moulded === undefined && Math.random() < 0.9 ? pick(of('headgear')) : null;
+	const colors = COMMON_COLORS.slice(6, 30);
+	portrait.figure = {
+		head: { id: head.id, color: pick(skin) },
+		headgear: { id: wear?.id ?? null, color: pick(colors) },
+		neck: { id: Math.random() < 0.2 ? pick(of('neck')).id : null, color: pick(colors) },
+		back: { id: Math.random() < 0.2 ? pick(of('back')).id : null, color: pick(colors) },
+		torso: { id: torso.id, color: pick(colors), arms: pick(colors), hands: pick(skin) },
+		handR: { id: Math.random() < 0.3 ? pick(of('hand')).id : null, color: pick(colors), spin: 0 },
+		handL: { id: null, color: 71, spin: 0 },
+		pose: { ...STANDING },
+		legs:
+			Math.random() < 0.6
+				? { id: STANDARD_LEGS, color: pick(colors), hips: pick(colors) }
+				: { id: pick(of('legs')).id, color: pick(colors), hips: pick(colors) }
+	};
+}

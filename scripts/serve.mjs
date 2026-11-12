@@ -5,7 +5,7 @@ import {createScanHandler} from './scan-api.mjs';
 const root=resolve(import.meta.dirname,'..');
 const port=Number(process.env.PORT||4173);
 const scanHandler=createScanHandler();
-const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webmanifest':'application/manifest+json','.json':'application/json','.woff2':'font/woff2'};
+const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.txt':'text/plain; charset=utf-8','.ldr':'text/plain; charset=utf-8','.webmanifest':'application/manifest+json','.json':'application/json','.woff2':'font/woff2'};
 const server=http.createServer(async(req,res)=>{
   try{
     const pathname=decodeURIComponent(new URL(req.url,'http://localhost').pathname);

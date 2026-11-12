@@ -1,16 +1,17 @@
 # Questlog
 
-A mobile-first character journal for the **2024 D&D 5e core rules** with a retro RPG heart. Original pixel art, animated level-ups, and a little optional 8-bit fanfare.
+A mobile-first character journal for the **2024 D&D 5e core rules** with a retro RPG heart. Bricktrait character portraits, original pixel scenery, animated level-ups, and a little optional 8-bit fanfare.
 
 ## Run locally
 
 Install [Node.js](https://nodejs.org/) 24 or newer, then run:
 
 ```sh
+npm ci
 npm run dev
 ```
 
-Open **http://localhost:4173**. There are no npm dependencies to install. Opening `index.html` directly as a file won't load the JavaScript modules; use the local server or GitHub Pages.
+Open **http://localhost:4173**. The first build installs and bundles the reused Bricktrait editor and downloads the LDraw library; allow several minutes for that initial asset preparation. Later builds reuse the cached library. Opening `index.html` directly as a file won't load the JavaScript modules; use the local server or GitHub Pages.
 
 ## Host on GitHub Pages
 
@@ -26,11 +27,12 @@ This public repository uses GitHub Actions to publish the app to GitHub Pages au
 
 The workflow checks the JavaScript, runs the model tests, builds `dist/`, and publishes it using the [official GitHub Pages workflow](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages). All app paths, the manifest, and the service worker are relative, so repository subpaths and custom domains work without configuration.
 
-Alternatively, this is a buildless app: publish the repository root with GitHub Pages' **Deploy from a branch** option. `.nojekyll` is included. Choose either branch publication or the Actions workflow, not both.
+To deploy elsewhere, run `npm ci` and `npm run build`, then publish `dist/`. The generated `portrait-maker/` assets are required; publishing only the source repository does not include the editor.
 
 ## At the table
 
 - **Characters:** starts with the three photographed level 3 characters: **Melchior** (Drow Battle Master Fighter, Eric), **Balin** (Hill Dwarf Beast Barbarian, Rob), and **Teyla** (Wood Elf Assassin Rogue / Folk Hero, Jen). Their inventories, coins, personality, and final ability scores are included. Class features and derived totals are corrected for 2024 play, while older character options remain usable. Pinned journal notes explain conversions and uncertain handwriting. **Settings & backup → Add default party** adds fresh copies; the optional Lyra Ranger remains available through **Add 2024 example**. Open the character switcher to create your own adventurers. Edit player name, species, class, subclass, background, alignment, campaign, level, and XP. When copying an existing higher-level sheet, set its HP in **Edit stats**.
+- **Portrait maker:** tap the portrait on the character sheet (or **Edit character → Make or edit portrait**). The embedded [Bricktrait](https://github.com/Maxichance/bricktrait) editor offers real minifigure parts, colours, poses, camera controls, backgrounds, and undo/redo. Choose **Use portrait** to save it for this character, or **Cancel** to keep the current portrait. Your saved portrait appears in the sheet, switcher, backup previews, and level-up screen. Reopen it to continue editing. Portraits and their editable designs travel in JSON backups; existing version 2 saves still load. Character details are saved before opening the maker from Edit character.
 - **Scan a sheet:** open the character switcher or **Settings & backup → Scan a sheet**. Take a photo or choose up to six JPG, PNG, or WebP photos of one character’s printed or handwritten 5e sheet. Review and correct the extracted fields, compare the original photos, then create a new character. Existing characters are preserved. Scanning needs an online scan service; see setup below.
 - **Character sheet:** edit scores and combat stats; roll checks, saving throws, attacks, damage, and initiative. Cycle skill dots through untrained, proficiency, and expertise. Attack editors support normal/advantage/disadvantage rolls; Edit stats supports initiative advantage.
 - **Paper sheet details:** dedicated personality traits, ideals, bonds, flaws, languages, armor/weapon/tool proficiencies, senses, and armor/shield notes. Edit initiative and passive Perception adjustments for features, equipment, or table rulings. [Full coverage map](docs/character-sheet-coverage.md).
@@ -53,9 +55,9 @@ Clearing browser data, using private browsing, changing the site's address, or s
 
 Backups are validated before import. Each browser supports up to 100 characters and 2 MB of saved data. Over-limit changes remain available in memory for export, but reduce the data before expecting automatic saving to resume. Roll history is session-only and is not included in backups.
 
-**Only save format version 2 is supported.** Browser storage uses `questlog.v2` and starts with the default party; previous browser saves are not read, migrated, or deleted. Version 1 and other backup versions are rejected. Every current sheet field, casting ability, initiative advantage setting, attack note and roll mode, feature formula, and Short Rest recovery value is required, even when empty or zero. Import does not fill in missing fields. All current fields are included in export/import.
+**Only save format version 2 is supported.** Browser storage uses `questlog.v2` and starts with the default party; previous browser saves are not read, migrated, or deleted. Version 1 and other backup versions are rejected. Every current sheet field, casting ability, initiative advantage setting, attack note and roll mode, feature formula, and Short Rest recovery value is required, even when empty or zero. Import does not fill in missing fields. All current fields are included in export/import. The optional `portrait` field stores a compact 256 px image and its editable Bricktrait design; saves without it use the starter portrait.
 
-After the first online visit and the **Ready for offline adventures** message, a service worker caches the app, local icons, and original artwork. Character tracking and dice then work offline on HTTPS hosts or localhost. Reference pages and photo scanning need internet access. The app has no remote fonts, scripts, analytics, or runtime dependencies. For future code releases, bump the cache name in `sw.js` when changing the offline asset set.
+After the first online visit and the **Ready for offline adventures** message, a service worker caches the app, local icons, and original artwork. Character tracking and dice then work offline on HTTPS hosts or localhost. Reference pages and photo scanning need internet access. The app makes no requests to remote fonts, scripts, analytics, or Bricktrait services. The editor’s bundled dependencies and LDraw models are served from this site. The portrait maker requires WebGL. Its editor and parts cache as you use them: reopen once online before using the maker offline; parts you have not loaded yet need a connection. Saved portrait images always remain available with the sheet. For future code releases, bump the cache name in `sw.js` when changing the offline asset set.
 
 ## Sheet scanning setup
 
@@ -116,3 +118,9 @@ The output is `dist/`. The same app can be previewed at `http://localhost:4173/d
 Source layout: `app.js` handles views and interactions, `model.js` contains character and dice logic plus backup validation, `catalog.js` contains equipment/character-option data and preset mapping, `catalog-ui.js` contains dropdowns and stat previews, `default-characters.js` supplies the photographed default party and fresh state, `sheet-scan.js` defines extraction and import validation, and `sheet-scan-ui.js` handles photo capture and review. `styles.css` contains the responsive design, `art.js` and `icons.js` contain original SVG assets, and `sw.js` enables offline use. `scripts/` contains the dependency-free server, optional vision endpoint, and build tools. `tests/` covers rules calculations, catalog integrity, preset backup compatibility, and sheet scanning.
 
 Design research: the familiar sheet/inventory/spell/journal organization was informed by [D&D Beyond's sheet sections](https://dndbeyond-support.wizards.com/hc/en-us/articles/7747193946388-Sheet-Sections). Questlog's visual design and pixel artwork are original. Questlog is an independent fan project and is not affiliated with Wizards of the Coast.
+
+## Bricktrait attribution
+
+The portrait editor reuses [Bricktrait by Maxichance](https://github.com/Maxichance/bricktrait) under its MIT license, pinned at `f333d939753526469e4169481d578aed74e955ed`. Source and integration notes are in [vendor/bricktrait](vendor/bricktrait/README.md). The built editor includes the MIT license, dependency licenses, and LDraw’s per-file credits and CC BY license texts. LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize, or endorse this project. Questlog and Bricktrait are not affiliated with the LEGO Group, LDraw.org, or any game publisher.
+
+`npm run test:portraits` exercises the real editor, per-character saves, cancellation, reopening, backup import, mobile layout, and offline use in a headless Chromium browser. Start `npm run dev` first. It detects Microsoft Edge or Chrome, or uses `BROWSER_PATH`; `PORTRAIT_TEST_URL` can point at a build preview, including `/dist/` to verify relative asset paths.

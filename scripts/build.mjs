@@ -1,9 +1,10 @@
-import {mkdir,copyFile} from 'node:fs/promises';
+import {mkdir,copyFile,cp} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
-for(const file of ['index.html','styles.css','app.js','model.js','catalog.js','catalog-ui.js','default-characters.js','sheet-scan.js','sheet-scan-ui.js','icons.js','art.js','sw.js','manifest.webmanifest','.nojekyll'])await copyFile(resolve(root,file),resolve(out,file));
-for(const file of ['icon.svg','icon-192.png','icon-512.png'])await copyFile(resolve(root,'assets',file),resolve(out,'assets',file));
+for(const file of ['index.html','styles.css','app.js','model.js','portrait.js','portrait-ui.js','catalog.js','catalog-ui.js','default-characters.js','sheet-scan.js','sheet-scan-ui.js','icons.js','art.js','sw.js','manifest.webmanifest','.nojekyll'])await copyFile(resolve(root,file),resolve(out,file));
+for(const file of ['icon.svg','icon-192.png','icon-512.png','portrait-adventurer.webp'])await copyFile(resolve(root,'assets',file),resolve(out,'assets',file));
+await cp(resolve(root,'portrait-maker'),resolve(out,'portrait-maker'),{recursive:true});
 console.log('Questlog built successfully → dist/ (static, GitHub Pages-ready)');
