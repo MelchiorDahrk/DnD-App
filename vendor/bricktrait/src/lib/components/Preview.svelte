@@ -4,6 +4,8 @@
 	import { MIN_ZOOM } from '#lib/scene.ts';
 	import { t } from '#lib/i18n.svelte.ts';
 	import { hold, release } from '#lib/history.svelte.ts';
+	import { transparentStyle } from '#lib/compose.ts';
+	let { transparent = false }: { transparent?: boolean } = $props();
 
 	const SIZE = 640;
 	const webgl = webglAvailable();
@@ -40,7 +42,8 @@
 	});
 
 	function draw() {
-		renderer.draw(canvas, SIZE, $state.snapshot(portrait.view), $state.snapshot(portrait.style));
+		const style = $state.snapshot(portrait.style);
+		renderer.draw(canvas, SIZE, $state.snapshot(portrait.view), transparent ? transparentStyle(style) : style);
 	}
 
 	// One pointer turns the figure, two (touch) pinch to zoom

@@ -63,9 +63,16 @@ dialog{border:1px solid #dbe2cd;background:var(--paper);border-radius:15px;paddi
 @media(max-width:600px){[data-sheet-section="attacks"] .action-row{flex-wrap:wrap}[data-sheet-section="attacks"] .action-rolls{order:4;width:100%;padding-left:42px}[data-sheet-section="attacks"] .action-info{flex-basis:45%}}
 
 /* Character portraits rendered by the integrated Bricktrait editor. */
-.character-portrait{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
-.mini-avatar .character-portrait{width:100%;height:100%;margin:0;object-fit:cover}
-.avatar-frame{width:106px;height:106px;align-items:center;padding:4px;background:#254937}
+.character-portrait{display:block;width:100%;height:100%;object-fit:contain;border-radius:0}
+.mini-avatar .character-portrait{width:100%;height:100%;margin:0;object-fit:contain}
+.mini-avatar:has(.character-portrait){border-radius:4px;border:0;overflow:visible}
+.equipment-icon{display:grid;place-items:center;width:100%;height:100%;position:relative}
+.equipment-icon>.icon{grid-area:1/1}
+.equipment-icon>img{grid-area:1/1;position:relative;width:100%;height:100%;object-fit:contain;background:var(--bg,#fffef9)}
+.item-symbol:has(.equipment-icon){background:transparent}
+.item-symbol .equipment-icon>img{background:transparent}
+.equipment-icon:has(img)>.icon{visibility:hidden}
+.avatar-frame{width:106px;height:106px;align-items:center;padding:0;background:transparent;border:0;box-shadow:none}
 .avatar-frame:after{display:none}
 .portrait-button{cursor:pointer;transition:box-shadow .2s}
 .portrait-button:hover,.portrait-button:focus-visible{box-shadow:0 0 0 3px #cfe48b}

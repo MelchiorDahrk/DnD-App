@@ -4,6 +4,7 @@ import {existsSync} from 'node:fs';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {validPortrait} from '../portrait.js';
+import {EQUIPMENT_ICONS} from '../equipment-icons.js';
 
 const base=process.env.PORTRAIT_TEST_URL||'http://localhost:4173/';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
@@ -30,6 +31,21 @@ async function save(frame) {
   await page.click('.portrait-use');
   await page.waitForFunction(()=>!document.querySelector('.portrait-dialog'),{timeout:60000});
 }
+function transparentStyle(style) {
+  assert.equal(style.background,'none');assert.equal(style.ring,false);
+  assert.equal(style.shape,'square');assert.equal(style.outline,false);
+}
+async function imagePixels(src) {
+  return page.evaluate(async src=>{
+    const img=new Image();img.src=src;await img.decode();
+    const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const {width:w,height:h}=canvas;
+    const data=ctx.getImageData(0,0,w,h).data;
+    let count=0,minX=w,minY=h,maxX=0,maxY=0;
+    for(let y=0;y<h;y++)for(let x=0;x<w;x++)if(data[(y*w+x)*4+3]>8){count++;minX=Math.min(minX,x);maxX=Math.max(maxX,x);minY=Math.min(minY,y);maxY=Math.max(maxY,y);}
+    return {w,h,corners:[data[3],data[(w-1)*4+3],data[((h-1)*w)*4+3],data[(w*h-1)*4+3]],count,bounds:[minX,minY,maxX,maxY]};
+  },src);
+}
 async function setYaw(frame,value) {
   await frame.evaluate(()=>[...document.querySelectorAll('[role=tab]')].find(e=>e.textContent.trim()==='Camera').click());
   await frame.waitForSelector('input[type=range]');
@@ -37,10 +53,31 @@ async function setYaw(frame,value) {
 }
 try {
   await page.goto(base,{waitUntil:'networkidle0'});
+  await page.evaluate(()=>{
+    const s=JSON.parse(localStorage.getItem('questlog.v2'));
+    s.characters.find(c=>c.id===s.activeId).items.push(
+      {id:'icon-mapped',name:'Longsword',category:'Weapon',qty:1,weight:3,equipped:false,description:'Icon fixture',wiki:''},
+      {id:'icon-custom',name:'Custom moon compass',category:'Gear',qty:1,weight:0,equipped:false,description:'Fallback fixture',wiki:''});
+    localStorage.setItem('questlog.v2',JSON.stringify(s));
+    localStorage.setItem('bricktrait:prefs',JSON.stringify({favourites:['3885','30173a'],recent:['3885','30173a']}));
+  });
+  await page.reload({waitUntil:'networkidle0'});
+  await page.click('[data-action=navigate][data-route=inventory]');
+  await page.waitForSelector('.inventory-list .equipment-icon img');
+  assert.equal(await page.$('canvas'),null,'Inventory lists need no WebGL');
+  const mappedRow=await page.$eval('[data-action=item][data-id=icon-mapped]',el=>el.closest('.action-row').innerHTML);
+  assert.match(mappedRow,/assets\/equipment\/longsword.webp/);
+  const customRow=await page.$eval('[data-action=item][data-id=icon-custom]',el=>el.closest('.action-row').innerHTML);
+  assert.doesNotMatch(customRow,/<img/);assert.match(customRow,/<svg/);
+  await page.$eval('.inventory-list .equipment-icon img',img=>img.src='./assets/equipment/missing-test.webp');
+  await page.waitForFunction(()=>[...document.querySelectorAll('.equipment-icon')].some(el=>!el.querySelector('img')&&getComputedStyle(el.querySelector('svg')).visibility==='visible'));
+  await page.click('[data-action=navigate][data-route=sheet]');
+  console.log('PASS inventory static thumbnails, custom SVGs, and missing-asset fallback without WebGL');
   const attribution=await page.evaluate(async()=>Promise.all(['portrait-maker/LICENSE','portrait-maker/ldraw/CREDITS.txt','portrait-maker/ldraw/CAlicense4.txt'].map(async path=>{const response=await fetch(path);if(!response.ok)throw new Error(`Missing attribution: ${path}`);return response.text();})));
   assert.match(attribution[0],/Copyright \(c\) 2026 Maxichance/);
   assert.match(attribution[1],/file\s+author\s+license/);
   assert.match(attribution[2],/Creative Commons/i);
+  assert.deepEqual((await imagePixels(new URL('assets/portrait-adventurer.webp',base).href)).corners,[0,0,0,0],'Bundled starter portrait must be transparent');
   console.log('PASS deployed code license and LDraw attribution');
   let frame=await open();
   await save(frame);
@@ -48,6 +85,10 @@ try {
   const firstId=s.activeId;
   const original=s.characters.find(c=>c.id===firstId).portrait;
   assert.ok(validPortrait(original));
+  transparentStyle(original.design.style);
+  assert.match(original.image,/^data:image\/webp/);
+  assert.deepEqual((await imagePixels(original.image)).corners,[0,0,0,0]);
+  assert.ok((await imagePixels(original.image)).count>1000,'Portrait must contain a real figure');
   if(process.argv.includes('--write-default')) {
     await fs.writeFile(resolve('assets/portrait-adventurer.webp'),Buffer.from(original.image.split(',')[1],'base64'));
     console.log('Generated starter portrait using the reused Bricktrait renderer.');
@@ -71,6 +112,66 @@ try {
   assert.deepEqual((await state()).characters.find(c=>c.id===firstId).portrait,saved);
   console.log('PASS edit, reopen, and cancel without changing saved design');
 
+  // Seed an actual v2 legacy save, including a now excluded part. Opening and
+  // canceling must preserve even its old flattened ringed image byte for byte.
+  const legacy=structuredClone(saved);
+  legacy.design.style={...legacy.design.style,background:'space',ring:true,shape:'round',outline:true};
+  legacy.image=await page.evaluate(async src=>{
+    const image=new Image();image.src=src;await image.decode();
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=256;
+    const ctx=canvas.getContext('2d');ctx.fillStyle='#262a72';ctx.fillRect(0,0,256,256);
+    ctx.drawImage(image,0,0);ctx.lineWidth=16;ctx.strokeStyle='#1f5ef5';ctx.beginPath();ctx.arc(128,128,116,0,Math.PI*2);ctx.stroke();
+    return canvas.toDataURL('image/webp');
+  },saved.image);
+  legacy.design.figure.handR.id='3885';legacy.design.figure.pose.armR=30;
+  legacy.design.view={yaw:17,pitch:9,zoom:.65};
+  await page.evaluate(({id,portrait})=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));s.characters.find(c=>c.id===id).portrait=portrait;localStorage.setItem('questlog.v2',JSON.stringify(s));}, {id:firstId,portrait:legacy});
+  await page.reload({waitUntil:'networkidle0'});
+  frame=await open();
+  assert.equal(await frame.$eval('.modes',el=>el.textContent.includes('Scene')),false);
+  assert.equal(await frame.$('input[type=color]'),null,'Embedded editor exposes no background or ring colours');
+  assert.ok(await frame.$('.slots .pick[title*="Darksaber"]'),'Excluded equipped part remains in its slot');
+  await frame.evaluate(()=>document.querySelectorAll('.slots .pick')[6].click());
+  await frame.waitForSelector('.picker .pick');
+  assert.equal(await frame.$('.picker .pick[title*="Darksaber"]'),null);
+  for(const label of ['Favourites','Recent']) {
+    await frame.evaluate(label=>[...document.querySelectorAll('.views button')].find(el=>el.textContent.includes(label)).click(),label);
+    await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===1);
+    assert.match(await frame.$eval('.picker .pick',el=>el.title),/30173a/);
+  }
+  await frame.evaluate(()=>document.querySelector('.views button').click());
+  await frame.$eval('.picker input[type=search]',input=>{input.value='darksaber';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===0);
+  assert.deepEqual((await imagePixels(await frame.$eval('.preview canvas',c=>c.toDataURL('image/webp')))).corners,[0,0,0,0]);
+  await page.click('[data-portrait-close]');
+  assert.deepEqual((await state()).characters.find(c=>c.id===firstId).portrait,legacy);
+  frame=await open();await save(frame);
+  const converted=(await state()).characters.find(c=>c.id===firstId).portrait;
+  assert.deepEqual(converted.design.figure,legacy.design.figure);
+  assert.deepEqual(converted.design.view,legacy.design.view);
+  transparentStyle(converted.design.style);
+  assert.deepEqual((await imagePixels(converted.image)).corners,[0,0,0,0]);
+  // Restore the fixture used by the existing per-character and backup checks.
+  await page.evaluate(({id,portrait})=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));s.characters.find(c=>c.id===id).portrait=portrait;localStorage.setItem('questlog.v2',JSON.stringify(s));},{id:firstId,portrait:saved});
+  await page.reload({waitUntil:'networkidle0'});
+  console.log('PASS legacy ring normalization, excluded equipped part rendering, and lossless cancellation');
+
+  for(const key of Object.keys(EQUIPMENT_ICONS)) {
+    const px=await imagePixels(new URL(`assets/equipment/${key}.webp`,base).href);
+    assert.equal(px.w,160);assert.equal(px.h,160);assert.deepEqual(px.corners,[0,0,0,0],key);
+    assert.ok(px.count>50,`${key}: real geometry`);
+    const [x,y,right,bottom]=px.bounds;
+    assert.ok(x>0&&y>0&&right<159&&bottom<159,`${key}: no clipped edges`);
+    assert.ok(Math.abs((x+right)/2-79.5)<19&&Math.abs((y+bottom)/2-79.5)<19,`${key}: centered`);
+  }
+  console.log('PASS all mapped equipment thumbnails contain centered geometry and transparent corners');
+  const review=await browser.newPage();
+  await review.setViewport({width:1000,height:1100});
+  await review.setContent(`<style>body{margin:24px;background:#eef1e5;font:14px Georgia;color:#254937}main{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}figure{margin:0;padding:9px;text-align:center;background:#fffef9;border-radius:7px}figure:nth-child(even){background:#254937;color:#eef1e5}img{width:88px;height:88px;object-fit:contain}figcaption{font-size:12px}</style><h1>Questlog LEGO equipment</h1><main>${Object.keys(EQUIPMENT_ICONS).map(key=>`<figure><img src="${new URL(`assets/equipment/${key}.webp`,base).href}"><figcaption>${key}</figcaption></figure>`).join('')}</main>`);
+  await review.evaluate(()=>Promise.all([...document.images].map(img=>img.decode())));
+  await fs.mkdir('screenshots',{recursive:true});
+  await review.screenshot({path:'screenshots/equipment-icons.png',fullPage:true});await review.close();
+
   await page.click('[data-action=characters]');
   await page.click('[data-action=switch-character]:not(.active)');
   const secondId=(await state()).activeId;
@@ -93,13 +194,15 @@ try {
 
   const backupPath=resolve('.tmp/portrait-browser-backup.json');
   await fs.mkdir(resolve('.tmp'),{recursive:true});
-  await fs.writeFile(backupPath,JSON.stringify(await state()));
+  const beforeImport=await state();
+  await fs.writeFile(backupPath,JSON.stringify(beforeImport));
   await (await page.$('#import-file')).uploadFile(backupPath);
   await page.waitForSelector('[data-action=confirm-import]');
   await page.click('[data-action=confirm-import]');
   s=await state();
   assert.equal(s.characters.filter(c=>c.portrait?.design.view.yaw===25).length,2);
   assert.equal(s.characters.filter(c=>c.portrait?.design.view.yaw===-15).length,2);
+  assert.deepEqual(s.characters.filter(c=>c.portrait?.design.view.yaw===25).map(c=>c.items),[beforeImport.characters.find(c=>c.id===firstId).items,beforeImport.characters.find(c=>c.id===firstId).items]);
   console.log('PASS backup import preserves portrait images and editable designs');
 
   // Return to the original second character for offline checks.
@@ -131,7 +234,10 @@ try {
   await page.waitForSelector('.hero .character-portrait');
   assert.equal(await page.$eval('.hero .character-portrait',img=>img.src),(await state()).characters.find(c=>c.id===secondId).portrait.image);
   frame=await open();
-  await page.click('[data-portrait-close]');
+  await save(frame);
+  for(const key of Object.keys(EQUIPMENT_ICONS)) {
+    assert.ok((await imagePixels(new URL(`assets/equipment/${key}.webp`,base).href)).count>50,`${key}: bundled offline icon`);
+  }
   await page.setOfflineMode(false);
   console.log('PASS offline sheet portrait and cached editor reopening');
 

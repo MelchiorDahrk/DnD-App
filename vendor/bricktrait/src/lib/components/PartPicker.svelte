@@ -4,6 +4,7 @@
 	import { isFavourite, prefs, toggleFavourite } from '#lib/prefs.svelte.ts';
 	import { t, tn } from '#lib/i18n.svelte.ts';
 	import Thumb from './Thumb.svelte';
+	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
 
 	let {
 		parts,
@@ -47,11 +48,12 @@
 		for (const v of list) if (v) m.set(v, (m.get(v) ?? 0) + 1);
 		return [...m].sort((a, b) => b[1] - a[1]);
 	};
-	const kinds = $derived(count(parts.map((p) => p.kind)));
-	const themes = $derived(count(parts.map((p) => p.theme)));
+	const approved = $derived(fantasyCatalog(parts));
+	const kinds = $derived(count(approved.map((p) => p.kind)));
+	const themes = $derived(count(approved.map((p) => p.theme)));
 
 	const shown = $derived.by(() => {
-		let list = parts;
+		let list = approved;
 		if (view === 'favourites') list = list.filter((p) => prefs.favourites.includes(p.id));
 		if (view === 'recent') {
 			const order = new Map(prefs.recent.map((id, i) => [id, i]));
@@ -175,7 +177,7 @@
 				<span>{extra.label()}</span>
 			</label>
 		{/if}
-		<span class="count mono">{shown.length} / {parts.length}</span>
+		<span class="count mono">{shown.length} / {approved.length}</span>
 	</div>
 
 	{#if kinds.length > 1}

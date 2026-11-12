@@ -2,6 +2,7 @@ import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
 import { STANDARD_LEGS, STANDING, type Figure, type Part } from './ldraw';
 import type { View } from './scene';
 import { defaultStyle, type Style } from './compose';
+import { fantasyCatalog } from './fantasy-catalog.js';
 
 export interface Portrait {
 	figure: Figure;
@@ -85,25 +86,29 @@ export function fromHash(hash: string): Portrait | null {
 const pick = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
 export function randomize(catalog: Part[]) {
+	catalog = fantasyCatalog(catalog);
 	const of = (cat: string) => catalog.filter((p) => p.cat === cat);
+	// A broken configuration must not destroy the current figure.
+	if (!of('torso').length || !of('head').length) return;
 	const skin = [14, 14, 14, 78, 84, 92, 70];
 	const torso = pick(of('torso'));
 	// Printed heads have faces, plain ones would look empty
-	const head = pick(of('head').filter((p) => /pattern/i.test(p.name)));
+	const printed = of('head').filter((p) => /pattern/i.test(p.name));
+	const head = pick(printed.length ? printed : of('head'));
 	// Moulded heads are complete on their own
 	const wear = head.moulded === undefined && Math.random() < 0.9 ? pick(of('headgear')) : null;
 	const colors = COMMON_COLORS.slice(6, 30);
 	portrait.figure = {
 		head: { id: head.id, color: pick(skin) },
 		headgear: { id: wear?.id ?? null, color: pick(colors) },
-		neck: { id: Math.random() < 0.2 ? pick(of('neck')).id : null, color: pick(colors) },
-		back: { id: Math.random() < 0.2 ? pick(of('back')).id : null, color: pick(colors) },
+		neck: { id: Math.random() < 0.2 ? pick(of('neck'))?.id ?? null : null, color: pick(colors) },
+		back: { id: Math.random() < 0.2 ? pick(of('back'))?.id ?? null : null, color: pick(colors) },
 		torso: { id: torso.id, color: pick(colors), arms: pick(colors), hands: pick(skin) },
-		handR: { id: Math.random() < 0.3 ? pick(of('hand')).id : null, color: pick(colors), spin: 0 },
+		handR: { id: Math.random() < 0.3 ? pick(of('hand'))?.id ?? null : null, color: pick(colors), spin: 0 },
 		handL: { id: null, color: 71, spin: 0 },
 		pose: { ...STANDING },
 		legs:
-			Math.random() < 0.6
+			Math.random() < 0.6 || !of('legs').length
 				? { id: STANDARD_LEGS, color: pick(colors), hips: pick(colors) }
 				: { id: pick(of('legs')).id, color: pick(colors), hips: pick(colors) }
 	};

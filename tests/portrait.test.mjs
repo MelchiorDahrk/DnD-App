@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {validPortrait,portraitMarkup} from '../portrait.js';
 import {makeCharacter,parseBackup,SAVE_VERSION} from '../model.js';
+import {defaultStyle,transparentStyle} from '../vendor/bricktrait/src/lib/compose.ts';
 
 // Keep a real Bricktrait design fixture independent of the save validator.
 const design={
@@ -13,8 +14,23 @@ const state=c=>({version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sou
 
 test('portraits survive backup export/import with their editable design',()=>{
   const c=makeCharacter({portrait:portrait()});
+  c.items=[{id:'independent-inventory-id',name:'Longsword',category:'Weapon',qty:1,weight:3,equipped:true,description:'Family heirloom',wiki:''}];
   assert.deepEqual(parseBackup(JSON.stringify(state(c))).characters[0].portrait,c.portrait);
+  assert.deepEqual(parseBackup(JSON.stringify(state(c))).characters[0].items,c.items);
   assert.match(portraitMarkup(c),/data:image\/webp;base64/);
+});
+
+test('new defaults and reopened legacy designs use alpha without mutating saved data',()=>{
+  for(const style of [defaultStyle,transparentStyle(design.style)]) {
+    assert.equal(style.background,'none');assert.equal(style.ring,false);
+    assert.equal(style.shape,'square');assert.equal(style.outline,false);
+  }
+  const old=portrait(),before=structuredClone(old);
+  const working=structuredClone(old.design);working.style=transparentStyle(working.style);
+  assert.deepEqual(working.figure,old.design.figure);assert.deepEqual(working.view,old.design.view);
+  assert.deepEqual(old,before);
+  assert.ok(validPortrait(old));
+  assert.ok(validPortrait({...old,design:working}));
 });
 
 test('existing version 2 characters need no migration or new portrait field',()=>{

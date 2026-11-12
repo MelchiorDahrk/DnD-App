@@ -19,15 +19,22 @@ export interface Style {
 }
 
 export const defaultStyle: Style = {
-	background: 'space',
+	background: 'none',
 	backdrop: '#262a72',
 	backdrop2: '#0d0f2b',
-	ring: true,
+	ring: false,
 	ringColor: '#1f5ef5',
-	shape: 'round',
+	shape: 'square',
 	outline: false,
 	retro: false
 };
+
+/** Questlog exports cutouts, including when an older ringed design is reopened.
+ * Return a copy: merely opening the editor must never modify a saved design.
+ */
+export const transparentStyle = (style: Style): Style => ({
+	...style, background: 'none', ring: false, shape: 'square', outline: false
+});
 
 /** Ring colours of the classic character select screens */
 export const RING_PRESETS = ['#1f5ef5', '#d6232c', '#e0a800', '#2e9e4f', '#9aa3ad', '#7b3fbf'];

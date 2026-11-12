@@ -13,7 +13,8 @@
 	} from '#lib/ldraw.ts';
 	import { MIN_ZOOM } from '#lib/scene.ts';
 	import { renderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
-	import { RING_PRESETS, setBackdropImage } from '#lib/compose.ts';
+	import { RING_PRESETS, setBackdropImage, transparentStyle } from '#lib/compose.ts';
+	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
 	import { fromHash, initial, portrait, randomize, toHash } from '#lib/state.svelte.ts';
 	import { history as timeline, hold, redo, release, track, undo } from '#lib/history.svelte.ts';
 	import { used } from '#lib/prefs.svelte.ts';
@@ -99,6 +100,7 @@
 		saveError = '';
 		try {
 			const snapshot = $state.snapshot(portrait);
+			snapshot.style = transparentStyle(snapshot.style);
 			if (!await renderer.update(snapshot.figure)) throw new Error('The figure changed. Try saving again.');
 			const blob = await renderer.image(256, snapshot.view, snapshot.style, 'webp');
 			if (!blob) throw new Error('Could not render this portrait. Please try again.');
@@ -120,7 +122,11 @@
 	onMount(() => {
 		function receive(event: MessageEvent) {
 			if (event.origin !== location.origin || event.source !== window.parent || event.data?.session !== session) return;
-			if (event.data.type === 'questlog:portrait-init' && event.data.design) Object.assign(portrait, structuredClone(event.data.design));
+			if (event.data.type === 'questlog:portrait-init' && event.data.design) {
+				const design = structuredClone(event.data.design);
+				design.style = transparentStyle(design.style);
+				Object.assign(portrait, design);
+			}
 			if (event.data.type === 'questlog:portrait-request-save') void saveToCharacter();
 		}
 		window.addEventListener('message', receive);
@@ -132,11 +138,13 @@
 		if (embedded && ready) send('questlog:portrait-loaded', { webgl: webglAvailable() });
 	});
 	// The panel next to the portrait: what is being edited
-	const MODES = ['parts', 'pose', 'camera', 'scene'] as const;
-	let mode: (typeof MODES)[number] = $state('parts');
+	type Mode = 'parts' | 'pose' | 'camera' | 'scene';
+	const MODES: Mode[] = embedded ? ['parts', 'pose', 'camera'] : ['parts', 'pose', 'camera', 'scene'];
+	let mode: Mode = $state('parts');
 
 	const standard = $derived<Part>({ id: STANDARD_LEGS, name: t('standardLegs'), cat: 'legs' });
-	const of = (cat: string) => catalog.filter((p) => p.cat === cat);
+	const selectable = $derived(fantasyCatalog(catalog));
+	const of = (cat: string) => selectable.filter((p) => p.cat === cat);
 	const lists = $derived<Record<SlotId, Part[]>>({
 		headgear: of('headgear'),
 		head: of('head'),
@@ -216,7 +224,7 @@
 	$effect(() => {
 		document.documentElement.lang = i18n.lang;
 		const shared = fromHash(location.hash);
-		if (shared) Object.assign(portrait, shared);
+		if (shared) Object.assign(portrait, { ...shared, style: embedded ? transparentStyle(shared.style) : shared.style });
 		load();
 	});
 
@@ -351,7 +359,7 @@
 	function openLink() {
 		const shared = fromHash(location.hash);
 		if (shared && toHash(shared) !== toHash($state.snapshot(portrait)))
-			Object.assign(portrait, shared);
+			Object.assign(portrait, { ...shared, style: embedded ? transparentStyle(shared.style) : shared.style });
 	}
 
 	// Phone: the portrait gets smaller once the catalogue is scrolled, with
@@ -534,7 +542,7 @@
 		<section class="stage" aria-label={t('preview')}>
 			<div class="view">
 				<div class="preview-frame">
-					<Preview />
+					<Preview transparent={embedded} />
 				</div>
 				<div class="float">
 					<button
@@ -768,7 +776,7 @@
 						</button>
 						<p class="muted">{t('cameraHint')}</p>
 					</div>
-				{:else}
+				{:else if !embedded}
 					<fieldset class="group">
 						<legend class="label">{t('background')}</legend>
 						<div class="seg" role="group" aria-label={t('background')}>

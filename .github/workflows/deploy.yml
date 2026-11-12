@@ -24,6 +24,11 @@ jobs:
           cache: npm
       - name: Install portrait maker dependencies
         run: npm ci
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
       - uses: actions/cache@v4
         with:
           path: |
@@ -37,6 +42,17 @@ jobs:
         run: npm test
       - name: Build static app
         run: npm run build
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+      - name: Browser portrait, equipment, and offline checks under Pages subpath
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: |
+          ln -s dist DnD-App
+          node scripts/serve.mjs > /tmp/questlog-server.log 2>&1 &
+          for attempt in 1 2 3 4 5; do curl --silent --fail http://127.0.0.1:4173/DnD-App/ > /dev/null && break; sleep 1; done
+          npm run test:portraits
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

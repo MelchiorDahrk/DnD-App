@@ -112,9 +112,14 @@ export class Stage {
 	/** Fits the whole model, for thumbnails. */
 	fit(view: View) {
 		if (!this.model) return;
+		// Measure after rotation so off-centre accessories stay centred, too.
+		this.pivot.rotation.y = MathUtils.degToRad(view.yaw);
+		this.pivot.updateMatrixWorld(true);
 		const box = new Box3().setFromObject(this.model);
 		const size = box.getSize(new Vector3());
-		this.aim(box.getCenter(new Vector3()), Math.max(size.x, size.y, size.z) * 1.15, view);
+		const pitch = MathUtils.degToRad(view.pitch);
+		const height = size.y * Math.abs(Math.cos(pitch)) + size.z * Math.abs(Math.sin(pitch));
+		this.aim(box.getCenter(new Vector3()), Math.max(size.x, height, size.z) * 1.2, view);
 	}
 
 	private aim(target: Vector3, extent: number, view: View) {

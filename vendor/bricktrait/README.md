@@ -26,6 +26,15 @@ No external website, CDN, or online service is used by the editor at runtime.
 Thumbnails render on demand using the original renderer, avoiding thousands
 of pre-rendered thumbnails in the source repository.
 
+Questlog's fantasy extension uses `fantasy-catalog.json` as an explicit,
+category-based selection allowlist. Full LDraw metadata and geometry are retained
+for old designs. Embedded previews and saved WebPs enforce transparent,
+square, borderless composition; old saves are updated only on **Use portrait**.
+The embedded editor hides scene controls while the standalone page retains them.
+The existing thumbnail renderer also pre-renders 36 mapped inventory accessories;
+the rest of the editor's thumbnails continue rendering on demand.
+See [maintenance and testing notes](../../docs/fantasy-portraits.md).
+
 The build preserves LDraw's per-file CREDITS.txt, CAreadme.txt and license
 texts. Code attribution and the MIT license ship alongside the editor.
 LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize,

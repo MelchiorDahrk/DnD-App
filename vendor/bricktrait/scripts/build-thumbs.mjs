@@ -9,34 +9,45 @@ import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
 import { createServer } from 'vite';
+import { EQUIPMENT_ICONS } from '../../../equipment-icons.js';
 
-const OUT = path.resolve('static/thumbs');
+const equipment = process.argv.includes('--equipment');
+const OUT = equipment ? path.resolve('../../assets/equipment') : path.resolve('static/thumbs');
 const BATCH = 40;
 // Files that change how a thumbnail looks (new parts are simply added).
 // Other changes that matter bump THUMB_VERSION in thumb-render.ts.
-const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts'];
+const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts'];
+if (equipment) INPUTS.push('../../equipment-icons.js', 'static/ldraw/catalog.json');
 
 const CHROME =
 	process.env.CHROME_PATH ??
 	[
 		'C:/Program Files/Google/Chrome/Application/chrome.exe',
+		'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
 		'/usr/bin/google-chrome',
+		'/usr/bin/chromium',
 		'/usr/bin/chromium-browser',
 		'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 	].find((p) => fs.existsSync(p));
-if (!CHROME) throw new Error('Chrome not found, set CHROME_PATH');
-if (!fs.existsSync('static/ldraw/catalog.json')) throw new Error('Run `npm run parts` first');
+if (!fs.existsSync('static/ldraw/catalog.json')) throw new Error('Run `npm run build:portraits` from the Questlog root first');
 
 // Start over when the rendering changed
 const stamp = crypto.createHash('sha1');
 for (const f of INPUTS) stamp.update(fs.readFileSync(f));
 const version = stamp.digest('hex');
 const versionFile = path.join(OUT, '.version');
-if (fs.existsSync(versionFile) && fs.readFileSync(versionFile, 'utf8') !== version) {
+const changed = !fs.existsSync(versionFile) || fs.readFileSync(versionFile, 'utf8') !== version;
+if (!equipment && changed) {
 	console.log('Rendering changed, rebuilding every thumbnail');
-	fs.rmSync(OUT, { recursive: true, force: true });
 }
 fs.mkdirSync(OUT, { recursive: true });
+const mapped = Object.entries(EQUIPMENT_ICONS).map(([key, item]) => ({ id:item.part, color:item.color, key }));
+const filename = item => path.join(OUT, `${equipment ? item.key : item.id}.webp`);
+if (equipment && !changed && mapped.every(item => fs.existsSync(filename(item)))) {
+	console.log(`${mapped.length} equipment thumbnails are up to date`);
+	process.exit(0);
+}
+if (!CHROME) throw new Error('Thumbnail generation requires Chromium. Set CHROME_PATH (CI installs Chrome explicitly).');
 
 const server = await createServer({
 	configFile: false,
@@ -48,18 +59,20 @@ const server = await createServer({
 await server.listen();
 const url = server.resolvedUrls.local[0];
 
-const browser = await puppeteer.launch({
-	executablePath: CHROME,
-	headless: true,
-	args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox']
-});
-
+let browser;
 try {
+	browser = await puppeteer.launch({
+		executablePath: CHROME,
+		headless: true,
+		args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--no-sandbox']
+	});
+
 	const page = await browser.newPage();
 	page.on('pageerror', (e) => console.error('page:', e.message));
 	await page.goto(url);
-	const items = await page.evaluate(() => window.thumbsReady);
-	const todo = items.filter(({ id }) => !fs.existsSync(path.join(OUT, `${id}.webp`)));
+	const parts = await page.evaluate(() => window.thumbsReady);
+	const items = equipment ? mapped : parts;
+	const todo = items.filter(item => changed || !fs.existsSync(filename(item)));
 	console.log(`${items.length} thumbnails, ${todo.length} to render`);
 
 	let failed = 0;
@@ -67,17 +80,18 @@ try {
 	for (let i = 0; i < todo.length; i += BATCH) {
 		const batch = todo.slice(i, i + BATCH);
 		const urls = await page.evaluate((b) => window.renderThumbs(b), batch);
-		batch.forEach(({ id }, j) => {
+		batch.forEach((item, j) => {
 			if (!urls[j]) return failed++;
-			fs.writeFileSync(path.join(OUT, `${id}.webp`), Buffer.from(urls[j].split(',')[1], 'base64'));
+			fs.writeFileSync(filename(item), Buffer.from(urls[j].split(',')[1], 'base64'));
 		});
 		const done = Math.min(i + BATCH, todo.length);
 		process.stdout.write(`\r${done}/${todo.length} (${Math.round((Date.now() - start) / 1000)} s)`);
 	}
 	if (todo.length) process.stdout.write('\n');
+	if (failed && equipment) throw new Error(`${failed} equipment thumbnails failed to render`);
 	if (failed) console.warn(`${failed} thumbnails failed, the app renders them live`);
 	fs.writeFileSync(versionFile, version);
 } finally {
-	await browser.close();
+	await browser?.close();
 	await server.close();
 }
