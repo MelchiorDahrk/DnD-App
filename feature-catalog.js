@@ -133,6 +133,8 @@ for(const [lineage,cantrip,first,second] of [
 ])add('Species traits',lineage,[[1,'Lineage Magic',`Record ${cantrip} and your lineage’s resistance or other benefits. Choose the permitted casting ability.`],[3,`${first} (lineage)`,`One free ${first} casting. Add the spell separately and choose No slot for the free casting.`,'one-long'],[5,`${second} (lineage)`,`One free ${second} casting. Add the spell separately and choose No slot for the free casting.`,'one-long']],{species:[lineage],wiki:`${RULES_URL}/character-origins#${lineage.includes('Tiefling')?'Tiefling':'Elf'}`});
 add('Species traits','Forest Gnome',[[1,'Forest Gnome Magic','Record Minor Illusion and Speak with Animals in Spellbook.'],[1,'Speak with Animals (lineage)','Free lineage castings; add the spell separately.','pb-long']],{species:['Forest Gnome'],wiki:`${RULES_URL}/character-origins#Gnome`});
 add('Species traits','Rock Gnome',[[1,'Rock Gnome Magic','Record Mending, Prestidigitation, and your clockwork device rules.']],{species:['Rock Gnome'],wiki:`${RULES_URL}/character-origins#Gnome`});
+add('Species traits','Half-Elf',[[1,'Darkvision','Earlier-book Half-Elf: Darkvision 60 feet.'],[1,'Fey Ancestry','Earlier-book Half-Elf resistance to magical sleep and charm.'],[1,'Skill Versatility','Choose two skill proficiencies.']],{species:['Half-Elf'],source:'2014',wiki:'https://www.dndbeyond.com/sources/dnd/basic-rules-2014/races#HalfElf'});
+add('Species traits','Half-Orc',[[1,'Darkvision','Earlier-book Half-Orc: Darkvision 60 feet.'],[1,'Menacing','Intimidation proficiency.'],[1,'Relentless Endurance','Remain at 1 HP when eligible; apply HP separately.','one-long'],[1,'Savage Attacks','Additional weapon damage die on qualifying critical hits.']],{species:['Half-Orc'],source:'2014',wiki:'https://www.dndbeyond.com/sources/dnd/basic-rules-2014/races#HalfOrc'});
 
 for(const feat of ORIGIN_FEATS)add('Origin feats','Origin',[[1,feat.name,feat.details,feat.name==='Lucky'?'pb-long':feat.name.startsWith('Magic Initiate')?'one-long':undefined]],{wiki:feat.wiki});
 const generalFeats=[
@@ -143,6 +145,12 @@ add('Fighting styles','Style',[
   ['Archery','Bonus to ranged weapon attack rolls.'],['Blind Fighting','Record the granted Blindsight.'],['Defense','Armor Class bonus while armored.'],['Dueling','Damage bonus with an eligible one-handed melee weapon.'],['Great Weapon Fighting','Minimum damage die results for qualifying weapons.'],['Interception','Reaction to reduce damage to an ally.'],['Protection','Shield-based reaction to protect an ally.'],['Thrown Weapon Fighting','Damage bonus for thrown attacks.'],['Two-Weapon Fighting','Add ability modifier to qualifying extra attack damage.'],['Unarmed Fighting','Enhanced Unarmed Strike and grapple damage.']
 ].map(([name,details])=>[1,`Fighting Style: ${name}`,`${details} Requires the Fighting Style feature; apply the effect manually.`]),{wiki:`${PHB}/feats`,prerequisites:'Fighting Style feature'});
 add('Epic boons','Boon',['Combat Prowess','Dimensional Travel','Energy Resistance','Fate','Fortitude','Irresistible Offense','Recovery','Skill','Speed','Spell Recall','the Night Spirit','Truesight'].map(name=>[19,`Boon of ${name}`,'Epic Boon reference. Review its prerequisites and benefits in your book; edit scores, resources, and other effects manually.']),{wiki:`${PHB}/feats`,prerequisites:'Level 19+; check any additional prerequisites.'});
+for(const [name,details,species,resource] of [
+  ['Dungeon Delver','Earlier feat for traps and secret doors.'],['Linguist','Intelligence increase, three languages, and ciphers.'],['Martial Adept','Two maneuvers and one d6 Superiority Die per Short or Long Rest.',undefined,'martial-adept'],
+  ['Artificer Initiate','One Artificer cantrip, one level 1 spell, and one artisan’s tool.',undefined,'one-long'],['Eldritch Adept','One invocation; check its prerequisites.'],['Fighting Initiate','One Fighter Fighting Style.'],['Gunner','Dexterity increase and firearm training.'],['Metamagic Adept','Two Metamagic options and two Sorcery Points for those options.',undefined,'two-long'],
+  ['Bountiful Luck','Help nearby allies reroll a natural 1.',['Halfling']],['Dragon Fear','An alternate use of your breath weapon.',['Dragonborn']],['Dragon Hide','Draconic armor and claws.',['Dragonborn']],['Drow High Magic','Additional Drow magic.',['Drow']],['Dwarven Fortitude','Constitution increase and Dodge healing.',['Dwarf']],
+  ['Elven Accuracy','Enhanced qualifying Advantage rolls.',['Elf','Half-Elf']],['Fade Away','An invisibility reaction.',['Gnome'],'one-short'],['Fey Teleportation','High Elf teleportation and language.',['High Elf'],'one-short'],['Flames of Phlegethos','Fiery spellcasting benefits.',['Tiefling']],['Infernal Constitution','Constitution increase and resistances.',['Tiefling']],['Orcish Fury','Additional damage and an endurance follow-up.',['Half-Orc'],'one-short'],['Prodigy','Skill, tool, language, and Expertise.',['Human','Half-Elf','Half-Orc']],['Second Chance','Force an attack reroll.',['Gnome','Halfling','Human'],'one-short'],['Squat Nimbleness','Speed, skill, and escape benefits; Dwarf or Small species.'],['Wood Elf Magic','Druid cantrip and woodland spells.',['Wood Elf']]
+])add('Earlier feats','Feat',[[4,name,`${details} Unreplaced 2014-rules feat reference; consult the original book for prerequisites and effects.`,resource]],{source:'2014',species,wiki:`https://www.dndbeyond.com/sources/dnd/${['Dungeon Delver','Linguist','Martial Adept'].includes(name)?'phb-2014':['Artificer Initiate','Eldritch Adept','Fighting Initiate','Gunner','Metamagic Adept'].includes(name)?'tcoe':'xgte'}`});
 
 add('Maneuvers','Battle Master',[
   ['Ambush','Improve Stealth or Initiative.'],['Bait and Switch','Exchange positions and grant an AC benefit.'],['Commanding Presence','Improve an eligible social check.'],['Commander’s Strike','Direct an ally’s reaction attack.'],['Disarming Attack','Attempt to disarm a target.'],['Distracting Strike','Help an ally attack the target.'],['Evasive Footwork','Defensive movement.'],['Feinting Attack','Feint to improve an attack.'],['Goading Attack','Encourage a foe to attack you.'],['Lunging Attack','Extend an attack through movement.'],['Maneuvering Attack','Help an ally reposition.'],['Menacing Attack','Attempt to Frighten the target.'],['Parry','Reaction to reduce damage.'],['Precision Attack','Improve an attack roll.'],['Pushing Attack','Attempt to push a target.'],['Rally','Grant temporary HP.'],['Riposte','Reaction counterattack.'],['Sweeping Attack','Damage another nearby target.'],['Tactical Assessment','Improve an eligible knowledge or perception check.'],['Trip Attack','Attempt to knock a target Prone.']
@@ -161,7 +169,7 @@ function speciesMatches(race,allowed) {
   const value=normalized(race);
   return allowed.some(name=>{
     if(matches(race,name))return true;
-    if(name==='Elf')return /\b(elf|drow)\b/.test(value);
+    if(name==='Elf')return !/^half elf$/.test(value)&&/\b(elf|drow)\b/.test(value);
     if(name==='Gnome')return /\bgnome\b/.test(value);
     if(name==='Dwarf')return /\bdwarf\b/.test(value);
     if(name==='Tiefling')return /\btiefling\b/.test(value);
@@ -198,8 +206,13 @@ export function featureFields(entry,character={},classLevel=character.level||1) 
   if(resource==='one-short')reset='short';
   if(resource==='one-manual')reset='manual';
   if(resource==='two-long')maxUses=2;
+  if(resource==='two-short'){maxUses=2;reset='short';}
+  if(resource==='three-long')maxUses=3;
+  if(resource==='rune'){maxUses=level>=15?2:1;reset='short';}
+  if(resource==='healing-light'){maxUses=level+1;rollFormula='1d6';}
+  if(resource==='martial-adept'){maxUses=1;reset='short';rollFormula='1d6';}
   if(resource==='pb-long'||resource==='pb-short'){maxUses=pb;if(resource==='pb-short')reset='short';}
-  if(['wis-long','int-long','con-long'].includes(resource))maxUses=ability(resource.slice(0,3));
+  if(['wis-long','int-long','con-long','cha-long','wis-short'].includes(resource)){maxUses=ability(resource.slice(0,3));if(resource==='wis-short')reset='short';}
   if(resource==='rage'){maxUses=tier(level,[[1,2],[3,3],[6,4],[12,5],[17,6]]);shortRestRecovery=1;}
   if(resource==='second-wind'){maxUses=tier(level,[[1,2],[4,3],[10,4]]);shortRestRecovery=1;rollFormula=`1d10+${level}`;}
   if(resource==='action-surge'){maxUses=level>=17?2:1;reset='short';}

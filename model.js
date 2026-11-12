@@ -160,6 +160,7 @@ export function shortRest(c,count=0,roller=randomDie) {
   if (!Number.isInteger(count)||count<0||count>c.hitDice) throw new Error('Choose an available number of Hit Dice.');
   const healing=Array.from({length:count},()=>Math.max(0,roller(c.hitDie)+mod(c.stats.con))).reduce((a,b)=>a+b,0);
   changeHP(c,healing,'heal');c.hitDice-=count;
+  if(c.class==='Warlock'&&c.pactMagic===true)c.slots.forEach(s=>s.used=0);
   for (const f of c.features) {
     if (f.reset==='short') f.used=0;
     else if (f.reset==='long'&&f.shortRestRecovery) f.used=Math.max(0,f.used-f.shortRestRecovery);
@@ -196,6 +197,9 @@ function validateCharacter(c) {
   requireThat(typeof c.inspiration==='boolean','invalid inspiration.');
   requireThat(typeof c.initiativeAdvantage==='boolean','invalid initiative advantage.');
   requireThat(c.spellAbility==='auto'||Object.hasOwn(ABILITIES,c.spellAbility),'invalid casting ability.');
+  requireThat(c.pactMagic===undefined||typeof c.pactMagic==='boolean','invalid Pact Magic flag.');
+  requireThat(c.circleLand===undefined||['Arid','Polar','Temperate','Tropical'].includes(c.circleLand),'invalid Circle of the Land terrain.');
+  requireThat(c.genieKind===undefined||['Dao','Djinni','Efreeti','Marid'].includes(c.genieKind),'invalid Genie kind.');
   for (const [key,values] of [['skills',Object.keys(SKILLS)],['expertise',Object.keys(SKILLS)],['saves',Object.keys(ABILITIES)],['conditions',CONDITIONS]]) requireThat(Array.isArray(c[key])&&c[key].length<=30&&c[key].every(v=>values.includes(v)),`invalid ${key}.`);
   requireThat(integerIn(c.exhaustion,0,6)&&integerIn(c.deathSuccess,0,3)&&integerIn(c.deathFailure,0,3),'invalid condition counters.');
   requireThat(Array.isArray(c.slots)&&c.slots.length===9&&c.slots.every(s=>s&&integerIn(s.max,0,99)&&integerIn(s.used,0,s.max)),'invalid spell slots.');
@@ -206,9 +210,11 @@ function validateCharacter(c) {
   }
   c.items.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&['Weapon','Armor','Gear','Consumable','Treasure'].includes(v.category)&&integerIn(v.qty,0,99999)&&numberIn(v.weight,0,99999)&&typeof v.equipped==='boolean'&&string(v.description)&&string(v.wiki,2000),'invalid item.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
+  c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
   c.notes.forEach(v=>requireThat(string(v.title,200)&&v.title.trim()&&string(v.body,100000)&&string(v.tag,100)&&typeof v.pinned==='boolean'&&string(v.updated,100)&&!Number.isNaN(Date.parse(v.updated)),'invalid note.'));
   c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,999)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&string(v.rollFormula,30)&&(v.rollFormula===''||validDiceFormula(v.rollFormula)),'invalid feature.'));
   c.features.forEach(v=>requireThat(integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));
+  c.features.forEach(v=>requireThat(v.catalogId===undefined||string(v.catalogId,200),'invalid feature catalog reference.'));
   c.attacks.forEach(v=>{
     requireThat(string(v.name,200)&&v.name.trim()&&Object.hasOwn(ABILITIES,v.ability)&&integerIn(v.bonus,-99,99)&&typeof v.proficient==='boolean'&&string(v.damage,30)&&string(v.type,100)&&string(v.range,100),'invalid attack.');
     requireThat(string(v.notes),'invalid attack notes.');

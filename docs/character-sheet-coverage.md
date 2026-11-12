@@ -16,7 +16,7 @@ All three passive Perception totals now come from actual Perception proficiency,
 
 | Paper sheet | App location and behavior |
 | --- | --- |
-| Character name, player name, class and level, background, species, alignment, XP | **Edit character details** on the hero card. Includes subclass and campaign. Set level and XP directly when copying a sheet; **Level up** adds HP when advancing during play. |
+| Character name, player name, class and level, background, species, alignment, XP | **Edit character details** on the hero card. Includes subclass and campaign. Set level and XP directly when copying a sheet; **Level up** reviews HP, features, skills, feats, spells, slots and resource scaling before advancing during play. |
 | Six ability scores and modifiers | **Ability scores**. Edit total scores; modifiers update and can be rolled. |
 | Heroic Inspiration | Toggle in **Ready for anything**; spend it to reroll one die immediately after rolling it, keeping the new result. Rerolls are manual. |
 | Proficiency bonus | Calculated from level in **Skills & saving throws**. |
@@ -45,7 +45,7 @@ All three passive Perception totals now come from actual Perception proficiency,
 - **Dancing Lights:** add a cantrip in **Spellbook**. Scrolls and item-based spells can be cast using **No slot (ritual / item / feature)**, then decrement the relevant item in inventory.
 - **Magic items and potion effects:** item descriptions preserve special rules; temporary ability changes are entered in ability scores, and temporary HP is entered in health controls.
 
-The tracker uses 2024 core rest rules: all Hit Dice return on a Long Rest, which normally removes one Exhaustion level. Exhaustion applies −2 per level to sheet D20 Tests and reduces walking speed by 5 feet per level. Weapon Mastery is recorded in attack notes and Origin feats in Features. Ability changes, leveling, and changing equipment do not rebuild explicit HP, AC, damage, resource limits, or roll modes; edit these when needed.
+The tracker uses 2024 core rest rules: all Hit Dice return on a Long Rest, which normally removes one Exhaustion level. Exhaustion applies −2 per level to sheet D20 Tests and reduces walking speed by 5 feet per level. Weapon Mastery is recorded in attack notes and Origin feats in Features. Direct ability/level edits and equipment changes do not rebuild combat fields. The guided [level-up process](level-up.md) reviews supported HP, ability, spell, skill and resource changes; AC, damage, movement and situational effects remain explicit.
 
 All fields are saved locally and included in version 2 backups. Only `questlog.v2` browser data is read. There are no migrations, missing-field defaults during loading, or older backup import paths. Version 1 backups are rejected; previous browser data is not read or deleted.
 
