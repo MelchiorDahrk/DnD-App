@@ -21,7 +21,7 @@ export const SHEET_SCAN_SCHEMA = object({
   ...Object.fromEntries(Object.keys(SHEET_TEXT).map(k=>[k,text()])),
   attacks:list(object({name:text(200),ability:choice(Object.keys(ABILITIES)),attackBonus:number(-99,99),proficient:bool,damage:text(30),type:text(100),range:text(100),notes:text(),rollMode:choice(['normal','advantage','disadvantage'])})),
   items:list(object({name:text(200),category:choice(['Weapon','Armor','Gear','Consumable','Treasure']),qty:number(0,99999),weight:{type:['number','null'],minimum:0,maximum:99999},equipped:bool,description:text()})),
-  features:list(object({name:text(200),description:text(),maxUses:number(0,99),used:number(0,99),reset:choice(['short','long','manual']),rollFormula:text(30)})),
+  features:list(object({name:text(200),description:text(),maxUses:number(0,999),used:number(0,999),reset:choice(['short','long','manual']),rollFormula:text(30)})),
   spells:list(object({name:text(200),level:number(0,9),school:text(2000),castingTime:text(2000),range:text(2000),duration:text(2000),concentration:bool,prepared:bool,notes:text()})),
   spellAbility:choice(Object.keys(ABILITIES)),slots:list(object({max:number(0,99),used:number(0,99)})),notes:text(60000)
 });

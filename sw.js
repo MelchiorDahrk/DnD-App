@@ -1,7 +1,7 @@
 import {EQUIPMENT_ICONS} from './equipment-icons.js';
-const CACHE = 'questlog-app-v10-default-equipment-icons';
+const CACHE = 'questlog-app-v11-feature-catalog';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
-ASSETS.push('./equipment-icons.js','./item-icons.js',...Object.keys(EQUIPMENT_ICONS).map(key=>`./assets/equipment/${key}.webp`));
+ASSETS.push('./feature-catalog.js','./equipment-icons.js','./item-icons.js',...Object.keys(EQUIPMENT_ICONS).map(key=>`./assets/equipment/${key}.webp`));
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('questlog-app-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{

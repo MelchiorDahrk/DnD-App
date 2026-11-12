@@ -14,6 +14,11 @@ dialog{border:1px solid #dbe2cd;background:var(--paper);border-radius:15px;paddi
 /* Native dropdowns keep the catalog usable by keyboard and on small touchscreens. */
 .catalog-picker{border:1px solid var(--line);border-radius:10px;background:#f4f6ec;padding:17px;margin-bottom:22px;min-width:0}
 .catalog-picker-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px;font-size:13px;color:var(--green)}
+.feature-picker [hidden]{display:none!important}
+.feature-counter{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.feature-counter strong{margin:0!important;font-variant-numeric:tabular-nums}
+.feature-counter .icon-btn{border:1px solid var(--line);background:var(--paper)}
+.feature-uses:has(.feature-counter)>small{flex-basis:100%;line-height:1.6}
 .catalog-picker .form-grid,.catalog-browser .form-grid{align-items:start}
 .catalog-picker select,.character-choice select,.catalog-browser select{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}
 .catalog-preview{border:1px solid #dbe3ce;border-radius:8px;background:#fbfcf5;padding:14px;margin-top:12px;color:#526348;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
