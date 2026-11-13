@@ -7,15 +7,14 @@ permissions:
   contents: read
   pages: write
   id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # Superseded builds can stop without interrupting an active Pages deployment.
+    concurrency:
+      group: pages-build-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v4
@@ -29,7 +28,9 @@ jobs:
         with:
           chrome-version: stable
           install-dependencies: true
-      - uses: actions/cache@v4
+      - name: Restore generated portrait assets
+        uses: actions/cache/restore@v4
+        id: portraits
         with:
           path: |
             .cache/ldraw
@@ -37,37 +38,104 @@ jobs:
             vendor/bricktrait/static/ldraw
             vendor/bricktrait/static/thumbs
             vendor/bricktrait/static/portrait-match-index.json
-          key: bricktrait-ldraw-f333d939-v3-${{ hashFiles('equipment-icons.js', 'vendor/bricktrait/scripts/build-parts.mjs', 'portrait-image-analysis.js', 'vendor/bricktrait/scripts/thumbs/references.ts', 'vendor/bricktrait/*catalog.json') }}
+          # Cover both renderers' fingerprints, their dependencies and the packer.
+          # Keep these paths stable so older caches can still seed a rebuild.
+          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json') }}
           restore-keys: |
+            bricktrait-ldraw-f333d939-v4-
             bricktrait-ldraw-f333d939-v3-
             bricktrait-ldraw-f333d939-v2-
             bricktrait-ldraw-f333d939-v1
+      - name: Restore generated equipment thumbnails
+        uses: actions/cache/restore@v4
+        id: equipment
+        with:
+          path: assets/equipment
+          # These files are tracked: never overlay a different committed version
+          # with a prefix match. Include their content and restore exact hits only.
+          key: equipment-${{ steps.portraits.outputs.cache-primary-key }}-${{ hashFiles('assets/equipment/**') }}
       - name: Check source
+        timeout-minutes: 2
         run: npm run check
       - name: Build static app
+        # A genuinely cold reference render can take 20-30 minutes on SwiftShader.
+        # Warm builds must report "references unchanged" and skip that work.
+        timeout-minutes: 35
         run: npm run build
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+      # Save before tests: a later assertion or deploy failure must not discard
+      # a successful 1,634-part render. Exact hits are immutable and need no save.
+      - name: Save generated portrait assets
+        if: steps.portraits.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            .cache/ldraw
+            .cache/ldraw-unofficial
+            vendor/bricktrait/static/ldraw
+            vendor/bricktrait/static/thumbs
+            vendor/bricktrait/static/portrait-match-index.json
+          key: ${{ steps.portraits.outputs.cache-primary-key }}
+      - name: Save generated equipment thumbnails
+        if: steps.equipment.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: assets/equipment
+          key: ${{ steps.equipment.outputs.cache-primary-key }}
       - name: Run tests including generated matching assets
+        timeout-minutes: 2
         run: npm test
-      - name: Browser portrait, equipment, and offline checks under Pages subpath
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
-          SHEET_TEST_URL: http://127.0.0.1:4173/DnD-App/
-          ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
+      - name: Serve production app under Pages subpath
+        timeout-minutes: 1
         run: |
           ln -s dist DnD-App
           node scripts/serve.mjs > /tmp/questlog-server.log 2>&1 &
-          for attempt in 1 2 3 4 5; do curl --silent --fail http://127.0.0.1:4173/DnD-App/ > /dev/null && break; sleep 1; done
-          npm run test:portraits
-          npm run test:portrait-photos
-          npm run test:sheet
-          npm run test:item-icons
-      - uses: actions/configure-pages@v5
+          for attempt in 1 2 3 4 5; do
+            if curl --silent --fail --max-time 2 http://127.0.0.1:4173/DnD-App/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/questlog-server.log
+          exit 1
+      - name: Browser portrait and offline checks
+        timeout-minutes: 5
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:portraits
+      - name: Browser photo matching and offline checks
+        timeout-minutes: 5
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:portrait-photos
+      - name: Browser sheet checks
+        timeout-minutes: 3
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          SHEET_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:sheet
+      - name: Browser equipment checks
+        timeout-minutes: 3
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:item-icons
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

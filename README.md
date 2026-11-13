@@ -188,6 +188,16 @@ npm run build
 
 The output is `dist/`. The same app can be previewed at `http://localhost:4173/dist/` after building, which also exercises repository-subpath hosting.
 
+Pages deployments cache the generated LDraw packs, portrait matching index and
+thumbnails. A cold build renders all 1,634 references and can take 20–30 minutes
+on a GitHub runner; unchanged references should log `references unchanged` on
+later builds. The cache key covers the renderer sources, catalogs and dependency
+lockfile. Successful builds save their generated assets **before** running tests,
+so a later test or deployment failure does not force another full render.
+Source, unit and browser checks still run on every deployment, with separate
+timings and timeouts. New pushes cancel superseded builds; active Pages
+deployments finish without interruption.
+
 Source layout: `app.js` handles views and interactions, `model.js` contains character and dice logic plus backup validation, `catalog.js` contains equipment/character-option data and preset mapping, `feature-catalog.js` contains feature/resource references, filtering, and scaling defaults, `catalog-ui.js` contains dropdowns and stat previews, `default-characters.js` supplies the photographed default party and fresh state, `sheet-scan.js` defines extraction and import validation, and `sheet-scan-ui.js` handles photo capture and review. `styles.css` contains the responsive design, `art.js` and `icons.js` contain original SVG assets, and `sw.js` enables offline use. `scripts/` contains the dependency-free server, optional vision endpoint, and build tools. `tests/` covers rules calculations, catalog integrity, preset backup compatibility, and sheet scanning.
 
 Design research: the familiar sheet/inventory/spell/journal organization was informed by [D&D Beyond's sheet sections](https://dndbeyond-support.wizards.com/hc/en-us/articles/7747193946388-Sheet-Sections). Questlog's visual design and pixel artwork are original. Questlog is an independent fan project and is not affiliated with Wizards of the Coast.
