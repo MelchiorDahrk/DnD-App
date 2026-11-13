@@ -1,3 +1,4 @@
+import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
@@ -54,6 +55,8 @@ async function setYaw(frame,value) {
 }
 try {
   await page.goto(base,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
+  await page.reload({waitUntil:'networkidle0'});
   await page.evaluate(()=>{
     const s=JSON.parse(localStorage.getItem('questlog.v2'));
     s.characters.find(c=>c.id===s.activeId).items.push(

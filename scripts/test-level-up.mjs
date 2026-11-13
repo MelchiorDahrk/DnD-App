@@ -1,3 +1,4 @@
+import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -17,6 +18,8 @@ try{
   browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox']});
   const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.setViewport({width:1280,height:1000});await page.goto(`http://127.0.0.1:${port}${process.env.LEVEL_TEST_PATH||'/'}`,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
+  await page.reload({waitUntil:'networkidle0'});
   const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
   const active=s=>s.characters.find(c=>c.id===s.activeId);
   const set=async(name,value)=>page.$eval(`#modal [name="${name}"]`,(n,v)=>{n.value=String(v);n.dispatchEvent(new Event('change',{bubbles:true}));},value);

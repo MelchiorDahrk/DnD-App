@@ -84,6 +84,15 @@ test('backups round-trip every character collection and reject corrupt rules dat
   c.notes[0].updated='not a date';assert.throws(()=>parseBackup(JSON.stringify(state)),/note/);
   assert.throws(()=>parseBackup('{broken'),/JSON/);assert.throws(()=>parseBackup('{"version":9}'),/only version 2/);
 });
+test('empty journals require no active character, populated journals require a matching one',()=>{
+  const empty={version:SAVE_VERSION,characters:[],activeId:null,settings:{sound:true}};
+  assert.deepEqual(parseBackup(JSON.stringify(empty)),empty);
+  for(const activeId of ['missing','',undefined])assert.throws(()=>parseBackup(JSON.stringify({...empty,activeId})),/active character/);
+  const populated=demoState();
+  for(const activeId of [null,'missing',undefined])assert.throws(()=>parseBackup(JSON.stringify({...populated,activeId})),/active character/);
+  assert.throws(()=>parseBackup(JSON.stringify({...empty,characters:Array(101).fill(populated.characters[0])})),/0–100/);
+});
+
 test('reference links reject script and data URLs',()=>{
   assert.equal(safeURL('javascript:alert(1)'),'');assert.equal(safeURL('data:text/html,hello'),'');assert.equal(safeURL('https://dnd5e.wikidot.com/ranger'),'https://dnd5e.wikidot.com/ranger');
 });

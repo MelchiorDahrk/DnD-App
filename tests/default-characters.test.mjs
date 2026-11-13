@@ -2,16 +2,25 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {defaultCharacters,initialState} from '../default-characters.js';
 import {SAVE_VERSION,STORAGE_KEY,attackBonus,initiative,passivePerception,skillBonus,shortRest,longRest,parseBackup} from '../model.js';
+import {defaultPartyState} from './helpers/default-party.mjs';
 
-test('fresh saves contain the three photographed characters and round-trip without changes',()=>{
+test('fresh journals are empty and round-trip without adding a default character',()=>{
   const state=initialState();
+  assert.deepEqual(state,{version:SAVE_VERSION,characters:[],activeId:null,settings:{sound:false}});
+  assert.deepEqual(parseBackup(JSON.stringify(state)),state);
+  state.settings.sound=true;
+  assert.equal(initialState().settings.sound,false);
+});
+
+test('the optional default party contains the three photographed characters and round-trips without changes',()=>{
+  const state=defaultPartyState();
   assert.equal(SAVE_VERSION,2);assert.equal(STORAGE_KEY,'questlog.v2');
   assert.deepEqual(state.characters.map(c=>[c.name,c.playerName,c.class,c.level,c.maxHp]),[
     ['Melchior','Eric','Fighter',3,21],['Balin','Rob','Barbarian',3,35],['Teyla','Jen','Rogue',3,24]
   ]);
   assert.equal(state.activeId,state.characters[0].id);
   assert.deepEqual(parseBackup(JSON.stringify(state)),state);
-  const second=initialState();assert.notEqual(state.activeId,second.activeId);
+  const second=defaultPartyState();assert.notEqual(state.activeId,second.activeId);
   state.characters[0].items[0].qty=0;assert.equal(second.characters[0].items[0].qty,1);
   assert.ok(state.characters.every(c=>c.notes.some(n=>n.pinned&&n.body.includes('IMG_'))));
 });

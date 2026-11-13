@@ -228,10 +228,10 @@ export function parseBackup(text) {
   let data;
   try {data=JSON.parse(text);} catch {throw new Error('This file isn’t valid JSON. Choose a Questlog backup.');}
   requireThat(data?.version===SAVE_VERSION,`only version ${SAVE_VERSION} Questlog saves are supported. Older saves cannot be loaded or imported.`);
-  requireThat(Array.isArray(data.characters)&&data.characters.length>0&&data.characters.length<=100,'expected 1–100 characters.');
+  requireThat(Array.isArray(data.characters)&&data.characters.length<=100,'expected 0–100 characters.');
   data.characters.forEach(validateCharacter);
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
-  requireThat(data.characters.some(c=>c.id===data.activeId),'active character is missing.');
+  requireThat(data.characters.length?data.characters.some(c=>c.id===data.activeId):data.activeId===null,'active character is missing.');
   requireThat(data.settings&&typeof data.settings.sound==='boolean','invalid settings.');
   return data;
 }

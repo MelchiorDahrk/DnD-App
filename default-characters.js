@@ -143,6 +143,5 @@ function teyla() {
 
 export function defaultCharacters() { return [melchior(),balin(),teyla()]; }
 export function initialState() {
-  const characters=defaultCharacters();
-  return {version:SAVE_VERSION,characters,activeId:characters[0].id,settings:{sound:false}};
+  return {version:SAVE_VERSION,characters:[],activeId:null,settings:{sound:false}};
 }

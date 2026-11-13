@@ -1,3 +1,4 @@
+import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -29,6 +30,8 @@ try{
   page.on('pageerror',e=>errors.push(e.message));
   await page.setViewport({width:1440,height:1100});
   await page.goto(base,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
+  await page.reload({waitUntil:'networkidle0'});
   const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
   const active=s=>s.characters.find(c=>c.id===s.activeId);
   const field=name=>`#modal [name="${name}"]`;

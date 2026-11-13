@@ -1,3 +1,4 @@
+import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -31,6 +32,8 @@ try {
   page.on('pageerror',error=>errors.push(error.message));
   await page.setViewport({width:1440,height:1100});
   await page.goto(base,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
+  await page.reload({waitUntil:'networkidle0'});
   await page.waitForSelector('[data-sheet-section]');
   assert.equal(await page.$$eval('[data-sheet-section]',nodes=>nodes.length),SHEET_SECTIONS.length);
   assert.equal(await page.$$eval('[data-sheet-entry] button button',nodes=>nodes.length),0);

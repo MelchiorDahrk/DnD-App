@@ -1,3 +1,4 @@
+import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import {existsSync} from 'node:fs';
@@ -40,6 +41,8 @@ async function photo(){
 }
 try{
   await page.goto(base,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
+  await page.reload({waitUntil:'networkidle0'});
   const initial=await saved();let frame=await open();await photo();
   await page.click('[data-photo="suggest"]');await page.waitForSelector('[data-photo="apply"]:not([disabled])');
   assert.equal(uploaded.images.length,1);assert.match(uploaded.images[0],/^data:image\/jpeg;base64,/);
