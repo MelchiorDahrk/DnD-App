@@ -9,11 +9,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
-import {EQUIPMENT_ICONS,equipmentIconParts} from '../../../equipment-icons.js';
+import {LDRAW_ICONS,equipmentIconParts} from '../../../equipment-icons.js';
 
 // Explicit icon-only dependencies (tiles, gems, bars, etc.) use the same packer
 // and attribution pipeline; they never enter the portrait selection allowlist.
-const iconParts = new Set(Object.values(EQUIPMENT_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)));
+const iconParts = new Set(Object.values(LDRAW_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)));
 
 const LDRAW = path.resolve(process.env.LDRAW_DIR ?? '.ldraw');
 // Parts still in review on the LDraw parts tracker, used when present. The

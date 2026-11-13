@@ -61,6 +61,18 @@ export const EQUIPMENT_ICONS = {
   needles: {parts:[{id:'87994',color:71},{id:'87994',color:71,at:[6,0,0]},{id:'87994',color:71,at:[12,0,0]}],names:['Blowgun needles']}
 };
 
+// Currency uses the canonical LDraw round 1 x 1 plate, with its raised stud.
+// LDraw colours: Metallic Copper/Silver/Green/Gold, then Chrome Silver.
+export const CURRENCY_ICONS = {
+  'coin-copper': {part:'6141',color:300,view:{yaw:-25,pitch:30}},
+  'coin-silver': {part:'6141',color:80,view:{yaw:-25,pitch:30}},
+  'coin-electrum': {part:'6141',color:81,view:{yaw:-25,pitch:30}},
+  'coin-gold': {part:'6141',color:82,view:{yaw:-25,pitch:30}},
+  'coin-platinum': {part:'6141',color:383,view:{yaw:-25,pitch:30}}
+};
+
+export const LDRAW_ICONS = {...EQUIPMENT_ICONS,...CURRENCY_ICONS};
+
 /** Small brick assemblies share the same renderer as individual accessories. */
 export const equipmentIconParts = entry => entry.parts || [{id:entry.part,color:entry.color}];
 

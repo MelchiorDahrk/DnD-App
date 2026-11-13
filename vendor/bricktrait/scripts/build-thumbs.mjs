@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import puppeteer from 'puppeteer-core';
 import { createServer } from 'vite';
-import { EQUIPMENT_ICONS, equipmentIconParts, equipmentIconView } from '../../../equipment-icons.js';
+import { LDRAW_ICONS, equipmentIconParts, equipmentIconView } from '../../../equipment-icons.js';
 
 const equipment = process.argv.includes('--equipment');
 const OUT = equipment ? path.resolve('../../assets/equipment') : path.resolve('static/thumbs');
@@ -41,7 +41,7 @@ if (!equipment && changed) {
 	console.log('Rendering changed, rebuilding every thumbnail');
 }
 fs.mkdirSync(OUT, { recursive: true });
-const mapped = Object.entries(EQUIPMENT_ICONS).map(([key, item]) => {
+const mapped = Object.entries(LDRAW_ICONS).map(([key, item]) => {
 	const parts = equipmentIconParts(item);
 	return {id:parts[0].id,color:parts[0].color,parts,view:equipmentIconView(item),key};
 });

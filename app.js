@@ -60,7 +60,7 @@ const num = (data,key) => Number(data.get(key));
 const textValue = (data,key) => String(data.get(key)||'').trim();
 const sheetEntry = (key,label) => `data-sheet-entry="${esc(key)}" data-sheet-label="${esc(label)}"`;
 const coinName = key => key[0].toUpperCase()+key.slice(1);
-const coinStud = key => icon('stud',`coin-stud coin-stud-${key}`);
+const coinStud = key => `<img class="coin-stud" src="./assets/equipment/coin-${key}.webp" alt="" aria-hidden="true" width="160" height="160" decoding="async">`;
 function renderCoinBalances(c) {
   return `<span class="coin-balances">${Object.entries(COINS).map(([key,unit])=>`<span class="coin-balance" data-denomination="${key}">${coinStud(key)}<strong>${fmt(c[key])}</strong><abbr title="${coinName(key)} pieces">${unit.toUpperCase()}</abbr></span>`).join('')}</span>`;
 }

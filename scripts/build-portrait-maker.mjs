@@ -4,7 +4,7 @@ import {resolve} from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {checkFantasyCatalog} from './check-fantasy-catalog.mjs';
-import {EQUIPMENT_ICONS,equipmentIconParts} from '../equipment-icons.js';
+import {LDRAW_ICONS,equipmentIconParts} from '../equipment-icons.js';
 import {buildPortraitMatchIndex} from './build-portrait-match-index.mjs';
 
 const root=resolve(import.meta.dirname,'..');
@@ -19,7 +19,7 @@ function run(script, ...args) {
 
 export async function buildPortraitMaker() {
   // Generated LDraw data is cached between builds; all runtime assets are self-hosted.
-  const iconParts=[...new Set(Object.values(EQUIPMENT_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)))];
+  const iconParts=[...new Set(Object.values(LDRAW_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)))];
   const partsKey=createHash('sha256').update(await readFile(resolve(vendor,'scripts/build-parts.mjs'))).digest('hex');
   if(await readFile(resolve(vendor,'static/ldraw/.questlog-parts-complete'),'utf8').catch(()=>'')!==partsKey ||
     !(await Promise.all(iconParts.map(id=>exists(resolve(vendor,'static/ldraw/p',`${id}.ldr`))))).every(Boolean)) {
