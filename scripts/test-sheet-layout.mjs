@@ -8,6 +8,7 @@ import puppeteer from 'puppeteer-core';
 import {parseBackup} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
 import {equipmentIconURL} from '../equipment-icons.js';
+import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 
 const root=resolve(import.meta.dirname,'..');
 const port=process.env.SHEET_TEST_PORT || '4187';
@@ -61,21 +62,58 @@ try {
       assert.ok(loaded,`${c.name}: visible WebP for ${item.name}`);
       assert.equal(await page.$eval(selector,img=>img.getAttribute('src')),equipmentIconURL(item));
     }
-    for(const attack of c.attacks)if(equipmentIconURL(attack)) {
+    for(const attack of c.attacks) {
+      assert.ok(equipmentIconURL(attack),`${c.name}: explicit artwork for ${attack.name}`);
       const selector=`${entrySelector('attacks',attack.id)} .equipment-icon img`;
       assert.ok(await page.$(selector),`${c.name}: sheet weapon icon for ${attack.name}`);
       await page.$eval(selector,img=>{img.scrollIntoView({block:'center'});return img.decode();});
+      await page.click(`${entrySelector('attacks',attack.id)} [data-action="attack-roll"]`);
+      await page.$eval('#modal .combat-icon img',img=>img.decode());
+      assert.equal(await page.$eval('#modal .combat-icon img',img=>img.getAttribute('src')),equipmentIconURL(attack));
+      await page.click('#modal [data-combat-action="close"]');
     }
     await page.setViewport({width:390,height:844});
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${c.name}: mobile sheet icons fit`);
     await page.setViewport({width:1440,height:1100});
   }
+  // Exercise the entire catalog in the actual inventory, including lazy images
+  // below the fold, plus safe artwork for custom items and renamed attacks.
+  const catalogState=structuredClone(original),catalogCharacter=catalogState.characters[0];
+  catalogCharacter.items=EQUIPMENT.map(itemFromEquipment);
+  catalogCharacter.items.push({...catalogCharacter.items[0],id:'custom-item',name:'Custom treasure',category:'Treasure'});
+  catalogCharacter.attacks.push({...catalogCharacter.attacks[0],id:'renamed-weapon',name:'Moonblade',weaponId:'rapier'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),catalogState);
+  await page.goto(new URL('#inventory',base).href,{waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal(await page.$$eval('.inventory-list .equipment-icon img',imgs=>imgs.length),EQUIPMENT.length+1);
+  for(const img of await page.$$('.inventory-list .equipment-icon img')) {
+    await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
+    assert.equal(await img.evaluate(img=>img.naturalWidth),160);
+  }
+  await page.waitForFunction(()=>navigator.serviceWorker.controller);
+  await page.setOfflineMode(true);
+  await page.reload({waitUntil:'networkidle0'});
+  for(const img of await page.$$('.inventory-list .equipment-icon img'))await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
+  await page.setOfflineMode(false);
+  await page.setViewport({width:390,height:844});
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Full catalog inventory fits mobile');
+  await page.setViewport({width:1440,height:1100});
+  await page.goto(new URL('#sheet',base).href,{waitUntil:'networkidle0'});
+  const renamed=entrySelector('attacks','renamed-weapon');
+  assert.match(await page.$eval(`${renamed} img`,img=>img.getAttribute('src')),/\/rapier.webp/);
+  await page.click(`${renamed} [data-action="attack-roll"]`);
+  assert.match(await page.$eval('#modal .combat-icon img',img=>img.getAttribute('src')),/\/rapier.webp/);
+  await page.click('#modal [data-combat-action="close"]');
+  await page.$eval(`${renamed} img`,img=>img.src='./assets/equipment/missing-test.webp');
+  await page.waitForFunction(selector=>!document.querySelector(`${selector} img`),{},renamed);
+  assert.equal(await page.$eval(`${renamed} .equipment-icon .icon`,svg=>getComputedStyle(svg).visibility),'visible','Image failure reveals SVG');
+  console.log(`PASS all ${EQUIPMENT.length} catalog items, custom entries, renamed weapons and offline artwork`);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
   await page.reload({waitUntil:'networkidle0'});
   await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
   await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>Promise.all(imgs.map(img=>img.decode())));
   assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth===160)),'Normal sheet pack preview shows LEGO icons');
-  console.log('PASS all 63 default inventory entries and mapped weapons show loaded LEGO icons on desktop/mobile sheets without WebGL');
+  console.log('PASS all 63 default inventory entries and every default attack show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
 
   for (const width of [390,320]) {
     await page.setViewport({width,height:844});

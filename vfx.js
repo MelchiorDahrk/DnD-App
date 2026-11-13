@@ -1,6 +1,6 @@
 // Local, short-lived effects. Nothing is stored with a character.
 import {COINS} from './model.js';
-import {itemIconMarkup} from './item-icons.js';
+import {attackIconMarkup} from './item-icons.js';
 
 const THEMES = {
   attack: {color:'#dbb777',accent:'#fff0be',symbol:'strike',life:1250,count:30},
@@ -188,7 +188,7 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     if(kind==='money')addStuds(burst,studs,x,y);
     if(kind==='attack'&&weapon){
       const prop=document.createElement('div');prop.className=`vfx-weapon${ranged?' vfx-weapon-ranged':''}${miss?' vfx-weapon-miss':''}${critical?' vfx-weapon-critical':''}`;
-      prop.innerHTML=itemIconMarkup({name:weapon.name,category:'Weapon'},ranged?'bow':'sword');
+      prop.innerHTML=attackIconMarkup(weapon,ranged?'bow':'sword');
       // The scene is brief; don't defer decoding its local LEGO thumbnail.
       const img=prop.querySelector('img');if(img)img.loading='eager';
       burst.append(prop);

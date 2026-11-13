@@ -1,7 +1,6 @@
 import {mod,rollDice,signed,validDiceFormula,RULES_URL} from './model.js';
 import {attackWeapon,attackMastery,attackContext,attackOutcome,damageFormula,rollAttackDamage,rerollAttackDie,toppleDC,hasWeaponProperty,attackDamageFeatures} from './attack-rules.js';
-import {itemIconMarkup} from './item-icons.js';
-import {equipmentIconURL} from './equipment-icons.js';
+import {attackIconMarkup} from './item-icons.js';
 import {icon} from './icons.js';
 import {playAttackEffect} from './vfx.js';
 
@@ -23,8 +22,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     options={kind:attackWeapon(a)?.family.endsWith('ranged')?'ranged':'melee',ac:'',distance:'',cover:'none',advantage:false,disadvantage:false,closeEnemy:false,fearVisible:false,twoHanded:false,override:false,keepAbility:c.features.some(f=>/two.weapon fighting/i.test(f.name))};
     if(damageOnly){outcome='hit';damageOnly=false;render();}else setup();
   }
-  const artworkName=()=>equipmentIconURL(a)?a.name:attackWeapon(a)?.name||a.name;
-  const header=()=>`<div class="combat-weapon"><span class="combat-icon">${itemIconMarkup({name:artworkName(),category:'Weapon'},options.kind==='ranged'?'bow':'sword')}</span><div><strong>${esc(a.name)}</strong><small>${esc(a.type)} · ${esc(a.range)}${mastery?' · '+mastery:''}${extraKind?' · '+esc(extraKind):''}</small></div></div>`;
+  const header=()=>`<div class="combat-weapon"><span class="combat-icon">${attackIconMarkup(a,options.kind==='ranged'?'bow':'sword')}</span><div><strong>${esc(a.name)}</strong><small>${esc(a.type)} · ${esc(a.range)}${mastery?' · '+mastery:''}${extraKind?' · '+esc(extraKind):''}</small></div></div>`;
   function setup() {
     const w=attackWeapon(a),thrown=w?.properties.includes('Thrown');
     setModal('Make your attack.',`${header()}<div class="form-grid combat-setup">${input('Target AC (optional)','ac',options.ac,'type="number" min="0" max="99" step="1"')}${select('Target cover','cover',[['none','None'],['half','Half (+2 AC)'],['three-quarters','Three-quarters (+5 AC)'],['total','Total (cannot target)']],options.cover)}${input('Distance in feet (optional)','distance',options.distance,'type="number" min="0" max="99999" step="1"')}${thrown||!w?select('Attack type','kind',[['melee','Melee'],['ranged','Ranged / thrown']],options.kind):''}</div>${check('Situational advantage (Vex, Help, unseen attacker, etc.)','advantage',options.advantage)}${check('Situational disadvantage (unseen target, target Prone at distance, etc.)','disadvantage',options.disadvantage)}${check('Ranged: visible, non-Incapacitated enemy within 5 ft.','closeEnemy',options.closeEnemy)}${w?.properties.includes('Versatile')?check('Use two hands for Versatile melee damage','twoHanded',options.twoHanded):''}${extraKind==='Light extra attack'?check('Keep ability damage (Two-Weapon Fighting or a specific feature)','keepAbility',options.keepAbility):''}${c.features.some(f=>/^Tactical Master\b/i.test(f.name))&&mastery?select('Tactical Master: mastery for this attack','mastery',[[mastery,mastery],...['Push','Sap','Slow'].filter(m=>m!==mastery).map(m=>[m,m])],mastery):''}<details class="combat-details"><summary>Exceptions & rules</summary>${check('Feature / DM exception: use only the situational boxes','override',options.override)}<p>Both advantage and disadvantage cancel, regardless of how many sources apply. Saved roll mode, Heavy, your tracked conditions, range, and nearby enemies are checked. Resolve visibility, target conditions, underwater combat, and special features with your DM.</p><p>Each roll is one attack. Extra Attack, actions, Reactions, and once-per-turn limits are tracked at the table.</p>${a.notes?`<p>${esc(a.notes)}</p>`:''}</details><div class="modal-actions">${button('close','Cancel')}${button('roll',icon('dice')+'Roll to hit','',true)}</div>`);
@@ -41,7 +39,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     return true;
   }
   function animate(result,phase,damageLabel=a.type) {
-    playAttackEffect({name:artworkName()},{ranged:options.kind==='ranged',critical:outcome==='critical',miss:outcome==='miss',label:phase==='damage'?`${result.total} ${damageLabel}`:a.name,detail:phase==='damage'?'DAMAGE':outcome==='critical'?'CRITICAL HIT':outcome==='miss'?'MISS':'ATTACK ROLL',target:'.combat-weapon'});
+    playAttackEffect(a,{ranged:options.kind==='ranged',critical:outcome==='critical',miss:outcome==='miss',label:phase==='damage'?`${result.total} ${damageLabel}`:a.name,detail:phase==='damage'?'DAMAGE':outcome==='critical'?'CRITICAL HIT':outcome==='miss'?'MISS':'ATTACK ROLL',target:'.combat-weapon'});
   }
   function doRoll() {
     if(!readOptions())return;
