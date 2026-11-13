@@ -131,3 +131,11 @@ dialog{border:1px solid #dbe2cd;background:var(--paper);border-radius:15px;paddi
 /* Level-up review: bounded lists, readable choices, and narrow-screen controls. */
 .level-feat-reference{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.level-feat-reference a{text-decoration:underline;text-underline-offset:3px}
 .level-choice{border:1px solid var(--line);border-radius:8px;padding:14px;margin:18px 0;min-width:0}.level-choice legend,.level-choice summary{font-size:12px;font-weight:600;color:var(--green)}.level-choice summary{cursor:pointer}.level-choice>.form-field{margin:10px 0}.level-option{display:flex;align-items:flex-start;gap:10px;padding:10px 0;font-size:12px;line-height:1.6;cursor:pointer}.level-option input{flex:0 0 auto;margin-top:4px;accent-color:var(--green)}.level-option span{min-width:0;overflow-wrap:anywhere}.level-option strong{display:block;font-weight:500}.level-option small{display:block;color:#78866c;font-size:10px;line-height:1.7}.level-spell-list{max-height:290px;overflow:auto;margin-top:12px}.level-option[hidden]{display:none}
+/* Character management and deletion confirmation. */
+.character-manager-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.character-manager-row .character-option{flex:1;min-width:0;margin-bottom:0}
+.character-manager-row .character-option>div{min-width:0;overflow-wrap:anywhere}
+.character-manager-row>.btn{flex-shrink:0;min-height:40px}
+.character-delete-warning{padding:14px;border:1px solid #efd9d2;border-radius:8px;background:#fff1ed;color:var(--danger);font-size:13px;line-height:1.8;overflow-wrap:anywhere}
+#character-delete-help{overflow-wrap:anywhere}
+@media(max-width:420px){.character-manager-row{align-items:stretch;flex-direction:column;gap:6px;margin-bottom:18px}.character-manager-row>.btn{align-self:flex-end}}
