@@ -10,7 +10,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     # Superseded builds can stop without interrupting an active Pages deployment.
     concurrency:
       group: pages-build-${{ github.ref }}
@@ -98,7 +98,9 @@ jobs:
           cat /tmp/questlog-server.log
           exit 1
       - name: Browser portrait and offline checks
-        timeout-minutes: 5
+        # Several real WebGL editor sessions run serially on CPU SwiftShader.
+        # Keep room for the backup, mobile and offline checks after rendering.
+        timeout-minutes: 10
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/

@@ -8,6 +8,12 @@ import {validPortrait} from '../portrait.js';
 import {EQUIPMENT_ICONS} from '../equipment-icons.js';
 import themeCatalog from '../vendor/bricktrait/theme-catalog.json' with {type:'json'};
 
+const started=performance.now();
+let checkStarted=started,checkName='browser startup';
+const seconds=since=>((performance.now()-since)/1000).toFixed(1);
+function startCheck(name) {checkName=name;checkStarted=performance.now();console.log(`RUN ${name} (${seconds(started)}s total)`);}
+function pass() {console.log(`PASS ${checkName} (${seconds(checkStarted)}s; ${seconds(started)}s total)`);}
+
 const base=process.env.PORTRAIT_TEST_URL||'http://localhost:4173/';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
 assert.ok(executablePath,'Set BROWSER_PATH to a Chromium browser.');
@@ -54,6 +60,7 @@ async function setYaw(frame,value) {
   await frame.evaluate(value=>{const input=document.querySelector('.panel input[type=range]');input.value=String(value);input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));},value);
 }
 try {
+  startCheck('inventory static thumbnails, custom backpack images and SVGs, and missing-asset fallback without WebGL');
   await page.goto(base,{waitUntil:'networkidle0'});
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
   await page.reload({waitUntil:'networkidle0'});
@@ -76,14 +83,27 @@ try {
   await page.$eval('.inventory-list .equipment-icon img',img=>img.src='./assets/equipment/missing-test.webp');
   await page.waitForFunction(()=>[...document.querySelectorAll('.equipment-icon')].some(el=>!el.querySelector('img')&&getComputedStyle(el.querySelector('svg')).visibility==='visible'));
   await page.click('[data-action=navigate][data-route=sheet]');
-  console.log('PASS inventory static thumbnails, custom backpack images and SVGs, and missing-asset fallback without WebGL');
+  pass();
+  startCheck('deployed code license and LDraw attribution');
   const attribution=await page.evaluate(async()=>Promise.all(['portrait-maker/LICENSE','portrait-maker/ldraw/CREDITS.txt','portrait-maker/ldraw/CAlicense4.txt'].map(async path=>{const response=await fetch(path);if(!response.ok)throw new Error(`Missing attribution: ${path}`);return response.text();})));
   assert.match(attribution[0],/Copyright \(c\) 2026 Maxichance/);
   assert.match(attribution[1],/file\s+author\s+license/);
   assert.match(attribution[2],/Creative Commons/i);
   assert.deepEqual((await imagePixels(new URL('assets/portrait-adventurer.webp',base).href)).corners,[0,0,0,0],'Bundled starter portrait must be transparent');
-  console.log('PASS deployed code license and LDraw attribution');
+  pass();
+  startCheck('bundled editor thumbnails and missing-asset WebGL fallback');
   let frame=await open();
+  const thumbnail=await frame.waitForSelector('.picker .pick[aria-pressed="false"] .thumb img[src*="/thumbs/"]');
+  await thumbnail.evaluate(img=>img.decode());
+  const thumbContainer=await thumbnail.evaluateHandle(img=>img.parentElement);
+  await thumbnail.evaluate(img=>{img.src='./thumbs/missing-test.webp';});
+  await frame.waitForFunction(el=>{
+    const img=el.querySelector('img');
+    return img?.src.startsWith('blob:')&&img.complete&&img.naturalWidth>0;
+  },{timeout:60000},thumbContainer);
+  await thumbContainer.dispose();await thumbnail.dispose();
+  pass();
+  startCheck('render and save a real portrait');
   await save(frame);
   let s=await state();
   const firstId=s.activeId;
@@ -97,12 +117,14 @@ try {
     await fs.writeFile(resolve('assets/portrait-adventurer.webp'),Buffer.from(original.image.split(',')[1],'base64'));
     console.log('Generated starter portrait using the reused Bricktrait renderer.');
   }
-  console.log('PASS render and save a real portrait');
+  pass();
 
+  startCheck('edit, reopen, and cancel without changing saved design');
   frame=await open();
   const nextHead=await frame.$eval('.picker .pick[aria-pressed="false"]',el=>el.querySelector('.id').textContent);
   await frame.click('.picker .pick[aria-pressed="false"]');
   await frame.click('.swatch[title$="(78)"]');
+  await frame.waitForSelector('.picker .thumb img[src^="blob:"]',{timeout:60000});
   await setYaw(frame,25);await save(frame);
   s=await state();const saved=s.characters.find(c=>c.id===firstId).portrait;
   assert.equal(saved.design.view.yaw,25);
@@ -114,8 +136,9 @@ try {
   await setYaw(frame,-25);
   await page.click('[data-portrait-close]');
   assert.deepEqual((await state()).characters.find(c=>c.id===firstId).portrait,saved);
-  console.log('PASS edit, reopen, and cancel without changing saved design');
+  pass();
 
+  startCheck('available theme filters/search and new headgear, scabbard, staff and printed body render/save/reopen');
   frame=await open();
   const slotIndex={headgear:0,head:1,neck:2,back:3,torso:4,legs:5,hand:6};
   async function browseTheme(cat,theme,query='') {
@@ -156,8 +179,9 @@ try {
     prefs.favourites=['3885','30173a'];prefs.recent=['3885','30173a'];localStorage.setItem('bricktrait:prefs',JSON.stringify(prefs));
   },{id:firstId,portrait:saved});
   await page.reload({waitUntil:'networkidle0'});
-  console.log('PASS available theme filters/search and new headgear, scabbard, staff and printed body render/save/reopen');
+  pass();
 
+  startCheck('legacy ring normalization, excluded equipped part rendering, and lossless cancellation');
   // Seed an actual v2 legacy save, including a now excluded part. Opening and
   // canceling must preserve even its old flattened ringed image byte for byte.
   const legacy=structuredClone(saved);
@@ -200,8 +224,9 @@ try {
   // Restore the fixture used by the existing per-character and backup checks.
   await page.evaluate(({id,portrait})=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));s.characters.find(c=>c.id===id).portrait=portrait;localStorage.setItem('questlog.v2',JSON.stringify(s));},{id:firstId,portrait:saved});
   await page.reload({waitUntil:'networkidle0'});
-  console.log('PASS legacy ring normalization, excluded equipped part rendering, and lossless cancellation');
+  pass();
 
+  startCheck('all mapped equipment thumbnails contain centered geometry and transparent corners; axes show their broad blades');
   for(const key of Object.keys(EQUIPMENT_ICONS)) {
     const px=await imagePixels(new URL(`assets/equipment/${key}.webp`,base).href);
     assert.equal(px.w,160);assert.equal(px.h,160);assert.deepEqual(px.corners,[0,0,0,0],key);
@@ -212,14 +237,15 @@ try {
     const broadsideRatio={handaxe:0.36,battleaxe:0.24,greataxe:0.6}[key];
     if(broadsideRatio)assert.ok((right-x+1)/(bottom-y+1)>=broadsideRatio,`${key}: the broad blade face must be visible`);
   }
-  console.log('PASS all mapped equipment thumbnails contain centered geometry and transparent corners; axes show their broad blades');
   const review=await browser.newPage();
   await review.setViewport({width:1000,height:1100});
   await review.setContent(`<style>body{margin:24px;background:#eef1e5;font:14px Georgia;color:#254937}main{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}figure{margin:0;padding:9px;text-align:center;background:#fffef9;border-radius:7px}figure:nth-child(even){background:#254937;color:#eef1e5}img{width:88px;height:88px;object-fit:contain}figcaption{font-size:12px}</style><h1>Questlog LEGO equipment</h1><main>${Object.keys(EQUIPMENT_ICONS).map(key=>`<figure><img src="${new URL(`assets/equipment/${key}.webp`,base).href}"><figcaption>${key}</figcaption></figure>`).join('')}</main>`);
   await review.evaluate(()=>Promise.all([...document.images].map(img=>img.decode())));
   await fs.mkdir('screenshots',{recursive:true});
   await review.screenshot({path:'screenshots/equipment-icons.png',fullPage:true});await review.close();
+  pass();
 
+  startCheck('separate character portraits and reload persistence');
   await page.click('[data-action=characters]');
   await page.click('[data-action=switch-character]:not(.active)');
   const secondId=(await state()).activeId;
@@ -228,8 +254,9 @@ try {
   assert.deepEqual(s.characters.find(c=>c.id===firstId).portrait,saved);
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$eval('.hero .character-portrait',img=>img.src),(await state()).characters.find(c=>c.id===secondId).portrait.image);
-  console.log('PASS separate character portraits and reload persistence');
+  pass();
 
+  startCheck('details save before editing and Escape cancels the maker');
   await page.click('[data-action=edit-character]');
   await page.$eval('[name=campaign]',input=>{input.value='Portrait browser check';input.dispatchEvent(new Event('input',{bubbles:true}));});
   await page.click('#modal [data-action=portrait]');
@@ -238,8 +265,9 @@ try {
   await frame.focus('.preview canvas');
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.querySelector('.portrait-dialog'));
-  console.log('PASS details save before editing and Escape cancels the maker');
+  pass();
 
+  startCheck('backup import preserves portrait images and editable designs');
   const backupPath=resolve('.tmp/portrait-browser-backup.json');
   await fs.mkdir(resolve('.tmp'),{recursive:true});
   const beforeImport=await state();
@@ -251,8 +279,9 @@ try {
   assert.equal(s.characters.filter(c=>c.portrait?.design.view.yaw===25).length,2);
   assert.equal(s.characters.filter(c=>c.portrait?.design.view.yaw===-15).length,2);
   assert.deepEqual(s.characters.filter(c=>c.portrait?.design.view.yaw===25).map(c=>c.items),[beforeImport.characters.find(c=>c.id===firstId).items,beforeImport.characters.find(c=>c.id===firstId).items]);
-  console.log('PASS backup import preserves portrait images and editable designs');
+  pass();
 
+  startCheck('mobile layout without horizontal overflow');
   // Return to the original second character for offline checks.
   await page.click('[data-action=characters]');
   await page.click(`[data-action=switch-character][data-id="${secondId}"]`);
@@ -274,9 +303,10 @@ try {
   assert.ok(await frame.$eval('.lang select',el=>el.getBoundingClientRect().right<=innerWidth),'Mobile header controls must fit');
   await page.click('[data-portrait-close]');
   await page.screenshot({path:'screenshots/bricktrait-character-mobile.png'});
-  console.log('PASS mobile layout without horizontal overflow');
+  pass();
 
-  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
+  startCheck('offline sheet portrait and cached editor reopening');
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:60000});
   await page.setOfflineMode(true);
   await page.reload({waitUntil:'load'});
   await page.waitForSelector('.hero .character-portrait');
@@ -287,9 +317,12 @@ try {
     assert.ok((await imagePixels(new URL(`assets/equipment/${key}.webp`,base).href)).count>50,`${key}: bundled offline icon`);
   }
   await page.setOfflineMode(false);
-  console.log('PASS offline sheet portrait and cached editor reopening');
+  pass();
 
   assert.deepEqual(errors,[],'Browser JavaScript errors');
   assert.deepEqual(externalRequests,[],'The editor must be fully self-hosted');
-  console.log('All portrait browser checks passed.');
+  console.log(`All portrait browser checks passed (${seconds(started)}s total).`);
+} catch(error) {
+  console.error(`FAIL ${checkName} after ${seconds(checkStarted)}s (${seconds(started)}s total)`);
+  throw error;
 } finally { await browser.close(); }

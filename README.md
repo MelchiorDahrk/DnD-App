@@ -198,6 +198,11 @@ Source, unit and browser checks still run on every deployment, with separate
 timings and timeouts. New pushes cancel superseded builds; active Pages
 deployments finish without interruption.
 
+The portrait browser suite allows ten minutes for its serial SwiftShader editor
+sessions. Each check logs its start, duration and total elapsed time, so a slow
+render can be distinguished from a stalled wait. The editor uses bundled part
+thumbnails first; only missing images and custom colours need live rendering.
+
 Source layout: `app.js` handles views and interactions, `model.js` contains character and dice logic plus backup validation, `catalog.js` contains equipment/character-option data and preset mapping, `feature-catalog.js` contains feature/resource references, filtering, and scaling defaults, `catalog-ui.js` contains dropdowns and stat previews, `default-characters.js` supplies the photographed default party and fresh state, `sheet-scan.js` defines extraction and import validation, and `sheet-scan-ui.js` handles photo capture and review. `styles.css` contains the responsive design, `art.js` and `icons.js` contain original SVG assets, and `sw.js` enables offline use. `scripts/` contains the dependency-free server, optional vision endpoint, and build tools. `tests/` covers rules calculations, catalog integrity, preset backup compatibility, and sheet scanning.
 
 Design research: the familiar sheet/inventory/spell/journal organization was informed by [D&D Beyond's sheet sections](https://dndbeyond-support.wizards.com/hc/en-us/articles/7747193946388-Sheet-Sections). Questlog's visual design and pixel artwork are original. Questlog is an independent fan project and is not affiliated with Wizards of the Coast.

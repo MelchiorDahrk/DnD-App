@@ -7,7 +7,7 @@
 	let el: HTMLElement;
 	let visible = $state(false);
 	let live = $state('');
-	let missing = $state(true);
+	let missing = $state(false);
 	let failed = $state(false);
 
 	// The pre-rendered image is shown right away; another colour, or a missing
@@ -16,8 +16,9 @@
 
 	$effect(() => {
 		void id;
-		missing = true;
+		missing = false;
 		live = '';
+		failed = false;
 	});
 
 	$effect(() => {
