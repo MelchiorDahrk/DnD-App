@@ -70,12 +70,16 @@ matches start unchecked. **Apply selected suggestions** changes only the selecte
 slots; pose and camera stay as they were. Undo/redo works, and the character is
 saved only when you choose **Use portrait**. Cancel discards the changes.
 
-The parts browser now includes **862** fantasy and CMF-associated parts, with a
-**Part collection** filter for **Fantasy + CMFs**, **Fantasy**, or **CMFs ·
+The parts browser includes **1,634** fantasy, CMF-associated and theme parts, with a
+**Part collection** filter for **All collections**, **Fantasy**, **Theme parts**, or **CMFs ·
 Collectible Minifigures**. Search accepts `cmf` and `collectible minifigures`.
 CMF coverage reflects the available LDraw models and source tags, including
 available D&D CMF pieces; it is not an exhaustive inventory of every series.
 Printed details can require a nearby substitute. Manual editing remains available.
+The theme collections add 772 selections, including separate Vikings, Hobbit,
+Indiana Jones, Caribbean, Chima and Dreamzzz filters. No compatible Last Airbender
+or One Piece models were identified in the bundled LDraw snapshot.
+[Theme coverage and refresh instructions](docs/fantasy-portraits.md#theme-coverage).
 
 Photo suggestions reuse the secure sheet scanning server described below.
 Set `OPENAI_API_KEY` in the terminal running `npm run dev` or `npm start`.

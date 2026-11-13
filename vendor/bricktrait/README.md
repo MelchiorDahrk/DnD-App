@@ -26,8 +26,13 @@ No external website, CDN, or online service is used by the editor at runtime.
 Thumbnails render on demand using the original renderer, avoiding thousands
 of pre-rendered thumbnails in the source repository.
 
-Questlog's fantasy extension uses `fantasy-catalog.json` as an explicit,
-category-based selection allowlist. Full LDraw metadata and geometry are retained
+Questlog combines `fantasy-catalog.json`, `cmf-catalog.json` and
+`theme-catalog.json` as explicit category-based selection allowlists. The theme
+snapshot supports shared membership and separate theme filters/search for the
+requested historical, adventure and fantasy themes. Refresh it after preparing
+LDraw with `npm run update:portrait-themes` from the repository root. Empty theme
+entries record unavailable/unidentified compatible models; they are not replaced
+with unrelated franchises. Full LDraw metadata and geometry are retained
 for old designs. Embedded previews and saved WebPs enforce transparent,
 square, borderless composition; old saves are updated only on **Use portrait**.
 The embedded editor hides scene controls while the standalone page retains them.

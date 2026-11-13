@@ -8,6 +8,7 @@
 //   CREDITS.txt     authors of every file shipped, plus the library licences
 import fs from 'node:fs';
 import path from 'node:path';
+import {createHash} from 'node:crypto';
 import {EQUIPMENT_ICONS,equipmentIconParts} from '../../../equipment-icons.js';
 
 // Explicit icon-only dependencies (tiles, gems, bars, etc.) use the same packer
@@ -37,7 +38,7 @@ const GROUPS = [
 			[/^Minifig (Hair )?(Beard|Moustache)\b/, 'Beard'],
 			[/^Minifig (Neckwear|Neck|Bandana|Collar|Scarf|Bowtie)\b/, 'Neckwear'],
 			[/^Minifig (Face Scarf)\b/, 'Neckwear'],
-			[/^Minifig (Armour|Breastplate|Epaulette|Shoulder|Body Armour|Front Harness)\b/, 'Armour'],
+			[/^Minifig (Armou?r|Breastplate|Epaulette|Shoulder|Body Armou?r|Front Harness)\b/, 'Armour'],
 			[/^Minifig (Vest|Lifevest|Life Jacket|Lifeguard|Life Preserver|Life Ring)\b/, 'Vest']
 		]
 	},
@@ -48,7 +49,7 @@ const GROUPS = [
 			[/^Minifig Cape\b(?!.*Cloth(?!.*Formed))/, 'Cape'],
 			[/^Minifig Ghost Shroud\b/, 'Cape'],
 			[
-				/^Minifig (Backpack|Airtanks|Jet-Pack|Scuba|Arrow Quiver|Quiver|Ninja Turtle Shell)\b/,
+				/^Minifig (Backpack|Airtanks|Jet-Pack|Scuba|Arrow Quiver|Quiver|(Sword )?Scabbard|Ninja Turtle Shell)\b/,
 				'Pack'
 			],
 			[/^Minifig Wings\b/, 'Wings']
@@ -67,7 +68,7 @@ const GROUPS = [
 			[/^Minifig ((?!with\b)\S+ ){0,2}Hood\b/, 'Hood'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}(Hat|Crown|Tiara|Turban|Bonnet|Beret)\b/, 'Hat'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}(Headdress|Headphones|Headset)\b/, 'Headdress'],
-			[/^Minifig (Kufi|Cloth Wrap)\b/, 'Hat'],
+			[/^Minifig (Kufi|Cloth Wrap|Desert Head Wrap)\b/, 'Hat'],
 			// Animal and costume masks worn over the head, not breathing masks
 			[/^Minifig Mask (?!.*\b(Oxygen|Breathing|Gas)\b)/, 'Mask']
 		]
@@ -84,6 +85,7 @@ const GROUPS = [
 			[/^Minifig Shield\b/, 'Shield'],
 			[/^Minifig (Circular Blade Saw)\b/, 'Tool'],
 			[/^Minifig (Cheerleader Pom|Conical Flask)\b/, 'Gear'],
+			[/^Minifig Pharaoh's Staff\b/, 'Gear'],
 			[
 				/^Minifig (Tool|Shovel|Pickaxe|Jackhammer|Hose|Broom|Mop|Pushbroom|Brush|Paint|Welding|Chainsaw|Sledgehammer|Pitchfork|Oar|Ladle|Frypan|Saucepan|Utensil|Cutlery|Whisk|Plunger|Spray|Watering|Syringe|Keys?|Handcuffs|Comb|Hairbrush|Fishing|Hockey|Baseball Bat|Bat|Tennis|Ski Pole|Crutch|Lasso)\b/,
 				'Tool'
@@ -443,7 +445,7 @@ fs.writeFileSync(
 );
 for (const f of ['CAreadme.txt', 'CAlicense.txt', 'CAlicense4.txt'])
 	fs.copyFileSync(path.join(LDRAW, f), path.join(OUT, f));
-fs.writeFileSync(path.join(OUT, '.questlog-parts-complete'), 'f333d939-v1');
+fs.writeFileSync(path.join(OUT, '.questlog-parts-complete'), createHash('sha256').update(fs.readFileSync(import.meta.filename)).digest('hex'));
 
 const count = (cat) => catalog.filter((c) => c.cat === cat).length;
 const coreSize = fs.statSync(path.join(OUT, 'core.ldr')).size;

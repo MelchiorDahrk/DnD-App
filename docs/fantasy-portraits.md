@@ -35,8 +35,7 @@ Rebuild after editing. The build fails on unknown IDs, category mismatches, empt
 slots, and equipment mappings that refer to unavailable parts.
 
 The independent [`vendor/bricktrait/cmf-catalog.json`](../vendor/bricktrait/cmf-catalog.json)
-snapshot adds **365 CMF-associated parts**, giving **862** unique selectable
-parts across both collections. It records IDs associated with Collectible
+snapshot records **365 CMF-associated parts**. It records IDs associated with Collectible
 Minifigures by LDraw header keywords, plus reviewed mohawk and D&D CMF additions.
 Shared moulds can appear in both collections. Tags and model coverage are
 incomplete: this is not an inventory of every CMF series. The existing explicit
@@ -44,11 +43,74 @@ exclusions take precedence across both collections. Refresh the snapshot with
 `node scripts/update-cmf-catalog.mjs` after the LDraw catalog is prepared; review
 the resulting diff. No catalog or CMF metadata is fetched at runtime.
 
-The picker defaults to **Fantasy + CMFs**, with separate **Fantasy** and **CMFs**
-collection filters. CMF search terms are indexed independently of theme, so
-Castle, Monsters and other theme filters remain usable. All browser views and
-randomization use the combined explicit catalog. Existing excluded saved parts
-remain renderable as before.
+The picker defaults to **All collections**, with separate **Fantasy**, **CMFs**
+and **Theme parts** collection filters. CMF search terms are indexed independently
+of theme. All browser views, randomization and photo suggestions use the combined
+explicit catalog. Existing excluded saved parts remain renderable as before.
+
+## Theme coverage
+
+[`vendor/bricktrait/theme-catalog.json`](../vendor/bricktrait/theme-catalog.json)
+adds **1,046 unique theme-associated parts**, including **772 new selections**,
+for **1,634 selectable parts** across all collections. Each theme lists parts by slot
+and explicit LDraw ID. A shared mould can belong to several themes. These specific
+memberships replace the old single-theme guesses for filtering and search, so
+Vikings, Indiana Jones, The Hobbit and the other named themes are discoverable
+independently. The snapshot also includes printed torsos/hips and their assembled
+variants, whose source headers can carry different theme information.
+
+Coverage in the current source snapshot:
+
+| Theme | Compatible parts |
+| --- | ---: |
+| Castle | 316 |
+| Pirates | 123 |
+| Western | 78 |
+| Adventurers | 76 |
+| Lord of the Rings | 94 |
+| Harry Potter | 149 |
+| Vikings | 29 |
+| Avatar: The Last Airbender | 0 identified |
+| Indiana Jones | 9 |
+| Ninjago | 183 |
+| Prince of Persia | 8 |
+| Pirates of the Caribbean | 11 |
+| Atlantis | 12 |
+| Pharaoh's Quest | 38 |
+| The Hobbit | 18 |
+| Legends of Chima | 23 |
+| Dreamzzz | 12 |
+| One Piece | 0 identified |
+
+Counts overlap across themes. LDraw source metadata and geometry coverage are
+incomplete, so this is not a complete inventory of every figure or set. No
+compatible Last Airbender or One Piece parts were identified in the cached
+official/unofficial library; the unrelated Na’vi Avatar parts are not substitutes.
+Empty themes remain recorded in the snapshot and do not produce empty picker
+filters. Loose arms/legs, separate plumes/clip-on wing inserts, flat cloth, full moulded figures,
+missing dependencies and textured models remain outside the supported slots.
+
+The packer now supports scabbards at the torso, the Prince of Persia desert head
+wrap, the Pharaoh's Quest staff and American-spelled armor headers. The Caribbean
+shoulder-strap scabbard is classified as a back accessory, sharing the torso
+attachment with neckwear, rather than a held sword. Reviewed shared moulds also
+cover Dastan/Tamina hair and the Dagger of Time, Ninjago sword carriers and pirate
+gear. The Atlantis speargun is explicitly approved; its previous fantasy-only
+exclusion was removed for this theme. Inventory references for the supplements
+include [Dastan](https://www.bricklink.com/catalogItemInv.asp?M=pop004),
+[Tamina](https://www.minifig-pictures.be/controler/c_FicheMinifig.php?Code=pop003),
+[Caribbean gear](https://www.bricklink.com/CatalogItemInv.asp?S=853219-1) and
+[Atlantis gear](https://www.bricklink.com/catalogItemInv.asp?G=852777).
+
+After preparing LDraw parts, run `npm run update:portrait-themes`, review the
+snapshot diff and rebuild. Matching rules and reviewed supplements live in
+`scripts/lib/portrait-themes.mjs` and `scripts/update-theme-catalog.mjs`.
+Normal builds validate every snapshot ID/category and publish the snapshot with
+the editor; no metadata is fetched at runtime. The parts completion marker now
+tracks the packer source hash, so cached libraries rebuild when slot recognition
+changes. Source tests cover all memberships, searches, exclusions and randomizer
+eligibility; browser checks exercise all available theme filters and save/reopen
+a figure with new headgear, scabbard, staff and printed body parts.
 
 ## Photo suggestions
 

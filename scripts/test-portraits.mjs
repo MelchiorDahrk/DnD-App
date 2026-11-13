@@ -5,6 +5,7 @@ import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {validPortrait} from '../portrait.js';
 import {EQUIPMENT_ICONS} from '../equipment-icons.js';
+import themeCatalog from '../vendor/bricktrait/theme-catalog.json' with {type:'json'};
 
 const base=process.env.PORTRAIT_TEST_URL||'http://localhost:4173/';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
@@ -111,6 +112,48 @@ try {
   await page.click('[data-portrait-close]');
   assert.deepEqual((await state()).characters.find(c=>c.id===firstId).portrait,saved);
   console.log('PASS edit, reopen, and cancel without changing saved design');
+
+  frame=await open();
+  const slotIndex={headgear:0,head:1,neck:2,back:3,torso:4,legs:5,hand:6};
+  async function browseTheme(cat,theme,query='') {
+    await frame.evaluate(index=>document.querySelectorAll('.slots .pick')[index].click(),slotIndex[cat]);
+    await frame.waitForSelector('.picker select[aria-label="Part collection"]');
+    await frame.select('.picker select[aria-label="Part collection"]','themes');
+    await frame.select('.picker select[aria-label="Theme"]',theme);
+    await frame.$eval('.picker input[type=search]',(input,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},query);
+    await frame.waitForSelector('.picker .pick');
+  }
+  for(const [theme,categories] of Object.entries(themeCatalog.themes)) {
+    const category=Object.entries(categories).sort((a,b)=>Object.keys(a[1]).length-Object.keys(b[1]).length)[0];
+    if(!category)continue;
+    const [cat,entries]=category;
+    await browseTheme(cat,theme,theme);
+    const shown=await frame.$$eval('.picker .pick .id',elements=>elements.map(el=>el.textContent));
+    assert.ok(shown.length>0,theme);
+    for(const id of shown)assert.ok(Object.hasOwn(entries,id),`${theme}: ${cat}/${id}`);
+  }
+  const themedFigure=[['headgear','Prince of Persia','88287'],['back','Pirates of the Caribbean','95348'],['hand',"Pharaoh's Quest",'93252'],['torso',"Pharaoh's Quest",'76382pq0'],['legs',"Pharaoh's Quest",'73200bpq0']];
+  for(const [cat,theme,id] of themedFigure) {
+    await browseTheme(cat,theme,id);
+    await frame.click(`.picker .pick[title*=" · ${id}"]`);
+    await frame.waitForSelector('.preview:not(.busy)',{timeout:60000});
+    assert.equal(await frame.$('.preview .error'),null,`${theme}: ${id} renders`);
+  }
+  await save(frame);
+  const themedPortrait=(await state()).characters.find(c=>c.id===firstId).portrait;
+  for(const [cat,,id] of themedFigure)assert.equal(themedPortrait.design.figure[cat==='hand'?'handR':cat].id,id);
+  assert.ok((await imagePixels(themedPortrait.image)).count>1000);
+  frame=await open();
+  assert.ok(await frame.$('.slots .pick[title*="Desert Head Wrap"]'));
+  assert.ok(await frame.$('.slots .pick[title*="Sword Scabbard with Shoulder Strap"]'));
+  await page.click('[data-portrait-close]');
+  await page.evaluate(({id,portrait})=>{
+    const s=JSON.parse(localStorage.getItem('questlog.v2'));s.characters.find(c=>c.id===id).portrait=portrait;localStorage.setItem('questlog.v2',JSON.stringify(s));
+    const prefs=JSON.parse(localStorage.getItem('bricktrait:prefs'));
+    prefs.favourites=['3885','30173a'];prefs.recent=['3885','30173a'];localStorage.setItem('bricktrait:prefs',JSON.stringify(prefs));
+  },{id:firstId,portrait:saved});
+  await page.reload({waitUntil:'networkidle0'});
+  console.log('PASS available theme filters/search and new headgear, scabbard, staff and printed body render/save/reopen');
 
   // Seed an actual v2 legacy save, including a now excluded part. Opening and
   // canceling must preserve even its old flattened ringed image byte for byte.

@@ -1,7 +1,7 @@
 // Forgiving part search: accents and case are ignored, plurals and close
 // synonyms match, and one typo is allowed in words of 4 letters or more.
 import type { Part } from './ldraw';
-import { isCMFPart } from './fantasy-catalog.js';
+import { isCMFPart, partThemes } from './fantasy-catalog.js';
 
 const SYNONYMS: Record<string, string[]> = {
 	beard: ['moustache', 'mustache', 'goatee'],
@@ -67,7 +67,7 @@ const words = new WeakMap<Part, string[]>();
 function wordsOf(part: Part) {
 	let list = words.get(part);
 	if (!list) {
-		const text = [part.name, part.id, part.kind, part.theme, isCMFPart(part) ? 'CMF Collectible Collectable Minifigures' : ''].filter(Boolean).join(' ');
+		const text = [part.name, part.id, part.kind, ...partThemes(part), isCMFPart(part) ? 'CMF Collectible Collectable Minifigures' : ''].filter(Boolean).join(' ');
 		list = normalize(text).split(' ').map(stem);
 		words.set(part, list);
 	}

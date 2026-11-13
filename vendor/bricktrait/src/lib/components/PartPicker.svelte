@@ -4,7 +4,7 @@
 	import { isFavourite, prefs, toggleFavourite } from '#lib/prefs.svelte.ts';
 	import { t, tn } from '#lib/i18n.svelte.ts';
 	import Thumb from './Thumb.svelte';
-	import { fantasyCatalog, isCMFPart, isClassicFantasyPart } from '#lib/fantasy-catalog.js';
+	import { fantasyCatalog, isCMFPart, isClassicFantasyPart, isThemedPart, partThemes } from '#lib/fantasy-catalog.js';
 
 	let {
 		parts,
@@ -51,12 +51,13 @@
 	};
 	const approved = $derived(fantasyCatalog(parts));
 	const kinds = $derived(count(approved.map((p) => p.kind)));
-	const themes = $derived(count(approved.map((p) => p.theme)));
+	const themes = $derived(count(approved.flatMap(partThemes)));
 
 	const shown = $derived.by(() => {
 		let list = approved;
-		if (collection === 'cmf') list = list.filter(isCMFPart);
+		if (collection === 'cmf') list = list.filter((p) => isCMFPart(p));
 		if (collection === 'fantasy') list = list.filter((p) => isClassicFantasyPart(p));
+		if (collection === 'themes') list = list.filter((p) => isThemedPart(p));
 		if (view === 'favourites') list = list.filter((p) => prefs.favourites.includes(p.id));
 		if (view === 'recent') {
 			const order = new Map(prefs.recent.map((id, i) => [id, i]));
@@ -65,7 +66,7 @@
 				.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
 		}
 		if (kind) list = list.filter((p) => p.kind === kind);
-		if (theme) list = list.filter((p) => p.theme === theme);
+		if (theme) list = list.filter((p) => partThemes(p).includes(theme));
 		if (flag && extra) list = list.filter(extra.test);
 		if (sort === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
 		if (sort === 'new') list = [...list].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
@@ -158,15 +159,16 @@
 		<label class="select">
 			<span class="sr-only">Part collection</span>
 			<select aria-label="Part collection" bind:value={collection}>
-				<option value="">Fantasy + CMFs</option>
+				<option value="">All collections</option>
 				<option value="fantasy">Fantasy</option>
 				<option value="cmf">CMFs · Collectible Minifigures</option>
+				<option value="themes">Theme parts</option>
 			</select>
 		</label>
 		{#if themes.length > 1}
 			<label class="select">
 				<span class="sr-only">{t('theme')}</span>
-				<select bind:value={theme}>
+				<select aria-label={t('theme')} bind:value={theme}>
 					<option value="">{t('allThemes')}</option>
 					{#each themes as [name, n] (name)}
 						<option value={name}>{tn(name)} ({n})</option>
