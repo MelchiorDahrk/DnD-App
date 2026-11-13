@@ -247,13 +247,22 @@ only when the user requests it; it never repairs or substitutes saved parts.
 
 ## Maintain equipment icons
 
-Edit [`equipment-icons.js`](../equipment-icons.js). Its 58 entries specify
+Edit [`equipment-icons.js`](../equipment-icons.js). Its 239 entries specify
 an LDraw part ID and colour, or a short `parts` assembly of LDraw placements,
 plus exact equipment names. Names are normalized for
 case, whitespace, punctuation and apostrophes; there is no fuzzy guessing or
 substring matching. `itemFromEquipment()` creates independent inventory IDs,
-so icon lookup deliberately uses names. Both legacy and new inventory items
-work without changing version 2 data. Renaming to an unmapped name uses an SVG.
+so automatic icon lookup deliberately uses names. Both legacy and new inventory
+items work without changing version 2 data. Unmapped names use category artwork.
+The item editor's **Item icon → Browse library** offers a searchable visual
+palette with category filters and an **Automatic** option. A saved `iconKey`
+overrides name/category matching and survives edits, reloads and JSON backups.
+Unknown keys fall back to automatic artwork; only bundled keys form image URLs.
+`EXTRA_ITEM_ICONS` contributes 111 choices that need no equipment preset or name
+alias. Their labels, categories, keywords and LDraw part IDs are searchable.
+Find candidates in the cached official library by searching first-line
+descriptions and `!KEYWORDS` for sword, katana, axe, spear, shield, helmet, wand,
+crystal, food, container and tool. Inspect rendered silhouettes before shipping.
 
 Equipment uses a straight-on camera instead of the portrait picker's angled
 view. Set an entry's optional `view.yaw` or `view.pitch` in degrees to show its
@@ -267,12 +276,12 @@ common blades, axes, polearms, bows, shields, staves, wands, bottles, books,
 lights, tools, packs and instruments. Kits use a case or their representative
 tool; magical variants use the relevant weapon, bottle, scroll or token model.
 Small brick assemblies represent bedrolls, mess kits, chalk and metal pegs.
-Unmapped custom items and instruments without a suitable model retain SVGs. Models are
+Custom items can choose any library icon, or keep category artwork. Models are
 representative LEGO accessories, not illustrations of exact D&D dimensions.
 Inventory equip/unequip never changes portraits.
 
 The sheet pack preview, mapped weapon attacks, and inventory list share the same
-lazy, asynchronously decoded 160×160 WebPs. All 58 files (about 110 KB) are bundled under
+lazy, asynchronously decoded 160×160 WebPs. All 239 files are bundled under
 `assets/equipment/`, and need no WebGL in inventory. Failed image loads remove
 the image and reveal the original SVG. The service worker precaches the entire
 small icon set, even if some inventory items have not been viewed yet.

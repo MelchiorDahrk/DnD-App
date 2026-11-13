@@ -1,10 +1,46 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {LDRAW_ICONS,ITEM_ICON_DEFAULTS,equipmentIconParts,equipmentIconURL,normalizeEquipmentName} from '../equipment-icons.js';
+import {LDRAW_ICONS,EXTRA_ITEM_ICONS,ITEM_ICON_LIBRARY,ITEM_ICON_DEFAULTS,equipmentIconParts,equipmentIconURL,normalizeEquipmentName} from '../equipment-icons.js';
 import {itemIconMarkup,attackIconMarkup} from '../item-icons.js';
 import {EQUIPMENT,WEAPONS,itemFromEquipment,attackFromWeapon} from '../catalog.js';
 import {defaultCharacters} from '../default-characters.js';
+import {parseBackup} from '../model.js';
+import {defaultPartyState} from './helpers/default-party.mjs';
+
+test('chosen library icons override automatic names and safely fall back for unknown keys',()=>{
+  const item={name:'Longsword',category:'Weapon',iconKey:'katana'};
+  assert.equal(equipmentIconURL(item),'./assets/equipment/katana.webp');
+  assert.match(itemIconMarkup(item),/\/katana.webp/);
+  assert.match(attackIconMarkup({...item,weaponId:'rapier'}),/\/katana.webp/);
+  for(const iconKey of ['',null,{},'missing','__proto__','constructor','../../bad','"><img src=x>']) {
+    assert.equal(equipmentIconURL({...item,iconKey}),'./assets/equipment/longsword.webp');
+    assert.match(itemIconMarkup({name:'Custom',category:'Gear',iconKey}),/\/backpack.webp/);
+  }
+});
+
+test('item icon selections survive backups while old items keep automatic artwork',()=>{
+  const state=defaultPartyState();
+  state.characters[0].items[0].iconKey='katana';
+  assert.equal(parseBackup(JSON.stringify(state)).characters[0].items[0].iconKey,'katana');
+  delete state.characters[0].items[0].iconKey;
+  assert.equal(parseBackup(JSON.stringify(state)).characters[0].items[0].iconKey,undefined);
+  state.characters[0].items[0].iconKey='future-icon';
+  assert.ok(parseBackup(JSON.stringify(state)),'future keys use automatic artwork until available');
+  state.characters[0].items[0].iconKey='../../unsafe';
+  assert.throws(()=>parseBackup(JSON.stringify(state)),/invalid item icon/);
+});
+
+test('library includes unused weapons and supplies with searchable labels, groups and part IDs',()=>{
+  assert.ok(Object.keys(EXTRA_ITEM_ICONS).length>=100);
+  assert.equal(ITEM_ICON_LIBRARY.length,Object.keys(LDRAW_ICONS).length);
+  for(const key of ['katana','dwarvenaxe','chakram','crown','apple','ratchet']) {
+    const entry=ITEM_ICON_LIBRARY.find(entry=>entry.key===key);
+    assert.ok(entry?.label&&entry.group);
+    assert.ok(entry.keywords.includes(EXTRA_ITEM_ICONS[key].part));
+    assert.equal(equipmentIconURL({name:'Homebrew',iconKey:key}),`./assets/equipment/${key}.webp`);
+  }
+});
 
 test('equipment mapping uses exact normalized names, independent of generated inventory IDs',()=>{
   const preset=EQUIPMENT.find(p=>p.name==='Longsword');

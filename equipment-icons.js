@@ -1,6 +1,6 @@
 // Explicit equipment names, never inventory IDs (itemFromEquipment generates those).
 // Re-render after editing: npm run build:item-icons (build:portraits packs new parts).
-// Every shipped item/action is mapped; custom entries use the category artwork.
+// Every shipped item/action is mapped; custom entries can choose any library icon.
 export const EQUIPMENT_ICONS = {
   longsword: {part:'98370',color:71,view:{yaw:90},names:['Longsword']},
   shortsword: {part:'3847',color:71,view:{yaw:90},names:['Shortsword']},
@@ -143,7 +143,124 @@ export const CURRENCY_ICONS = {
   'coin-platinum': {part:'6141',color:383,view:{yaw:-25,pitch:30}}
 };
 
-export const LDRAW_ICONS = {...EQUIPMENT_ICONS,...ACTION_ICONS,...CURRENCY_ICONS};
+// Extra library choices need no equipment preset or automatic name mapping.
+// Found by searching official LDraw descriptions/!KEYWORDS for sword, axe,
+// spear, shield, helmet, wand, crystal, food, container, lantern and tool.
+export const EXTRA_ITEM_ICONS = {
+  uruksword:{part:'10050',color:72,label:'Orc sword',group:'Weapons',keywords:'uruk hai cleaver blade',view:{yaw:90}},
+  curvedsword:{part:'10053',color:71,label:'Curved sword',group:'Weapons',keywords:'saber blade',view:{yaw:90}},
+  doubleblade:{part:'11103',color:71,label:'Double blade',group:'Weapons',keywords:'sword twin',view:{yaw:90}},
+  jaggedsword:{part:'11439',color:72,label:'Jagged sword',group:'Weapons',keywords:'serrated blade',view:{yaw:90}},
+  broadsword:{part:'18031',color:71,label:'Broadsword',group:'Weapons',keywords:'longsword thick guard',view:{yaw:90}},
+  gladius:{part:'18034',color:71,label:'Gladius',group:'Weapons',keywords:'roman shortsword',view:{yaw:90}},
+  katana:{part:'21459',color:71,label:'Katana',group:'Weapons',keywords:'ninja samurai sword',view:{yaw:90}},
+  dao:{part:'25111',color:71,label:'Dao sword',group:'Weapons',keywords:'curved saber hilt',view:{yaw:90}},
+  cutlass:{part:'2530',color:71,label:'Cutlass',group:'Weapons',keywords:'pirate sword',view:{yaw:90}},
+  elvensword:{part:'2674a',color:71,label:'Elven sword',group:'Weapons',keywords:'elvish blade',view:{yaw:90}},
+  cappedgreatsword:{part:'2674b',color:71,label:'Knight’s greatsword',group:'Weapons',keywords:'two handed sword capped pommel',view:{yaw:90}},
+  brokensword:{part:'2674e',color:71,label:'Broken sword',group:'Weapons',keywords:'shattered blade relic',view:{yaw:90}},
+  curvedknife:{part:'37341b',color:71,label:'Curved knife',group:'Weapons',keywords:'dagger kukri',view:{yaw:90}},
+  hookblade:{part:'37341e',color:71,label:'Double hook blade',group:'Weapons',keywords:'weapon hooks',view:{yaw:90}},
+  crescentblade:{part:'3757',color:71,label:'Crescent blade',group:'Weapons',keywords:'moon weapon',view:{yaw:90}},
+  wakizashi:{part:'5644',color:71,label:'Wakizashi',group:'Weapons',keywords:'short katana ninja samurai sword',view:{yaw:90}},
+  saber:{part:'59229',color:71,label:'Saber',group:'Weapons',keywords:'sabre sword clip pommel',view:{yaw:90}},
+  jaggedscimitar:{part:'60752',color:72,label:'Jagged scimitar',group:'Weapons',keywords:'orc curved sword',view:{yaw:90}},
+  macuahuitl:{part:'69944',color:6,label:'Macuahuitl',group:'Weapons',keywords:'obsidian club eight blades'},
+  ornateblade:{part:'76764',color:297,label:'Ornate shortsword',group:'Weapons',keywords:'elaborate hilt sword',view:{yaw:90}},
+  handdagger:{part:'88812',color:71,label:'Hand dagger',group:'Weapons',keywords:'punch knife katar',view:{pitch:90}},
+  dragonsword:{part:'93055',color:297,label:'Dragon katana',group:'Weapons',keywords:'sword guard ninja',view:{yaw:90}},
+  khopesh:{part:'93247',color:297,label:'Khopesh',group:'Weapons',keywords:'egyptian curved sword',view:{yaw:90}},
+  angularsword:{part:'95053',color:71,label:'Angular shortsword',group:'Weapons',keywords:'small blade guard',view:{yaw:90}},
+  twinaxe:{parts:[{id:'11096',color:71},{id:'87994',color:6,at:[0,28,0]}],label:'Twin bladed axe',group:'Weapons',keywords:'double battleaxe'},
+  tomahawk:{part:'13571',color:6,label:'Tomahawk',group:'Weapons',keywords:'throwing axe hatchet',view:{yaw:90}},
+  dwarvenaxe:{part:'2674d',color:71,label:'Dwarven axe',group:'Weapons',keywords:'dwarf battleaxe',view:{yaw:90}},
+  pickaxeweapon:{part:'39802',color:71,label:'Long handled axe',group:'Weapons',keywords:'pick end battleaxe',view:{yaw:90}},
+  bladedspear:{part:'43899',color:71,label:'Four bladed spear',group:'Weapons',keywords:'polearm lance'},
+  flatspear:{part:'93789',color:71,label:'Flat ended spear',group:'Weapons',keywords:'javelin lance'},
+  shortspear:{part:'98338',color:71,label:'Short spear',group:'Weapons',keywords:'javelin harpoon'},
+  boomerang:{part:'25892',color:6,label:'Boomerang',group:'Weapons',keywords:'throwing ranged',view:{yaw:90,pitch:90}},
+  chakram:{part:'35485',color:297,label:'Chakram',group:'Weapons',keywords:'throwing ring disc',view:{pitch:90}},
+  shuriken:{part:'93058',color:71,label:'Throwing star',group:'Weapons',keywords:'shuriken ninja',view:{yaw:90}},
+  sai:{part:'98139',color:71,label:'Sai',group:'Weapons',keywords:'trident dagger ninja'},
+  serratedblade:{part:'98141',color:71,label:'Serrated crescent',group:'Weapons',keywords:'moon blade',view:{yaw:90}},
+  smallbow:{part:'95051',color:6,label:'Small bow & arrow',group:'Weapons',keywords:'shortbow archery',view:{yaw:90}},
+  longwhip:{part:'2488',color:6,label:'Long whip',group:'Weapons',keywords:'lash rope',view:{yaw:90}},
+  doublepistol:{part:'95199',color:72,label:'Double barrel pistol',group:'Weapons',keywords:'gun firearm',view:{yaw:90}},
+  orcshield:{part:'10049',color:72,label:'Orc shield',group:'Armor & shields',keywords:'uruk hai spiked'},
+  longshield:{part:'18836',color:4,label:'Long triangular shield',group:'Armor & shields',keywords:'kite knight'},
+  battlementshield:{part:'22408',color:71,label:'Battlement shield',group:'Armor & shields',keywords:'pentagonal castellated'},
+  jaggedshield:{part:'22409',color:72,label:'Jagged shield',group:'Armor & shields',keywords:'pentagonal orc'},
+  ovoidshield:{part:'2586',color:6,label:'Ovoid shield',group:'Armor & shields',keywords:'oval wooden'},
+  triangleshield:{part:'3846',color:4,label:'Triangular shield',group:'Armor & shields',keywords:'knight heraldry'},
+  roundshield:{part:'3876',color:6,label:'Round shield',group:'Armor & shields',keywords:'buckler viking'},
+  octagonalshield:{part:'48494',color:71,label:'Octagonal shield',group:'Armor & shields',keywords:'buckler stud'},
+  bowedshield:{part:'75902',color:71,label:'Bowed round shield',group:'Armor & shields',keywords:'buckler'},
+  ovalshield:{part:'92747',color:6,label:'Oval shield',group:'Armor & shields',keywords:'wooden guard'},
+  scarabshield:{part:'93251',color:297,label:'Scarab shield',group:'Armor & shields',keywords:'egyptian beetle'},
+  towershield:{part:'98367',color:71,label:'Tower shield',group:'Armor & shields',keywords:'rectangular curved roman'},
+  orchelm:{part:'10051',color:72,label:'Orc helmet',group:'Armor & shields',keywords:'uruk hai lateral comb'},
+  riderhelm:{part:'10054',color:6,label:'Rider helmet',group:'Armor & shields',keywords:'rohan cheek comb'},
+  morion:{part:'30048',color:71,label:'Morion helmet',group:'Armor & shields',keywords:'guard soldier'},
+  samuraihelm:{part:'30175',color:0,label:'Samurai helmet',group:'Armor & shields',keywords:'kabuto'},
+  guardhelm:{part:'3844',color:71,label:'Neck guard helmet',group:'Armor & shields',keywords:'castle knight'},
+  grillehelm:{part:'4503',color:71,label:'Grilled helmet',group:'Armor & shields',keywords:'castle knight face grille'},
+  vikinghelm:{part:'53450',color:71,label:'Viking helmet',group:'Armor & shields',keywords:'nose protector warrior'},
+  dragonhelm:{part:'6122',color:72,label:'Dragon helmet',group:'Armor & shields',keywords:'castle crown knight'},
+  closedhelm:{part:'89520',color:71,label:'Closed helmet',group:'Armor & shields',keywords:'castle knight eye slit'},
+  gladiatorhelm:{part:'95676',color:297,label:'Gladiator helmet',group:'Armor & shields',keywords:'arena armor'},
+  romanhelm:{part:'98366',color:71,label:'Roman helmet',group:'Armor & shields',keywords:'soldier legion'},
+  hollowwand:{part:'102498',color:6,label:'Spell wand',group:'Magic & treasure',keywords:'wizard hollow tip'},
+  starwand:{part:'28681',color:297,label:'Short star wand',group:'Magic & treasure',keywords:'magic fairy'},
+  longstarwand:{part:'6124b',color:297,label:'Long star wand',group:'Magic & treasure',keywords:'magic fairy'},
+  pharaohstaff:{part:'93252',color:297,label:'Forked staff',group:'Magic & treasure',keywords:'pharaoh rod scepter'},
+  moonstaff:{part:'95050',color:297,label:'Crescent staff',group:'Magic & treasure',keywords:'moon rod scepter'},
+  fourcrystal:{part:'11127',color:41,label:'Four point crystal',group:'Magic & treasure',keywords:'gem rock quartz'},
+  heartgem:{part:'15745',color:36,label:'Heart gem',group:'Magic & treasure',keywords:'ruby jewel facetted'},
+  crystalcluster:{part:'30213',color:43,label:'Crystal cluster',group:'Magic & treasure',keywords:'rock gem sapphire'},
+  fivecrystal:{part:'30385',color:34,label:'Five point crystal',group:'Magic & treasure',keywords:'rock gem emerald'},
+  chalice:{part:'2343',color:297,label:'Chalice',group:'Magic & treasure',keywords:'goblet holy grail cup'},
+  trophy:{part:'10172',color:297,label:'Trophy cup',group:'Magic & treasure',keywords:'prize treasure'},
+  crown:{part:'18165',color:297,label:'Crown',group:'Magic & treasure',keywords:'king queen royal spikes'},
+  tiara:{part:'33322',color:297,label:'Tiara',group:'Magic & treasure',keywords:'crown princess royal'},
+  ornatekey:{part:'19118',color:297,label:'Ornate key',group:'Magic & treasure',keywords:'ornamented lock dungeon'},
+  goldpiece:{part:'96904',color:297,label:'Gold coin',group:'Magic & treasure',keywords:'money currency gothic treasure',view:{pitch:75}},
+  diamond:{part:'72078',color:47,label:'Diamond',group:'Magic & treasure',keywords:'jewel gem raised',view:{pitch:65}},
+  pretzel:{part:'10170',color:19,label:'Pretzel',group:'Food & drink',keywords:'bread ration snack'},
+  corn:{part:'1411',color:14,label:'Corn',group:'Food & drink',keywords:'cob vegetable ration'},
+  cherries:{part:'22667',color:4,label:'Cherries',group:'Food & drink',keywords:'cherry fruit berry'},
+  bread:{part:'25386',color:19,label:'Bread bun',group:'Food & drink',keywords:'roll ration loaf',view:{pitch:90}},
+  roast:{part:'33048',color:6,label:'Roast turkey',group:'Food & drink',keywords:'chicken feast meat',view:{yaw:90,pitch:15}},
+  apple:{part:'33051',color:4,label:'Apple',group:'Food & drink',keywords:'fruit ration'},
+  drumstick:{part:'33057',color:6,label:'Turkey leg',group:'Food & drink',keywords:'chicken meat ration',view:{pitch:90}},
+  sausage:{part:'33078',color:6,label:'Sausage',group:'Food & drink',keywords:'meat ration'},
+  banana:{part:'33085',color:14,label:'Banana',group:'Food & drink',keywords:'fruit ration'},
+  croissant:{part:'33125',color:19,label:'Croissant',group:'Food & drink',keywords:'bread pastry ration'},
+  carrot:{part:'33172',color:25,label:'Carrot',group:'Food & drink',keywords:'vegetable ration'},
+  peach:{part:'5234',color:25,label:'Peach',group:'Food & drink',keywords:'fruit ration'},
+  pear:{part:'5822',color:2,label:'Pear',group:'Food & drink',keywords:'fruit ration'},
+  dumpling:{part:'6647',color:19,label:'Dumpling',group:'Food & drink',keywords:'food ration'},
+  pie:{part:'93568',color:19,label:'Cream pie',group:'Food & drink',keywords:'pastry dessert'},
+  mug:{part:'33054',color:6,label:'Mug',group:'Food & drink',keywords:'cup ale beer drink'},
+  stein:{part:'68495',color:71,label:'Tankard',group:'Food & drink',keywords:'stein mug ale beer drink'},
+  handledcup:{part:'38014',color:297,label:'Handled cup',group:'Food & drink',keywords:'goblet drink',view:{yaw:90,pitch:15}},
+  smallchest:{part:'30150',color:6,label:'Adventurer’s chest',group:'Tools & gear',keywords:'container treasure box'},
+  tiedsack:{part:'92590',color:19,label:'Tied sack',group:'Tools & gear',keywords:'bag pouch container'},
+  handbasket:{part:'4523',color:6,label:'Hand basket',group:'Tools & gear',keywords:'container carrier'},
+  roundlantern:{part:'65581',color:297,label:'Round lantern',group:'Tools & gear',keywords:'light lamp spherical'},
+  handtorch:{part:'86208',color:6,label:'Hand torch',group:'Tools & gear',keywords:'light fire handle',view:{pitch:-90}},
+  iceaxe:{part:'30193',color:71,label:'Ice axe',group:'Tools & gear',keywords:'climbing pick mountaineering',view:{yaw:90}},
+  circularsaw:{part:'30194',color:71,label:'Circular saw',group:'Tools & gear',keywords:'blade carpenter tool',view:{yaw:90}},
+  wrench:{part:'55299',color:71,label:'Open end wrench',group:'Tools & gear',keywords:'spanner tool tinker'},
+  boxwrench:{part:'55300',color:71,label:'Box wrench',group:'Tools & gear',keywords:'spanner tool tinker'},
+  adjustablewrench:{part:'604614',color:71,label:'Adjustable wrench',group:'Tools & gear',keywords:'spanner tool tinker'},
+  ratchet:{part:'604615',color:71,label:'Ratchet wrench',group:'Tools & gear',keywords:'socket spanner tool tinker'},
+  climbinghook:{part:'15534',color:71,label:'Climbing hook',group:'Tools & gear',keywords:'grappling bar hook'},
+  anchor:{part:'2564',color:72,label:'Anchor',group:'Animals & travel',keywords:'boat ship sailing',view:{pitch:90}},
+  piratehook:{part:'2531',color:71,label:'Pirate hook',group:'Tools & gear',keywords:'hand prosthetic',view:{pitch:90}},
+  fryingpan:{part:'97790',color:0,label:'Frying pan',group:'Food & drink',keywords:'cook utensils skillet'}
+};
+
+export const LDRAW_ICONS = {...EQUIPMENT_ICONS,...EXTRA_ITEM_ICONS,...ACTION_ICONS,...CURRENCY_ICONS};
 
 // Even homebrew items and actions receive bundled artwork, with SVGs beneath
 // each image in case it cannot load. Values are keys in LDRAW_ICONS.
@@ -161,10 +278,26 @@ export const equipmentIconView = entry => ({yaw:0,pitch:0,zoom:1,...entry.view})
 export const normalizeEquipmentName = name => String(name ?? '').normalize('NFKD')
   .replace(/\p{M}/gu,'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 
+const libraryGroups = {
+  Weapons:'longsword shortsword greatsword dagger rapier scimitar handaxe battleaxe greataxe spear pike trident shortbow longbow crossbow staff club hammer lighthammer whip blowgun mace flail sickle halberd pickaxe dart sling musket pistol bite claws tail unarmed action',
+  'Armor & shields':'shield chainmail studdedarmor platearmor clothes',
+  'Magic & treasure':'wand potion scroll feather emerald oil poison driftglobe glue symbol coin-copper coin-silver coin-electrum coin-gold coin-platinum',
+  'Food & drink':'bottle pot rations waterskin messkit jug',
+  'Music & games':'lute horn violin guitar flute panflute bagpipes drum dice chess cards',
+  'Animals & travel':'horse pony camel saddle boat dog elephant cart sled airship'
+};
+export const ITEM_ICON_LIBRARY = Object.entries(LDRAW_ICONS).map(([key,entry]) => ({
+  key,label:entry.label || entry.names?.[0] || (key.startsWith('coin-')?key.slice(5)+' coin':'Action token'),
+  group:entry.group || Object.entries(libraryGroups).find(([,keys])=>keys.split(' ').includes(key))?.[0] || 'Tools & gear',
+  keywords:[...(entry.names || []),entry.keywords || '',...equipmentIconParts(entry).map(part=>part.id)].join(' ')
+})).sort((a,b)=>a.label.localeCompare(b.label));
+
+export const validItemIconKey = key => typeof key==='string' && Object.hasOwn(LDRAW_ICONS,key);
+
 const byName = new Map(Object.entries({...EQUIPMENT_ICONS,...ACTION_ICONS}).flatMap(([key,entry]) =>
   entry.names.map(name => [normalizeEquipmentName(name),key])));
 
 export function equipmentIconURL(item) {
-  const key = byName.get(normalizeEquipmentName(item?.name));
+  const key = validItemIconKey(item?.iconKey) ? item.iconKey : byName.get(normalizeEquipmentName(item?.name));
   return key ? `./assets/equipment/${key}.webp` : null;
 }

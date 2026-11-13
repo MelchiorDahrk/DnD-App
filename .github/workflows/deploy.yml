@@ -55,6 +55,7 @@ jobs:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
           SHEET_TEST_URL: http://127.0.0.1:4173/DnD-App/
+          ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
         run: |
           ln -s dist DnD-App
           node scripts/serve.mjs > /tmp/questlog-server.log 2>&1 &
@@ -62,6 +63,7 @@ jobs:
           npm run test:portraits
           npm run test:portrait-photos
           npm run test:sheet
+          npm run test:item-icons
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with:

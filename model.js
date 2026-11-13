@@ -224,6 +224,7 @@ function validateCharacter(c) {
     c[key].forEach(v=>{requireThat(v&&string(v.id,100)&&/^[a-zA-Z0-9_-]+$/.test(v.id)&&!ids.has(v.id),`invalid or duplicate ${key} IDs.`);ids.add(v.id);});
   }
   c.items.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&['Weapon','Armor','Gear','Consumable','Treasure'].includes(v.category)&&integerIn(v.qty,0,99999)&&numberIn(v.weight,0,99999)&&typeof v.equipped==='boolean'&&string(v.description)&&string(v.wiki,2000),'invalid item.'));
+  c.items.forEach(v=>requireThat(v.iconKey===undefined||(string(v.iconKey,100)&&/^[a-z0-9-]*$/.test(v.iconKey)),'invalid item icon.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
   c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
   c.notes.forEach(v=>requireThat(string(v.title,200)&&v.title.trim()&&string(v.body,100000)&&string(v.tag,100)&&typeof v.pinned==='boolean'&&string(v.updated,100)&&!Number.isNaN(Date.parse(v.updated)),'invalid note.'));
