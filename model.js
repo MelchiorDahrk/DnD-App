@@ -7,6 +7,20 @@ export const RULES_URL = 'https://www.dndbeyond.com/sources/dnd/br-2024';
 export const ABILITIES = {str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence', wis:'Wisdom', cha:'Charisma'};
 export const SKILLS = {Acrobatics:'dex','Animal Handling':'wis',Arcana:'int',Athletics:'str',Deception:'cha',History:'int',Insight:'wis',Intimidation:'cha',Investigation:'int',Medicine:'wis',Nature:'int',Perception:'wis',Performance:'cha',Persuasion:'cha',Religion:'int','Sleight of Hand':'dex',Stealth:'dex',Survival:'wis'};
 export const COINS = {copper:'cp',silver:'sp',electrum:'ep',gold:'gp',platinum:'pp'};
+// A leading sign adjusts the current balance; an unsigned expression sets a total.
+export function calculateMoney(balance,expression) {
+  const input=String(expression).trim().replace(/−/g,'-');
+  if(input.length>120||!/^[-+]?\s*\d+(?:\s*[-+]\s*\d+)*$/.test(input))throw new Error('Use whole coins, with + to add or − to subtract.');
+  let total=/^[-+]/.test(input)?balance:0;
+  for(const term of input.match(/[-+]?\s*\d+/g)) {
+    const amount=Number(term.replace(/\s/g,''));
+    total+=amount;
+    if(!Number.isSafeInteger(amount)||!Number.isSafeInteger(total))throw new Error('That calculation is too large.');
+  }
+  if(total<0)throw new Error('You don’t have enough coins for that change.');
+  if(total>100000000)throw new Error('Keep each balance at 100,000,000 coins or fewer.');
+  return total;
+}
 export const SHEET_TEXT = {personalityTraits:'Personality traits',ideals:'Ideals',bonds:'Bonds',flaws:'Flaws',languages:'Languages',armorProficiencies:'Armor training',weaponProficiencies:'Weapon proficiencies',toolProficiencies:'Tool & other proficiencies',senses:'Senses',defenses:'Armor, shield & defense notes'};
 const sheetDefaults = () => Object.fromEntries([...Object.keys(SHEET_TEXT),'playerName'].map(key=>[key,'']).concat([['electrum',0],['platinum',0],['initiativeBonus',0],['passivePerceptionBonus',0]]));
 export const CLASSES = {Artificer:8,Barbarian:12,Bard:8,Cleric:8,Druid:8,Fighter:10,Monk:8,Paladin:10,Ranger:10,Rogue:8,Sorcerer:6,Warlock:8,Wizard:6};

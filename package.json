@@ -16,6 +16,7 @@
     "test:sheet": "node scripts/test-sheet-layout.mjs",
     "test:characters": "node scripts/test-characters.mjs",
     "test:features": "node scripts/test-features.mjs",
+    "test:currency": "node scripts/test-currency.mjs",
     "build:progression": "node scripts/build-progression-data.mjs",
     "test:level-up": "node scripts/test-level-up.mjs",
     "test:portrait-photos": "node scripts/test-portrait-photos.mjs",

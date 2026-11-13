@@ -30,6 +30,12 @@
 .vfx-inspiration-spent .vfx-sigil{animation:vfx-release 1.1s ease-out both}
 .vfx-resource,.vfx-condition,.vfx-xp{--vfx-size:96px}
 .vfx-resource .vfx-caption,.vfx-condition .vfx-caption,.vfx-xp .vfx-caption{top:calc(var(--vfx-y) + 47px)}
+.vfx-stud{position:absolute;left:0;top:0;width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 4px 3px #49361255);animation:vfx-stud-flight 950ms cubic-bezier(.25,.65,.4,1) both}
+.vfx-stud-gain{--stud-from-scale:1.1;--stud-to-scale:.35}
+.vfx-stud-spend{--stud-from-scale:.6;--stud-to-scale:1}
+.vfx-money .vfx-aura{width:230px;height:230px}
+.vfx-money .vfx-caption{top:calc(var(--vfx-y) + 37px);min-width:0;padding:10px 16px}
+.vfx-money .vfx-caption strong{font-family:var(--mono);font-size:17px;line-height:1.5}
 .vfx-calm{animation:none}
 .vfx-calm.vfx-scene::before,.vfx-calm.vfx-damage::before{display:none}
 .vfx-calm .vfx-caption{animation:none;transform:translateX(-50%);top:calc(var(--vfx-y) + 16px);box-shadow:0 4px 18px #0b211722}
@@ -64,6 +70,7 @@
 .inspiration.active .icon{filter:drop-shadow(0 0 5px #dcbd68)}
 
 @keyframes vfx-lifetime{0%,72%{opacity:1}100%{opacity:0}}
+@keyframes vfx-stud-flight{0%{opacity:0;transform:translate3d(var(--stud-from-x),var(--stud-from-y),0) translate(-50%,-50%) rotate(var(--stud-spin)) scale(var(--stud-from-scale))}15%{opacity:1}50%{opacity:1;transform:translate3d(var(--stud-via-x),var(--stud-via-y),0) translate(-50%,-50%) rotate(0) scale(1)}100%{opacity:0;transform:translate3d(var(--stud-to-x),var(--stud-to-y),0) translate(-50%,-50%) rotate(calc(var(--stud-spin) * -1)) scale(var(--stud-to-scale))}}
 @keyframes vfx-sigil{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-32deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}
 @keyframes vfx-aura{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}
 @keyframes vfx-caption{from{opacity:0;transform:translate(-50%,12px) scale(.95)}to{opacity:1;transform:translate(-50%,0) scale(1)}}

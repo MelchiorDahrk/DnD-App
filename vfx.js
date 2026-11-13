@@ -1,4 +1,6 @@
-// Local, short-lived canvas effects. Nothing is downloaded or stored with a character.
+// Local, short-lived effects. Nothing is stored with a character.
+import {COINS} from './model.js';
+
 const THEMES = {
   damage: {color:'#ed716b',accent:'#ffd4af',symbol:'strike',life:1100,count:44},
   heal: {color:'#75d9aa',accent:'#e6ffb8',symbol:'heart',life:1650,count:58},
@@ -12,7 +14,8 @@ const THEMES = {
   resource: {color:'#9dd4bc',accent:'#eff9bb',symbol:'rune',life:1050,count:28},
   critical: {color:'#edca7c',accent:'#fff9dd',symbol:'star',life:1950,count:90},
   condition: {color:'#d6a0c5',accent:'#f8def4',symbol:'rune',life:1100,count:26},
-  xp: {color:'#b9d583',accent:'#effbc7',symbol:'star',life:1200,count:36}
+  xp: {color:'#b9d583',accent:'#effbc7',symbol:'star',life:1200,count:36},
+  money: {color:'#e3bb64',accent:'#fff0bc',life:1700,count:0}
 };
 
 const SYMBOLS = {
@@ -143,7 +146,28 @@ export function clearEffects() {
   layer?.remove();layer=canvas=context=null;
 }
 
-export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true}={}) {
+function addStuds(burst,changes,x,y) {
+  for(const {denomination,amount} of changes) {
+    if(!Object.hasOwn(COINS,denomination)||!Number.isFinite(amount)||!amount)continue;
+    const origin=position(`[data-denomination="${denomination}"]`,true);
+    const startX=origin.node?origin.x:x,startY=origin.node?origin.y:y;
+    const gain=amount>0;
+    for(let i=0;i<7;i++) {
+      const spread=rand(-100,100),lift=rand(65,130);
+      const stud=document.createElement('img');stud.className=`vfx-stud vfx-stud-${gain?'gain':'spend'}`;
+      stud.src=`./assets/equipment/coin-${denomination}.webp`;stud.alt='';stud.width=36;stud.height=36;
+      const points=gain
+        ? [startX+spread,startY-lift,startX+spread*.45,startY-lift*.35,startX,startY]
+        : [startX,startY,startX+spread*.5,startY-rand(25,65),startX+spread,startY+rand(45,110)];
+      ['from-x','from-y','via-x','via-y','to-x','to-y'].forEach((key,index)=>stud.style.setProperty(`--stud-${key}`,`${points[index]}px`));
+      stud.style.setProperty('--stud-spin',`${rand(-210,210)}deg`);
+      stud.style.animationDelay=`${i*55}ms`;
+      burst.append(stud);
+    }
+  }
+}
+
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[]}={}) {
   const theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
@@ -159,6 +183,7 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     const aura=document.createElement('div');aura.className='vfx-aura';
     burst.append(aura);
     if(showSigil){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
+    if(kind==='money')addStuds(burst,studs,x,y);
   }
   if(showCaption){
     const caption=document.createElement('div');caption.className='vfx-caption';
@@ -174,7 +199,7 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
   bursts.push(entry);
   // Bound rapid taps; don't let old effects obscure the next action.
   if(bursts.length>3){const oldest=bursts.shift();clearTimeout(oldest.timer);oldest.node.remove();}
-  if(!calm){animateTarget(node,kind,theme.color);seed(kind,theme,x,y);}
+  if(!calm){animateTarget(node,kind,theme.color);if(theme.count)seed(kind,theme,x,y);}
 }
 
 if(typeof window!=='undefined') {
