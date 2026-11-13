@@ -160,6 +160,24 @@ The default party uses 2024 Fighter/Battle Master, Barbarian, and Rogue/Assassin
 
 This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode. Rules are summarized and adapted for this tracker.
 
+## Fantasy sound library
+
+**Settings & Backup → Sound effects** enables 49 bundled CC0 effects (about 1 MB with both encodings). Adjust the master slider or individual categories and use **Sound preview → Test sound** to audition cues. Sound remains off by default, and the existing `settings.sound` preference is preserved. Volume preferences use a separate `questlog.audio.v1` browser-storage key; version 2 character backups are unchanged, and volume settings stay on the device.
+
+Actual dice rolls, guided weapon attacks, spell casts, HP gains, potions, equipment, coins, XP, Inspiration, resource restoration, rests and completed level-ups have semantic cues. Opening the dice interface is silent. Weapon movement plays before a hit is known; impact cues require a confirmed hit/critical. Healing feedback follows actual HP gains. Spells choose effects by curated names and school, with a generic custom-spell fallback. The brief campfire fades after 12 seconds or when the rest dialog closes, is replaced, navigation changes, or the app is backgrounded. Sound does not alter rules or resolve spell damage/healing automatically.
+
+`sound.js` uses one native Web Audio context unlocked by a user gesture, lazy local decoding with an LRU cache (24 clips), shared pending loads (at most 8), at most 8 live voices (2 per event), cooldowns, and cancellation of pending playback on mute/background. `sound-events.js` owns semantic mappings and variant selection; the generated `sound-assets.js` supplies relative paths. Unsupported Vorbis decodes fall back to the bundled MP3, including offline. Audio errors resolve silently so gameplay continues. There is no runtime third-party request, audio framework, API, LLM or audio conversion. The build copies all assets to `dist/`; the service worker precaches both formats under the installation's subdirectory.
+
+Credits, source/license evidence, curation limitations and per-file provenance: [audio credits](assets/sfx/CREDITS.md), [manifest](assets/sfx/manifest.json), and [license evidence](assets/sfx/license-evidence.json). Dedicated fire/necrotic recordings, a literal drinking gulp and gentle nighttime ambience are gaps. Fire/dark events use neutral casts; radiant/protective spells share a chime. The preview supports listening review; automated checks validate decoding, silence and playback behavior rather than subjective speaker quality.
+
+To add or replace sounds:
+
+1. Read the [source agent guide](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/docs/AGENT_GUIDE.md). Search categories, tags, use cases and keywords in its catalog, then audition candidates. Download only selected files. Review the original source's explicit CC0 license.
+2. Edit `scripts/sfx-selection.json`: use a stable lowercase ID, category, creator and exact catalog ID. The repository revision and catalog SHA-256 are pinned. A supplemental CC0 asset needs a fixed download URL, original SHA-256, source/pack/license, and any explicit excerpt bounds or archive member/hash. Update credits and license evidence. Do not insert non-CC0 audio.
+3. Install **FFmpeg** for development and run `npm run import:sfx`. Set `FFMPEG` to its executable path if necessary. The current encodes use FFmpeg 9.0.2 (libvorbis q3 / libmp3lame 96 kbps); use the same version for byte-identical regeneration. The importer validates the catalog and original-file hashes, caches by SHA-256 in `.cache/sfx/import/`, peak adjusts and encodes locally, then regenerates the manifest and asset registry. `npm run import:sfx -- --offline` reproduces from that development cache. It refuses a hash mismatch or unapproved license. Normal builds never import or require FFmpeg/network access.
+4. Add semantic mappings to `sound-events.js` and hook successful gameplay actions, avoiding nested duplicate cues. Commit the selected OGG/MP3 files, selection, manifest, generated registry and credits together.
+5. Run `npm test`, `npm run check`, `npm run build`, and `npm run test:sounds`. The browser test checks the production `/dist/` subdirectory, every clip in both encodings, real gameplay, mobile settings, mute, persistence and offline playback. It uses installed Chrome/Firefox/Edge or `BROWSER_PATH`. Test mobile Safari separately before release.
+
 ## Check and build
 
 ```sh

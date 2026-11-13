@@ -1,0 +1,359 @@
+{
+  "repository": "Mcamento8/open-game-sfx-index",
+  "revision": "34bbe8b525b5ceff3804915ea745532af11f6055",
+  "catalogSha256": "7247b245bddc8ddc631fd92aad59b1ab4421568eee23d387dd5c07195c2beb3a",
+  "sounds": [
+    {
+      "id": "die-1",
+      "category": "dice",
+      "catalogId": "casino-audio_die-throw-1",
+      "author": "Kenney"
+    },
+    {
+      "id": "die-2",
+      "category": "dice",
+      "catalogId": "casino-audio_die-throw-2",
+      "author": "Kenney"
+    },
+    {
+      "id": "die-3",
+      "category": "dice",
+      "catalogId": "casino-audio_die-throw-3",
+      "author": "Kenney"
+    },
+    {
+      "id": "dice-1",
+      "category": "dice",
+      "catalogId": "casino-audio_dice-throw-1",
+      "author": "Kenney"
+    },
+    {
+      "id": "dice-2",
+      "category": "dice",
+      "catalogId": "casino-audio_dice-throw-2",
+      "author": "Kenney"
+    },
+    {
+      "id": "dice-3",
+      "category": "dice",
+      "catalogId": "casino-audio_dice-throw-3",
+      "author": "Kenney"
+    },
+    {
+      "id": "dice-shake",
+      "category": "dice",
+      "catalogId": "casino-audio_dice-shake-1",
+      "author": "Kenney"
+    },
+    {
+      "id": "bow-release",
+      "category": "combat",
+      "catalogId": "oga-battle_battle_sound_effects_Bow",
+      "author": "Ogrebane"
+    },
+    {
+      "id": "swing-heavy",
+      "category": "combat",
+      "catalogId": "oga-battle_battle_sound_effects_swish_2",
+      "author": "Ogrebane"
+    },
+    {
+      "id": "swing-sword",
+      "category": "combat",
+      "catalogId": "oga-battle_battle_sound_effects_swish_3",
+      "author": "Ogrebane"
+    },
+    {
+      "id": "swing-light",
+      "category": "combat",
+      "catalogId": "oga-battle_battle_sound_effects_swish_4",
+      "author": "Ogrebane"
+    },
+    {
+      "id": "dagger-1",
+      "category": "combat",
+      "catalogId": "rpg-audio_knifeSlice",
+      "author": "Kenney"
+    },
+    {
+      "id": "dagger-2",
+      "category": "combat",
+      "catalogId": "rpg-audio_knifeSlice2",
+      "author": "Kenney"
+    },
+    {
+      "id": "chop",
+      "category": "combat",
+      "catalogId": "rpg-audio_chop",
+      "author": "Kenney"
+    },
+    {
+      "id": "punch-1",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactPunch_medium_000",
+      "author": "Kenney"
+    },
+    {
+      "id": "punch-2",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactPunch_medium_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "blunt-1",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactWood_heavy_000",
+      "author": "Kenney"
+    },
+    {
+      "id": "blunt-2",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactWood_medium_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "metal-1",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactMetal_medium_000",
+      "author": "Kenney"
+    },
+    {
+      "id": "metal-2",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactMetal_heavy_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "arrow-impact",
+      "category": "combat",
+      "catalogId": "impact-sounds_impactSoft_medium_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "spell-cast-1",
+      "category": "magic",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_magic1",
+      "author": "artisticdude"
+    },
+    {
+      "id": "spell-cast-2",
+      "category": "magic",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_spell",
+      "author": "artisticdude"
+    },
+    {
+      "id": "pizzi-0",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI00",
+      "author": "Kenney"
+    },
+    {
+      "id": "pizzi-1",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI01",
+      "author": "Kenney"
+    },
+    {
+      "id": "pizzi-7",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI07",
+      "author": "Kenney"
+    },
+    {
+      "id": "pizzi-10",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI10",
+      "author": "Kenney"
+    },
+    {
+      "id": "pizzi-12",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI12",
+      "author": "Kenney"
+    },
+    {
+      "id": "pizzi-16",
+      "category": "progression",
+      "catalogId": "music-jingles_jingles_PIZZI16",
+      "author": "Kenney"
+    },
+    {
+      "id": "book-open",
+      "category": "inventory",
+      "catalogId": "rpg-audio_bookOpen",
+      "author": "Kenney"
+    },
+    {
+      "id": "book-close",
+      "category": "inventory",
+      "catalogId": "rpg-audio_bookClose",
+      "author": "Kenney"
+    },
+    {
+      "id": "page-1",
+      "category": "inventory",
+      "catalogId": "rpg-audio_bookFlip1",
+      "author": "Kenney"
+    },
+    {
+      "id": "page-2",
+      "category": "inventory",
+      "catalogId": "rpg-audio_bookFlip2",
+      "author": "Kenney"
+    },
+    {
+      "id": "coins-1",
+      "category": "inventory",
+      "catalogId": "rpg-audio_handleCoins",
+      "author": "Kenney"
+    },
+    {
+      "id": "coins-2",
+      "category": "inventory",
+      "catalogId": "rpg-audio_handleCoins2",
+      "author": "Kenney"
+    },
+    {
+      "id": "equip-latch",
+      "category": "inventory",
+      "catalogId": "rpg-audio_metalLatch",
+      "author": "Kenney"
+    },
+    {
+      "id": "equip-blade",
+      "category": "inventory",
+      "catalogId": "rpg-audio_drawKnife1",
+      "author": "Kenney"
+    },
+    {
+      "id": "pack-leather",
+      "category": "inventory",
+      "catalogId": "rpg-audio_handleSmallLeather",
+      "author": "Kenney"
+    },
+    {
+      "id": "pack-cloth",
+      "category": "inventory",
+      "catalogId": "rpg-audio_cloth1",
+      "author": "Kenney"
+    },
+    {
+      "id": "equip-armor",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_chainmail1",
+      "author": "artisticdude"
+    },
+    {
+      "id": "potion-bottle",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_bottle",
+      "author": "artisticdude"
+    },
+    {
+      "id": "potion-bubble",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_bubble",
+      "author": "artisticdude"
+    },
+    {
+      "id": "confirm",
+      "category": "interface",
+      "catalogId": "interface-sounds_confirmation_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "error",
+      "category": "interface",
+      "catalogId": "interface-sounds_error_001",
+      "author": "Kenney"
+    },
+    {
+      "id": "ice-cast",
+      "category": "magic",
+      "pack": "Ice spells",
+      "author": "bart",
+      "source": "https://opengameart.org/content/ice-spells",
+      "license": "CC0-1.0",
+      "downloadUrl": "https://opengameart.org/sites/default/files/icespells.zip",
+      "format": "zip",
+      "sha256": "45f02a204fc7cc896a17487080376c521ac2e564fe3da4d24cffa0086f8d6a54",
+      "archivePath": "coldsnap.wav",
+      "extractedSha256": "090977264d65d90a50b04e9f0c1c4e02fb194e5b50d9fe244f0079a4da54158c",
+      "tags": [
+        "ice",
+        "cold",
+        "spell"
+      ],
+      "duration": 1.3
+    },
+    {
+      "id": "lightning-cast",
+      "category": "magic",
+      "pack": "Spell sounds",
+      "author": "Augmentality (Brandon Morris), submitted by HaelDB",
+      "source": "https://opengameart.org/content/spell-sounds",
+      "license": "CC0-1.0",
+      "downloadUrl": "https://opengameart.org/sites/default/files/electricspell2.ogg",
+      "format": "ogg",
+      "sha256": "5fcb8824064d9dba2e3880d439a44b798ecdc2a58041cd028f094d774302a9a1",
+      "duration": 2.6,
+      "tags": [
+        "electricity",
+        "lightning",
+        "spell"
+      ],
+      "start": 3.2
+    },
+    {
+      "id": "healing-cast",
+      "category": "magic",
+      "pack": "Spell sounds",
+      "author": "Augmentality (Brandon Morris), submitted by HaelDB",
+      "source": "https://opengameart.org/content/spell-sounds",
+      "license": "CC0-1.0",
+      "downloadUrl": "https://opengameart.org/sites/default/files/healing.ogg",
+      "format": "ogg",
+      "sha256": "4600822379d18992e9f526b718395dc752821b6218ca5728fb2d5ea9cf774c6d",
+      "duration": 1.4,
+      "tags": [
+        "healing",
+        "restoration",
+        "spell"
+      ],
+      "start": 11.45
+    },
+    {
+      "id": "magic-chime",
+      "category": "magic",
+      "pack": "Magic Spell SFX",
+      "author": "JaggedStone",
+      "source": "https://opengameart.org/content/magic-spell-sfx",
+      "license": "CC0-1.0",
+      "downloadUrl": "https://opengameart.org/sites/default/files/magical_1_0.ogg",
+      "format": "ogg",
+      "sha256": "119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f",
+      "tags": [
+        "magic",
+        "chime",
+        "spellcasting"
+      ]
+    },
+    {
+      "id": "campfire",
+      "category": "ambient",
+      "pack": "Fireplace Sound loop",
+      "author": "PagDev",
+      "source": "https://opengameart.org/content/fireplace-sound-loop",
+      "license": "CC0-1.0",
+      "downloadUrl": "https://opengameart.org/sites/default/files/fire.wav",
+      "format": "wav",
+      "sha256": "85ca0cc60d0c037fff8b185e31ad1fcdbda6ce45eee17c3ee1318d1b8f59e330",
+      "duration": 10,
+      "tags": [
+        "campfire",
+        "crackle",
+        "rest"
+      ]
+    }
+  ]
+}
