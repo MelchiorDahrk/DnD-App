@@ -71,12 +71,12 @@ try {
   assert.equal(await page.$('canvas'),null,'Inventory lists need no WebGL');
   const mappedRow=await page.$eval('[data-action=item][data-id=icon-mapped]',el=>el.closest('.action-row').innerHTML);
   assert.match(mappedRow,/assets\/equipment\/longsword.webp/);
-  const customRow=await page.$eval('[data-action=item][data-id=icon-custom]',el=>el.closest('.action-row').innerHTML);
-  assert.doesNotMatch(customRow,/<img/);assert.match(customRow,/<svg/);
+  const customIcon=await page.$eval('[data-action=item][data-id=icon-custom]',el=>el.closest('.action-row').querySelector('.equipment-icon').innerHTML);
+  assert.match(customIcon,/<img src="\.\/assets\/equipment\/backpack\.webp"/);assert.match(customIcon,/<svg/);
   await page.$eval('.inventory-list .equipment-icon img',img=>img.src='./assets/equipment/missing-test.webp');
   await page.waitForFunction(()=>[...document.querySelectorAll('.equipment-icon')].some(el=>!el.querySelector('img')&&getComputedStyle(el.querySelector('svg')).visibility==='visible'));
   await page.click('[data-action=navigate][data-route=sheet]');
-  console.log('PASS inventory static thumbnails, custom SVGs, and missing-asset fallback without WebGL');
+  console.log('PASS inventory static thumbnails, custom backpack images and SVGs, and missing-asset fallback without WebGL');
   const attribution=await page.evaluate(async()=>Promise.all(['portrait-maker/LICENSE','portrait-maker/ldraw/CREDITS.txt','portrait-maker/ldraw/CAlicense4.txt'].map(async path=>{const response=await fetch(path);if(!response.ok)throw new Error(`Missing attribution: ${path}`);return response.text();})));
   assert.match(attribution[0],/Copyright \(c\) 2026 Maxichance/);
   assert.match(attribution[1],/file\s+author\s+license/);
