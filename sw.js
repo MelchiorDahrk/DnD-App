@@ -1,8 +1,9 @@
 import {LDRAW_ICONS} from './equipment-icons.js';
-const CACHE = 'questlog-app-v23-money-calculations';
+const CACHE = 'questlog-app-v24-rest-reminders';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./vfx.js','./vfx.css','./feature-catalog.js','./equipment-icons.js','./item-icons.js',...Object.keys(LDRAW_ICONS).map(key=>`./assets/equipment/${key}.webp`));
 ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progression-options.js');
+ASSETS.push('./rest-rules.js','./rest-reference-data.js');
 ASSETS.push('./portrait-scan.js','./portrait-photo-ui.js');
 ASSETS.push('./portrait-image-analysis.js','./portrait-match.js','./portrait-match-worker.js','./portrait-maker/portrait-match-index.json');
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});

@@ -162,20 +162,21 @@ export function changeHP(c, amount, kind) {
   if (c.hp > 0) { c.deathSuccess=0; c.deathFailure=0; }
   return c;
 }
-export function longRest(c,{reduceExhaustion=true}={}) {
+export function longRest(c,{reduceExhaustion=true,skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Long Rest.');
   c.hp=c.maxHp;c.tempHp=0;c.hitDice=c.level;
   if (reduceExhaustion) c.exhaustion=Math.max(0,c.exhaustion-1);
   c.slots.forEach(s=>s.used=0);c.concentration='';c.deathSuccess=0;c.deathFailure=0;
-  c.features.filter(f=>f.reset!=='manual').forEach(f=>f.used=0);
+  c.features.filter(f=>f.reset!=='manual'&&!skipFeatureIds.includes(f.id)).forEach(f=>f.used=0);
 }
-export function shortRest(c,count=0,roller=randomDie) {
+export function shortRest(c,count=0,roller=randomDie,{skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Short Rest.');
   if (!Number.isInteger(count)||count<0||count>c.hitDice) throw new Error('Choose an available number of Hit Dice.');
   const healing=Array.from({length:count},()=>Math.max(0,roller(c.hitDie)+mod(c.stats.con))).reduce((a,b)=>a+b,0);
   changeHP(c,healing,'heal');c.hitDice-=count;
   if(c.class==='Warlock'&&c.pactMagic===true)c.slots.forEach(s=>s.used=0);
   for (const f of c.features) {
+    if(skipFeatureIds.includes(f.id))continue;
     if (f.reset==='short') f.used=0;
     else if (f.reset==='long'&&f.shortRestRecovery) f.used=Math.max(0,f.used-f.shortRestRecovery);
   }
