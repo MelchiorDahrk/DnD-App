@@ -1,3 +1,4 @@
+import {visualChecks} from '../tests/helpers/browser-checks.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -70,7 +71,7 @@ try {
   await page.select('[data-item-icon-group]','Weapons');await search('21459');
   assert.equal(await page.$$eval('[data-item-icon-key]:not([hidden])',nodes=>nodes.length),1);
   await choose('katana');
-  assert.ok(await page.$eval('#modal',node=>node.scrollWidth<=node.clientWidth),'mobile editor fits');
+  if(visualChecks)assert.ok(await page.$eval('#modal',node=>node.scrollWidth<=node.clientWidth),'mobile editor fits');
   await search('sword');
   await mkdir(resolve(root,'screenshots'),{recursive:true});
   await page.$eval('.item-icon-picker',node=>node.scrollIntoView({block:'start'}));

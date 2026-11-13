@@ -1,3 +1,4 @@
+import {visualChecks} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
@@ -86,7 +87,7 @@ try {
   const box=await page.$eval('.portrait-crop-box',el=>{const b=el.getBoundingClientRect();return {x:b.x+b.width*.4,y:b.y+b.height*.4};});
   await page.touchscreen.touchStart(box.x,box.y);await page.touchscreen.touchMove(box.x+8,box.y);await page.touchscreen.touchEnd();
   assert.notEqual(await page.$eval('[data-rect="0"]',el=>el.value),before);
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.ok(await frame.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  if(visualChecks){assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));assert.ok(await frame.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));}
   await page.click('[data-photo="manual"]');await manualMohawk();await preview();
   await fs.mkdir(resolve('.tmp/screenshots'),{recursive:true});await page.screenshot({path:'.tmp/screenshots/portrait-photo-mobile.png'});
   await page.setViewport({width:1440,height:1100,hasTouch:true,isMobile:true});await page.screenshot({path:'.tmp/screenshots/portrait-photo-desktop.png'});

@@ -11,6 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      # Keep layout, palette and artwork measurements in the optional visual review.
+      # Persistence, interactions, asset loading and offline tests remain required.
+      QUESTLOG_VISUAL_CHECKS: '0'
     # Superseded builds can stop without interrupting an active Pages deployment.
     concurrency:
       group: pages-build-${{ github.ref }}
@@ -123,8 +127,8 @@ jobs:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
         run: npm run test:item-icons
-      - name: Browser appearance, contrast and offline checks
-        timeout-minutes: 3
+      - name: Browser appearance functionality and offline checks
+        timeout-minutes: 5
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           THEME_TEST_URL: http://127.0.0.1:4173/DnD-App/

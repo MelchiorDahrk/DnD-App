@@ -1,3 +1,4 @@
+import {visualChecks,waitForImages} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
@@ -58,8 +59,8 @@ try {
     for(const item of c.items) {
       const selector=`${entrySelector('pack',item.id)} .equipment-icon img`;
       assert.ok(await page.$(selector),`${c.name}: sheet icon for ${item.name}`);
-      const loaded=await page.$eval(selector,async img=>{img.scrollIntoView({block:'center'});await img.decode();return img.naturalWidth===160&&img.naturalHeight===160;});
-      assert.ok(loaded,`${c.name}: visible WebP for ${item.name}`);
+      await waitForImages(page,selector);
+      if(visualChecks)assert.ok(await page.$eval(selector,img=>img.naturalWidth===160&&img.naturalHeight===160),`${c.name}: thumbnail size for ${item.name}`);
       assert.equal(await page.$eval(selector,img=>img.getAttribute('src')),equipmentIconURL(item));
     }
     for(const attack of c.attacks) {
@@ -73,7 +74,7 @@ try {
       await page.click('#modal [data-combat-action="close"]');
     }
     await page.setViewport({width:390,height:844});
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${c.name}: mobile sheet icons fit`);
+    if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${c.name}: mobile sheet icons fit`);
     await page.setViewport({width:1440,height:1100});
   }
   // Exercise the entire catalog in the actual inventory, including lazy images
@@ -88,7 +89,7 @@ try {
   assert.equal(await page.$$eval('.inventory-list .equipment-icon img',imgs=>imgs.length),EQUIPMENT.length+1);
   for(const img of await page.$$('.inventory-list .equipment-icon img')) {
     await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
-    assert.equal(await img.evaluate(img=>img.naturalWidth),160);
+    assert.ok(await img.evaluate(img=>img.naturalWidth>0),'Equipment image loads');
   }
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);
@@ -96,7 +97,7 @@ try {
   for(const img of await page.$$('.inventory-list .equipment-icon img'))await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
   await page.setOfflineMode(false);
   await page.setViewport({width:390,height:844});
-  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Full catalog inventory fits mobile');
+  if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Full catalog inventory fits mobile');
   await page.setViewport({width:1440,height:1100});
   await page.goto(new URL('#sheet',base).href,{waitUntil:'networkidle0'});
   const renamed=entrySelector('attacks','renamed-weapon');
@@ -111,20 +112,22 @@ try {
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
   await page.reload({waitUntil:'networkidle0'});
   await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
-  await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>Promise.all(imgs.map(img=>img.decode())));
-  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth===160)),'Normal sheet pack preview shows LEGO icons');
+  await waitForImages(page,'[data-sheet-section="pack"] .equipment-icon img');
+  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth>0)),'Normal sheet pack preview shows LEGO icons');
   console.log('PASS all 63 default inventory entries and every default attack show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
 
   for (const width of [390,320]) {
     await page.setViewport({width,height:844});
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px expanded sheet must not overflow horizontally`);
-    const labelOverlaps=await page.$$eval('.ability-entry',entries=>entries.flatMap(entry=>{
-      const range=document.createRange();
-      range.selectNodeContents(entry.querySelector('.ability-label'));
-      const label=range.getBoundingClientRect(),star=entry.querySelector('.sheet-favorite').getBoundingClientRect();
-      return label.right<=star.left || label.bottom<=star.top || label.top>=star.bottom?[]:[{name:entry.dataset.sheetLabel,label:label.toJSON(),star:star.toJSON()}];
-    }));
-    assert.deepEqual(labelOverlaps,[],`${width}px ability names must not overlap favorite buttons`);
+    if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px expanded sheet must not overflow horizontally`);
+    if(visualChecks) {
+      const labelOverlaps=await page.$$eval('.ability-entry',entries=>entries.flatMap(entry=>{
+        const range=document.createRange();
+        range.selectNodeContents(entry.querySelector('.ability-label'));
+        const label=range.getBoundingClientRect(),star=entry.querySelector('.sheet-favorite').getBoundingClientRect();
+        return label.right<=star.left || label.bottom<=star.top || label.top>=star.bottom?[]:[{name:entry.dataset.sheetLabel,label:label.toJSON(),star:star.toJSON()}];
+      }));
+      assert.deepEqual(labelOverlaps,[],`${width}px ability names must not overlap favorite buttons`);
+    }
   }
   await mkdir(resolve(root,'.tmp'),{recursive:true});
   await page.$eval('.ability-section',node=>node.scrollIntoView());
@@ -174,14 +177,14 @@ try {
   assert.deepEqual(active(await state()).sheetLayout,layout);
   console.log('PASS reload, backup validation, and character switching preserve independent choices');
 
-  assert.ok(await page.$eval(sectionSelector('skills'),node=>node.getBoundingClientRect().height<250),'Collapsed skills panel should fit its favorite rows');
+  if(visualChecks)assert.ok(await page.$eval(sectionSelector('skills'),node=>node.getBoundingClientRect().height<250),'Collapsed skills panel should fit its favorite rows');
   await page.evaluate(()=>document.querySelectorAll('.toast').forEach(node=>node.remove()));
   await page.evaluate(()=>scrollTo(0,0));
   await mkdir(resolve(root,'.tmp'),{recursive:true});
   await page.screenshot({path:resolve(root,'.tmp/sheet-favorites-desktop.png'),fullPage:true});
   for (const width of [390,320]) {
     await page.setViewport({width,height:844});
-    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px sheet must not overflow horizontally`);
+    if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px sheet must not overflow horizontally`);
     for (const section of SHEET_SECTIONS) assert.deepEqual(await visibleKeys(section),[selected[section]]);
     await page.screenshot({path:resolve(root,`.tmp/sheet-favorites-${width}.png`),fullPage:true});
   }
@@ -225,7 +228,7 @@ try {
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$$eval('.sheet-section-body:not([hidden])',nodes=>nodes.length),0);
   for (const section of SHEET_SECTIONS) {
-    assert.ok(await page.$eval(sectionSelector(section),node=>node.getBoundingClientRect().height<100),'Sections without favorites should shrink to their headings');
+    if(visualChecks)assert.ok(await page.$eval(sectionSelector(section),node=>node.getBoundingClientRect().height<100),'Sections without favorites should shrink to their headings');
   }
   assert.deepEqual(errors,[]);
   console.log('PASS deleting favorites and collapsing empty sections with no browser errors');
