@@ -123,6 +123,13 @@ jobs:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
         run: npm run test:item-icons
+      - name: Browser appearance, contrast and offline checks
+        timeout-minutes: 3
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          THEME_TEST_URL: http://127.0.0.1:4173/DnD-App/
+          THEME_TEST_PRODUCTION: '1'
+        run: npm run test:themes
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist

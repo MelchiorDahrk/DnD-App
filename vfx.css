@@ -98,3 +98,10 @@
 @keyframes ascension-portrait{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 @media(max-width:600px){.vfx-scene{--vfx-size:174px}.vfx-scene .vfx-caption{top:calc(var(--vfx-y) + 103px)}.vfx-caption strong{font-size:21px}.vfx-scene .vfx-caption strong{font-size:25px}.vfx-caption span{font-size:7px;letter-spacing:1.2px}.ascension-stage{min-height:230px}.ascension-kicker{font-size:7px;letter-spacing:2px}.rest-illustration{min-height:156px}}
 @media(prefers-reduced-motion:reduce){.vfx-layer *,.rest-illustration *,.celebration-ascend *,.celebration-ascend *::before,.celebration-ascend *::after{animation:none!important;transition:none!important}.vfx-canvas,.vfx-aura,.vfx-sigil,.vfx-scene::before,.vfx-damage::before{display:none}.vfx-event{animation:none}.vfx-caption{transform:translateX(-50%)}.rest-sky i{opacity:.4}.ascension-stage::before,.ascension-stage::after{animation:none}}
+/* Shared journal materials around the existing effects; mechanics stay in vfx.js. */
+.vfx-caption{background:var(--hero-surface);color:var(--hero-text);border-color:var(--accent-edge);box-shadow:0 12px 40px var(--shadow-deep)}
+.vfx-caption strong{color:var(--hero-text)}.vfx-aura{filter:opacity(var(--effect-intensity))}
+.rest-illustration.rest-short{background:radial-gradient(ellipse at 71% 75%,var(--ambient-light),transparent 58%),var(--hero-surface);color:var(--hero-brass)}
+.rest-illustration.rest-long{background:radial-gradient(ellipse at 72% 15%,var(--status-magic-bg),transparent 65%),var(--hero-surface);color:var(--hero-muted)}
+.ascension-stage{background:radial-gradient(ellipse at 50% 53%,var(--ambient-light),transparent 58%),var(--hero-surface);color:var(--hero-brass);border-color:var(--accent-edge)}
+.hero[data-concentrating="true"] .portrait-button{border-radius:3px;box-shadow:0 0 0 2px var(--status-magic),0 0 20px var(--ambient-light)}

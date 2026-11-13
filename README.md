@@ -214,3 +214,9 @@ The portrait editor reuses [Bricktrait by Maxichance](https://github.com/Maxicha
 `npm run test:portraits` exercises the real editor, per-character saves, cancellation, reopening, backup import, mobile layout, and offline use in a headless Chromium browser. Start `npm run dev` first. It detects Microsoft Edge or Chrome, or uses `BROWSER_PATH`; `PORTRAIT_TEST_URL` can point at a build preview, including `/dist/` to verify relative asset paths.
 
 Fantasy catalog and equipment icon maintenance, build requirements, and regression coverage: [Fantasy Bricktrait guide](docs/fantasy-portraits.md). Inventory, sheet pack previews, and mapped weapon attacks use 239 small, bundled LEGO thumbnails. Add or edit an inventory item and open **Item icon → Browse library** to choose artwork. Search by name, keyword, category or LDraw part number; **Automatic** restores name/category matching. The library includes 111 additional weapons, shields, helmets, artifacts, foods and tools for custom items. Icon choices stay with each item in saves and JSON backups. Every equipment preset and default inventory item has an automatic mapping, with SVG fallbacks for unavailable images. Run `npm run test:item-icons` for the picker browser checks.
+
+## Appearance
+
+Questlog uses a shared fantasy journal interface in **Daylight Adventurer** and **Candlelit Adventurer** appearances, with a System option that follows your device. Change it on the welcome page, desktop sidebar, or in Settings & backup. Appearance stays on this device, separately from character backups.
+
+See [the appearance architecture and validation guide](docs/appearance.md) and [GUI asset credits](assets/gui/README.md). During development, open `/dev/theme-showcase.html` to compare production components in both appearances; the workshop is excluded from the static build. Run `npm run test:themes` for responsive, appearance, contrast, and offline browser checks.

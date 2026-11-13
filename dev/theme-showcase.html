@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#e5d9bf">
+  <meta name="color-scheme" content="light dark">
+  <script src="../theme.js"></script>
+  <link rel="stylesheet" href="../theme.css">
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="../vfx.css">
+  <title>Questlog · Theme workshop</title>
+  <style>
+    .workshop{max-width:1180px;margin:auto;padding:32px 24px 64px}.workshop-header{display:flex;justify-content:space-between;align-items:center;gap:24px;margin-bottom:32px}.workshop-header h1{font:500 40px/1.2 var(--display);margin:8px 0}.workshop-header select{min-width:240px}.workshop-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.workshop-section{margin:24px 0}.workshop-section h2{font-family:var(--display);font-size:24px}.workshop-buttons{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.workshop .hero{margin:0}.workshop .desktop-nav{padding:20px}.workshop .theme-control{max-width:320px}.swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.swatch{min-height:72px;border:1px solid var(--border-control);border-radius:5px;padding:10px;font-size:11px;display:flex;align-items:end}.workshop-palette{padding:20px;background:var(--surface-panel);color:var(--text-primary);border:1px solid var(--accent-edge);border-radius:10px}.workshop-palette h3{font:600 22px var(--display);margin-top:0}.workshop .toast{position:static;max-width:none}.workshop .ability-grid{grid-template-columns:repeat(3,1fr);margin:0}.workshop .spell-peek{margin-top:18px}.workshop .inventory-list .action-row{min-height:85px}.workshop .form-grid{margin-bottom:20px}.workshop .panel{align-self:start}.workshop-muted{color:var(--text-secondary);font-size:13px}.workshop-wide{grid-column:1/-1}.workshop-type{font:500 32px var(--display)}@media(max-width:760px){.workshop{padding:24px 16px 48px}.workshop-header{align-items:flex-start;flex-direction:column}.workshop-grid{grid-template-columns:1fr}.workshop-header h1{font-size:34px}.swatches{grid-template-columns:repeat(3,1fr)}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#workshop-main">Skip to workshop</a>
+  <main class="workshop" id="workshop-main" tabindex="-1">
+    <header class="workshop-header"><div><p class="eyebrow">QUESTLOG · DEVELOPMENT WORKSHOP</p><h1>One journal. Two kinds of light.</h1><p class="workshop-muted">Production components, LEGO artwork, and a shared fantasy design system.</p></div><label class="theme-control">Appearance<select data-theme-select aria-label="Showcase appearance"><option value="light">Light — Daylight Adventurer</option><option value="dark">Dark — Candlelit Adventurer</option><option value="system">System — follow device</option></select></label></header>
+    <div id="showcase"></div>
+  </main>
+  <dialog id="sample-dialog" aria-labelledby="sample-title"><form method="dialog"><header class="modal-header"><h2 id="sample-title">A moment by the fire</h2><button class="icon-btn" aria-label="Close dialog">×</button></header><div class="modal-body"><p class="modal-intro">Your next chapter can wait. Review your supplies before you rest.</p><label class="form-field">Rest notes<textarea placeholder="A watch beneath the stars…"></textarea></label><div class="modal-actions"><button class="btn">Return to adventure</button><button class="btn btn-primary">Take a rest</button></div></div></form></dialog>
+  <script type="module" src="./theme-showcase.js"></script>
+</body>
+</html>

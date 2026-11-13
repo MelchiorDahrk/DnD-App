@@ -121,6 +121,8 @@ try{
   }
   await close();await page.waitForFunction(()=>!document.querySelector('.vfx-layer'));
   await page.waitForFunction(()=>navigator.serviceWorker.controller);await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});
+  // Reload restores scroll position; center the target above the persistent mobile nav.
+  await page.$eval(`[data-action="attack-roll"][data-id="${axe.id}"]`,node=>node.scrollIntoView({block:'center'}));
   await page.click(`[data-action="attack-roll"][data-id="${axe.id}"]`);await click('roll');
   assert.ok(await page.$('.combat-result'),'guided attacks work offline');
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
