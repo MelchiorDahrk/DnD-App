@@ -1,0 +1,1913 @@
+{
+  "version": 1,
+  "source": {
+    "repository": "Mcamento8/open-game-sfx-index",
+    "revision": "34bbe8b525b5ceff3804915ea745532af11f6055",
+    "catalogURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/index.json",
+    "catalogSha256": "7247b245bddc8ddc631fd92aad59b1ab4421568eee23d387dd5c07195c2beb3a"
+  },
+  "encoding": {
+    "tool": "ffmpeg version 9.0.2-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers",
+    "ogg": "Vorbis q3, mono 44.1kHz",
+    "mp3": "LAME 96kbps, mono 44.1kHz",
+    "peakLimitDb": -3
+  },
+  "assets": [
+    {
+      "id": "die-1",
+      "filename": "die-1.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/die-1.ogg",
+        "mp3": "assets/sfx/dice/die-1.mp3"
+      },
+      "catalogId": "casino-audio_die-throw-1",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/die-throw-1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "b31d716165be60e442da3c1ca25a3968aad1e0851a7f0859f495aecc02fd9e13",
+      "originalFormat": "ogg",
+      "duration": 0.529,
+      "tags": [
+        "1",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "die",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 0
+      },
+      "sha256": {
+        "ogg": "060777ddb61c48a0c8a5aaa3a3837d56a17bb0ea65a3249caafd821afe99aa68",
+        "mp3": "397d1a263146bf0cfe44774029dd9d330a1066f4fd3c0c5c0e7b321abb4f4dc1"
+      },
+      "sizes": {
+        "ogg": 7834,
+        "mp3": 6896
+      }
+    },
+    {
+      "id": "die-2",
+      "filename": "die-2.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/die-2.ogg",
+        "mp3": "assets/sfx/dice/die-2.mp3"
+      },
+      "catalogId": "casino-audio_die-throw-2",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/die-throw-2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "a2702cfe14d24aab302483a1499daa88474a4af4acd794b58d97f4af16333b3d",
+      "originalFormat": "ogg",
+      "duration": 0.644,
+      "tags": [
+        "2",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "die",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.5
+      },
+      "sha256": {
+        "ogg": "1b173ded821311f8c59d10cac04a1670f060f089b6d6d195a1dcd08c22b36bf3",
+        "mp3": "50dbecc5639cf6d509ce213e64dc2b4cf9653040e89cee0ccc175d0f74384145"
+      },
+      "sizes": {
+        "ogg": 8868,
+        "mp3": 8150
+      }
+    },
+    {
+      "id": "die-3",
+      "filename": "die-3.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/die-3.ogg",
+        "mp3": "assets/sfx/dice/die-3.mp3"
+      },
+      "catalogId": "casino-audio_die-throw-3",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/die-throw-3.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "52fc44c7bb89328a147738574c925508c34abf4c19a014575b37ffb8c6b02437",
+      "originalFormat": "ogg",
+      "duration": 0.73,
+      "tags": [
+        "3",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "die",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.7
+      },
+      "sha256": {
+        "ogg": "038e77003f70bd7e8d9dfaf37fe020d8c56519797e91cb7587e2a4931954d14e",
+        "mp3": "913e2fec45d248df4e96848e8e8ba56cdef687897070f2a698cbe52757762259"
+      },
+      "sizes": {
+        "ogg": 9446,
+        "mp3": 9404
+      }
+    },
+    {
+      "id": "dice-1",
+      "filename": "dice-1.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/dice-1.ogg",
+        "mp3": "assets/sfx/dice/dice-1.mp3"
+      },
+      "catalogId": "casino-audio_dice-throw-1",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/dice-throw-1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "4e6581c73465cdd7ec32e86a709b4ea5c682e819c9bdb7989d1df1880ba67886",
+      "originalFormat": "ogg",
+      "duration": 0.63,
+      "tags": [
+        "1",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -0.1
+      },
+      "sha256": {
+        "ogg": "0d901cc9c039f2dc6b2b4a6f87778b9526d14c82a6f657da9cf06cf431a5aa6d",
+        "mp3": "44721d95b61b14cf9921a294bf62de63dcd0209b0b13b50af751a4486499e148"
+      },
+      "sizes": {
+        "ogg": 8718,
+        "mp3": 8150
+      }
+    },
+    {
+      "id": "dice-2",
+      "filename": "dice-2.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/dice-2.ogg",
+        "mp3": "assets/sfx/dice/dice-2.mp3"
+      },
+      "catalogId": "casino-audio_dice-throw-2",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/dice-throw-2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "e0b8c370503b2c5c2a72d311cccae30fe63a6afd48f2be32e771fcf1a98585d6",
+      "originalFormat": "ogg",
+      "duration": 0.4,
+      "tags": [
+        "2",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -0.9
+      },
+      "sha256": {
+        "ogg": "3ca8d660c4f0e17cc63bec036604c75bb239f73099af9b91915668f8b325cb7c",
+        "mp3": "56ce3bb91310f4ada1f8e34d2ce09d25719da95b159f239ab92a458eaa6c9b0f"
+      },
+      "sizes": {
+        "ogg": 6944,
+        "mp3": 5329
+      }
+    },
+    {
+      "id": "dice-3",
+      "filename": "dice-3.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/dice-3.ogg",
+        "mp3": "assets/sfx/dice/dice-3.mp3"
+      },
+      "catalogId": "casino-audio_dice-throw-3",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/dice-throw-3.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "09c13d35a9a30bfce31a5e9bca94adc5be189ddecd0b4500237d54c7fd05227c",
+      "originalFormat": "ogg",
+      "duration": 0.572,
+      "tags": [
+        "3",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "throw"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1
+      },
+      "sha256": {
+        "ogg": "3b8830ec745f8a6caeecb3d5df060c76c7b78a30d67e4da746abe691da6f727f",
+        "mp3": "901f72961122234e455e6dd5e5735ca5fc464213f996ee75f6fe8d802d84135a"
+      },
+      "sizes": {
+        "ogg": 8525,
+        "mp3": 7523
+      }
+    },
+    {
+      "id": "dice-shake",
+      "filename": "dice-shake.ogg",
+      "category": "dice",
+      "files": {
+        "ogg": "assets/sfx/dice/dice-shake.ogg",
+        "mp3": "assets/sfx/dice/dice-shake.mp3"
+      },
+      "catalogId": "casino-audio_dice-shake-1",
+      "author": "Kenney",
+      "pack": "casino-audio",
+      "sourceURL": "https://kenney.nl/assets/casino-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/casino-audio/dice-shake-1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "ba603441c857204dbe3ff3345902c7e1c3f523bf1bd314acf088609bc6c1e4e5",
+      "originalFormat": "ogg",
+      "duration": 1.481,
+      "tags": [
+        "1",
+        "card",
+        "casino",
+        "chip",
+        "dice",
+        "shake"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.6
+      },
+      "sha256": {
+        "ogg": "6d21185d2cb5925d1c09437ff7aff1dce23f30dccecbf3a342770571c0c88b3c",
+        "mp3": "7b2868d28fef36cdfe2eabb03d21091860fa59cc6637e47d92e68c9746c46f6c"
+      },
+      "sizes": {
+        "ogg": 18608,
+        "mp3": 18181
+      }
+    },
+    {
+      "id": "bow-release",
+      "filename": "bow-release.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/bow-release.ogg",
+        "mp3": "assets/sfx/combat/bow-release.mp3"
+      },
+      "catalogId": "oga-battle_battle_sound_effects_Bow",
+      "author": "Ogrebane",
+      "pack": "oga-battle",
+      "sourceURL": "https://opengameart.org/content/battle-sound-effects",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-battle/battle_sound_effects/Bow.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "0dc8cf132cf583563936ac3a4d776e196210d5f6703b4ebdd7c68e8f35b9f3e3",
+      "originalFormat": "wav",
+      "duration": 0.546,
+      "tags": [
+        "battle",
+        "bow",
+        "combat",
+        "effects",
+        "sound",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 0.4
+      },
+      "sha256": {
+        "ogg": "670b0aeee67df376b2a2806a122aefa37b191d3907ea59088637883e2a67898e",
+        "mp3": "3eeb1b940897894f42d27c84a63d0c8c103f211a814ab26173ac2bfccf67e4b9"
+      },
+      "sizes": {
+        "ogg": 7231,
+        "mp3": 6896
+      }
+    },
+    {
+      "id": "swing-heavy",
+      "filename": "swing-heavy.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/swing-heavy.ogg",
+        "mp3": "assets/sfx/combat/swing-heavy.mp3"
+      },
+      "catalogId": "oga-battle_battle_sound_effects_swish_2",
+      "author": "Ogrebane",
+      "pack": "oga-battle",
+      "sourceURL": "https://opengameart.org/content/battle-sound-effects",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-battle/battle_sound_effects/swish_2.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "690725fd44a99a4abd32d59c0efe8e28486afb564d3f5710cca75a2c786cf0f1",
+      "originalFormat": "wav",
+      "duration": 0.368,
+      "tags": [
+        "2",
+        "battle",
+        "combat",
+        "effects",
+        "sound",
+        "swish",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.7
+      },
+      "sha256": {
+        "ogg": "2e4c0bedd4f1950cbef961a4adc7fd3298f772e2341d9f7fa89de695b9bc08bc",
+        "mp3": "38f565efcf7bf267ff4399a262c655a529a6856c46a3c71c6850ba957e92f084"
+      },
+      "sizes": {
+        "ogg": 6360,
+        "mp3": 5016
+      }
+    },
+    {
+      "id": "swing-sword",
+      "filename": "swing-sword.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/swing-sword.ogg",
+        "mp3": "assets/sfx/combat/swing-sword.mp3"
+      },
+      "catalogId": "oga-battle_battle_sound_effects_swish_3",
+      "author": "Ogrebane",
+      "pack": "oga-battle",
+      "sourceURL": "https://opengameart.org/content/battle-sound-effects",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-battle/battle_sound_effects/swish_3.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "7767c7b6ba063d8d5de6e05ba29c037af5c4a19d02b00b6b5ff398f72732e1c9",
+      "originalFormat": "wav",
+      "duration": 0.572,
+      "tags": [
+        "3",
+        "battle",
+        "combat",
+        "effects",
+        "sound",
+        "swish",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.9
+      },
+      "sha256": {
+        "ogg": "87a75336408e5f105ed403c505cf43570223125faa2b0eb450d2d572c5fb560c",
+        "mp3": "8f1ba8810c485cb854199fc31a2e090775f4cfa90d5dd50b140e79dbe8b4b5ff"
+      },
+      "sizes": {
+        "ogg": 8197,
+        "mp3": 7523
+      }
+    },
+    {
+      "id": "swing-light",
+      "filename": "swing-light.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/swing-light.ogg",
+        "mp3": "assets/sfx/combat/swing-light.mp3"
+      },
+      "catalogId": "oga-battle_battle_sound_effects_swish_4",
+      "author": "Ogrebane",
+      "pack": "oga-battle",
+      "sourceURL": "https://opengameart.org/content/battle-sound-effects",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-battle/battle_sound_effects/swish_4.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "a53382f21d9c7e4d7a1d6e8cddc9ce9779740f9ad2ba4d9012ee20318c04f24c",
+      "originalFormat": "wav",
+      "duration": 0.372,
+      "tags": [
+        "4",
+        "battle",
+        "combat",
+        "effects",
+        "sound",
+        "swish",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.3
+      },
+      "sha256": {
+        "ogg": "bff8f94b49b20b7eb72b6bc81da56dc511492c0c2b24a6d8e2c7f4c00d25faf3",
+        "mp3": "c192df57d20c560e8e0c52d8923e5c862bf582df039ce0b2ec2b535301c9aaf0"
+      },
+      "sizes": {
+        "ogg": 6557,
+        "mp3": 5016
+      }
+    },
+    {
+      "id": "dagger-1",
+      "filename": "dagger-1.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/dagger-1.ogg",
+        "mp3": "assets/sfx/combat/dagger-1.mp3"
+      },
+      "catalogId": "rpg-audio_knifeSlice",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/knifeSlice.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f",
+      "originalFormat": "ogg",
+      "duration": 0.597,
+      "tags": [
+        "foley",
+        "footstep",
+        "knifeslice",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -0.1
+      },
+      "sha256": {
+        "ogg": "6574cb24ed04ea63b30278fc06c87aa5b3887ac1e36d1f8f0276e7ace5826ad6",
+        "mp3": "1ddcec61e7b411a6872aa1ee60f47e2bfa45d6f34217a414fcceb117aada46fe"
+      },
+      "sizes": {
+        "ogg": 8501,
+        "mp3": 7523
+      }
+    },
+    {
+      "id": "dagger-2",
+      "filename": "dagger-2.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/dagger-2.ogg",
+        "mp3": "assets/sfx/combat/dagger-2.mp3"
+      },
+      "catalogId": "rpg-audio_knifeSlice2",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/knifeSlice2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def",
+      "originalFormat": "ogg",
+      "duration": 0.566,
+      "tags": [
+        "foley",
+        "footstep",
+        "knifeslice2",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "aaf6232254bb7daf30cfc9bf7d44a04036af31399a01c87ae24c9a90d7c09ee4",
+        "mp3": "20ed6a7d924700e494049e484fcbcbb27bd597dc438d1569c5a97fb2bd72915f"
+      },
+      "sizes": {
+        "ogg": 8350,
+        "mp3": 7210
+      }
+    },
+    {
+      "id": "chop",
+      "filename": "chop.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/chop.ogg",
+        "mp3": "assets/sfx/combat/chop.mp3"
+      },
+      "catalogId": "rpg-audio_chop",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/chop.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "d00c2b3c9fff07e376145c8c8c45c90e5084ec192f6ce0387db233f7b86f1486",
+      "originalFormat": "ogg",
+      "duration": 0.237,
+      "tags": [
+        "chop",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.8
+      },
+      "sha256": {
+        "ogg": "cd9a06736452285df3c1766e21fb12460a9a3c2d3cb95efb5589b5413e541599",
+        "mp3": "0884096c0ccca9b27fce3d81aac4c90df15328e29964cac070fd81f9cc0e4abb"
+      },
+      "sizes": {
+        "ogg": 5641,
+        "mp3": 3448
+      }
+    },
+    {
+      "id": "punch-1",
+      "filename": "punch-1.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/punch-1.ogg",
+        "mp3": "assets/sfx/combat/punch-1.mp3"
+      },
+      "catalogId": "impact-sounds_impactPunch_medium_000",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactPunch_medium_000.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "486988aa2d6440ffc4c62a0e8ccf3c23673ba84424bd4723378d451b7255eb5c",
+      "originalFormat": "ogg",
+      "duration": 0.428,
+      "tags": [
+        "000",
+        "collision",
+        "hit",
+        "impact",
+        "impactpunch",
+        "medium"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.9
+      },
+      "sha256": {
+        "ogg": "c8a6406b456ae3ca2e498c8f898c8a57564ba2cfb8004b781173568c07987538",
+        "mp3": "44127a9fa9bccebe308affa6abef704330135dae6251ddb15c295e7cbbe3221c"
+      },
+      "sizes": {
+        "ogg": 6377,
+        "mp3": 5642
+      }
+    },
+    {
+      "id": "punch-2",
+      "filename": "punch-2.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/punch-2.ogg",
+        "mp3": "assets/sfx/combat/punch-2.mp3"
+      },
+      "catalogId": "impact-sounds_impactPunch_medium_001",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactPunch_medium_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "e71d23abcc3f10d9d6bc9615b2a431fff70b12333a5fcdd9964457564ace4349",
+      "originalFormat": "ogg",
+      "duration": 0.402,
+      "tags": [
+        "001",
+        "collision",
+        "hit",
+        "impact",
+        "impactpunch",
+        "medium"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.9
+      },
+      "sha256": {
+        "ogg": "b919fdbc6dfa88258337de279e7e9e5aedb3610d618419ebf32c91bdf8ca7033",
+        "mp3": "0b86c89bd73de12f9375770830db1924ced0f6634b3894560debf94569a515e1"
+      },
+      "sizes": {
+        "ogg": 6324,
+        "mp3": 5329
+      }
+    },
+    {
+      "id": "blunt-1",
+      "filename": "blunt-1.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/blunt-1.ogg",
+        "mp3": "assets/sfx/combat/blunt-1.mp3"
+      },
+      "catalogId": "impact-sounds_impactWood_heavy_000",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactWood_heavy_000.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "15ff82332f342c30e469215539e1cc57e11b221aa2cf7e11e811d313a9927f3d",
+      "originalFormat": "ogg",
+      "duration": 0.31,
+      "tags": [
+        "000",
+        "collision",
+        "heavy",
+        "hit",
+        "impact",
+        "impactwood"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.1
+      },
+      "sha256": {
+        "ogg": "316f2f9ea327482aecb0372f326293bc731d868409f12748bf13f3abeefc02aa",
+        "mp3": "b3327c39c4d321e6240a86d8a8dddc3133cb7957c0f41fbd2e744b777fa6dcef"
+      },
+      "sizes": {
+        "ogg": 4296,
+        "mp3": 4075
+      }
+    },
+    {
+      "id": "blunt-2",
+      "filename": "blunt-2.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/blunt-2.ogg",
+        "mp3": "assets/sfx/combat/blunt-2.mp3"
+      },
+      "catalogId": "impact-sounds_impactWood_medium_001",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactWood_medium_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "15271dbe8e2872dbb0ff1aeb7b12b2d2b92b7c1951c88532b9ab9158c36dfc73",
+      "originalFormat": "ogg",
+      "duration": 0.33,
+      "tags": [
+        "001",
+        "collision",
+        "hit",
+        "impact",
+        "impactwood",
+        "medium"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2
+      },
+      "sha256": {
+        "ogg": "ae5e13fc3283dfffe55acf01785f486d6ba1423bf417cbfca98b9df2d644ab18",
+        "mp3": "5085717bc2321dacd231a89262b087c759cdc10a8bcfea3c5d0540681df3227c"
+      },
+      "sizes": {
+        "ogg": 4809,
+        "mp3": 4389
+      }
+    },
+    {
+      "id": "metal-1",
+      "filename": "metal-1.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/metal-1.ogg",
+        "mp3": "assets/sfx/combat/metal-1.mp3"
+      },
+      "catalogId": "impact-sounds_impactMetal_medium_000",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactMetal_medium_000.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "a96f879fec0864a8938e0c745b6996a6c5679c16a234ce31a01cc995e8401003",
+      "originalFormat": "ogg",
+      "duration": 0.269,
+      "tags": [
+        "000",
+        "collision",
+        "hit",
+        "impact",
+        "impactmetal",
+        "medium"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.8
+      },
+      "sha256": {
+        "ogg": "3236d18cba1499035d8497838cda57a60532e7b50a1365adfe3f0bb57da4802b",
+        "mp3": "1ef5199833fed53be7e38a4a10d291f1689ea5153e772b155de0a06df60e2ff5"
+      },
+      "sizes": {
+        "ogg": 5142,
+        "mp3": 3762
+      }
+    },
+    {
+      "id": "metal-2",
+      "filename": "metal-2.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/metal-2.ogg",
+        "mp3": "assets/sfx/combat/metal-2.mp3"
+      },
+      "catalogId": "impact-sounds_impactMetal_heavy_001",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactMetal_heavy_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "83554049f81f4db9209379e103c30bfa63f65c42189a03f300b045c2c82e23ae",
+      "originalFormat": "ogg",
+      "duration": 0.356,
+      "tags": [
+        "001",
+        "collision",
+        "heavy",
+        "hit",
+        "impact",
+        "impactmetal"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.9
+      },
+      "sha256": {
+        "ogg": "571ee6833762876b499633554e4ad6fc236e43ebbc8792f04e71734c98936268",
+        "mp3": "1763896066c4f9e4bb00e1e14bc001dae021a67ed21311d27e1e17f215b717ef"
+      },
+      "sizes": {
+        "ogg": 4906,
+        "mp3": 4702
+      }
+    },
+    {
+      "id": "arrow-impact",
+      "filename": "arrow-impact.ogg",
+      "category": "combat",
+      "files": {
+        "ogg": "assets/sfx/combat/arrow-impact.ogg",
+        "mp3": "assets/sfx/combat/arrow-impact.mp3"
+      },
+      "catalogId": "impact-sounds_impactSoft_medium_001",
+      "author": "Kenney",
+      "pack": "impact-sounds",
+      "sourceURL": "https://kenney.nl/assets/impact-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/impact-sounds/impactSoft_medium_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "7642a4fd43e547afe4f7adfadb3dabb681c0ff512f52c1674bae30a726841faf",
+      "originalFormat": "ogg",
+      "duration": 0.18,
+      "tags": [
+        "001",
+        "collision",
+        "hit",
+        "impact",
+        "impactsoft",
+        "medium"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.1
+      },
+      "sha256": {
+        "ogg": "abe12398a3ac84065da91c875fcabc74230d66e1732cb908ee8171851ad750d0",
+        "mp3": "d3e928322319c17ef9a41b8396c65082dc1926014cce50a922353078ec343a8c"
+      },
+      "sizes": {
+        "ogg": 3962,
+        "mp3": 2508
+      }
+    },
+    {
+      "id": "spell-cast-1",
+      "filename": "spell-cast-1.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/spell-cast-1.ogg",
+        "mp3": "assets/sfx/magic/spell-cast-1.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_magic1",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/battle/magic1.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "cadea162f3fe91c27666ab2a0516fa3bf156997d92d4f8145919126bca7b1e8a",
+      "originalFormat": "wav",
+      "duration": 0.895,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "magic1",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 0.2
+      },
+      "sha256": {
+        "ogg": "cf5ab86a571a4700241aa22d59a338e0817e44e47c32ce4f8875641b0598a21c",
+        "mp3": "955cea06de9abe6b39043000c2ffbf4afc4749a62c0445ff04565c351a415080"
+      },
+      "sizes": {
+        "ogg": 8329,
+        "mp3": 10971
+      }
+    },
+    {
+      "id": "spell-cast-2",
+      "filename": "spell-cast-2.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/spell-cast-2.ogg",
+        "mp3": "assets/sfx/magic/spell-cast-2.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_spell",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/battle/spell.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "61d79416a7cbb04e1f46618ded72386f82bb6bd9dc170170480d271f4efb3958",
+      "originalFormat": "wav",
+      "duration": 3.25,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound",
+        "spell"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 2.3
+      },
+      "sha256": {
+        "ogg": "7a28d351fd235bf79a1a8261878fc71be3e02001c1e7656c9012934794b8b576",
+        "mp3": "a27b9affd448b38f293a077a4f4c6c6ab58fae64cc1455e854713b2baeaf6998"
+      },
+      "sizes": {
+        "ogg": 25058,
+        "mp3": 39497
+      }
+    },
+    {
+      "id": "pizzi-0",
+      "filename": "pizzi-0.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-0.ogg",
+        "mp3": "assets/sfx/progression/pizzi-0.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI00",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI00.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "b442ade3308a2bbda4b8c572c86f9f1071c7bdbcfb1e6f915d35c605b61bd475",
+      "originalFormat": "ogg",
+      "duration": 0.515,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi00",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 3.1
+      },
+      "sha256": {
+        "ogg": "cf16f936a4484d1380913b7fa0532f98b3648982045cdb16243afd69094ac237",
+        "mp3": "486c287eb5aeab89d4aed646e4dc3787430637c0d2cdbf08f479ae1e34f0b888"
+      },
+      "sizes": {
+        "ogg": 7233,
+        "mp3": 6269
+      }
+    },
+    {
+      "id": "pizzi-1",
+      "filename": "pizzi-1.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-1.ogg",
+        "mp3": "assets/sfx/progression/pizzi-1.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI01",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI01.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "3f8f2534a297d19386c233a7ee4fa8737cc40870dd206010263760e1983dde46",
+      "originalFormat": "ogg",
+      "duration": 0.999,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi01",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 2.1
+      },
+      "sha256": {
+        "ogg": "4d9b102ab34ff4f73ba7a88870dc1458fd6b0ca38d26d7d66b9371b75172d6d2",
+        "mp3": "fe06c2e8156b054e3d0197bcc70dc7600147ce9e1aa2e4472c2974df529b3d68"
+      },
+      "sizes": {
+        "ogg": 11191,
+        "mp3": 12539
+      }
+    },
+    {
+      "id": "pizzi-7",
+      "filename": "pizzi-7.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-7.ogg",
+        "mp3": "assets/sfx/progression/pizzi-7.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI07",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI07.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "91870588924e0e498c6eb8d4f4ccf8595c9e7dc51fb553797b551062e642ce7c",
+      "originalFormat": "ogg",
+      "duration": 1.324,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi07",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 2.7
+      },
+      "sha256": {
+        "ogg": "dcca99a386fd6b88e1ea0dbf28d6f994d1590a51259421504bda02727bf1d403",
+        "mp3": "939bab27fb34a66e47c85630603ad859a8ae7a354be886f19aa714f1b5bb08c7"
+      },
+      "sizes": {
+        "ogg": 12755,
+        "mp3": 16300
+      }
+    },
+    {
+      "id": "pizzi-10",
+      "filename": "pizzi-10.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-10.ogg",
+        "mp3": "assets/sfx/progression/pizzi-10.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI10",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI10.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "baf50beffc4cc2dbb92c9d596a22732a8b5249c7648b681c0df6d0af6c561478",
+      "originalFormat": "ogg",
+      "duration": 0.794,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi10",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.6
+      },
+      "sha256": {
+        "ogg": "ddf3e810b7a60cfd34e4a50d4799f2733586d4ee9edf96f62e9d7b9f47ab0a38",
+        "mp3": "eaeff659d81c958d228750632b14f84ba2b51b81def9958612323442c04a287b"
+      },
+      "sizes": {
+        "ogg": 9637,
+        "mp3": 10031
+      }
+    },
+    {
+      "id": "pizzi-12",
+      "filename": "pizzi-12.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-12.ogg",
+        "mp3": "assets/sfx/progression/pizzi-12.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI12",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI12.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "f5fc4c01b106e6317acaee1bffb51704e41c85b0fa7529dff86b447bdabf150c",
+      "originalFormat": "ogg",
+      "duration": 1.014,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi12",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.2
+      },
+      "sha256": {
+        "ogg": "cea873424eb8c18aa05c7203659bf67f906bfbae62ed8249300ffc8d7caf98b8",
+        "mp3": "cd89fb259dce20935168714c55285dba0f99cc4fc0d8a962b2e22ef6c1e692ee"
+      },
+      "sizes": {
+        "ogg": 10861,
+        "mp3": 12539
+      }
+    },
+    {
+      "id": "pizzi-16",
+      "filename": "pizzi-16.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/pizzi-16.ogg",
+        "mp3": "assets/sfx/progression/pizzi-16.mp3"
+      },
+      "catalogId": "music-jingles_jingles_PIZZI16",
+      "author": "Kenney",
+      "pack": "music-jingles",
+      "sourceURL": "https://kenney.nl/assets/music-jingles",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI16.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "1b1211b6360aae37ea685fee057bcabd034a749c1dfac6a9d643086d96e9b9aa",
+      "originalFormat": "ogg",
+      "duration": 0.459,
+      "tags": [
+        "jingle",
+        "jingles",
+        "music",
+        "pizzi16",
+        "stinger"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 2.4
+      },
+      "sha256": {
+        "ogg": "d37c1476523a2d52be03b36acab259e9b231b56c4df05e49e47c0fda10ae3302",
+        "mp3": "1418ac103abcf9c2904a3be2ca27fec3c5fd1698b15f2935fedf9e1be1e763a7"
+      },
+      "sizes": {
+        "ogg": 7062,
+        "mp3": 5956
+      }
+    },
+    {
+      "id": "book-open",
+      "filename": "book-open.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/book-open.ogg",
+        "mp3": "assets/sfx/inventory/book-open.mp3"
+      },
+      "catalogId": "rpg-audio_bookOpen",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/bookOpen.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "953390534377222bee89ac8cd9e60a58fdc037c71a4d7c18c43cd647c7f34ba8",
+      "originalFormat": "ogg",
+      "duration": 0.151,
+      "tags": [
+        "bookopen",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 10.5
+      },
+      "sha256": {
+        "ogg": "d1117e83a9d3d937a1fc6e8a5d437e483ed9788600985b5cbf70900658de1fee",
+        "mp3": "2eddd227aa214ad6f4b84c25e19e14f1591cefbe16734f30bfdf3d75ce06dd8d"
+      },
+      "sizes": {
+        "ogg": 5310,
+        "mp3": 2194
+      }
+    },
+    {
+      "id": "book-close",
+      "filename": "book-close.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/book-close.ogg",
+        "mp3": "assets/sfx/inventory/book-close.mp3"
+      },
+      "catalogId": "rpg-audio_bookClose",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/bookClose.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "81e976532565f4372abd14e83d2684195fa548d0a28d345de221e56052454f32",
+      "originalFormat": "ogg",
+      "duration": 0.228,
+      "tags": [
+        "bookclose",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "9d0252d31ee4330d7d4eaa3579d2a39dc673b8ce1a1a7717b9d5c73e70b8e3f3",
+        "mp3": "565c43e587507a57b290f6e082c19d0521db5474f1a30638575a4ce5efa974b0"
+      },
+      "sizes": {
+        "ogg": 5657,
+        "mp3": 3135
+      }
+    },
+    {
+      "id": "page-1",
+      "filename": "page-1.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/page-1.ogg",
+        "mp3": "assets/sfx/inventory/page-1.mp3"
+      },
+      "catalogId": "rpg-audio_bookFlip1",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/bookFlip1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "fa81ac2fedc8c641661b87e349630a36c9800e795e0c800e029214efdbe26a7d",
+      "originalFormat": "ogg",
+      "duration": 0.766,
+      "tags": [
+        "bookflip1",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "b046071c6d8f9e69b2294ff16e5832199553354ddf90910fd9a011ee6084717c",
+        "mp3": "83915b4d351b03cade53a66174701d9fc0076c38051ad95a1f5c3f6dd6598e60"
+      },
+      "sizes": {
+        "ogg": 10118,
+        "mp3": 9718
+      }
+    },
+    {
+      "id": "page-2",
+      "filename": "page-2.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/page-2.ogg",
+        "mp3": "assets/sfx/inventory/page-2.mp3"
+      },
+      "catalogId": "rpg-audio_bookFlip2",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/bookFlip2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "3409042acbfaebc24c1a6327dc073e36f9250841712e96c5040da566a97df73c",
+      "originalFormat": "ogg",
+      "duration": 0.451,
+      "tags": [
+        "bookflip2",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 6.7
+      },
+      "sha256": {
+        "ogg": "d460dec98ab5fae059f971a61f5420e2d5933192f73cecf6772d6c0cd2e4ad0c",
+        "mp3": "d46745fae5c24b036aa7627d688a1f0f969eaed950d2ff75ab6b145d1253dcd0"
+      },
+      "sizes": {
+        "ogg": 7569,
+        "mp3": 5642
+      }
+    },
+    {
+      "id": "coins-1",
+      "filename": "coins-1.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/coins-1.ogg",
+        "mp3": "assets/sfx/inventory/coins-1.mp3"
+      },
+      "catalogId": "rpg-audio_handleCoins",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/handleCoins.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab",
+      "originalFormat": "ogg",
+      "duration": 0.866,
+      "tags": [
+        "foley",
+        "footstep",
+        "handlecoins",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.5
+      },
+      "sha256": {
+        "ogg": "1692c16f41748678ee4b3ce0e4540b61844ebb9f10bcea9ac8fb56b2fe173db6",
+        "mp3": "419741b7696dbf1bd8dbd10422d15a88a4bdcc59951d8a0c3b55cdd15bddf92d"
+      },
+      "sizes": {
+        "ogg": 12109,
+        "mp3": 10658
+      }
+    },
+    {
+      "id": "coins-2",
+      "filename": "coins-2.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/coins-2.ogg",
+        "mp3": "assets/sfx/inventory/coins-2.mp3"
+      },
+      "catalogId": "rpg-audio_handleCoins2",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/handleCoins2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "4b857968d64f9ac9336a10ffac6694d7547e1f01566ad6857b30bc8db3ee6c32",
+      "originalFormat": "ogg",
+      "duration": 0.335,
+      "tags": [
+        "foley",
+        "footstep",
+        "handlecoins2",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 9.2
+      },
+      "sha256": {
+        "ogg": "de29efeffb012f4ddf91422f3d271ddb8618fa18f73f6b1c546ef899570bc10c",
+        "mp3": "1e1b1bcdfeedf20613436f804260bc23d536aa80396ad302aee736424da5f210"
+      },
+      "sizes": {
+        "ogg": 7630,
+        "mp3": 4389
+      }
+    },
+    {
+      "id": "equip-latch",
+      "filename": "equip-latch.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-latch.ogg",
+        "mp3": "assets/sfx/inventory/equip-latch.mp3"
+      },
+      "catalogId": "rpg-audio_metalLatch",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/metalLatch.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708",
+      "originalFormat": "ogg",
+      "duration": 0.258,
+      "tags": [
+        "foley",
+        "footstep",
+        "metallatch",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "4d1dabe0a4a7574ea679d7ff5dddccc6c96355d1648ff097d6ef708dee5f75cb",
+        "mp3": "287c4e645e7d9e1ef4891db16d092fef30247c5f204d20dcd972f1bdc66b4e5d"
+      },
+      "sizes": {
+        "ogg": 5982,
+        "mp3": 3762
+      }
+    },
+    {
+      "id": "equip-blade",
+      "filename": "equip-blade.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-blade.ogg",
+        "mp3": "assets/sfx/inventory/equip-blade.mp3"
+      },
+      "catalogId": "rpg-audio_drawKnife1",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/drawKnife1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "276403e72c3b71c47bc24db3083970c23f8e5551ffa78f436f83483c56f3f0bb",
+      "originalFormat": "ogg",
+      "duration": 0.397,
+      "tags": [
+        "drawknife1",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 20
+      },
+      "sha256": {
+        "ogg": "b0834c2ab8fd27f1d892934ccbadf5220aa95b008bfe401fcb69a789034fd693",
+        "mp3": "bd51707984c73048ce0db850c299e6d665a5966e28dfbcad6212e43089a117c6"
+      },
+      "sizes": {
+        "ogg": 6793,
+        "mp3": 5329
+      }
+    },
+    {
+      "id": "pack-leather",
+      "filename": "pack-leather.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/pack-leather.ogg",
+        "mp3": "assets/sfx/inventory/pack-leather.mp3"
+      },
+      "catalogId": "rpg-audio_handleSmallLeather",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/handleSmallLeather.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "ae3cbf695aa0a8b98b5a80a835be5a3ccbd5446a24db2235cd4c3cd6fc92ed96",
+      "originalFormat": "ogg",
+      "duration": 0.335,
+      "tags": [
+        "foley",
+        "footstep",
+        "handlesmallleather",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 11.6
+      },
+      "sha256": {
+        "ogg": "1e46ebaf43cfbd3e133152cb16014d49b677853084487c567b3c92b42c6b9d7d",
+        "mp3": "32fd8f915012f27ff25d4a1f39190c5321985b7479fc834f0ecb78bdbc21b6c7"
+      },
+      "sizes": {
+        "ogg": 6713,
+        "mp3": 4389
+      }
+    },
+    {
+      "id": "pack-cloth",
+      "filename": "pack-cloth.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/pack-cloth.ogg",
+        "mp3": "assets/sfx/inventory/pack-cloth.mp3"
+      },
+      "catalogId": "rpg-audio_cloth1",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/cloth1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d",
+      "originalFormat": "ogg",
+      "duration": 0.684,
+      "tags": [
+        "cloth1",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1
+      },
+      "sha256": {
+        "ogg": "b1118b171e7cd80ee4e456dee19c023464522df561b843533549f0f92081d6ce",
+        "mp3": "8757ce7bbb22f0b8cc3a5537502fdb87933f5c717a704452ace5fd687a96635c"
+      },
+      "sizes": {
+        "ogg": 9171,
+        "mp3": 8464
+      }
+    },
+    {
+      "id": "equip-armor",
+      "filename": "equip-armor.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-armor.ogg",
+        "mp3": "assets/sfx/inventory/equip-armor.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_chainmail1",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/chainmail1.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "44d4d6b0cda8138c9d5545ba4f434f53b7817ba32d98ddfdf5bff6ae7acdefdf",
+      "originalFormat": "wav",
+      "duration": 0.58,
+      "tags": [
+        "battle",
+        "chainmail1",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.8
+      },
+      "sha256": {
+        "ogg": "230f2f73c7c6d2bc36d8970ca9e324b3f2e6a5cb028b6ee5dce5aff137e7dded",
+        "mp3": "189c8349f81faf912674870e19df2b9b38c6db78792dd1f3c38d3026e1db949c"
+      },
+      "sizes": {
+        "ogg": 7725,
+        "mp3": 7523
+      }
+    },
+    {
+      "id": "potion-bottle",
+      "filename": "potion-bottle.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/potion-bottle.ogg",
+        "mp3": "assets/sfx/inventory/potion-bottle.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_bottle",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/bottle.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "b80e52ce602f0e8f75b3a80516771a759b815416f749888f72cadcd9448ecea0",
+      "originalFormat": "wav",
+      "duration": 0.476,
+      "tags": [
+        "battle",
+        "bottle",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2
+      },
+      "sha256": {
+        "ogg": "359c888ce67adc9eb883b9b92e4119798ac41fa44e3bd73154ed978ae8785b0f",
+        "mp3": "51f9dda466a0ff7eada87ba9df9ada7863759ed325284c1a9e024b0b3d50c9b8"
+      },
+      "sizes": {
+        "ogg": 7196,
+        "mp3": 6269
+      }
+    },
+    {
+      "id": "potion-bubble",
+      "filename": "potion-bubble.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/potion-bubble.ogg",
+        "mp3": "assets/sfx/inventory/potion-bubble.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_bubble",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/bubble.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "c5f15d81e2b169784b737d31876ef67eb6957232f3e9c8186dde12c2370c822e",
+      "originalFormat": "wav",
+      "duration": 0.453,
+      "tags": [
+        "battle",
+        "bubble",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.7
+      },
+      "sha256": {
+        "ogg": "03ea90cd664fef2e2f9a264e7c1913a6bb88ba337731fdf256df0a6d58357486",
+        "mp3": "ca6703b05673e4110544b66a0403567e1b7597ab3c0ad7fe119183944c2a82b7"
+      },
+      "sizes": {
+        "ogg": 8251,
+        "mp3": 5956
+      }
+    },
+    {
+      "id": "confirm",
+      "filename": "confirm.ogg",
+      "category": "interface",
+      "files": {
+        "ogg": "assets/sfx/interface/confirm.ogg",
+        "mp3": "assets/sfx/interface/confirm.mp3"
+      },
+      "catalogId": "interface-sounds_confirmation_001",
+      "author": "Kenney",
+      "pack": "interface-sounds",
+      "sourceURL": "https://kenney.nl/assets/interface-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/interface-sounds/confirmation_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a",
+      "originalFormat": "ogg",
+      "duration": 0.287,
+      "tags": [
+        "001",
+        "click",
+        "confirm",
+        "confirmation",
+        "error",
+        "hover",
+        "interface"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.1
+      },
+      "sha256": {
+        "ogg": "b7ed1c71d6f37635a8ec3383424df25a45625a7000a861955f460364acd8bd3c",
+        "mp3": "d3660213c4dc8a9e070ee7419596077f74b81b86d594d74d0f6fbac415459466"
+      },
+      "sizes": {
+        "ogg": 4535,
+        "mp3": 4075
+      }
+    },
+    {
+      "id": "error",
+      "filename": "error.ogg",
+      "category": "interface",
+      "files": {
+        "ogg": "assets/sfx/interface/error.ogg",
+        "mp3": "assets/sfx/interface/error.mp3"
+      },
+      "catalogId": "interface-sounds_error_001",
+      "author": "Kenney",
+      "pack": "interface-sounds",
+      "sourceURL": "https://kenney.nl/assets/interface-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/interface-sounds/error_001.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "46e67425d16339772e8d328fb36a49426c9467418686e11beeb71ff84b0f6433",
+      "originalFormat": "ogg",
+      "duration": 0.162,
+      "tags": [
+        "001",
+        "click",
+        "confirm",
+        "error",
+        "hover",
+        "interface"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.2
+      },
+      "sha256": {
+        "ogg": "2b92a461eb61107f654aef911d47feecae23e962ab85a959d6db63db9e629b70",
+        "mp3": "a80369dd8239e02fea29f2fbce79d59b8baebc373786eb33b9d7168cc50804c0"
+      },
+      "sizes": {
+        "ogg": 5267,
+        "mp3": 2508
+      }
+    },
+    {
+      "id": "ice-cast",
+      "filename": "ice-cast.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/ice-cast.ogg",
+        "mp3": "assets/sfx/magic/ice-cast.mp3"
+      },
+      "catalogId": null,
+      "author": "bart",
+      "pack": "Ice spells",
+      "sourceURL": "https://opengameart.org/content/ice-spells",
+      "sourceFileURL": "https://opengameart.org/sites/default/files/icespells.zip",
+      "license": "CC0-1.0",
+      "originalSha256": "45f02a204fc7cc896a17487080376c521ac2e564fe3da4d24cffa0086f8d6a54",
+      "originalFormat": "zip",
+      "archivePath": "coldsnap.wav",
+      "extractedSha256": "090977264d65d90a50b04e9f0c1c4e02fb194e5b50d9fe244f0079a4da54158c",
+      "duration": 1.3,
+      "tags": [
+        "ice",
+        "cold",
+        "spell"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": 1.3,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "29b9921729b5e7f53af776fc3a7f2641c30e88321ec3cebf1000e3abe623f7f0",
+        "mp3": "c74987d4d7b24af01b544cc3be17da82db8db8d264a091a0b677d9b1d618ac34"
+      },
+      "sizes": {
+        "ogg": 18305,
+        "mp3": 15987
+      }
+    },
+    {
+      "id": "lightning-cast",
+      "filename": "lightning-cast.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/lightning-cast.ogg",
+        "mp3": "assets/sfx/magic/lightning-cast.mp3"
+      },
+      "catalogId": null,
+      "author": "Augmentality (Brandon Morris), submitted by HaelDB",
+      "pack": "Spell sounds",
+      "sourceURL": "https://opengameart.org/content/spell-sounds",
+      "sourceFileURL": "https://opengameart.org/sites/default/files/electricspell2.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "5fcb8824064d9dba2e3880d439a44b798ecdc2a58041cd028f094d774302a9a1",
+      "originalFormat": "ogg",
+      "duration": 2.6,
+      "tags": [
+        "electricity",
+        "lightning",
+        "spell"
+      ],
+      "edit": {
+        "start": 3.2,
+        "duration": 2.6,
+        "normalizationDb": 14.6
+      },
+      "sha256": {
+        "ogg": "28b6afb8c105746f5c40a15bfda93670ccbfd2c55e14c486cb657621c53b438f",
+        "mp3": "dcce137e7f665034cfc8390c85eeb27aa87fcf0290f53800bc89fcd9f02bae9b"
+      },
+      "sizes": {
+        "ogg": 22148,
+        "mp3": 31660
+      }
+    },
+    {
+      "id": "healing-cast",
+      "filename": "healing-cast.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/healing-cast.ogg",
+        "mp3": "assets/sfx/magic/healing-cast.mp3"
+      },
+      "catalogId": null,
+      "author": "Augmentality (Brandon Morris), submitted by HaelDB",
+      "pack": "Spell sounds",
+      "sourceURL": "https://opengameart.org/content/spell-sounds",
+      "sourceFileURL": "https://opengameart.org/sites/default/files/healing.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "4600822379d18992e9f526b718395dc752821b6218ca5728fb2d5ea9cf774c6d",
+      "originalFormat": "ogg",
+      "duration": 1.4,
+      "tags": [
+        "healing",
+        "restoration",
+        "spell"
+      ],
+      "edit": {
+        "start": 11.45,
+        "duration": 1.4,
+        "normalizationDb": 8
+      },
+      "sha256": {
+        "ogg": "db38892fafd110c18b3c5766fb06fc75d3954e50dafee8d76d08edda90bcbdfe",
+        "mp3": "588595b65c730d389ea4d25084d3e46bbe5fc134a1263db63a9b4a6bfd5cfbef"
+      },
+      "sizes": {
+        "ogg": 13765,
+        "mp3": 17241
+      }
+    },
+    {
+      "id": "magic-chime",
+      "filename": "magic-chime.ogg",
+      "category": "magic",
+      "files": {
+        "ogg": "assets/sfx/magic/magic-chime.ogg",
+        "mp3": "assets/sfx/magic/magic-chime.mp3"
+      },
+      "catalogId": null,
+      "author": "JaggedStone",
+      "pack": "Magic Spell SFX",
+      "sourceURL": "https://opengameart.org/content/magic-spell-sfx",
+      "sourceFileURL": "https://opengameart.org/sites/default/files/magical_1_0.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f",
+      "originalFormat": "ogg",
+      "duration": 1.609,
+      "tags": [
+        "magic",
+        "chime",
+        "spellcasting"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 8.9
+      },
+      "sha256": {
+        "ogg": "daf5710f479ff8910cc5945b52523abf4f06431b2366587064f121c3943fc529",
+        "mp3": "6ce58b82b29f609db3c78f065302c0f6372e94808c18596668e8a1f27e2275d7"
+      },
+      "sizes": {
+        "ogg": 15728,
+        "mp3": 19749
+      }
+    },
+    {
+      "id": "campfire",
+      "filename": "campfire.ogg",
+      "category": "ambient",
+      "files": {
+        "ogg": "assets/sfx/ambient/campfire.ogg",
+        "mp3": "assets/sfx/ambient/campfire.mp3"
+      },
+      "catalogId": null,
+      "author": "PagDev",
+      "pack": "Fireplace Sound loop",
+      "sourceURL": "https://opengameart.org/content/fireplace-sound-loop",
+      "sourceFileURL": "https://opengameart.org/sites/default/files/fire.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "85ca0cc60d0c037fff8b185e31ad1fcdbda6ce45eee17c3ee1318d1b8f59e330",
+      "originalFormat": "wav",
+      "duration": 10,
+      "tags": [
+        "campfire",
+        "crackle",
+        "rest"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": 10,
+        "normalizationDb": 20
+      },
+      "sha256": {
+        "ogg": "d112be38c1083bb55656462c59e663020e7149a68856ebcd2040cbc2b5746888",
+        "mp3": "2969ae9d0ad6c3550cc245c4cd4391a5d6e3c2c86fa30e33eff4749252fb66ce"
+      },
+      "sizes": {
+        "ogg": 99290,
+        "mp3": 120372
+      }
+    }
+  ]
+}

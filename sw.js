@@ -1,10 +1,13 @@
 import {LDRAW_ICONS} from './equipment-icons.js';
-const CACHE = 'questlog-app-v27-item-icon-library';
+import {SOUND_FILES} from './sound-assets.js';
+const CACHE = 'questlog-app-v28-fantasy-sound-library';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./vfx.js','./vfx.css','./feature-catalog.js','./equipment-icons.js','./item-icons.js',...Object.keys(LDRAW_ICONS).map(key=>`./assets/equipment/${key}.webp`));
 ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progression-options.js');
 ASSETS.push('./rest-rules.js','./rest-reference-data.js');
 ASSETS.push('./attack-rules.js','./attack-ui.js');
+// Both encodings are cached: older mobile Safari can fall back to MP3 offline.
+ASSETS.push('./sound.js','./sound-events.js','./sound-assets.js','./assets/sfx/manifest.json','./assets/sfx/CREDITS.md',...SOUND_FILES.map(path=>'./'+path));
 ASSETS.push('./portrait-scan.js','./portrait-photo-ui.js');
 ASSETS.push('./portrait-image-analysis.js','./portrait-match.js','./portrait-match-worker.js','./portrait-maker/portrait-match-index.json');
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});

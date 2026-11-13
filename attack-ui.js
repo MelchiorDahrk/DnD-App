@@ -3,6 +3,8 @@ import {attackWeapon,attackMastery,attackContext,attackOutcome,damageFormula,rol
 import {attackIconMarkup} from './item-icons.js';
 import {icon} from './icons.js';
 import {playAttackEffect} from './vfx.js';
+import {sound} from './sound.js';
+import {weaponSoundEvent} from './sound-events.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const button=(action,label,attrs='',primary=false)=>`<button type="button" class="btn${primary?' btn-primary':''}" data-combat-action="${action}" ${attrs}>${label}</button>`;
@@ -39,13 +41,16 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     return true;
   }
   function animate(result,phase,damageLabel=a.type) {
+    const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase});
+    if(event)sound.play(event);
+    if(phase==='attack'&&outcome==='critical')sound.play('combat.critical',{delay:.15});
     playAttackEffect(a,{ranged:options.kind==='ranged',critical:outcome==='critical',miss:outcome==='miss',label:phase==='damage'?`${result.total} ${damageLabel}`:a.name,detail:phase==='damage'?'DAMAGE':outcome==='critical'?'CRITICAL HIT':outcome==='miss'?'MISS':'ATTACK ROLL',target:'.combat-weapon'});
   }
   function doRoll() {
     if(!readOptions())return;
     const context=attackContext(c,a,options);
     if(context.blocked)throw new Error(context.blocked);
-    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);recordRoll(roll,a.name+' · to hit');
+    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);recordRoll(roll,a.name+' · to hit',{criticalFeedback:false});
     outcome=attackOutcome(roll,options.ac,context.coverBonus);render();animate(roll,'attack');
   }
   function masteryMarkup() {
@@ -91,10 +96,10 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
       if(action==='close'){modal.close();return;}
       if(action==='roll'){doRoll();return;}
       if(action==='again'){reset(a);return;}
-      if(['hit','critical','miss'].includes(action)){outcome=action;render();return;}
+      if(['hit','critical','miss'].includes(action)){outcome=action;render();const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase:'impact'});if(event)sound.play(event);return;}
       if(action==='inspiration'){
         if(!c.inspiration||!roll||damage||extras.length||save)return;
-        roll=rerollAttackDie(roll,Number(el.dataset.index));c.inspiration=false;onChange();recordRoll(roll,a.name+' · Inspiration reroll');
+        roll=rerollAttackDie(roll,Number(el.dataset.index));c.inspiration=false;onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false});
         outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);save=null;render();animate(roll,'attack');return;
       }
       if(action==='damage'){
@@ -124,7 +129,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
         if(action==='mark')usedFeatures.add('mark');
         extras.push({label,result});recordRoll(result,a.name+' · '+label);render();animate(result,'damage',label);
       }
-    }catch(error){const errorNode=modal.querySelector('#form-error');errorNode.hidden=false;errorNode.className='form-error';errorNode.textContent=error.message;}
+    }catch(error){sound.play('ui.error');const errorNode=modal.querySelector('#form-error');errorNode.hidden=false;errorNode.className='form-error';errorNode.textContent=error.message;}
   },{signal});
   modal.addEventListener('close',()=>controller?.abort(),{once:true,signal});
   reset(initial);
