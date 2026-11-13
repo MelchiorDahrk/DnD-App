@@ -1,4 +1,4 @@
-import {mod,signed,ABILITIES} from './model.js';
+import {mod,signed,ABILITIES,safeURL} from './model.js';
 import {SPECIES} from './catalog.js';
 import {levelUpPlan,applyLevelUp,LEVEL_SUBCLASSES,canonicalSubclass,spellKey,FEAT_ABILITIES} from './level-up.js';
 
@@ -19,10 +19,10 @@ export function openLevelUp(character,{setModal,onComplete}){
     if(c.subclass&&!subclasses.some(s=>s.name===c.subclass))subclasses.push({name:c.subclass,source:'Custom'});
     const family=/elf|drow/i.test(character.race)?['Elf','Drow','High Elf','Wood Elf']:/gnome/i.test(character.race)?['Gnome','Forest Gnome','Rock Gnome']:/tiefling/i.test(character.race)?['Tiefling','Abyssal Tiefling','Chthonic Tiefling','Infernal Tiefling']:[character.race];
     const species=SPECIES.filter(s=>family.includes(s.name));if(!species.some(s=>s.name===c.race))species.push({name:c.race});
+    const featChoice=plan.choices.find(ch=>ch.id==='feat'),feat=featChoice?.options.find(o=>o.id===draft.choices?.feat?.[0]);
     const choiceMarkup=plan.choices.map(choice=>`<fieldset class="level-choice" data-level-choice="${esc(choice.id)}"><legend>${esc(choice.label)} · choose ${choice.count}</legend>${choice.options.length<choice.count?`<p class="form-help">Your sheet has too few eligible recorded options. Review missing proficiencies or your book’s special rules.</p><label class="check-field"><input type="checkbox" name="manualChoiceIds" value="${esc(choice.id)}" required>Save a pending choice in Features for manual completion</label>`:Array.from({length:choice.count},(_,i)=>`<label class="form-field">Choice ${i+1}<select name="choice-${esc(choice.id)}" required ${['feat','style','featSkills','classSkills','genie','affinity'].includes(choice.id)?'data-level-refresh':''}><option value="">Choose…</option>${options(choice.options,draft.choices?.[choice.id]?.[i])}</select></label>`).join('')}${['invocations','feat'].includes(choice.id)?'<p class="form-help">Check additional ability, spell, pact, and training prerequisites in your book.</p>':''}</fieldset>`).join('');
     const checked=(name,id,defaultValue)=>data&&!(name==='featureIds'&&!renderedFeatureIds.has(id))?data.getAll(name).includes(id):defaultValue;
     const featureRows=(entries,isNew)=>entries.map(f=>`<label class="level-option"><input type="checkbox" name="featureIds" value="${esc(f.id)}" ${checked('featureIds',f.id,isNew)?'checked':''}><span><strong>${esc(f.name)}</strong><small>${esc(f.owner)} · level ${f.level} · ${esc(f.source)}<br>${esc(f.details)}</small></span></label>`).join('');
-    const featChoice=plan.choices.find(ch=>ch.id==='feat'),feat=featChoice?.options.find(o=>o.id===draft.choices?.feat?.[0]);
     const allowedAbilities=feat?.label==='Ability Score Improvement'||feat?.entry.group==='Epic boons'?Object.keys(ABILITIES):FEAT_ABILITIES[feat?.label]||[];
     const abilities=feat&&allowedAbilities.length?`<fieldset class="level-choice"><legend>${feat.label==='Ability Score Improvement'?'Spend 2 ability score points':'Choose your feat’s +1 ability increase'}</legend><p class="form-help">${feat.label==='Ability Score Improvement'?'Increase one score by 2 or two scores by 1, to a maximum of 20.':`Choose one allowed ability, maximum ${feat.entry.group==='Epic boons'?30:20}.`} Constitution changes adjust HP for every level.</p><div class="form-grid">${Object.entries(ABILITIES).filter(([key])=>allowedAbilities.includes(key)).map(([key,label])=>`<label class="form-field">${label} (${c.stats[key]})<input name="ability-${key}" type="number" min="0" max="${feat.label==='Ability Score Improvement'?2:1}" step="1" value="${esc(data?.get(`ability-${key}`)||0)}"></label>`).join('')}</div></fieldset>`:'';
     const granted=new Set(plan.grant.map(s=>s.id));
@@ -47,6 +47,28 @@ export function openLevelUp(character,{setModal,onComplete}){
       applyLevelUp(character,selection);onComplete();
     });
     const form=document.querySelector('#modal-form');
+    if(feat&&safeURL(feat.entry.wiki)){
+      const reference=new URL(feat.entry.wiki);
+      if(!reference.hash)reference.hash=feat.label.replace(/\s*\([^)]*\)/g,'').replace(/[^a-z0-9]/gi,'');
+      form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<p class="form-help level-feat-reference"><strong>${esc(feat.label)}</strong> <a href="${esc(reference.href)}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read feat ↗</a></p>`);
+    }
+    const abilityInputs=[...form.querySelectorAll('[name^="ability-"]')];
+    if(abilityInputs.length){
+      const budget=feat.label==='Ability Score Improvement'?2:1,cap=feat.entry.group==='Epic boons'?30:20;
+      const remaining=document.createElement('p');remaining.className='form-help';remaining.setAttribute('data-level-ability-remaining','');remaining.setAttribute('aria-live','polite');
+      abilityInputs[0].closest('fieldset').append(remaining);
+      function updateAbilities(changed){
+        const value=input=>Number(input.value)||0;
+        const limit=input=>Math.max(0,Math.min(budget,cap-c.stats[input.name.slice(8)],budget-abilityInputs.filter(other=>other!==input).reduce((sum,other)=>sum+value(other),0)));
+        if(changed&&Number.isInteger(value(changed)))changed.value=Math.max(0,Math.min(value(changed),limit(changed)));
+        for(const input of abilityInputs)input.max=limit(input);
+        const spent=abilityInputs.reduce((sum,input)=>sum+value(input),0);
+        remaining.textContent=`${budget-spent} of ${budget} ability score point${budget===1?'':'s'} remaining.`;
+        abilityInputs[0].setCustomValidity(spent===budget?'':`Spend exactly ${budget} ability score point${budget===1?'':'s'}.`);
+      }
+      for(const input of abilityInputs)for(const event of ['input','change'])input.addEventListener(event,()=>updateAbilities(input));
+      updateAbilities();
+    }
     if(preparations)form.querySelector('[data-level-spell-search]')?.closest('fieldset').insertAdjacentHTML('beforebegin',preparations);
     if(spellSwaps.length)form.querySelector('[data-level-spell-search]')?.closest('fieldset').insertAdjacentHTML('beforebegin',spellSwaps.join(''));
     if(c.class==='Wizard')form.querySelector('[data-level-spell-search]')?.insertAdjacentHTML('beforebegin',`<label class="check-field"><input type="checkbox" name="prepareNewSpells" ${data?.has('prepareNewSpells')?'checked':''}>Also prepare newly learned spells</label><p class="form-help">Unchecked spells are added to your spellbook without using your preparation allowance.</p>`);
@@ -54,7 +76,7 @@ export function openLevelUp(character,{setModal,onComplete}){
     if(c.subclass==='Circle of the Land')form.querySelector('[name="levelSubclass"]').closest('label').insertAdjacentHTML('afterend',`<label class="form-field full">Circle of the Land terrain<select name="circleLand" data-level-refresh>${options(['Arid','Polar','Temperate','Tropical'].map(name=>({name})),draft.land)}</select></label>`);
     renderedFeatureIds=new Set([...plan.fresh,...plan.catchup].map(f=>f.id));
     if(c.class==='Artificer')for(const input of form.querySelectorAll('[name^="ability-"]'))input.setAttribute('data-level-refresh','');
-    form.addEventListener('change',event=>{if(event.target.matches('[data-level-refresh]')){collect(form);draw();}});
+    form.addEventListener('change',event=>{if(event.target.matches('[data-level-refresh]')){collect(form);if(event.target.name==='choice-feat'){draft.abilities={};for(const key of Object.keys(ABILITIES))data.delete(`ability-${key}`);}draw();}});
     form.querySelector('[data-level-spell-search]')?.addEventListener('input',event=>{const query=event.target.value.toLowerCase().trim();for(const row of form.querySelectorAll('[data-level-spell]'))row.hidden=!row.dataset.levelSpell.includes(query);});
   }
   draw();

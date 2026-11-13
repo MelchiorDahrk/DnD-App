@@ -51,7 +51,7 @@
 .ascension-stage{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;flex-direction:column;min-height:252px;overflow:hidden;border:1px solid #d9c99266;border-radius:11px;background:radial-gradient(ellipse at 50% 53%,#bcb66b33,transparent 58%),linear-gradient(150deg,#244638,#102d29);color:#ead99e}
 .ascension-stage::before,.ascension-stage::after{content:"";position:absolute;inset:0;z-index:-1;background:repeating-conic-gradient(from 0deg at 50% 53%,transparent 0deg 20deg,#f2da9620 23deg,transparent 26deg 40deg);mask-image:radial-gradient(circle,transparent 12%,#000 40%,transparent 75%);animation:ascension-rays 15s linear 1}
 .ascension-stage::after{transform:rotate(19deg);opacity:.5;animation-direction:reverse}
-.ascension-sigil{position:absolute;inset:12px;display:flex;justify-content:center;color:#e1cb83;opacity:.45}
+.ascension-sigil{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#e1cb83;opacity:.45}
 .ascension-sigil>svg{width:224px;height:224px;animation:ascension-reveal 1.1s ease-out both}
 .ascension-kicker{position:absolute;top:20px;font-family:var(--mono);font-size:8px;letter-spacing:3px}
 .celebration-ascend .ascension-stage .avatar-frame{position:relative;width:132px;height:132px;margin:0;z-index:1;filter:drop-shadow(0 0 21px #e4d38266);animation:ascension-portrait 1s cubic-bezier(.16,1,.3,1) both}
@@ -78,6 +78,6 @@
 @keyframes rest-ember{0%{opacity:0;transform:translate(0,0) scale(1)}20%{opacity:.8}100%{opacity:0;transform:translate(12px,-105px) scale(.3)}}
 @keyframes ascension-rays{to{transform:rotate(35deg)}}
 @keyframes ascension-reveal{from{opacity:0;transform:scale(.6) rotate(-25deg)}to{opacity:1;transform:scale(1) rotate(0)}}
-@keyframes ascension-portrait{from{opacity:0;transform:translateY(16px) scale(.8)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ascension-portrait{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
 @media(max-width:600px){.vfx-scene{--vfx-size:174px}.vfx-scene .vfx-caption{top:calc(var(--vfx-y) + 103px)}.vfx-caption strong{font-size:21px}.vfx-scene .vfx-caption strong{font-size:25px}.vfx-caption span{font-size:7px;letter-spacing:1.2px}.ascension-stage{min-height:230px}.ascension-kicker{font-size:7px;letter-spacing:2px}.rest-illustration{min-height:156px}}
 @media(prefers-reduced-motion:reduce){.vfx-layer *,.rest-illustration *,.celebration-ascend *,.celebration-ascend *::before,.celebration-ascend *::after{animation:none!important;transition:none!important}.vfx-canvas,.vfx-aura,.vfx-sigil,.vfx-scene::before,.vfx-damage::before{display:none}.vfx-event{animation:none}.vfx-caption{transform:translateX(-50%)}.rest-sky i{opacity:.4}.ascension-stage::before,.ascension-stage::after{animation:none}}

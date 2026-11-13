@@ -1,5 +1,5 @@
 import {EQUIPMENT_ICONS} from './equipment-icons.js';
-const CACHE = 'questlog-app-v17-portrait-themes';
+const CACHE = 'questlog-app-v18-level-up-fixes';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./vfx.js','./vfx.css','./feature-catalog.js','./equipment-icons.js','./item-icons.js',...Object.keys(EQUIPMENT_ICONS).map(key=>`./assets/equipment/${key}.webp`));
 ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progression-options.js');

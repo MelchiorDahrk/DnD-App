@@ -16,7 +16,7 @@ const THEMES = {
 };
 
 const SYMBOLS = {
-  star:'<path d="m80 38 11 28 30 14-30 12-11 30-12-30-29-12 29-14Z"/><path d="m116 36 4 11 11 4-11 4-4 11-4-11-11-4Z"/>',
+  star:'<path d="m80 38 11 28 30 14-30 12-11 30-12-30-29-12 29-14Z"/>',
   heart:'<path d="M80 112 49 81C25 55 60 34 80 58c20-24 55-3 31 23Z"/>',
   shield:'<path d="m80 36 33 14v28c0 22-19 38-33 46-14-8-33-24-33-46V50Z"/><path d="m63 78 12 12 23-27"/>',
   strike:'<path d="m93 32-44 55h28l-10 41 44-57H84Z"/>',
@@ -55,9 +55,10 @@ function mount() {
 }
 
 function position(target,scene) {
-  const node=typeof target==='string'?document.querySelector(target):target;
+  const node=typeof target==='string'||!target?document.querySelector(target||'.hero .avatar-frame'):target;
   const rect=node?.getBoundingClientRect();
   const visible=rect&&rect.width>0&&rect.height>0&&rect.bottom>90&&rect.top<innerHeight-80;
+  if(scene&&target&&visible)return {x:rect.left+rect.width/2,y:rect.top+rect.height/2,node};
   return {
     x:scene?innerWidth/2:Math.max(Math.min(150,innerWidth/2),Math.min(innerWidth-150,visible?rect.left+rect.width/2:innerWidth/2)),
     y:scene?Math.min(innerHeight*.39,340):Math.max(105,Math.min(innerHeight-165,visible?rect.top+rect.height/2:innerHeight*.38)),
@@ -142,7 +143,7 @@ export function clearEffects() {
   layer?.remove();layer=canvas=context=null;
 }
 
-export function playEffect(kind,{label='',detail='',target='.hero .avatar-frame'}={}) {
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true}={}) {
   const theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
@@ -156,13 +157,16 @@ export function playEffect(kind,{label='',detail='',target='.hero .avatar-frame'
   // Labels come from character names and spells too; keep them as text nodes.
   if(!calm) {
     const aura=document.createElement('div');aura.className='vfx-aura';
-    const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);
-    burst.append(aura,sigil);
+    burst.append(aura);
+    if(showSigil){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
   }
-  const caption=document.createElement('div');caption.className='vfx-caption';
-  const title=document.createElement('strong');title.textContent=label;
-  const subtitle=document.createElement('span');subtitle.textContent=detail;
-  caption.append(title,subtitle);burst.append(caption);layer.append(burst);
+  if(showCaption){
+    const caption=document.createElement('div');caption.className='vfx-caption';
+    const title=document.createElement('strong');title.textContent=label;
+    const subtitle=document.createElement('span');subtitle.textContent=detail;
+    caption.append(title,subtitle);burst.append(caption);
+  }
+  layer.append(burst);
   const entry={node:burst,timer:setTimeout(()=>{
     burst.remove();bursts=bursts.filter(item=>item!==entry);
     if(!bursts.length&&!frame)clearEffects();

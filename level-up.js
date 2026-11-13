@@ -1,6 +1,6 @@
 import {levelUp,uid,mod,SKILLS,ABILITIES,RULES_URL,parseBackup,SAVE_VERSION} from './model.js';
 import {FEATURE_CATALOG,featureFields,featureMatchesCharacter} from './feature-catalog.js';
-import {CLASS_OPTIONS,SUBCLASSES,WEAPONS,EQUIPMENT} from './catalog.js';
+import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
 import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
 
@@ -20,7 +20,7 @@ export function classProgression(c,level=c.level){
     const slots=CLASS_LEVELS.find(r=>r.className==='Paladin'&&r.level===level).slots;
     return {className:c.class,level,slots,cantrips:level>=14?4:level>=10?3:2,prepared:Math.max(1,Math.floor(level/2)+mod(c.stats.int)),specific:{},features:FEATURE_CATALOG.filter(f=>f.className===c.class&&!f.subclass&&f.level===level).map(f=>f.name)};
   }
-  if(['Eldritch Knight','Arcane Trickster'].includes(canonicalSubclass(c.subclass))&&level>=3){
+  if(((c.class==='Fighter'&&canonicalSubclass(c.subclass)==='Eldritch Knight')||(c.class==='Rogue'&&canonicalSubclass(c.subclass)==='Arcane Trickster'))&&level>=3){
     const tier=level>=19?4:level>=13?3:level>=7?2:1;
     const slots=Array(9).fill(0);slots[0]=level>=7?4:level>=4?3:2;if(tier>=2)slots[1]=level>=10?3:2;if(tier>=3)slots[2]=level>=16?3:2;if(tier>=4)slots[3]=1;
     const prepared=[0,0,0,3,4,4,4,5,6,6,7,8,8,9,10,10,11,11,11,12,13][level];
@@ -50,24 +50,29 @@ function classEntries(c,level){
 function eligibleFeat(f,c){
   if(!['General feats','Origin feats','Epic boons','Earlier feats'].includes(f.group)||f.level>c.level||!featureMatchesCharacter(f,c))return false;
   if(has(c,f.name)&&f.name!=='Ability Score Improvement')return false;
-  if(f.name==='War Caster'&&(!classProgression(c).prepared||c.stats.int<13&&c.stats.wis<13&&c.stats.cha<13))return false;
+  if(['War Caster','Elemental Adept','Spell Sniper','Eldritch Adept','Metamagic Adept'].includes(f.name)&&!classProgression(c).prepared)return false;
   if(f.name==='Grappler'&&c.stats.str<13&&c.stats.dex<13)return false;
   if(f.name==='Ritual Caster'&&!['int','wis','cha'].some(a=>c.stats[a]>=13))return false;
-  if(f.name==='Elemental Adept'&&!classProgression(c).prepared)return false;
-  if(['Artificer Initiate','Eldritch Adept','Metamagic Adept'].includes(f.name)&&f.name!=='Artificer Initiate'&&!classProgression(c).prepared)return false;
-  if(f.name==='Fighting Initiate'&&!/martial/i.test(c.weaponProficiencies))return false;
-  const abilityPrereqs={Actor:['cha'],Athlete:['str','dex'],Charger:['str','dex'],'Crossbow Expert':['dex'],Crusher:['str'], 'Defensive Duelist':['dex'],'Dual Wielder':['str','dex'],'Great Weapon Master':['str'],'Heavy Armor Master':['str'],'Inspiring Leader':['wis','cha'],'Keen Mind':['int'],'Mage Slayer':['str','dex'],'Mounted Combatant':['str','dex','wis'],Observant:['int','wis'],Piercer:['str','dex'],Poisoner:['dex','int'],'Polearm Master':['str','dex'],Sentinel:['str','dex'],Sharpshooter:['dex'],'Shield Master':['str'],Skulker:['dex'],Slasher:['str','dex'],Speedy:['dex','con'],'Spell Sniper':['int','wis','cha']};
+  const base=CLASS_OPTIONS.find(option=>option.name===c.class),armor=c.armorProficiencies||base.armor,weapons=c.weaponProficiencies||base.weapons;
+  if(f.name==='Fighting Initiate'&&!/martial/i.test(weapons))return false;
+  // PHB 2024 prerequisites differ from the abilities a feat can increase.
+  const abilityPrereqs={Actor:['cha'],Athlete:['str','dex'],Charger:['str','dex'],'Crossbow Expert':['dex'],'Defensive Duelist':['dex'],'Dual Wielder':['str','dex'],'Great Weapon Master':['str'],'Inspiring Leader':['wis','cha'],'Keen Mind':['int'],Observant:['int','wis'],'Polearm Master':['str','dex'],Sentinel:['str','dex'],Sharpshooter:['dex'],Skulker:['dex'],Speedy:['dex','con']};
   if(abilityPrereqs[f.name]&&!abilityPrereqs[f.name].some(a=>c.stats[a]>=13))return false;
-  if(['Heavily Armored','Medium Armor Master'].includes(f.name)&&!/medium/i.test(c.armorProficiencies))return false;
-  if(f.name==='Heavy Armor Master'&&!/heavy/i.test(c.armorProficiencies))return false;
-  if(f.name==='Moderately Armored'&&!/light/i.test(c.armorProficiencies))return false;
-  if(f.name==='Martial Weapon Training'&&!/simple/i.test(c.weaponProficiencies))return false;
-  if(f.name==='Spell Sniper'&&!classProgression(c).prepared)return false;
+  if(['Heavily Armored','Medium Armor Master'].includes(f.name)&&!/medium/i.test(armor))return false;
+  if(f.name==='Heavy Armor Master'&&!/heavy/i.test(armor))return false;
+  if(f.name==='Moderately Armored'&&!/light/i.test(armor))return false;
+  if(f.name==='Shield Master'&&!/shield/i.test(armor))return false;
+  if(f.name==='Squat Nimbleness'&&!featureMatchesCharacter({species:['Dwarf']},c)){
+    const size=SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size;
+    if(size&&!size.includes('Small'))return false;
+  }
   return true;
 }
 export function levelUpPlan(character,{subclass=character.subclass,race=character.race,choices:choiceSelections={},land=character.circleLand||'Temperate',abilities={}}={}){
   if(character.level>=20)throw new Error('You’ve reached level 20.');
   const c={...character,level:character.level+1,subclass:canonicalSubclass(subclass),race},level=c.level;
+  const knownSubclass=LEVEL_SUBCLASSES.find(s=>s.name===c.subclass);
+  if(knownSubclass&&knownSubclass.className!==c.class)throw new Error('That subclass is not available to your class.');
   const before=classProgression(character),after=classProgression(c);
   if(c.class==='Artificer')after.prepared=Math.max(1,Math.floor(level/2)+mod(c.stats.int+Number(abilities.int||0)));
   const known=new Set(c.features.map(f=>normalized(f.name)));
@@ -139,6 +144,7 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   if(c.class==='Cleric'&&level===7)chooseEffect('blessed','Blessed Strikes',['Divine Strike','Potent Spellcasting']);
   if(c.class==='Druid'&&level===7)chooseEffect('fury','Elemental Fury',['Primal Strike','Potent Spellcasting']);
   const feat=choices.find(ch=>ch.id==='feat')?.options.find(o=>o.id===choiceSelections.feat?.[0]);
+  if(feat?.label==='Squat Nimbleness'&&!featureMatchesCharacter({species:['Dwarf']},c)&&SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size!=='Small')add('featSize','Squat Nimbleness size prerequisite',1,[{id:'Small',label:'My character is Small'}]);
   if(feat?.label==='Skill Expert'){
     add('featSkills','Skill Expert proficiency',1,skillOptions(),'skills');
     add('featExpertise','Skill Expert Expertise',1,[...new Set([...expertOptions(),...(choiceSelections.featSkills||[])])],'expertise');

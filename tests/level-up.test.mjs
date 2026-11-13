@@ -105,6 +105,80 @@ test('third casters have correct slots and Intelligence casting; ASI caps reject
   c.level=5;c.stats.str=20;const before=structuredClone(c),bad=selection(c);bad.abilities={str:2};
   assert.throws(()=>applyLevelUp(c,bad),/above 20/);assert.deepEqual(c,before);
 });
+
+test('ASI permits +2 or +1/+1 and rejects overspending without changing the character',()=>{
+  for(const abilities of [{str:2},{str:1,dex:1}]){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3,skills:['Athletics','Perception']}),before=structuredClone(c.stats);
+    applyLevelUp(c,{...selection(c),abilities});
+    for(const ability of Object.keys(c.stats))assert.equal(c.stats[ability],before[ability]+(abilities[ability]||0));
+  }
+  for(const abilities of [{str:2,dex:2},{str:1},{str:1,dex:1,con:1},{str:1.5,dex:.5}]){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3,skills:['Athletics','Perception']}),before=structuredClone(c);
+    assert.throws(()=>applyLevelUp(c,{...selection(c),abilities}),/ability|points/);assert.deepEqual(c,before);
+  }
+  const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3,stats:{str:19,dex:19,con:14,int:10,wis:10,cha:10},skills:['Athletics','Perception']});
+  applyLevelUp(c,{...selection(c),abilities:{str:1,dex:1}});assert.equal(c.stats.str,20);assert.equal(c.stats.dex,20);
+});
+
+test('racial feats respect species and lineages; unknown Small size requires an explicit choice',()=>{
+  const racial={
+    'Bountiful Luck':['Halfling','Human'],'Dragon Fear':['Dragonborn','Human'],'Dragon Hide':['Dragonborn','Human'],
+    'Drow High Magic':['Drow','High Elf'],'Dwarven Fortitude':['Hill Dwarf','Human'],'Elven Accuracy':['Wood Elf','Human'],
+    'Fade Away':['Forest Gnome','Human'],'Fey Teleportation':['High Elf','Wood Elf'],'Flames of Phlegethos':['Infernal Tiefling','Human'],
+    'Infernal Constitution':['Abyssal Tiefling','Human'],'Orcish Fury':['Half-Orc','Orc'],'Prodigy':['Half-Elf','Wood Elf'],
+    'Second Chance':['Human','Wood Elf'],'Wood Elf Magic':['Wood Elf','High Elf'],'Squat Nimbleness':['Dwarf','Dragonborn']
+  };
+  const names=c=>levelUpPlan(c).choices.find(ch=>ch.id==='feat').options.map(o=>o.label);
+  for(const [name,[valid,invalid]] of Object.entries(racial)){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',race:valid,level:3,skills:['Athletics','Perception']});
+    assert.ok(names(c).includes(name),`${valid} qualifies for ${name}`);
+    c.race=invalid;assert.ok(!names(c).includes(name),`${invalid} cannot select ${name}`);
+    const before=structuredClone(c),s=selection(c);s.choices.feat=[FEATURE_CATALOG.find(f=>f.name===name).id];
+    assert.throws(()=>applyLevelUp(c,s),/Invalid choice/);assert.deepEqual(c,before);
+  }
+  const feat=FEATURE_CATALOG.find(f=>f.name==='Squat Nimbleness');
+  for(const race of ['Human','Custom folk']){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',race,level:3,skills:['Athletics','Perception']}),s=selection(c);
+    s.choices.feat=[feat.id];s.abilities={dex:1};assert.throws(()=>applyLevelUp(c,s),/size prerequisite/);
+    s.choices.featSize=['Small'];applyLevelUp(c,s);assert.ok(c.features.some(f=>f.name===feat.name));
+  }
+  for(const race of ['Dwarf','Hill Dwarf','Halfling','Forest Gnome']){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',race,level:3}),plan=levelUpPlan(c,{choices:{feat:[feat.id]}});
+    assert.ok(!plan.choices.some(ch=>ch.id==='featSize'),race);
+  }
+});
+
+test('caster feats require the class or subclass casting feature rather than incidental magic',()=>{
+  const gated=['War Caster','Spell Sniper','Elemental Adept','Eldritch Adept','Metamagic Adept'];
+  for(const [className,subclass,allowed] of [['Fighter','Champion',false],['Fighter','Eldritch Knight',true],['Rogue','Thief',false],['Rogue','Arcane Trickster',true],['Monk','Warrior of Shadow',false],['Wizard','Evoker',true],['Warlock','Fiend Patron',true]]){
+    const c=makeCharacter({class:className,subclass,race:'Wood Elf',level:3,stats:{str:10,dex:10,con:10,int:10,wis:10,cha:10},spells:[{name:'Druidcraft',level:0}]});
+    const names=levelUpPlan(c).choices.find(ch=>ch.id==='feat').options.map(o=>o.label);
+    for(const name of gated)assert.equal(names.includes(name),allowed,`${className} ${subclass}: ${name}`);
+  }
+  const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3}),before=structuredClone(c);
+  const s=selection(c);s.choices.feat=[FEATURE_CATALOG.find(f=>f.name==='War Caster').id];s.abilities={int:1};
+  assert.throws(()=>applyLevelUp(c,s),/Invalid choice/);assert.deepEqual(c,before);
+});
+
+test('feat gates use 2024 ability and training prerequisites, and prevent duplicate and premature feats',()=>{
+  const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3,stats:{str:10,dex:10,con:10,int:10,wis:10,cha:10}});
+  const names=()=>levelUpPlan(c).choices.find(ch=>ch.id==='feat').options.map(o=>o.label);
+  for(const name of ['Crusher','Heavy Armor Master','Mage Slayer','Mounted Combatant','Piercer','Poisoner','Slasher','Shield Master','Martial Weapon Training'])assert.ok(names().includes(name),name);
+  for(const name of ['Actor','Athlete','Charger','Crossbow Expert','Defensive Duelist','Dual Wielder','Great Weapon Master','Inspiring Leader','Keen Mind','Observant','Polearm Master','Sentinel','Sharpshooter','Skulker','Speedy','Grappler','Ritual Caster','Boon of Fate'])assert.ok(!names().includes(name),name);
+  c.stats.dex=13;assert.ok(names().includes('Grappler'));assert.ok(names().includes('Crossbow Expert'));
+  c.armorProficiencies='None';for(const name of ['Shield Master','Heavy Armor Master','Heavily Armored','Medium Armor Master','Moderately Armored'])assert.ok(!names().includes(name),name);
+  c.armorProficiencies='Light armor; Shields';assert.ok(names().includes('Shield Master'));assert.ok(names().includes('Moderately Armored'));assert.ok(!names().includes('Heavy Armor Master'));
+  c.features=[feature('Athlete',c)];assert.ok(!names().includes('Athlete'));
+});
+
+test('known subclasses cannot grant feats or casting progression to a different class',()=>{
+  for(const [cls,subclass] of [['Fighter','Arcane Trickster'],['Rogue','Eldritch Knight'],['Barbarian','Evoker']]){
+    const c=makeCharacter({class:cls,subclass,level:3}),before=structuredClone(c);
+    assert.throws(()=>levelUpPlan(c),/subclass.*class/);assert.throws(()=>applyLevelUp(c,{hpGain:8}),/subclass.*class/);assert.deepEqual(c,before);
+    assert.equal(classProgression(c).prepared,0);
+  }
+  assert.doesNotThrow(()=>levelUpPlan(makeCharacter({class:'Fighter',subclass:'My custom subclass',level:3})));
+});
 test('feat-specific skills and spell selections are required and persist',()=>{
   const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3,skills:['Athletics','Perception']});
   const feat=FEATURE_CATALOG.find(f=>f.name==='Magic Initiate (Wizard)'),s=selection(c);
