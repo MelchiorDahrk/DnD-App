@@ -23,3 +23,9 @@ To exercise the packaged production site, set `THEME_TEST_URL` to its served sub
 The theme check in [failed run 43510866087](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43510866087) waited on `image.decode()` for every equipment image, including deferred offscreen images. Chromium could leave that promise pending until the three-minute workflow step expired, even though the app built and the earlier functional suites passed.
 
 The shared browser helper now makes the test targets eager, waits at most 15 seconds for load completion, and checks nonzero decoded dimensions. It reports broken image URLs instead of awaiting an unbounded decoding promise. The theme suite covers an image far below the viewport and confirms an invalid image is still rejected. Checkpoint messages identify the active phase if a future run fails. This affects only tests; production lazy loading is unchanged.
+
+## Mobile palette interaction
+
+Opening a part palette schedules a native `details` toggle that rebuilds its buttons. Photo tests wait for that initial render, use locators that reacquire replaced controls, and verify the chosen part and enabled color control after clicking. Both 320px and 390px fresh-palette paths remain functional deployment checks. Set `PORTRAIT_PHOTO_CPU_RATE=4` when running `test:portrait-photos` to stress those mobile interactions under slower rendering.
+
+On failure, the photo suite records a screenshot and control geometry/state under `.tmp/browser-diagnostics/`. The deployment workflow uploads those diagnostics as `browser-failure-diagnostics`, while preserving the original test failure.

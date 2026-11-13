@@ -134,6 +134,14 @@ jobs:
           THEME_TEST_URL: http://127.0.0.1:4173/DnD-App/
           THEME_TEST_PRODUCTION: '1'
         run: npm run test:themes
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-failure-diagnostics
+          path: .tmp/browser-diagnostics/
+          if-no-files-found: ignore
+          retention-days: 7
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
