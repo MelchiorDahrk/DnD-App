@@ -112,24 +112,132 @@ changes. Source tests cover all memberships, searches, exclusions and randomizer
 eligibility; browser checks exercise all available theme filters and save/reopen
 a figure with new headgear, scabbard, staff and printed body parts.
 
-## Photo suggestions
+## Offline photo matching
 
-The host portrait dialog accepts up to three photos of one minifigure. It resizes
-them before an explicit **Suggest selections** request to `/api/suggest-portrait`.
-The secure Node service uses its own catalog and a strict JSON response schema;
-it never accepts a client-provided catalog. Both the host and embedded editor
-validate IDs, categories, colours and duplicate slots before applying a selection.
-Only checked matches change the figure; uncertain colours preserve existing values.
-Apply is one undoable change and preserves camera and pose. The existing save and
-cancel boundary remains authoritative. The bridge retains its same-origin,
-source-window and per-dialog session checks.
+The host dialog has four stages: upload, crop/regions, review, preview/apply.
+All photograph processing runs locally. There is no portrait inference endpoint,
+OpenAI configuration or runtime external reference source. The sheet scanner
+retains its separate endpoint and configuration.
 
-Photos and service access codes exist only in the open dialog, and are never
-part of the saved portrait, backups, service-worker cache or logs. Closing or
-stopping analysis aborts the client request. Photo text is untrusted reference
-data, never instructions. Setup, service hosting and API policy details are in
-the [README](../README.md#portrait-photo-setup). GitHub Pages needs a separately
-hosted photo service; manual editing and cached portraits still work offline.
+### Reference generation
+
+`scripts/build-portrait-match-index.mjs` uses the existing `drawThumb` and
+`Stage` through the build-only Vite thumbnail page. It renders every approved
+part at 160 pixels with alpha, samples descriptors at 96 pixels and writes
+`vendor/bricktrait/static/thumbs/<id>.webp` and
+`vendor/bricktrait/static/portrait-match-index.json`. Vite copies these to
+`portrait-maker/`; the static build copies them to `dist/portrait-maker/`.
+The generated files are build artifacts, separate from geometry and saves.
+
+Every reference has a straight-on view. Headgear, neckwear, back accessories
+and held parts also have a -30° yaw, 12° pitch view. A black-plastic comparison
+render estimates which pixels belong to recolourable plastic; fixed print
+colours stay in a separate histogram. Membership metadata records fantasy,
+CMF and specific theme associations from the existing allowlists. No alternate
+part-ID catalog is maintained.
+
+Descriptors contain a tight bounding-box aspect ratio, occupied area, 8×8
+silhouette occupancy, 8×8 contrast-normalized luminance, 16 edge bins, 64 RGB
+histogram bins, three dominant RGB samples and print complexity. Arrays are
+quantized to bytes. The full index is about 2.4 MiB for 1,634 parts; thumbnails
+are loaded lazily in the UI rather than decoded as a catalog-sized image set.
+
+The SHA-256 source fingerprint includes approved geometry packs (including
+standard leg components), core geometry, palette, catalog rules/memberships,
+renderer settings, descriptor code, build script and dependency lockfile.
+Unchanged data and present thumbnails skip rendering. Missing/stale references
+rebuild deterministically; a failed render fails the build. Actions caches the
+index, thumbnails and geometry and publishes the assets under the Pages subpath.
+
+Use `npm run build` for the full pipeline, or
+`npm run build:portrait-index` after preparing LDraw with
+`npm run build:portraits`. Set `CHROME_PATH` when Chromium is not in a standard
+location. Catalog updates are reflected on the next build. Keep descriptor
+layout/version and matcher validation in sync when changing the algorithm.
+
+### Photograph analysis and ranking
+
+`portrait-image-analysis.js` decodes locally using browser image orientation,
+limits the long side to 1,400 pixels and bounds processing to 96 pixels per
+region while preserving aspect ratio. No aggressive white-balance correction
+is applied. The user fits a crop and a configurable proportional template.
+Optional neck/back/hand regions start hidden; the user must mark them visible.
+Each photograph retains its own orientation, crop and region boxes, and each
+slot can explicitly use a different photograph. There is no multi-view
+reconstruction or automatic identity/occlusion detector.
+
+For simple backgrounds, a conservative border-connected flood removes pixels
+near the median border colour. Variable borders disable separation and mark
+the descriptor as unreliable; manual crops remain the fallback. Tight-box
+normalization and relative luminance reduce scale and brightness sensitivity.
+No exact pixel equality, OCR, neural model or hosted service is involved.
+
+`portrait-match.js` first intersects reference IDs/categories with the editor's
+current allowed catalog. It compares colour and shape to retain at most 48
+candidates, then ranks the best view for each part. Colour uses normalized
+histogram overlap; estimated recolourable pixels are compared against the
+observed dominant plastic colour. Shape combines aspect-ratio similarity
+(50%), occupancy (35%) and fill (15%). Pattern and edge scores compare normalized
+vectors, and complexity compares edge density. The final weighted sum is
+clamped to [0,1], rounded and sorted by score then ID for stable ties.
+
+| Category | Colour | Shape | Pattern | Edges | Complexity |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Head | .35 | .15 | .30 | .15 | .05 |
+| Headgear | .15 | .50 | .12 | .18 | .05 |
+| Neck | .20 | .40 | .15 | .20 | .05 |
+| Back | .30 | .30 | .20 | .15 | .05 |
+| Torso | .40 | .10 | .30 | .15 | .05 |
+| Legs | .40 | .15 | .25 | .15 | .05 |
+| Hand accessories | .10 | .55 | .10 | .20 | .05 |
+
+`MATCH_WEIGHTS` and `MATCH_THRESHOLDS` are configurable. A top score below .56
+leaves a slot unresolved. A .84 top score with a .07 margin and reliable
+separation is labelled a closer match; everything else stays ambiguous.
+These are conservative engineering gates, **not calibrated confidence or
+probabilities**. Tests cover obvious generated colour/shape cases, duplicates,
+noise, missing/hidden regions and catalog rejection. Representative physical
+photographs are not included in this repository; thresholds require calibration
+against a consented real-photo set before claiming measured accuracy. The UI
+requires an explicit choice even for a stronger resemblance.
+
+Three nearest LDraw colours use CIELAB distance with luminance weighted .55
+and chroma weighted 1. Dominant colour is only an estimate of plastic: large
+prints/backgrounds can dominate. Colours are never automatically applied.
+Separate arms, hands and hips remain editable and preserve existing values
+when left unchanged.
+
+### Review, privacy and offline behavior
+
+Every slot offers up to five lazy thumbnails, the cropped reference, full
+category search with collections, unchanged, and explicit None for optional
+accessories. A failed analysis keeps photos and the entire manual palette.
+Workers handle feature extraction/ranking, with a yielded main-thread path
+when workers are unavailable. Stop/close terminates matching and photo URLs
+are revoked on removal/close. Photographs and intermediates are memory-only.
+
+Preview uses a separate instance of the existing Bricktrait renderer and a
+copied design; it does not alter history or the saved character. Reviewed
+choices use `validatePortraitSuggestions()` and the existing
+`questlog:portrait-apply-selections` bridge. The editor validates again and
+applies one history transaction. The new preview message retains the same
+origin, source-window and per-dialog session checks. Pose, camera, transparent
+save behavior, Use portrait and cancel boundaries stay unchanged.
+
+The service worker precaches analysis modules, worker and descriptor index.
+**Cache visual palette for offline use** caches compressed thumbnails in small
+batches, with progress; it fetches no geometry or uploaded bytes. Browsing and
+recognition work offline after these assets are cached. Actual preview/save
+retains the editor's on-demand geometry requirements. Open desired parts online
+before using them offline; the entire geometry library is never required for
+recognition. Cache failures are shown and can be retried.
+
+Limits: fixed proportional regions assume a front-facing figure. Lighting,
+clutter, glare, occlusion, printed variants and fixed-colour parts can all
+produce plausible but incorrect suggestions. Use diffuse light, a contrasting
+background and close focus, adjust regions and designate supplementary views
+explicitly. Real Safari/mobile hardware and a representative physical-photo
+benchmark remain unverified; Chromium touch emulation covers layout/gestures.
 
 Browsing, filter counts, search, favourites, recent parts and randomization all
 use the allowlist. Full catalog metadata and geometry stay available to the

@@ -1,11 +1,33 @@
 import {EQUIPMENT_ICONS} from './equipment-icons.js';
-const CACHE = 'questlog-app-v20-character-landing';
+const CACHE = 'questlog-app-v21-local-portrait-matching';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./vfx.js','./vfx.css','./feature-catalog.js','./equipment-icons.js','./item-icons.js',...Object.keys(EQUIPMENT_ICONS).map(key=>`./assets/equipment/${key}.webp`));
 ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progression-options.js');
 ASSETS.push('./portrait-scan.js','./portrait-photo-ui.js');
+ASSETS.push('./portrait-image-analysis.js','./portrait-match.js','./portrait-match-worker.js','./portrait-maker/portrait-match-index.json');
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('questlog-app-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
+let paletteCaching=null;
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='questlog:cache-portrait-palette')return;
+  const reply=data=>event.source?.postMessage({type:'questlog:portrait-palette-cache',...data});
+  if(!paletteCaching)paletteCaching=(async()=>{
+    const cache=await caches.open(CACHE),url=new URL('./portrait-maker/portrait-match-index.json',self.location.href);
+    const response=await cache.match(url)||await fetch(url);
+    if(!response.ok)throw new Error('Matching data could not be cached.');
+    const index=await response.json();let done=0;
+    // Cache compressed static pictures only; never load them into image memory.
+    for(let start=0;start<index.parts.length;start+=6){
+      await Promise.all(index.parts.slice(start,start+6).map(async p=>{
+        const path=new URL(`./portrait-maker/thumbs/${encodeURIComponent(p.id)}.webp`,self.location.href);
+        if(!await cache.match(path))await cache.add(path);
+      }));
+      done=Math.min(index.parts.length,start+6);reply({done,total:index.parts.length});
+    }
+    return index.parts.length;
+  })().finally(()=>{paletteCaching=null;});
+  event.waitUntil(paletteCaching.then(total=>reply({done:total,total,complete:true})).catch(()=>reply({error:'Some palette assets could not be cached. Reconnect and try again.'})));
+});
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET'||new URL(event.request.url).origin!==self.location.origin||new URL(event.request.url).pathname.includes('/api/'))return;
   // Navigation and source use the network when possible, with a complete offline fallback.

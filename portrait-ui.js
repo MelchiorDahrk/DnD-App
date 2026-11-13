@@ -35,6 +35,7 @@ export function openPortraitMaker({character,onSave}) {
         if(event.data.webgl&&Array.isArray(event.data.catalog)&&Array.isArray(event.data.colors))photos.ready(event.data.catalog,event.data.colors);
         break;
       case 'questlog:portrait-selections-applied':photos.applied();break;
+      case 'questlog:portrait-selections-preview':photos.previewed(event.data);break;
       case 'questlog:portrait-selections-error':photos.applied(event.data.message||'Could not apply these selections.');break;
       case 'questlog:portrait-error':
         showError(event.data.message);use.disabled=false;use.textContent='Use portrait';break;

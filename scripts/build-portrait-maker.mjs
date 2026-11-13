@@ -5,6 +5,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {checkFantasyCatalog} from './check-fantasy-catalog.mjs';
 import {EQUIPMENT_ICONS,equipmentIconParts} from '../equipment-icons.js';
+import {buildPortraitMatchIndex} from './build-portrait-match-index.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const vendor=resolve(root,'vendor/bricktrait');
@@ -28,6 +29,7 @@ export async function buildPortraitMaker() {
   }
   checkFantasyCatalog();
   run('build-thumbs.mjs','--equipment');
+  await buildPortraitMatchIndex();
   const {build}=await import('vite');
   await build({configFile:resolve(vendor,'vite.config.js')});
   await cp(resolve(vendor,'LICENSE'),resolve(root,'portrait-maker/LICENSE'));

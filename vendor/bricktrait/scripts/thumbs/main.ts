@@ -3,6 +3,7 @@ import { library, STANDARD_LEGS, type Part, type Placement } from '../../src/lib
 import { Stage, type View } from '../../src/lib/scene';
 import { drawThumb } from '../../src/lib/thumb-render';
 import { THUMB_COLORS } from '../../src/lib/thumbs';
+import './references';
 
 declare global {
 	interface Window {

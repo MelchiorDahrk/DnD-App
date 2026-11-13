@@ -9,7 +9,7 @@ const RETRO_SCALE = 0.3;
 
 export type ImageFormat = 'png' | 'webp' | 'jpeg';
 
-class PortraitRenderer {
+export class PortraitRenderer {
 	private stage: Stage | null = null;
 	private focus: Box3 | null = null;
 	private body: Box3 | null = null;

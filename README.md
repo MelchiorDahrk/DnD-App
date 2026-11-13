@@ -63,56 +63,54 @@ After the first online visit and the **Ready for offline adventures** message, a
 ## Portrait photo setup
 
 Open the portrait maker and expand **Start from a LEGO photo**. Choose or take
-up to three JPG, PNG, or WebP photos of the **same** minifigure (15 MB each), then
-choose **Suggest selections**. Review the suggested face, hair, clothing,
-colours, and accessories, with confidence and approximation notes. Low-confidence
-matches start unchecked. **Apply selected suggestions** changes only the selected
-slots; pose and camera stay as they were. Undo/redo works, and the character is
-saved only when you choose **Use portrait**. Cancel discards the changes.
+up to three JPG, PNG, or WebP photos of the **same** minifigure (15 MB each).
+Designate a primary front view, fit the whole-figure crop and adjust the visible
+body regions by dragging or using the sliders. Each region can use a different
+photo, with independent crop, rotation and visibility settings.
 
-The parts browser includes **1,634** fantasy, CMF-associated and theme parts, with a
-**Part collection** filter for **All collections**, **Fantasy**, **Theme parts**, or **CMFs ·
-Collectible Minifigures**. Search accepts `cmf` and `collectible minifigures`.
-CMF coverage reflects the available LDraw models and source tags, including
-available D&D CMF pieces; it is not an exhaustive inventory of every series.
-Printed details can require a nearby substitute. Manual editing remains available.
-The theme collections add 772 selections, including separate Vikings, Hobbit,
-Indiana Jones, Caribbean, Chima and Dreamzzz filters. No compatible Last Airbender
-or One Piece models were identified in the bundled LDraw snapshot.
-[Theme coverage and refresh instructions](docs/fantasy-portraits.md#theme-coverage).
+Choose **Find matching LEGO parts** to compare the photo locally against the
+existing **1,634-part** fantasy, CMF and theme catalog. Up to five thumbnails
+appear per visible region. Scores describe visual similarity, not probabilities
+or exact minifigure identity. Every slot and colour starts unchanged: select a
+thumbnail, browse the full searchable category, or explicitly choose **None** for
+an optional accessory. Torso arms/hands and leg hips keep their separate colours.
+Ambiguous or hidden parts need manual review. **Browse parts manually** works
+even without useful matches or another upload.
 
-Photo suggestions reuse the secure sheet scanning server described below.
-Set `OPENAI_API_KEY` in the terminal running `npm run dev` or `npm start`.
-`OPENAI_PORTRAIT_MODEL` optionally overrides `OPENAI_SCAN_MODEL` / the existing
-`gpt-4.1` default. The model must accept images and strict Structured Outputs.
-See the official OpenAI documentation for [image inputs](https://developers.openai.com/api/docs/guides/images-vision)
-and [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs).
+**Preview reviewed choices** renders a temporary assembly with Bricktrait.
+**Apply reviewed choices to Bricktrait** makes one undoable edit, preserving pose
+and camera. Choose **Use portrait** separately to save the transparent portrait;
+Cancel discards the editor session. Uploaded photos never enter saves, backups,
+localStorage, logs, network requests or service-worker caches. Closing the dialog
+releases the photo URLs and cancels matching.
 
-**GitHub Pages needs a separate HTTPS photo service.** In **Connect a photo
-service**, enter `https://your-node-host.example/api/suggest-portrait` and its
-service access code. An existing `/api/scan-sheet` service URL is also accepted
-and converted to `/api/suggest-portrait`; update that server to this version.
-The same `SCAN_ACCESS_TOKEN` and `SCAN_ALLOWED_ORIGINS` settings protect both
-endpoints. The API key stays on the server. The access code stays in the open
-dialog and is cleared when it closes; only the service URL is remembered for
-the page session.
+Portrait matching needs no API key, service, backend, LLM or machine-learning
+model. GitHub Pages serves all matching code, descriptors and thumbnails as
+static assets. After opening the app online, use **Cache visual palette for
+offline use** to cache the thumbnails as well as the matching index. Recognition
+and the visual palette then work offline without downloading the LDraw geometry
+catalog. Bricktrait previews and saves still need geometry for the selected
+parts: open those parts online first, as with the existing editor.
 
-`POST /api/suggest-portrait` accepts `{ "images": ["data:image/jpeg;base64,..."] }`
-and returns `{ "suggestions": ... }` using the schema in `portrait-scan.js`.
-The server supplies its actual selectable parts and colours, then validates
-every returned slot, ID and colour. The browser and editor validate again
-before applying reviewed choices. Text inside photos is treated as reference
-data, never instructions. Analysis requires internet and may use API credits.
-Original photos are resized in the browser, held only in the dialog, and excluded
-from local storage, backups, logs, and service-worker caches. Requests use
-`store: false`; provider API data policies still apply. Closing the dialog or
-choosing **Stop analysis** cancels the client request.
+The build creates a roughly 2.4 MiB descriptor index from transparent LDraw
+renders, including extra angled views of headwear and accessories. It compares
+colours, silhouette/proportions, contrast-normalized patterns and edges using
+category-specific weights. See the [algorithm, reference regeneration and
+limitations guide](docs/fantasy-portraits.md#offline-photo-matching).
 
-`npm run test:portrait-photos` covers upload preparation, mocked suggestions,
-CMF filtering/search, review/apply, undo/redo, cancellation, mobile layout,
-save behaviour, and exclusion of reference photos from backups. It uses the
-same browser and URL settings as `test:portraits`. Live provider accuracy
-requires a configured service and representative minifigure photos.
+Photograph one front-facing figure against a contrasting, uncluttered background
+in diffuse light. Keep the face, prints and held accessories in focus; rotate
+sideways photos before matching. Busy backgrounds, shadows, glare, hidden
+accessories and nearly identical prints reduce accuracy. Printed colours are
+fixed in the model, so recolouring plastic may not reproduce a photograph.
+
+Run `npm run build:portrait-index` after preparing LDraw assets to regenerate
+matching data, or use the normal `npm run build`. Source fingerprints reuse
+unchanged references. `npm run test:portrait-photos` exercises real local matching,
+manual choices, preview/apply, undo/redo, cancel, transparent saves, mobile crop
+controls and offline use; it never mocks a recognition service. Tests use rendered
+and synthetic references; real-photo accuracy and physical Safari device testing
+remain areas for further validation. The D&D sheet scanner below is independent.
 
 ## Sheet scanning setup
 

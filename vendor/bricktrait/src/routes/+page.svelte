@@ -12,7 +12,7 @@
 		type Pose
 	} from '#lib/ldraw.ts';
 	import { MIN_ZOOM } from '#lib/scene.ts';
-	import { renderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
+	import { renderer, PortraitRenderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
 	import { RING_PRESETS, setBackdropImage, transparentStyle } from '#lib/compose.ts';
 	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
 	import { applyPortraitSelections } from '../../../../portrait-scan.js';
@@ -90,6 +90,27 @@
 	let saveError = $state('');
 	const embedded = window.parent !== window;
 	const session = window.name;
+	let photoPreview: PortraitRenderer | null = null;
+	let previewBusy = false;
+	async function previewSelections(selections: unknown, revision: number) {
+		if (previewBusy) return;
+		previewBusy = true;
+		try {
+			const snapshot = $state.snapshot(portrait);
+			const figure = applyPortraitSelections(snapshot.figure, selections, [...selectable, standard], colors.filter(c => !c.alpha));
+			photoPreview ??= new PortraitRenderer();
+			await photoPreview.update(figure);
+			const blob = await photoPreview.image(256, snapshot.view, transparentStyle(snapshot.style), 'webp');
+			if (!blob) throw new Error('Could not render the reviewed choices.');
+			const image = await new Promise<string>((resolve, reject) => {
+				const reader = new FileReader(); reader.onload = () => resolve(String(reader.result));
+				reader.onerror = () => reject(new Error('Could not read the preview.')); reader.readAsDataURL(blob);
+			});
+			send('questlog:portrait-selections-preview', { image, revision });
+		} catch(error) {
+			send('questlog:portrait-selections-preview', { message: error instanceof Error ? error.message : 'Could not preview these choices.', revision });
+		} finally { previewBusy = false; }
+	}
 
 	function send(type: string, data = {}) {
 		window.parent.postMessage({ type, session, ...data }, location.origin);
@@ -129,6 +150,7 @@
 				Object.assign(portrait, design);
 			}
 			if (event.data.type === 'questlog:portrait-request-save') void saveToCharacter();
+			if (event.data.type === 'questlog:portrait-preview-selections' && ready && webglAvailable()) void previewSelections(event.data.selections, event.data.revision);
 			if (event.data.type === 'questlog:portrait-apply-selections' && ready && webglAvailable()) {
 				try {
 					const figure = applyPortraitSelections($state.snapshot(portrait.figure), event.data.selections, [...selectable, standard], colors.filter((c) => !c.alpha));
