@@ -1,7 +1,9 @@
 // Local, short-lived effects. Nothing is stored with a character.
 import {COINS} from './model.js';
+import {itemIconMarkup} from './item-icons.js';
 
 const THEMES = {
+  attack: {color:'#dbb777',accent:'#fff0be',symbol:'strike',life:1250,count:30},
   damage: {color:'#ed716b',accent:'#ffd4af',symbol:'strike',life:1100,count:44},
   heal: {color:'#75d9aa',accent:'#e6ffb8',symbol:'heart',life:1650,count:58},
   shield: {color:'#83cfff',accent:'#e5ecff',symbol:'shield',life:1650,count:52},
@@ -167,7 +169,7 @@ function addStuds(burst,changes,x,y) {
   }
 }
 
-export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[]}={}) {
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,ranged=false,critical=false,miss=false}={}) {
   const theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
@@ -184,6 +186,13 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     burst.append(aura);
     if(showSigil){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
     if(kind==='money')addStuds(burst,studs,x,y);
+    if(kind==='attack'&&weapon){
+      const prop=document.createElement('div');prop.className=`vfx-weapon${ranged?' vfx-weapon-ranged':''}${miss?' vfx-weapon-miss':''}${critical?' vfx-weapon-critical':''}`;
+      prop.innerHTML=itemIconMarkup({name:weapon.name,category:'Weapon'},ranged?'bow':'sword');
+      // The scene is brief; don't defer decoding its local LEGO thumbnail.
+      const img=prop.querySelector('img');if(img)img.loading='eager';
+      burst.append(prop);
+    }
   }
   if(showCaption){
     const caption=document.createElement('div');caption.className='vfx-caption';
@@ -200,6 +209,10 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
   // Bound rapid taps; don't let old effects obscure the next action.
   if(bursts.length>3){const oldest=bursts.shift();clearTimeout(oldest.timer);oldest.node.remove();}
   if(!calm){animateTarget(node,kind,theme.color);if(theme.count)seed(kind,theme,x,y);}
+}
+
+export function playAttackEffect(weapon,options={}) {
+  playEffect('attack',{...options,weapon,sigil:false});
 }
 
 if(typeof window!=='undefined') {

@@ -37,6 +37,14 @@
 .vfx-money .vfx-caption{top:calc(var(--vfx-y) + 37px);min-width:0;padding:10px 16px}
 .vfx-money .vfx-caption strong{font-family:var(--mono);font-size:17px;line-height:1.5}
 .vfx-calm{animation:none}
+.vfx-weapon{position:absolute;left:var(--vfx-x);top:var(--vfx-y);width:132px;height:132px;filter:drop-shadow(0 6px 9px #102c2988);animation:vfx-weapon-swing 900ms cubic-bezier(.2,.8,.3,1) both}
+.vfx-weapon .equipment-icon,.vfx-weapon>.icon{width:100%;height:100%;display:block}
+.vfx-weapon .equipment-icon img{width:100%;height:100%;object-fit:contain}
+.vfx-weapon .icon{width:100%;height:100%;color:var(--vfx-accent)}
+.vfx-weapon-ranged{animation-name:vfx-weapon-shot}
+.vfx-weapon-miss{opacity:.65;filter:grayscale(.5) drop-shadow(0 4px 8px #102c2966)}
+.vfx-weapon-critical{filter:drop-shadow(0 0 15px #ffe2a6)}
+.vfx-attack .vfx-caption{top:calc(var(--vfx-y) + 62px);padding:9px 15px}
 .vfx-calm.vfx-scene::before,.vfx-calm.vfx-damage::before{display:none}
 .vfx-calm .vfx-caption{animation:none;transform:translateX(-50%);top:calc(var(--vfx-y) + 16px);box-shadow:0 4px 18px #0b211722}
 
@@ -70,6 +78,8 @@
 .inspiration.active .icon{filter:drop-shadow(0 0 5px #dcbd68)}
 
 @keyframes vfx-lifetime{0%,72%{opacity:1}100%{opacity:0}}
+@keyframes vfx-weapon-swing{0%{opacity:0;transform:translate(-100%,-65%) rotate(-95deg) scale(.65)}22%{opacity:1;transform:translate(-75%,-70%) rotate(-65deg) scale(1)}55%{opacity:1;transform:translate(-30%,-40%) rotate(35deg) scale(1.1)}100%{opacity:0;transform:translate(-15%,-20%) rotate(65deg) scale(.9)}}
+@keyframes vfx-weapon-shot{0%{opacity:0;transform:translate(-95%,-50%) rotate(-14deg) scale(.75)}25%{opacity:1;transform:translate(-60%,-50%) rotate(-6deg) scale(1)}48%{opacity:1;transform:translate(-72%,-50%) rotate(-12deg) scale(.95)}100%{opacity:0;transform:translate(25%,-50%) rotate(8deg) scale(.7)}}
 @keyframes vfx-stud-flight{0%{opacity:0;transform:translate3d(var(--stud-from-x),var(--stud-from-y),0) translate(-50%,-50%) rotate(var(--stud-spin)) scale(var(--stud-from-scale))}15%{opacity:1}50%{opacity:1;transform:translate3d(var(--stud-via-x),var(--stud-via-y),0) translate(-50%,-50%) rotate(0) scale(1)}100%{opacity:0;transform:translate3d(var(--stud-to-x),var(--stud-to-y),0) translate(-50%,-50%) rotate(calc(var(--stud-spin) * -1)) scale(var(--stud-to-scale))}}
 @keyframes vfx-sigil{0%{opacity:0;transform:translate(-50%,-50%) scale(.35) rotate(-32deg)}100%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0)}}
 @keyframes vfx-aura{0%{opacity:0;transform:translate(-50%,-50%) scale(.45)}30%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.3)}}

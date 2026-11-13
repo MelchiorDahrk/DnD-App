@@ -12,8 +12,8 @@ import {equipmentIconURL} from '../equipment-icons.js';
 const root=resolve(import.meta.dirname,'..');
 const port=process.env.SHEET_TEST_PORT || '4187';
 const base=process.env.SHEET_TEST_URL || `http://127.0.0.1:${port}/`;
-const executablePath=process.env.BROWSER_PATH || ['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
-assert.ok(executablePath,'Set BROWSER_PATH to a Chromium browser.');
+const executablePath=process.env.BROWSER_PATH || ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files/Mozilla Firefox/firefox.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
+assert.ok(executablePath,'Set BROWSER_PATH to a browser.');
 let server,browser;
 try {
   if (!process.env.SHEET_TEST_URL) {
@@ -26,7 +26,7 @@ try {
       server.stdout.once('data',()=>{clearTimeout(timer);resolve();});
     });
   }
-  browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox']});
+  browser=await puppeteer.launch({executablePath,browser:/firefox/i.test(executablePath)?'firefox':'chrome',headless:true,args:['--no-sandbox']});
   const page=await browser.newPage();
   const errors=[];
   page.on('pageerror',error=>errors.push(error.message));
@@ -110,6 +110,7 @@ try {
   await page.waitForSelector('#modal[open] .roll-modal');
   await page.click('#modal [data-action="close"]');
   await page.click(`${entrySelector('attacks',selected.attacks)} [data-action="attack-roll"]`);
+  await page.click('#modal [data-combat-action="roll"]');
   await page.waitForSelector('#modal[open] .roll-modal');
   await page.click('#modal [data-action="close"]');
   const featureBefore=active(await state()).features.find(f=>f.id===selected.features);
@@ -147,7 +148,7 @@ try {
     await page.screenshot({path:resolve(root,`.tmp/sheet-favorites-${width}.png`),fullPage:true});
   }
   await page.focus(`${entrySelector('skills',selected.skills)} .sheet-favorite`);
-  await page.keyboard.press('Space');
+  await page.keyboard.press(' ');
   assert.deepEqual(await visibleKeys('skills'),[]);
   assert.equal(await page.$eval(':focus',node=>node.dataset.action),'sheet-collapse');
   await page.keyboard.press('Enter');

@@ -235,6 +235,8 @@ function validateCharacter(c) {
     requireThat(string(v.notes),'invalid attack notes.');
     requireThat(['normal','advantage','disadvantage'].includes(v.rollMode),'invalid attack roll mode.');
     requireThat(validDiceFormula(v.damage),'invalid attack damage.');
+    requireThat(v.weaponId===undefined||(string(v.weaponId,100)&&/^[a-z0-9-]*$/.test(v.weaponId)),'invalid attack weapon reference.');
+    requireThat(v.mastery===undefined||['','Cleave','Graze','Nick','Push','Sap','Slow','Topple','Vex'].includes(v.mastery),'invalid attack mastery.');
   });
   return c;
 }

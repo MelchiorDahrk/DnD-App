@@ -157,7 +157,8 @@ export function attackFromWeapon(weapon,character) {
   const heavyDisadvantage=weapon.properties.includes('Heavy')&&character.stats[weapon.family.endsWith('ranged')?'dex':'str']<13;
   const distance=weapon.properties.match(/\d+\/\d+ ft\./)?.[0],reach=weapon.properties.includes('Reach')?'10 ft.':'5 ft.';
   const range=weapon.family.endsWith('melee')?reach+(distance?`; thrown ${distance}`:''):distance||reach;
-  return {name:weapon.name,ability,bonus:0,proficient,rollMode:heavyDisadvantage?'disadvantage':'normal',damage:weapon.damage==='1'?String(Math.max(0,1+modifier)):weapon.damage+(modifier?signed(modifier):''),type:weapon.type,range,notes:weapon.details};
+  const mastery=character.features.some(f=>/^weapon mastery\b/i.test(f.name)&&f.description.toLowerCase().includes(`${weapon.name} (${weapon.mastery})`.toLowerCase()))?weapon.mastery:'';
+  return {name:weapon.name,weaponId:weapon.id,mastery,ability,bonus:0,proficient,rollMode:heavyDisadvantage?'disadvantage':'normal',damage:weapon.damage==='1'?String(Math.max(0,1+modifier)):weapon.damage+(modifier?signed(modifier):''),type:weapon.type,range,notes:weapon.details};
 }
 
 const classRows = [
