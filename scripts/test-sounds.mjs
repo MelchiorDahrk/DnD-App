@@ -14,6 +14,7 @@ const root=resolve(import.meta.dirname,'..'),port=process.env.SOUND_TEST_PORT||'
 const base=process.env.SOUND_TEST_URL||`http://127.0.0.1:${port}${process.env.SOUND_TEST_PATH||'/dist/'}`;
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files/Mozilla Firefox/firefox.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/chromium'].find(existsSync);
 assert.ok(executablePath,'Set BROWSER_PATH to an installed browser.');
+const firefox=/firefox/i.test(executablePath);
 // Assert production copies, not just references in the build script.
 const manifest=JSON.parse(await readFile(resolve(root,'assets/sfx/manifest.json'),'utf8'));
 for(const path of ['sound.js','sound-assets.js','sound-events.js','assets/sfx/manifest.json','assets/sfx/CREDITS.md',...SOUND_FILES])assert.deepEqual(await readFile(resolve(root,'dist',path)),await readFile(resolve(root,path)),`Production copy: ${path}`);
@@ -24,22 +25,29 @@ try{
     server=spawn(process.execPath,['scripts/serve.mjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe'],windowsHide:true});
     await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Server did not start')),10000);server.once('error',reject);server.stdout.once('data',()=>{clearTimeout(timer);resolve();});server.stderr.once('data',data=>reject(Error(String(data))));});
   }
-  browser=await puppeteer.launch({executablePath,browser:/firefox/i.test(executablePath)?'firefox':'chrome',headless:true,args:['--no-sandbox']});
+  // Firefox cannot emulate this media feature through CDP; use its native pref.
+  browser=await puppeteer.launch({executablePath,browser:firefox?'firefox':'chrome',headless:true,args:['--no-sandbox'],...(firefox?{extraPrefsFirefox:{'ui.prefersReducedMotion':1}}:{})});
   const page=await browser.newPage(),errors=[],thirdPartyAudio=[];
   page.on('pageerror',error=>errors.push(error.message));
   page.on('request',request=>{if(/\.(ogg|mp3)(\?|$)/.test(request.url())&&new URL(request.url()).origin!==new URL(base).origin)thirdPartyAudio.push(request.url());});
   await page.evaluateOnNewDocument(()=>{
-    window.audioMetrics={contexts:0,starts:0};
+    window.audioMetrics={contexts:0,starts:0,clips:[]};
+    window.soundBufferSignature=buffer=>{
+      const samples=buffer.getChannelData(0),bits=new Uint32Array(samples.buffer,samples.byteOffset,samples.length);let hash=2166136261;
+      for(const value of bits)hash=Math.imul(hash^value,16777619);
+      return `${buffer.length}:${buffer.sampleRate}:${hash>>>0}`;
+    };
     const Native=window.AudioContext;
     window.AudioContext=class extends Native{
       constructor(...args){super(...args);window.audioMetrics.contexts++;window.audioContextForTest=this;}
-      createBufferSource(){const source=super.createBufferSource(),start=source.start.bind(source);source.start=(...args)=>{window.audioMetrics.starts++;return start(...args);};return source;}
+      createBufferSource(){const source=super.createBufferSource(),start=source.start.bind(source);source.start=(...args)=>{window.audioMetrics.starts++;window.audioMetrics.clips.push(window.soundBufferSignature(source.buffer));return start(...args);};return source;}
     };
   });
   await page.setViewport({width:1280,height:1000});await page.goto(base,{waitUntil:'networkidle0'});
   const c=makeCharacter({name:'Sound test adventurer',class:'Fighter',subclass:'Champion',level:4,hitDice:4,hp:5,maxHp:30,skills:['Athletics','Perception'],stats:{str:16,dex:16,con:14,int:12,wis:12,cha:10},weaponProficiencies:'Simple and Martial weapons'});
   c.attacks=['Longsword','Longbow','Dagger','Mace','Greatsword'].map(name=>{const w=WEAPONS.find(w=>w.name===name);return {id:w.id,...attackFromWeapon(w,c)};});
-  c.items=[{id:'potion',name:'Potion of Healing',category:'Consumable',qty:2,weight:.5,equipped:false,description:'',wiki:''}];
+  const equipmentCases=[['Longsword','Weapon','equip-sword'],['Dagger','Weapon','equip-blade'],['Longbow','Weapon','equip-bow'],['Quarterstaff','Weapon','equip-wood'],['Mace','Weapon','equip-metal'],['Shield','Armor','equip-shield'],['Chain Mail','Armor','equip-armor'],['Leather Armor','Armor','equip-leather'],['Padded Armor','Armor','pack-cloth'],['Backpack','Gear','pack-leather'],['Potion of Healing','Consumable','potion-bottle'],['Spellbook','Gear','equip-book'],['Spell Scroll (Shield)','Consumable','page-1'],['Gold coins','Treasure','coins-1'],['Ring of Protection','Gear','equip-jewelry'],['Wand of Magic Detection','Gear','magic-chime'],['Custom gear','Gear','equip-latch']];
+  c.items=[{id:'potion',name:'Potion of Healing',category:'Consumable',qty:2,weight:.5,equipped:false,description:'',wiki:''},...equipmentCases.map(([name,category],i)=>({id:'equipment-'+i,name,category,qty:1,weight:1,equipped:false,description:'',wiki:''}))];
   c.spells=['Fireball','Ray of Frost','Lightning Bolt','Sacred Flame','Chill Touch','Cure Wounds','Shield','A custom spell'].map((name,i)=>({id:'spell-'+i,name,level:0,school:i===6?'Abjuration':'Evocation',castingTime:'Action',range:'60 ft.',duration:'Instantaneous',notes:'',wiki:'',prepared:true,concentration:false}));
   const state={...initialState(),characters:[c],activeId:c.id};parseBackup(JSON.stringify(state));
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),state);await page.reload({waitUntil:'networkidle0'});
@@ -78,7 +86,7 @@ try{
       const buffer=await window.audioContextForTest.decodeAudioData(await response.arrayBuffer());
       const samples=buffer.getChannelData(0);let energy=0,first=-1;
       for(let i=0;i<samples.length;i++){energy+=samples[i]*samples[i];if(first<0&&Math.abs(samples[i])>.008)first=i/buffer.sampleRate;}
-      results.push({id:asset.id,format,duration:buffer.duration,rms:Math.sqrt(energy/samples.length),onset:first});
+      results.push({id:asset.id,format,duration:buffer.duration,rms:Math.sqrt(energy/samples.length),onset:first,signature:window.soundBufferSignature(buffer)});
     }
     return results;
   },manifest.assets);
@@ -111,6 +119,28 @@ try{
   await played('magic.heal',potionAfter);assert.equal((await saved()).characters[0].hp,14);await close();
   console.log('PASS spell categories/custom fallback, HP increases, potion handling and restoration');
 
+  // Compare the audio actually started with independently decoded source clips.
+  // Alternating randomness would expose the previous mixed equipment variants.
+  await page.evaluate(()=>{window.nativeRandom=Math.random;let flip=false;Math.random=()=>{flip=!flip;return flip?0:.999999;};});
+  for(const [index,[name,,asset]] of equipmentCases.entries()){
+    const id='equipment-'+index,expected=decoded.find(clip=>clip.id===asset&&clip.format==='ogg').signature;
+    const verifyEquipment=async(equipped,callback)=>{
+      await new Promise(resolve=>setTimeout(resolve,150));const after=await mark(),clipAfter=await page.evaluate(()=>window.audioMetrics.clips.length);
+      await callback();
+      await page.waitForFunction(after=>window.soundCalls.slice(after).some(call=>call.result===true),{timeout:10000},after);
+      const calls=await page.evaluate(after=>window.soundCalls.slice(after),after);
+      assert.equal(calls.length,1,`${name}: one equipment cue`);assert.match(calls[0].name,/^item\.equip(?:\.|$)/);
+      assert.deepEqual(await page.evaluate(after=>window.audioMetrics.clips.slice(after),clipAfter),[expected],`${name}: fixed ${asset} handling clip`);
+      assert.equal((await saved()).characters[0].items.find(item=>item.id===id).equipped,equipped);
+      await clearAudio();
+    };
+    for(const equipped of [true,false,true,false])await verifyEquipment(equipped,()=>page.click(`[data-action="equip"][data-id="${id}"]`));
+    for(const equipped of [true,false])await verifyEquipment(equipped,async()=>{await page.click(`[data-action="item"][data-id="${id}"]`);await page.click('#modal [name="equipped"]');await submit();});
+    await page.click(`[data-action="item"][data-id="${id}"]`);const before=await mark();await submit();assert.equal(await mark(),before,`${name}: unchanged edits are silent`);
+  }
+  await page.evaluate(()=>{Math.random=window.nativeRandom;delete window.nativeRandom;});
+  console.log('PASS 17 equipment families: 102 fixed-clip equip/unequip checks through buttons and editor, plus silent unchanged edits');
+
   await navigate('sheet');await clearAudio();
   await page.click('[data-action="rest"][data-kind="long"]');
   await page.waitForFunction(()=>window.soundForTest.diagnostics().voices>0);
@@ -142,9 +172,10 @@ try{
   await damage(2);assert.equal((await saved()).characters[0].hp,0);
   const beforeZero=await mark();await adjustHP(0);assert.equal(await mark(),beforeZero,'Zero damage is silent');
   await page.setViewport({width:390,height:844});
-  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  if(firefox)assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true);
+  else await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
   await damage(1);
-  await page.setViewport({width:1280,height:1000});await page.emulateMediaFeatures([]);
+  await page.setViewport({width:1280,height:1000});if(!firefox)await page.emulateMediaFeatures([]);
   console.log('PASS damage to HP, temporary HP, overflow, 0 HP, zero amount and reduced-motion mobile playback');
 
   await navigate('settings');

@@ -6,7 +6,8 @@ import {resolve} from 'node:path';
 import vm from 'node:vm';
 import {createSoundManager,AUDIO_PREFERENCES_KEY} from '../sound.js';
 import {SOUND_ASSETS,SOUND_FILES} from '../sound-assets.js';
-import {SOUND_EVENTS,spellSoundEvent,weaponSoundEvent,rollSoundEvent} from '../sound-events.js';
+import {SOUND_EVENTS,spellSoundEvent,weaponSoundEvent,rollSoundEvent,equipSoundEvent} from '../sound-events.js';
+import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 import {defaultPartyState} from './helpers/default-party.mjs';
 import {parseBackup,SAVE_VERSION} from '../model.js';
 
@@ -132,6 +133,32 @@ test('combat metadata and spell names resolve meaningful cues without inventing 
   assert.equal(spellSoundEvent({name:'Custom',school:'Abjuration'}),'magic.protect');
   assert.equal(rollSoundEvent({rolls:[]}),null);assert.equal(rollSoundEvent({rolls:[10]},'DEX save'),'dice.check');assert.equal(rollSoundEvent({rolls:[1,3]}),'dice.multiple');
 });
+test('equipment types have distinct fixed handling clips across catalog and custom items',()=>{
+  const clip=item=>{
+    const definition=SOUND_EVENTS[equipSoundEvent(item)];
+    assert.equal(definition.variants.length,1,`${item.name}: equipment cues must not vary randomly`);
+    return definition.variants[0];
+  };
+  const cases=[['Longsword','equip-sword'],['Dagger','equip-blade'],['Longbow','equip-bow'],['Quarterstaff','equip-wood'],['Mace','equip-metal'],['Shield','equip-shield'],['Chain Mail','equip-armor'],['Leather Armor','equip-leather'],['Padded Armor','pack-cloth'],['Backpack','pack-leather'],['Potion of Healing','potion-bottle'],['Spellbook','equip-book'],['Spell Scroll (Cantrip)','page-1'],['Ring of Protection','equip-jewelry'],['Wand of Magic Detection','magic-chime']];
+  for(const [name,asset] of cases){
+    const preset=EQUIPMENT.find(item=>item.name.toLowerCase()===name.toLowerCase());
+    assert.ok(preset,`${name}: catalog fixture`);
+    const item=itemFromEquipment(preset);
+    assert.equal(clip(item),asset,name);
+    assert.equal(clip({...item,equipped:true}),asset,`${name}: equipping and unequipping use the same clip`);
+  }
+  assert.equal(new Set(cases.map(([,asset])=>asset)).size,cases.length,'Each supported family has its own recording');
+  for(const [name,asset] of [['Sling','pack-leather'],['Whip','pack-leather'],['Blowgun','equip-wood'],['Spear','equip-wood'],['Battleaxe','equip-metal']])assert.equal(clip(itemFromEquipment(EQUIPMENT.find(item=>item.name===name))),asset,name);
+  for(const [name,asset] of [['Dwarven Thrower','equip-metal'],['Oathbow','equip-bow'],['Dragon Scale Mail','equip-armor']]){
+    const item=itemFromEquipment(EQUIPMENT.find(item=>item.name===name));
+    assert.equal(clip({...item,name:'My dagger, bow and shield',iconKey:'potion'}),asset,`${name}: retain the catalog base type after renaming`);
+  }
+  assert.equal(clip({name:'Gold coins',category:'Treasure'}),'coins-1');
+  assert.equal(clip({name:'My custom item',category:'Gear',description:'Creates a potion, sword, shield and a ring.',iconKey:'longsword'}),'equip-latch','Effects and decorative art do not change item type');
+  assert.equal(clip({name:'Ring Mail',category:'Armor'}),'equip-armor','Ring mail is armor, not jewelry');
+  assert.equal(clip({name:'Spell Scroll (Shield)',category:'Consumable'}),'page-1','Spell names do not turn scrolls into shields');
+});
+
 test('existing version 2 backups retain their settings and round-trip without new fields',()=>{
   for(const enabled of [false,true]){
     const state=defaultPartyState();state.settings.sound=enabled;assert.equal(state.version,SAVE_VERSION);

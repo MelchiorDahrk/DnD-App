@@ -287,6 +287,54 @@
       "author": "artisticdude"
     },
     {
+      "id": "equip-sword",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_sword-unsheathe",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-bow",
+      "category": "inventory",
+      "catalogId": "rpg-audio_creak1",
+      "author": "Kenney"
+    },
+    {
+      "id": "equip-wood",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_wood-small",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-metal",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_metal-small1",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-shield",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_metal-ringing",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-leather",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_armor-light",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-jewelry",
+      "category": "inventory",
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_beads",
+      "author": "artisticdude"
+    },
+    {
+      "id": "equip-book",
+      "category": "inventory",
+      "catalogId": "rpg-audio_bookPlace1",
+      "author": "Kenney"
+    },
+    {
       "id": "potion-bottle",
       "category": "inventory",
       "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_bottle",

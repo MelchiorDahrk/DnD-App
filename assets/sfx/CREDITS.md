@@ -1,17 +1,17 @@
 # Questlog audio credits
 
-The library includes 45 effects distributed under **CC0 1.0 Universal**:
+The library includes 53 effects distributed under **CC0 1.0 Universal**:
 <https://creativecommons.org/publicdomain/zero/1.0/>, plus five files supplied by the user for the actions listed below. No license or creator information was supplied for those five files; their manifest license fields are null. Credit for the CC0 effects is retained for provenance even though attribution is not required.
 
-40 effects were selected from [Open Game SFX Index](https://github.com/Mcamento8/open-game-sfx-index) at commit **34bbe8b525b5ceff3804915ea745532af11f6055**. Its [agent guide](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/docs/AGENT_GUIDE.md), catalog, source list and attribution record were reviewed. Only selected files were downloaded. The index metadata is MIT licensed; copyright (c) 2026 Mcamento8 (see [upstream LICENSE](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/LICENSE)).
+48 effects were selected from [Open Game SFX Index](https://github.com/Mcamento8/open-game-sfx-index) at commit **34bbe8b525b5ceff3804915ea745532af11f6055**. Its [agent guide](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/docs/AGENT_GUIDE.md), catalog, source list and attribution record were reviewed. Only selected files were downloaded. The index metadata is MIT licensed; copyright (c) 2026 Mcamento8 (see [upstream LICENSE](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/LICENSE)).
 
 | Creator | Original pack / license evidence | Included assets |
 | --- | --- | --- |
 | Kenney | [Casino Audio](https://kenney.nl/assets/casino-audio), CC0 | 7 dice effects |
 | Ogrebane | [Battle Sound Effects](https://opengameart.org/content/battle-sound-effects), CC0 | Bow release and 3 swings |
-| Kenney | [RPG Audio](https://kenney.nl/assets/rpg-audio), CC0 | 3 blade effects, 10 inventory/book effects |
+| Kenney | [RPG Audio](https://kenney.nl/assets/rpg-audio), CC0 | 3 blade effects, 12 inventory/book effects (including bow creak and book handling) |
 | Kenney | [Impact Sounds](https://kenney.nl/assets/impact-sounds), CC0 | 7 physical impacts |
-| artisticdude | [RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack), CC0 | 2 casts, chainmail, bottle, bubble |
+| artisticdude | [RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack), CC0 | 2 casts, sword draw, 6 equipment handling effects, bottle, bubble |
 | Kenney | [Music Jingles](https://kenney.nl/assets/music-jingles), CC0 | 2 PIZZI acoustic string stingers (critical rolls and resource restoration) |
 | Kenney | [Interface Sounds](https://kenney.nl/assets/interface-sounds), CC0 | Confirmation and error |
 | bart | [Ice spells](https://opengameart.org/content/ice-spells), CC0 | `coldsnap.wav` excerpt |

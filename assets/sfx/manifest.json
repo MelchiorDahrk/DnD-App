@@ -1607,6 +1607,333 @@
       }
     },
     {
+      "id": "equip-sword",
+      "filename": "equip-sword.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-sword.ogg",
+        "mp3": "assets/sfx/inventory/equip-sword.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_battle_sword-unsheathe",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/battle/sword-unsheathe.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "2cc0518b65d3a11b4f7cf22a5be6700d36fa1e681491dfb71b87ae5bce2296f6",
+      "originalFormat": "wav",
+      "duration": 0.539,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound",
+        "sword",
+        "unsheathe"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -0.6
+      },
+      "sha256": {
+        "ogg": "b326d437acbf8d7845d8aba2e8c46243062f60621e69a9680ffb252163ab7909",
+        "mp3": "0cf2adfc33f632a4ac333a48f96f3f17c41e8119b8df81c899e7c04b243c9428"
+      },
+      "sizes": {
+        "ogg": 7735,
+        "mp3": 6896
+      }
+    },
+    {
+      "id": "equip-bow",
+      "filename": "equip-bow.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-bow.ogg",
+        "mp3": "assets/sfx/inventory/equip-bow.mp3"
+      },
+      "catalogId": "rpg-audio_creak1",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/creak1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "8a346186fd297254248cab8e8117060a52a5cf2a84f603153a762108550ea95e",
+      "originalFormat": "ogg",
+      "duration": 0.684,
+      "tags": [
+        "creak1",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 6.1
+      },
+      "sha256": {
+        "ogg": "c03a3ec3462c723a9a543d4d72cd6c2f46ce4924bbdca244ad81cdec981dd895",
+        "mp3": "2df1b8823ecba2e243433ff7c4ea92da4e15ab0694538e0b148a5a91d38a3549"
+      },
+      "sizes": {
+        "ogg": 8971,
+        "mp3": 8464
+      }
+    },
+    {
+      "id": "equip-wood",
+      "filename": "equip-wood.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-wood.ogg",
+        "mp3": "assets/sfx/inventory/equip-wood.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_wood-small",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/wood-small.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "679184e2a0c37e68450f8f2b511daca8ce187af306789215197dc73c0193386e",
+      "originalFormat": "wav",
+      "duration": 0.31,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "small",
+        "sound",
+        "wood"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.9
+      },
+      "sha256": {
+        "ogg": "72acbf6077f41d124675bd27f252107ff5551cb13e221966e8eb9b795a1bbc1c",
+        "mp3": "6c24fa2263ff2b739a0fc83ff8ca515df77c91087265d5c6ff7d89870445ff17"
+      },
+      "sizes": {
+        "ogg": 6136,
+        "mp3": 4075
+      }
+    },
+    {
+      "id": "equip-metal",
+      "filename": "equip-metal.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-metal.ogg",
+        "mp3": "assets/sfx/inventory/equip-metal.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_metal-small1",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/metal-small1.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "8ebfaf55f946fd2af5086c333551dfc7c774a908759022081010c32085d600b3",
+      "originalFormat": "wav",
+      "duration": 0.55,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "metal",
+        "npc",
+        "pack",
+        "rpg",
+        "small1",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 0
+      },
+      "sha256": {
+        "ogg": "fd9dce11ac4b66cd4a69760d8ffebceb36319b85291ec082f51f48bbf11c369d",
+        "mp3": "919558797e63df6dc39ebcaa4e6a66d6965950cbd197bd5b47128d10a5ce2c78"
+      },
+      "sizes": {
+        "ogg": 5270,
+        "mp3": 6896
+      }
+    },
+    {
+      "id": "equip-shield",
+      "filename": "equip-shield.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-shield.ogg",
+        "mp3": "assets/sfx/inventory/equip-shield.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_metal-ringing",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/metal-ringing.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "55b1ba32e57070ef150c3fe88e1e04f0a4dc382f47e0bfc77249d1ac62dba517",
+      "originalFormat": "wav",
+      "duration": 0.514,
+      "tags": [
+        "battle",
+        "fantasy",
+        "inventory",
+        "metal",
+        "npc",
+        "pack",
+        "ringing",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.4
+      },
+      "sha256": {
+        "ogg": "00be91b23b8a4bae0bb3b12475dca17f6c1d420ab534dc7df6f3e8dc93368c9e",
+        "mp3": "9e4a1c5aaa6fc4a274021688a96b4d0e0e65af9661d071a8217d50823ed19ee3"
+      },
+      "sizes": {
+        "ogg": 7194,
+        "mp3": 6583
+      }
+    },
+    {
+      "id": "equip-leather",
+      "filename": "equip-leather.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-leather.ogg",
+        "mp3": "assets/sfx/inventory/equip-leather.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_armor-light",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/armor-light.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "1600329c7607eede7a441f66152f0626dd84e4b13f84ccd07887d020ba1c6b9e",
+      "originalFormat": "wav",
+      "duration": 0.497,
+      "tags": [
+        "armor",
+        "battle",
+        "fantasy",
+        "inventory",
+        "light",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.4
+      },
+      "sha256": {
+        "ogg": "8a7320a35c02795b3ed8a942b8fd94117e51d84291d6f7ac6d0d95ec883f45ee",
+        "mp3": "e1d58cfb774e3a7f151794226c9c60f4449337379aaa78d4aa49dd07187b97ab"
+      },
+      "sizes": {
+        "ogg": 7625,
+        "mp3": 6583
+      }
+    },
+    {
+      "id": "equip-jewelry",
+      "filename": "equip-jewelry.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-jewelry.ogg",
+        "mp3": "assets/sfx/inventory/equip-jewelry.mp3"
+      },
+      "catalogId": "oga-rpg-pack_RPG_Sound_Pack_inventory_beads",
+      "author": "artisticdude",
+      "pack": "oga-rpg-pack",
+      "sourceURL": "https://opengameart.org/content/rpg-sound-pack",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-rpg-pack/RPG%20Sound%20Pack/inventory/beads.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "dd8ae313bcb28b50725050780fe0d312d248e3aad15f33d7bea2ba58cbb2093b",
+      "originalFormat": "wav",
+      "duration": 0.521,
+      "tags": [
+        "battle",
+        "beads",
+        "fantasy",
+        "inventory",
+        "npc",
+        "pack",
+        "rpg",
+        "sound"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -2.6
+      },
+      "sha256": {
+        "ogg": "380b8563334c0421c634019744c6f8ea80b7708cbd0cfe0d055e2489ef0f7bf3",
+        "mp3": "4c59de5eaa8c98c86dace3f128682ab07b8e40725a17a0bf00a31b3513ca60b0"
+      },
+      "sizes": {
+        "ogg": 8942,
+        "mp3": 6583
+      }
+    },
+    {
+      "id": "equip-book",
+      "filename": "equip-book.ogg",
+      "category": "inventory",
+      "files": {
+        "ogg": "assets/sfx/inventory/equip-book.ogg",
+        "mp3": "assets/sfx/inventory/equip-book.mp3"
+      },
+      "catalogId": "rpg-audio_bookPlace1",
+      "author": "Kenney",
+      "pack": "rpg-audio",
+      "sourceURL": "https://kenney.nl/assets/rpg-audio",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/rpg-audio/bookPlace1.ogg",
+      "license": "CC0-1.0",
+      "originalSha256": "26f3ce60fbde85b678b0ad7f6624d80535fe540d88232ad1e38e47a96662d977",
+      "originalFormat": "ogg",
+      "duration": 0.274,
+      "tags": [
+        "bookplace1",
+        "foley",
+        "footstep",
+        "rpg",
+        "weapon"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -3
+      },
+      "sha256": {
+        "ogg": "c56275eaa5883786b3df8a5f50f824688bb88c3c3d509825467feb13efd2c5bd",
+        "mp3": "c0e5daa52293f985f65d26c4cfb11e9ca299a59143293bfc63796d13f8fd2561"
+      },
+      "sizes": {
+        "ogg": 6124,
+        "mp3": 3762
+      }
+    },
+    {
       "id": "potion-bottle",
       "filename": "potion-bottle.ogg",
       "category": "inventory",

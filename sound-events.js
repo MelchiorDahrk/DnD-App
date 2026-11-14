@@ -38,7 +38,23 @@ export const SOUND_EVENTS={
   'rest.long':event('progression',['long-rest'],.65,500),
   'rest.campfire':event('ambient',['campfire'],.3,250),
   'item.potion':event('inventory',['potion-bottle','potion-bubble'],.75,180),
-  'item.equip':event('inventory',['equip-latch','equip-blade','equip-armor'],.65),
+  'item.equip':event('inventory',['equip-latch'],.65),
+  'item.equip.weapon':event('inventory',['equip-sword'],.65),
+  'item.equip.dagger':event('inventory',['equip-blade'],.65),
+  'item.equip.bow':event('inventory',['equip-bow'],.65),
+  'item.equip.wood':event('inventory',['equip-wood'],.65),
+  'item.equip.metal':event('inventory',['equip-metal'],.65),
+  'item.equip.shield':event('inventory',['equip-shield'],.55),
+  'item.equip.armor':event('inventory',['equip-armor'],.65),
+  'item.equip.leather':event('inventory',['equip-leather'],.65),
+  'item.equip.cloth':event('inventory',['pack-cloth'],.65),
+  'item.equip.pack':event('inventory',['pack-leather'],.65),
+  'item.equip.potion':event('inventory',['potion-bottle'],.65),
+  'item.equip.book':event('inventory',['equip-book'],.65),
+  'item.equip.scroll':event('inventory',['page-1'],.65),
+  'item.equip.coin':event('inventory',['coins-1'],.65),
+  'item.equip.jewelry':event('inventory',['equip-jewelry'],.65),
+  'item.equip.focus':event('inventory',['magic-chime'],.45),
   'item.coin':event('inventory',['coins-1','coins-2'],.65),
   'item.acquire':event('inventory',['pack-leather','pack-cloth'],.65),
   'item.consume':event('inventory',['pack-leather'],.6),
@@ -48,6 +64,43 @@ export const SOUND_EVENTS={
   'ui.confirm':event('interface',['confirm'],.5,180),
   'ui.error':event('interface',['error'],.45,300)
 };
+
+export function equipSoundEvent(item={}){
+  // Catalog magic items keep their base type in this header. Ignore effect text
+  // and decorative icon choices, which can mention or depict unrelated gear.
+  const rules=String(item.typeDetails||String(item.description||'').match(/^Rules: (?:2024|2014)\.\s*([^\n]+)/)?.[1]||'');
+  const name=String(item.name||'').toLowerCase(),base=rules.match(/^(?:Weapon|Armor)\s*\(([^)]+)\)/i)?.[1];
+  const equipmentType=base&&!/\b(any|or)\b/i.test(base)?base.toLowerCase():name;
+  const type=(rules.split(',')[0]+' '+name).toLowerCase();
+  if(item.category==='Weapon'){
+    if(/\b(shortbow|longbow|crossbow|bow)\b/.test(equipmentType))return 'item.equip.bow';
+    if(/\b(sling|whip)\b/.test(equipmentType))return 'item.equip.pack';
+    if(/\b(dagger|knife|sickle)\b/.test(equipmentType))return 'item.equip.dagger';
+    if(/\b(quarterstaff|staff|greatclub|club|wooden|blowgun|javelin|spear|pike)\b/.test(equipmentType))return 'item.equip.wood';
+    if(/\b(warhammer|hammer|mace|maul|morningstar|flail|pick|axe|battleaxe|greataxe|handaxe|halberd|glaive|trident|pistol|musket|firearm)\b/.test(equipmentType))return 'item.equip.metal';
+    return 'item.equip.weapon';
+  }
+  if(item.category==='Armor'){
+    if(/\b(shield|buckler)\b/.test(equipmentType))return 'item.equip.shield';
+    if(/\b(leather|hide)\b/.test(equipmentType))return 'item.equip.leather';
+    if(/\bpadded\b/.test(equipmentType))return 'item.equip.cloth';
+    return 'item.equip.armor';
+  }
+  if(/\b(potion|bottle|flask|vial|elixir|antitoxin|perfume|oil)\b/.test(type))return 'item.equip.potion';
+  if(/\b(scroll|parchment|paper|map)\b/.test(type))return 'item.equip.scroll';
+  if(/\b(spellbook|book|tome|manual|grimoire)\b/.test(type))return 'item.equip.book';
+  if(/\b(backpack|bag|pouch|purse|satchel|belt|boots|shoes|slippers|gloves|leather)\b/.test(type))return 'item.equip.pack';
+  if(/\b(coins?|(?:gold|silver|copper|platinum|electrum) pieces?)\b/.test(type))return 'item.equip.coin';
+  if(/\b(rings?|amulet|necklace|pendant|brooch|bracelet|circlet|diadem|earrings?|beads?|gems?|jewels?)\b/.test(type))return 'item.equip.jewelry';
+  if(/\b(cloak|robe|clothes|clothing|shirt|tunic|cape|vestments?|blanket|bedroll|tent|hat|cap)\b/.test(type))return 'item.equip.cloth';
+  if(/\b(shield|buckler)\b/.test(name))return 'item.equip.shield';
+  if(/\b(wand|rod|staff|focus|orb|crystal|holy symbol|reliquary)\b/.test(type))return 'item.equip.focus';
+  if(/\b(gauntlets?|helm|helmet|crowbar|chain|manacles|pitons?|lock|key|bell|bucket|pot|pan|tools?)\b/.test(name))return 'item.equip.metal';
+  if(/\b(wooden|torch|arrows?|bolts?|lute|lyre|flute|viol|drum)\b/.test(name))return 'item.equip.wood';
+  if(item.category==='Treasure')return 'item.equip.jewelry';
+  if(item.category==='Consumable')return 'item.equip.pack';
+  return 'item.equip';
+}
 
 export function rollSoundEvent(result,label=''){
   if(!result?.rolls?.length)return null; // Fixed damage isn't a dice roll.

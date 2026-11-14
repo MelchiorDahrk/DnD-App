@@ -287,6 +287,62 @@ export const SOUND_ASSETS = {
     },
     "duration": 0.58
   },
+  "equip-sword": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-sword.ogg",
+      "mp3": "assets/sfx/inventory/equip-sword.mp3"
+    },
+    "duration": 0.539
+  },
+  "equip-bow": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-bow.ogg",
+      "mp3": "assets/sfx/inventory/equip-bow.mp3"
+    },
+    "duration": 0.684
+  },
+  "equip-wood": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-wood.ogg",
+      "mp3": "assets/sfx/inventory/equip-wood.mp3"
+    },
+    "duration": 0.31
+  },
+  "equip-metal": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-metal.ogg",
+      "mp3": "assets/sfx/inventory/equip-metal.mp3"
+    },
+    "duration": 0.55
+  },
+  "equip-shield": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-shield.ogg",
+      "mp3": "assets/sfx/inventory/equip-shield.mp3"
+    },
+    "duration": 0.514
+  },
+  "equip-leather": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-leather.ogg",
+      "mp3": "assets/sfx/inventory/equip-leather.mp3"
+    },
+    "duration": 0.497
+  },
+  "equip-jewelry": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-jewelry.ogg",
+      "mp3": "assets/sfx/inventory/equip-jewelry.mp3"
+    },
+    "duration": 0.521
+  },
+  "equip-book": {
+    "files": {
+      "ogg": "assets/sfx/inventory/equip-book.ogg",
+      "mp3": "assets/sfx/inventory/equip-book.mp3"
+    },
+    "duration": 0.274
+  },
   "potion-bottle": {
     "files": {
       "ogg": "assets/sfx/inventory/potion-bottle.ogg",
