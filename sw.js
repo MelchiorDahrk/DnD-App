@@ -1,7 +1,7 @@
 import {LDRAW_ICONS} from './equipment-icons.js';
 import {SOUND_FILES} from './sound-assets.js';
 import {CONDITION_ICON_FILES} from './icons.js';
-const CACHE = 'questlog-app-v39-status-icons';
+const CACHE = 'questlog-app-v40-open-dice';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./reference-links.js','./reference-pages.js');
 ASSETS.push('./magic-item-data.js');
@@ -14,6 +14,7 @@ ASSETS.push('./vfx.js','./vfx.css','./feature-catalog.js','./equipment-icons.js'
 ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progression-options.js');
 ASSETS.push('./rest-rules.js','./rest-reference-data.js');
 ASSETS.push('./attack-rules.js','./attack-ui.js');
+ASSETS.push('./dice-roller.js','./dice-roller.css','./dice-engine/dice-engine.js');
 // Both encodings are cached: older mobile Safari can fall back to MP3 offline.
 ASSETS.push('./sound.js','./sound-events.js','./sound-assets.js','./assets/sfx/manifest.json','./assets/sfx/CREDITS.md',...SOUND_FILES.map(path=>'./'+path));
 ASSETS.push('./portrait-scan.js','./portrait-photo-ui.js');

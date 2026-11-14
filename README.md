@@ -184,6 +184,28 @@ To add or replace sounds:
 4. Add semantic mappings to `sound-events.js` and hook successful gameplay actions, avoiding nested duplicate cues. Commit the selected OGG/MP3 files, selection, manifest, generated registry and credits together.
 5. Run `npm test`, `npm run check`, `npm run build`, and `npm run test:sounds`. The browser test checks the production `/dist/` subdirectory, every clip in both encodings, real gameplay, mobile settings, mute, persistence and offline playback. It uses installed Chrome/Firefox/Edge or `BROWSER_PATH`. Test mobile Safari separately before release.
 
+## 3D dice
+
+Custom rolls, checks, saves, attacks, damage, feature dice, Hit Dice, and healing potions use
+[open-dice](https://github.com/richardhealy/open-dice) (`open-dice-dnd` 1.13.0) for
+physical 3D throws. Dice land on the same unbiased random values recorded by the
+rules model; animations never change a result, spend a second resource, or delay
+HP updates. Advantage/disadvantage shows both d20s, with the kept die in gold.
+A d10's 0 means 10; percentile 00 + 0 means 100.
+
+The engine and its compatible Three.js/Cannon dependencies are bundled locally
+by `npm run build:dice` (also part of dev/start/build), with licenses in
+`dice-engine/licenses/`. No CDN or remote dice service is used. The service worker
+caches the engine for offline play. Reduced motion, unavailable WebGL, unusual
+die sizes, and pools above 20 physical dice use the complete text result instead
+(each d100 uses two physical dice). Closing a dialog or leaving the page releases
+the renderer. The portrait editor keeps its existing Three.js version.
+
+`npm run test:dice` checks real landing faces, modifiers, advantage/disadvantage,
+rapid rerolls, cleanup, mobile layout, reduced motion, WebGL failure, and offline
+loading under `/dist/`. Build first; set `BROWSER_PATH` to Chrome/Chromium for the
+complete browser suite, or `DICE_TEST_URL` for an already-running production preview.
+
 ## Check and build
 
 ```sh

@@ -3,6 +3,8 @@ import {resolve} from 'node:path';
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
+for(const file of ['dice-roller.js','dice-roller.css'])await copyFile(resolve(root,file),resolve(out,file));
+await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
 await copyFile(resolve(root,'condition-usage.js'),resolve(out,'condition-usage.js'));

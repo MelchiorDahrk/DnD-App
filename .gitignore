@@ -5,4 +5,5 @@ node_modules/
 .tmp/
 .cache/
 portrait-maker/
+dice-engine/
 vendor/bricktrait/static/

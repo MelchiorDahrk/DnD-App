@@ -9,6 +9,7 @@ Palette values, text contrast measurements, exact dimensions, panel height ceili
 | Command | Purpose |
 | --- | --- |
 | `npm test` | Functional unit tests, including save/rules validation and appearance behavior |
+| `npm run test:dice` | Real 3D landing faces, roll rules, resource spending, mobile interaction, reduced motion, WebGL fallback and offline engine loading |
 | `npm run test:themes` | Functional browser checks for both appearances and System, all routes at desktop/mobile sizes, dialogs, images, reduced-motion interaction, persistence, and offline reload |
 | `npm run test:visual` | Optional palette contrast tests plus the theme suite with layout/contrast measurements and screenshots |
 | `npm run test:sheet -- --visual` | Add optional sheet layout and thumbnail dimension measurements |

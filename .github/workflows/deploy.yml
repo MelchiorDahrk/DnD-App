@@ -127,6 +127,12 @@ jobs:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
         run: npm run test:item-icons
+      - name: Browser 3D dice and offline checks
+        timeout-minutes: 4
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          DICE_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:dice
       - name: Browser appearance functionality and offline checks
         timeout-minutes: 5
         env:
