@@ -3,6 +3,7 @@
 import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
 import {MAGIC_ITEMS as CURRENT_MAGIC_ITEMS} from './magic-item-data.js';
 import {LEGACY_MAGIC_ITEMS} from './legacy-magic-item-data.js';
+import {defaultItemUses} from './inventory-rules.js';
 export const MAGIC_ITEMS = [...CURRENT_MAGIC_ITEMS,...LEGACY_MAGIC_ITEMS];
 
 const slug = value => value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -113,7 +114,7 @@ const gearRows = [
   ["Priest’s Pack",29,'33 GP','Backpack, blanket, holy water, lamp, 7 days of rations, robe, tinderbox. Weight includes contents.'],
   ['Quiver',1,'1 GP','Holds 20 arrows. Ammunition sold separately.'],['Ram, Portable',35,'4 GP','+4 to Strength checks to break a door; a helper grants advantage.'],
   ['Rations',2,'5 SP','Food for one day.'],['Robe',4,'1 GP','Travel or ceremonial robe.'],['Rope',5,'1 GP','50 feet long; can be tied, climbed, or used to bind.'],['Sack',0.5,'1 CP','Capacity: 30 lb. / 1 cubic foot.'],
-  ["Scholar’s Pack",22,'40 GP','Backpack, book, ink, ink pen, lamp, 10 oil, 10 paper, tinderbox. Weight includes contents.'],
+  ["Scholar’s Pack",22,'40 GP','Backpack, book, ink, ink pen, lamp, 10 oil, 10 parchment, tinderbox. Weight includes contents.'],
   ['Shovel',5,'2 GP','Digging tool.'],['Signal Whistle',0,'5 CP','Utilize: audible up to 600 ft. away.'],
   ['Spell Scroll (Cantrip)',0,'30 GP','Single-use spell; the spell must be on your class spell list. See scroll rules for casting.'],['Spell Scroll (Level 1)',0,'50 GP','Single-use level 1 spell; the spell must be on your class spell list. See scroll rules for casting.'],
   ['Spikes, Iron',5,'1 GP','Ten iron spikes.'],['Spyglass',1,'1,000 GP','Objects viewed through it are magnified to twice their size.'],['String',0,'1 SP','10 feet long.'],
@@ -155,7 +156,7 @@ export const EQUIPMENT = [...BASIC_EQUIPMENT.filter(item=>!MAGIC_ITEMS.some(magi
 export const EQUIPMENT_GROUPS = [...new Set(EQUIPMENT.map(item=>item.group))];
 export const findEquipment = id => EQUIPMENT.find(item=>item.id===id);
 export const equipmentDescription = item => [item.magic?`Rules: ${item.edition||'2024'}. ${item.typeDetails}\nRarity: ${item.rarity}. Attunement: ${item.attunement}.\nSource: ${item.source}.`:'',item.details,...(item.tables||[]).map(rows=>rows.map(cells=>cells.join(' | ')).join('\n')),`Cost: ${item.cost}.${item.carried===false?' Weight excluded from carried gear.':item.weightStatus?` Weight: ${item.weight} lb. · ${item.weightStatus}.`:` Weight: ${item.weight} lb.${item.weight===0?' (negligible)':''}`}`].filter(Boolean).join('\n\n');
-export const equipmentFields = item => ({name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
+export const equipmentFields = item => ({name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...defaultItemUses(item),usesLeft:defaultItemUses(item).maxUses,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
 export const itemFromEquipment = item => ({id:uid(),qty:1,equipped:false,...equipmentFields(item)});
 export function attackFromWeapon(weapon,character) {
   const ability=weapon.properties.includes('Finesse')?(character.stats.dex>character.stats.str?'dex':'str'):weapon.family.endsWith('ranged')?'dex':'str';

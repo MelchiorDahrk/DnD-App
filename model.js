@@ -1,6 +1,7 @@
 import {validPortrait} from './portrait.js';
 import {validSheetLayout} from './sheet-layout.js';
 import {ACTION_TYPES} from './sheet-actions.js';
+import {itemUses,removeEmptyItems} from './inventory-rules.js';
 import {wikiURL} from './reference-links.js';
 export {RULES_URL,wikiURL,subclassURL,referenceURL,safeURL} from './reference-links.js';
 
@@ -211,6 +212,11 @@ function validateCharacter(c) {
   }
   c.items.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&['Weapon','Armor','Gear','Consumable','Treasure'].includes(v.category)&&integerIn(v.qty,0,99999)&&numberIn(v.weight,0,99999)&&typeof v.equipped==='boolean'&&string(v.description)&&string(v.wiki,2000),'invalid item.'));
   c.items.forEach(v=>requireThat(v.iconKey===undefined||(string(v.iconKey,100)&&/^[a-z0-9-]*$/.test(v.iconKey)),'invalid item icon.'));
+  c.items.forEach(v=>{
+    requireThat(v.maxUses===undefined||integerIn(v.maxUses,0,99999),'invalid item use limit.');
+    requireThat(v.usesLeft===undefined||integerIn(v.usesLeft,0,itemUses(v).maxUses),'invalid remaining item uses.');
+    requireThat(v.consumeOnEmpty===undefined||typeof v.consumeOnEmpty==='boolean','invalid item depletion rule.');
+  });
   for (const entries of [c.items,c.features,c.attacks]) entries.forEach(v=>requireThat(v.actionType===undefined||v.actionType===''||Object.hasOwn(ACTION_TYPES,v.actionType),'invalid action type.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
   c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
@@ -235,6 +241,7 @@ export function parseBackup(text) {
   requireThat(data?.version===SAVE_VERSION,`only version ${SAVE_VERSION} Questlog saves are supported. Older saves cannot be loaded or imported.`);
   requireThat(Array.isArray(data.characters)&&data.characters.length<=100,'expected 0–100 characters.');
   data.characters.forEach(validateCharacter);
+  data.characters.forEach(removeEmptyItems);
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
   requireThat(data.characters.length?data.characters.some(c=>c.id===data.activeId):data.activeId===null,'active character is missing.');
   requireThat(data.settings&&typeof data.settings.sound==='boolean','invalid settings.');

@@ -1,4 +1,14 @@
 /* All VFX are passive: controls, scrolling and dialog focus stay available. */
+.vfx-unpack-bag,.vfx-unpack-supply{position:absolute;left:var(--vfx-x);top:var(--vfx-y);display:grid;place-items:center;transform:translate(-50%,-50%)}
+.vfx-unpack-bag{width:104px;height:104px;animation:vfx-unpack-open 1.8s ease-in-out both}
+.vfx-unpack-supply{width:54px;height:54px;padding:5px;border:1px solid #dfc99988;border-radius:12px;background:#f7f0dded;box-shadow:0 8px 22px #10291c33;animation:vfx-unpack-fly 1.55s cubic-bezier(.2,.75,.3,1) both}
+.vfx-unpack-bag .equipment-icon,.vfx-unpack-supply .equipment-icon{width:100%;height:100%}
+.vfx-unpack-bag img,.vfx-unpack-supply img{width:100%;height:100%;object-fit:contain}
+.vfx-unpack.vfx-scene .vfx-caption{top:calc(var(--vfx-y) + 192px)}
+@keyframes vfx-unpack-open{0%{opacity:0;transform:translate(-50%,-50%) scale(.65)}20%{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1.08)}30%{transform:translate(-50%,-50%) rotate(7deg)}40%,75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.8)}}
+@keyframes vfx-unpack-fly{0%{opacity:0;transform:translate(-50%,-50%) scale(.25)}22%{opacity:1}65%,85%{opacity:1;transform:translate(calc(-50% + var(--unpack-dx)),calc(-50% + var(--unpack-dy))) scale(1)}100%{opacity:0;transform:translate(calc(-50% + var(--unpack-dx)),calc(-35% + var(--unpack-dy))) scale(.85)}}
+@media(max-width:600px){.vfx-unpack.vfx-scene .vfx-caption{top:calc(var(--vfx-y) + 150px)}.vfx-unpack-supply{width:46px;height:46px}}
+@media(prefers-reduced-motion:reduce){.vfx-unpack-bag,.vfx-unpack-supply{display:none}}
 .vfx-layer,.vfx-layer[popover]{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:0;border:0;overflow:hidden;background:transparent;color:inherit;pointer-events:none!important;z-index:10000;contain:strict}
 .vfx-layer::backdrop{display:none}
 .vfx-layer *{pointer-events:none!important;box-sizing:border-box}

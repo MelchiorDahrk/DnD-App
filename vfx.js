@@ -1,6 +1,6 @@
 // Local, short-lived effects. Nothing is stored with a character.
 import {COINS} from './model.js';
-import {attackIconMarkup} from './item-icons.js';
+import {attackIconMarkup,itemIconMarkup} from './item-icons.js';
 
 const THEMES = {
   attack: {color:'#dbb777',accent:'#fff0be',symbol:'strike',life:1250,count:30},
@@ -17,7 +17,8 @@ const THEMES = {
   critical: {color:'#edca7c',accent:'#fff9dd',symbol:'star',life:1950,count:90},
   condition: {color:'#d6a0c5',accent:'#f8def4',symbol:'rune',life:1100,count:26},
   xp: {color:'#b9d583',accent:'#effbc7',symbol:'star',life:1200,count:36},
-  money: {color:'#e3bb64',accent:'#fff0bc',life:1700,count:0}
+  money: {color:'#e3bb64',accent:'#fff0bc',life:1700,count:0},
+  unpack: {color:'#dbb777',accent:'#fff0be',life:2200,count:24,scene:true}
 };
 
 const SYMBOLS = {
@@ -169,7 +170,7 @@ function addStuds(burst,changes,x,y) {
   }
 }
 
-export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,ranged=false,critical=false,miss=false}={}) {
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,ranged=false,critical=false,miss=false,pack=null,contents=[]}={}) {
   const theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
@@ -186,6 +187,20 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     burst.append(aura);
     if(showSigil){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
     if(kind==='money')addStuds(burst,studs,x,y);
+    if(kind==='unpack'&&pack) {
+      const prop=document.createElement('div');prop.className='vfx-unpack-bag';
+      prop.innerHTML=itemIconMarkup(pack);burst.append(prop);
+      const supplies=contents.slice(0,12),radius=innerWidth<600?108:145;
+      supplies.forEach((item,index)=>{
+        const supply=document.createElement('div');supply.className='vfx-unpack-supply';
+        const angle=-Math.PI/2+index/supplies.length*Math.PI*2;
+        supply.style.setProperty('--unpack-dx',`${Math.cos(angle)*radius}px`);
+        supply.style.setProperty('--unpack-dy',`${Math.sin(angle)*radius}px`);
+        supply.style.animationDelay=`${130+index*45}ms`;
+        supply.innerHTML=itemIconMarkup(item);burst.append(supply);
+      });
+      burst.querySelectorAll('img').forEach(img=>img.loading='eager');
+    }
     if(kind==='attack'&&weapon){
       const prop=document.createElement('div');prop.className=`vfx-weapon${ranged?' vfx-weapon-ranged':''}${miss?' vfx-weapon-miss':''}${critical?' vfx-weapon-critical':''}`;
       prop.innerHTML=attackIconMarkup(weapon,ranged?'bow':'sword');

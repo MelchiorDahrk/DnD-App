@@ -50,10 +50,10 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('#modal [data-combat-action="close"]');
   await page.click(`${entry('pack','sheet-potion')} [data-action="use-item"]`);
   await page.click('#modal [data-action="confirm-use-item"]');
-  assert.equal(active(await state()).items.find(i=>i.id==='sheet-potion').qty,0);
+  assert.equal(active(await state()).items.find(i=>i.id==='sheet-potion'),undefined);
   assert.ok(active(await state()).hp>c.hp,'Potion heals from sheet');
   await page.click('#modal [data-action="close"]');
-  assert.equal(await page.$eval(`${entry('pack','sheet-potion')} [data-action="use-item"]`,n=>n.disabled),true);
+  assert.equal(await page.$(entry('pack','sheet-potion')),null);
 
   for(const [id,label] of [['sheet-action-spell','Action'],['sheet-bonus-spell','Bonus Action'],['sheet-reaction-spell','Reaction']]) assert.equal(await page.$eval(`${entry('attacks',id)} .action-timing`,n=>n.textContent),label);
   assert.equal(await page.$(entry('attacks','sheet-unready-spell')),null);

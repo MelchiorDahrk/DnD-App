@@ -5,6 +5,7 @@ const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
+for(const file of ['inventory-rules.js','inventory.js'])await copyFile(resolve(root,file),resolve(out,file));
 await copyFile(resolve(root,'magic-item-data.js'),resolve(out,'magic-item-data.js'));
 for(const file of ['legacy-magic-item-data.js','magic-item-icon-names.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['reference-links.js','reference-pages.js','attack-rules.js','attack-ui.js','level-up.js','level-up-ui.js','progression-data.js','progression-options.js','rest-rules.js','rest-reference-data.js','portrait-scan.js','portrait-photo-ui.js','portrait-image-analysis.js','portrait-match.js','portrait-match-worker.js'])await copyFile(resolve(root,file),resolve(out,file));
