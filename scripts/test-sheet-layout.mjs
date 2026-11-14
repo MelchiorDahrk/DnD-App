@@ -1,5 +1,6 @@
 import {visualChecks,waitForImages} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
+import {checkSheetImprovements} from '../tests/helpers/sheet-improvements.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir} from 'node:fs/promises';
@@ -8,6 +9,7 @@ import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {parseBackup} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
+import {sheetItems} from '../sheet-actions.js';
 import {equipmentIconURL} from '../equipment-icons.js';
 import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 
@@ -113,7 +115,7 @@ try {
   await page.reload({waitUntil:'networkidle0'});
   await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
   await waitForImages(page,'[data-sheet-section="pack"] .equipment-icon img');
-  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',imgs=>imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth>0)),'Normal sheet pack preview shows LEGO icons');
+  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',(imgs,count)=>imgs.length===count&&imgs.every(img=>img.complete&&img.naturalWidth>0),sheetItems(active(original)).length),'Sheet inventory preview and equipped items show LEGO icons');
   console.log('PASS all 63 default inventory entries and every default attack show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
 
   for (const width of [390,320]) {
@@ -232,6 +234,8 @@ try {
   }
   assert.deepEqual(errors,[]);
   console.log('PASS deleting favorites and collapsing empty sections with no browser errors');
+  await checkSheetImprovements(page,{base,original,root});
+  assert.deepEqual(errors,[]);
 } finally {
   await browser?.close();
   server?.kill();

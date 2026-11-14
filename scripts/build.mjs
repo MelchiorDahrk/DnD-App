@@ -4,6 +4,7 @@ const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
+await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
 for(const file of ['reference-links.js','reference-pages.js','attack-rules.js','attack-ui.js','level-up.js','level-up-ui.js','progression-data.js','progression-options.js','rest-rules.js','rest-reference-data.js','portrait-scan.js','portrait-photo-ui.js','portrait-image-analysis.js','portrait-match.js','portrait-match-worker.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['index.html','theme.js','theme.css','styles.css','app.js','sound.js','sound-events.js','sound-assets.js','vfx.js','vfx.css','model.js','sheet-layout.js','portrait.js','portrait-ui.js','catalog.js','feature-catalog.js','catalog-ui.js','default-characters.js','sheet-scan.js','sheet-scan-ui.js','icons.js','equipment-icons.js','item-icons.js','art.js','sw.js','manifest.webmanifest','.nojekyll'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['icon.svg','icon-192.png','icon-512.png','portrait-adventurer.webp'])await copyFile(resolve(root,'assets',file),resolve(out,'assets',file));

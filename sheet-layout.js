@@ -6,10 +6,11 @@ export function validSheetLayout(layout) {
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const uniqueList = (value,max,valid) => Array.isArray(value) && value.length <= max && new Set(value).size === value.length && value.every(valid);
   return record(layout)
+    && (layout.skillsProficientOnly===undefined || typeof layout.skillsProficientOnly==='boolean')
     && uniqueList(layout.collapsed,SHEET_SECTIONS.length,key=>SHEET_SECTIONS.includes(key))
     && record(layout.favorites)
     && Object.entries(layout.favorites).every(([section,keys])=>SHEET_SECTIONS.includes(section)
-      && uniqueList(keys,2001,key=>typeof key === 'string' && key.length > 0 && key.length <= 120));
+      && uniqueList(keys,section==='attacks'?4001:2001,key=>typeof key === 'string' && key.length > 0 && key.length <= 120));
 }
 
 export const isSheetFavorite = (c,section,key) => c.sheetLayout?.favorites[section]?.includes(key) || false;

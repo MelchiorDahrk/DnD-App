@@ -17,11 +17,11 @@ All three passive Perception totals now come from actual Perception proficiency,
 | Paper sheet | App location and behavior |
 | --- | --- |
 | Character name, player name, class and level, background, species, alignment, XP | **Edit character details** on the hero card. Includes subclass and campaign. Set level and XP directly when copying a sheet; **Level up** reviews HP, features, skills, feats, spells, slots and resource scaling before advancing during play. |
-| Six ability scores and modifiers | **Ability scores**. Edit total scores; modifiers update and can be rolled. |
-| Heroic Inspiration | Toggle in **Ready for anything**; spend it to reroll one die immediately after rolling it, keeping the new result. Rerolls are manual. |
+| Six ability scores and modifiers | **Abilities**. Edit total scores; modifiers update and can be rolled. |
+| Heroic Inspiration | Toggle in **Status**; spend it to reroll one die immediately after rolling it, keeping the new result. Rerolls are manual. |
 | Proficiency bonus | Calculated from level in **Skills & saving throws**. |
 | Six saving throws and proficiency circles | Toggle proficiency and roll each saving throw. |
-| All 18 skills and proficiency circles | Toggle untrained/proficient/expertise and roll each skill. |
+| All 18 skills and proficiency circles | Toggle untrained/proficient/expertise and roll each skill. Switch between all skills and proficient skills; this preference is saved per character. Saving throws remain visible. |
 | Armor class, including handwritten shield bonus | Enter total AC in **Edit stats**; record base armor and shield adjustments in **Armor, shield & defense notes**, shown below combat stats. Equipping an inventory item does not automatically change AC. |
 | Initiative | Dexterity modifier plus editable **Initiative bonus** in **Edit stats**; enable **Advantage on initiative** for features such as Assassinate. Tap initiative to roll the total and chosen mode. |
 | Speed | Editable walking speed in **Edit stats**; other movement modes can be recorded in senses or features. |
@@ -31,8 +31,10 @@ All three passive Perception totals now come from actual Perception proficiency,
 | Weapon name, attack bonus, damage dice/type | **Attacks & actions**. Each attack has an ability, proficiency toggle, additional attack bonus, damage formula, type, range, roll mode (normal/advantage/disadvantage), and notes for versatile weapons or special item effects. Change situational modes when circumstances change. |
 | Passive Wisdom (Perception) | **Senses & essentials** calculates 10 + Perception skill bonus + editable passive adjustment. This supports the photographed sheet's separately recorded passive value. |
 | Other proficiencies and languages | Dedicated **Proficiencies & languages** panel: languages, armor, weapons, tools and other proficiencies. |
-| CP, SP, EP, GP, PP | **Inventory → coin summary** or **In your pack → Manage**. All five denominations are editable and saved independently. |
-| Equipment, arrows, rations, packs, tools, potions, magic items | **Inventory** stores quantity, category, equipped state, weight, item notes, and reference link. Open an item to read/edit its full notes. Consumables can be spent. |
+| CP, SP, EP, GP, PP | **Inventory → coin summary** or the sheet's **Inventory → Manage**. All five denominations are editable and saved independently. |
+| Equipment, arrows, rations, packs, tools, potions, magic items | **Inventory** stores quantity, category, equipped state, weight, item notes, and reference link. Star an item to show it on the sheet, including while Inventory is collapsed. Equipped items also appear on the sheet. Use consumables directly, or open equipped gear's notes, reference, and matching weapon attack. |
+| Readied spells and concentration | **Attacks & actions** includes readied spells with casting controls and Action, Bonus Action, or Reaction labels. Active concentration is shown and can be ended here. Spell slots and concentration use the same state as Spellbook. |
+| Conditions | **Status** has an icon button for each condition, plus an Exhaustion control. Click a condition to apply or clear it. |
 | Personality traits, ideals, bonds, flaws | Four dedicated fields in **Personality & backstory**, with multiline text visible on the sheet. |
 | Features and traits, including species traits and fighting style | **Features & resources** stores full text, optional reference, uses, and short/long/manual refresh. |
 

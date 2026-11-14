@@ -327,6 +327,23 @@ dialog{background:var(--surface-panel);border:1px solid var(--accent-edge);borde
 @media(max-width:760px){.ability-entry .ability-card{padding-top:32px}.ability-entry .ability-label{font-size:9px;letter-spacing:.2px;padding-right:0;text-align:center}.ability-entry>.sheet-favorite{width:26px;height:26px;min-width:26px;min-height:26px}.ability-card .roll-hint{display:none}}
 @media(max-width:760px){[data-sheet-section="skills"]>.panel-heading{flex-wrap:wrap;gap:6px}[data-sheet-section="skills"]>.panel-heading h2{flex-basis:100%}.is-collapsed .panel-heading>.badge{display:none}}
 /* Reserve the persistent navigation edges when browsers scroll focused controls. */
+.action-timing{display:inline-flex;align-items:center;max-width:100%;margin:5px 0;padding:3px 7px;border:1px solid var(--border-control);border-radius:5px;font-family:var(--mono);font-size:9px;line-height:1.4;color:var(--text-secondary);background:var(--surface-raised)}
+.timing-action{color:var(--forest-ink);border-color:var(--accent-edge)}
+.timing-bonus{color:var(--accent-brass);background:var(--status-warning-bg);border-style:dashed}
+.timing-reaction{color:var(--status-danger);background:var(--status-danger-bg)}
+.action-info .action-timing{display:table}.sheet-spell.concentrating{background:var(--status-warning-bg)}
+.action-info .spell-concentration{display:flex;align-items:center;gap:4px}.spell-concentration .icon{width:13px;height:13px;flex-shrink:0}
+.condition-controls{position:relative;padding:15px 18px;border-top:1px solid var(--border-subtle)}
+.condition-controls>.tiny-label{display:block;margin:0 30px 10px 0}.condition-controls>.sheet-favorite{position:absolute;top:6px;right:12px}
+.condition-tray{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.condition-tray .condition-chip{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0;min-height:61px;padding:8px 2px;font-size:8px;line-height:1.3;text-align:center;overflow-wrap:anywhere}
+.condition-tray .condition-chip>.icon{width:21px;height:21px;flex-shrink:0}
+.condition-chip.active .icon{stroke-width:2.4}.condition-grid .condition-chip{display:flex;align-items:center;gap:9px;text-align:left}.condition-grid .condition-chip>.icon{flex-shrink:0}
+.skill-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}.skill-controls .btn{white-space:nowrap}.skill-controls [aria-pressed="true"]{border-color:var(--forest-ink);color:var(--forest-ink);background:var(--surface-hover)}
+.is-collapsed .skill-controls{display:none}
+.inventory-favorite{min-width:36px;min-height:36px}.item-attack-use{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.pack-preview .action-row{flex-wrap:wrap}.pack-preview .action-info{min-width:90px}.pack-preview .qty{margin-left:auto}.pack-preview .action-row>.btn{min-height:34px;padding:7px 10px}
+@media(max-width:760px){.skill-controls{width:100%;justify-content:space-between}.condition-controls{padding:15px}.condition-tray{gap:5px}.condition-tray .condition-chip{font-size:8px;min-height:65px}.sheet-spell>.btn{min-height:38px}.action-timing{font-size:9px}}
 html{scroll-padding-top:85px;scroll-padding-bottom:25px}button,a,input,select,textarea{scroll-margin-bottom:28px}
 @media(max-width:760px){html{scroll-padding-top:80px;scroll-padding-bottom:100px}button,a,input,select,textarea{scroll-margin-bottom:90px}}
 .sidebar{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}.item-symbol:has(.equipment-icon){background:radial-gradient(ellipse at 50% 40%,var(--art-light),var(--surface-recessed) 90%)}
