@@ -84,9 +84,12 @@ function renderConditionControls(c) {
 function itemUseButton(item) {
   return btn('use-item','Use','btn btn-sm',`data-id="${item.id}" aria-label="Use ${esc(item.name)}" ${item.qty===0?'disabled':''}`);
 }
+function itemUseTitle(item) {
+  return `<span class="item-use-title"><span class="item-symbol" aria-hidden="true">${itemIconMarkup(item)}</span><span>Use ${esc(item.name)}${item.category==='Consumable'?'?':'.'}</span></span>`;
+}
 function showItemUse(item) {
   const attacks=character().attacks.filter(a=>a.name.toLowerCase()===item.name.toLowerCase());
-  setModal(`Use ${esc(item.name)}.`,`${timingBadge(item,'item')}<p class="modal-intro">${esc(item.category)} · ${item.equipped?'Equipped':'In inventory'}</p>${item.description?`<div class="detail-paragraph">${esc(item.description)}</div>`:''}${item.wiki?ext(referenceURL(item.wiki,item.name,'equipment'),'Read the item rules '+icon('external'),'text-btn'):''}${attacks.map(a=>`<div class="item-attack-use">${btn('attack-roll',icon('dice')+'Attack with '+esc(a.name),'btn btn-primary',`data-id="${a.id}"`)}${btn('damage-roll',esc(a.damage)+' damage','btn',`data-id="${a.id}"`)}</div>`).join('')}<p class="form-help">Apply the item’s other effects at the table.</p><div class="modal-actions">${btn('close','Done','btn btn-primary')}${btn('item',icon('edit')+'Edit item','btn',`data-id="${item.id}"`)}</div>`);
+  setModal(itemUseTitle(item),`${timingBadge(item,'item')}<p class="modal-intro">${esc(item.category)} · ${item.equipped?'Equipped':'In inventory'}</p>${item.description?`<div class="detail-paragraph">${esc(item.description)}</div>`:''}${item.wiki?ext(referenceURL(item.wiki,item.name,'equipment'),'Read the item rules '+icon('external'),'text-btn'):''}${attacks.map(a=>`<div class="item-attack-use">${btn('attack-roll',icon('dice')+'Attack with '+esc(a.name),'btn btn-primary',`data-id="${a.id}"`)}${btn('damage-roll',esc(a.damage)+' damage','btn',`data-id="${a.id}"`)}</div>`).join('')}<p class="form-help">Apply the item’s other effects at the table.</p><div class="modal-actions">${btn('close','Done','btn btn-primary')}${btn('item',icon('edit')+'Edit item','btn',`data-id="${item.id}"`)}</div>`);
 }
 function inventoryFavorite(c,item) {
   const favorite=isSheetFavorite(c,'pack',item.id);
@@ -455,7 +458,7 @@ document.addEventListener('click',event=>{
       case 'currency':editCurrency();break;
       case 'quantity':{const item=c.items.find(i=>i.id===id),before=item.qty;item.qty=clamp(item.qty+Number(el.dataset.delta),0,99999);commit();if(item.qty>before)sound.play('item.acquire');break;}
       case 'equip':{const item=c.items.find(i=>i.id===id);item.equipped=!item.equipped;commit();sound.play(equipSoundEvent(item));break;}
-      case 'use-item':{const item=c.items.find(i=>i.id===id);if(!item||item.qty<1)break;if(item.category!=='Consumable'){showItemUse(item);break;}setModal(`Use ${esc(item.name)}?`,`<p class="modal-intro">This will use one item from your pack. ${/^potion of healing$/i.test(item.name)?'As a Bonus Action, drink it to roll 2d4 + 2 and restore that much HP to this character.':'Apply its effects at the table.'}</p><div class="modal-actions">${btn('close','Save it','btn')}${btn('confirm-use-item','Use item','btn btn-primary',`data-id="${id}"`)}</div>`);break;}
+      case 'use-item':{const item=c.items.find(i=>i.id===id);if(!item||item.qty<1)break;if(item.category!=='Consumable'){showItemUse(item);break;}setModal(itemUseTitle(item),`<p class="modal-intro">This will use one item from your pack. ${/^potion of healing$/i.test(item.name)?'As a Bonus Action, drink it to roll 2d4 + 2 and restore that much HP to this character.':'Apply its effects at the table.'}</p><div class="modal-actions">${btn('close','Save it','btn')}${btn('confirm-use-item','Use item','btn btn-primary',`data-id="${id}"`)}</div>`);break;}
       case 'confirm-use-item':{const item=c.items.find(i=>i.id===id);if(!item||item.qty<1||item.category!=='Consumable')break;item.qty--;sound.play(/potion/i.test(item.name)?'item.potion':'item.consume');if(/^potion of healing$/i.test(item.name)){const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll('2d4+2','Potion of healing');changeHP(c,r.total,'heal');commit(`${r.total} healing. A little better already.`);showHPFeedback(before,'heal','.big-die');}else{modal.close();commit(item.name+' used.');}break;}
       case 'note':editNote(id);break;
       case 'view-note':viewNote(id);break;
