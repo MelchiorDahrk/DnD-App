@@ -5,6 +5,7 @@ const out=resolve(root,'dist');
 await mkdir(out,{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
+await copyFile(resolve(root,'condition-usage.js'),resolve(out,'condition-usage.js'));
 for(const file of ['inventory-rules.js','inventory.js'])await copyFile(resolve(root,file),resolve(out,file));
 await copyFile(resolve(root,'magic-item-data.js'),resolve(out,'magic-item-data.js'));
 for(const file of ['legacy-magic-item-data.js','magic-item-icon-names.js'])await copyFile(resolve(root,file),resolve(out,file));
@@ -14,5 +15,6 @@ for(const file of ['icon.svg','icon-192.png','icon-512.png','portrait-adventurer
 await cp(resolve(root,'portrait-maker'),resolve(out,'portrait-maker'),{recursive:true});
 await cp(resolve(root,'assets/gui'),resolve(out,'assets/gui'),{recursive:true});
 await cp(resolve(root,'assets/equipment'),resolve(out,'assets/equipment'),{recursive:true});
+await cp(resolve(root,'assets/status-icons'),resolve(out,'assets/status-icons'),{recursive:true});
 await cp(resolve(root,'assets/sfx'),resolve(out,'assets/sfx'),{recursive:true});
 console.log('Questlog built successfully → dist/ (static, GitHub Pages-ready)');

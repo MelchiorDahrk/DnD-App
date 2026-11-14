@@ -52,6 +52,8 @@ To deploy elsewhere, run `npm ci` and `npm run build`, then publish `dist/`. The
 
 Data is saved automatically in this browser's local storage. **Character tracking needs no account or server, and there is no automatic sync between devices.** Optional photo scanning uses an online service. Use **Settings & backup → Export** to download a JSON backup, then import it on another device. Import adds characters and preserves existing ones; duplicate IDs become separate copies.
 
+The Status strip shows up to six compact condition shortcuts, with active effects first and frequently applied effects next. Names appear on hover and are available to screen readers; the three-dot button opens every tracked condition and the Exhaustion editor. Usage is cached in `questlog.condition-usage.v1` for this browser, separately from character backups; clearing a condition does not increase its usage count. Icons by JinxShadow are bundled from [dnd5e-status-icons](https://github.com/orangetruth/dnd5e-status-icons) and work offline. [Icon provenance](assets/status-icons/CREDITS.md).
+
 Clearing browser data, using private browsing, changing the site's address, or switching browsers can remove access to local saves. Export backups regularly. The app shows an explicit warning when browser storage fails; changes then remain in memory and can still be exported. It will not silently overwrite unreadable saved data.
 
 Backups are validated before import. Each browser supports up to 100 characters and 2 MB of saved data. Over-limit changes remain available in memory for export, but reduce the data before expecting automatic saving to resume. Roll history is session-only and is not included in backups.

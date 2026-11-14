@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {resolve} from 'node:path';
 import {CONDITIONS,SKILLS,parseBackup} from '../../model.js';
+import {CONDITION_USAGE_KEY,QUICK_CONDITION_LIMIT} from '../../condition-usage.js';
 
 export async function checkSheetImprovements(page,{base,original,root}) {
   const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);
@@ -19,7 +20,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
   const entry=(section,id)=>`[data-sheet-section="${section}"] [data-sheet-entry="${id}"]`;
   await page.setViewport({width:1440,height:1100});
-  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
+  await page.evaluate((s,key)=>{localStorage.setItem('questlog.v2',JSON.stringify(s));localStorage.removeItem(key);},fixture,CONDITION_USAGE_KEY);
   await page.goto(new URL('#inventory',base).href,{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
   const favorite='[data-action="sheet-favorite"][data-entry="sheet-favorite-item"]';
@@ -71,21 +72,31 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('#modal button[type="submit"]');
   assert.equal(await page.$eval(`${entry('attacks',c.attacks[0].id)} .action-timing`,n=>n.textContent),'Bonus Action');
 
+  assert.equal(await page.$$eval('.status-row .condition-tray .condition-chip',nodes=>nodes.length),QUICK_CONDITION_LIMIT);
+  assert.equal(await page.$eval('.condition-tray',node=>node.textContent.trim()),'','Shortcuts have no visible labels');
+  await page.click('.condition-tray [data-condition="Prone"]');
+  await page.click('.condition-tray [data-condition="Prone"]');
+  assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).Prone.count,CONDITION_USAGE_KEY),1,'Clearing does not inflate usage');
+  await page.click('.condition-more');
   for(const name of CONDITIONS) {
-    const selector=`.condition-tray [data-condition="${name}"]`;
-    assert.ok(await page.$(`${selector} svg path, ${selector} svg circle`),`${name} has an icon`);
+    const selector=`#modal [data-condition="${name}"]`;
+    await page.$eval(`${selector} img`,img=>img.decode());
+    assert.equal(await page.$eval(selector,node=>node.getAttribute('aria-label')),name);
     await page.click(selector);
     assert.equal(await page.$eval(selector,n=>n.getAttribute('aria-pressed')),'true');
     assert.equal(await page.$eval(':focus',n=>n.dataset.condition),name);
   }
   assert.deepEqual(active(await state()).conditions,CONDITIONS);
+  await page.click('#modal button[type="submit"]');
+  assert.ok(await page.$('.condition-more .condition-overflow-dot'),'Overflow indicates hidden active conditions');
   await page.reload({waitUntil:'networkidle0'});
-  await page.click('.condition-tray [data-condition="Blinded"]');
+  await page.click('.condition-more');
+  await page.click('#modal [data-condition="Blinded"]');
   assert.ok(!active(await state()).conditions.includes('Blinded'));
-  await page.click('.condition-tray [data-action="conditions"]');
   await page.$eval('#modal [name="exhaustion"]',n=>n.value='2');
   await page.click('#modal button[type="submit"]');
   assert.equal(active(await state()).exhaustion,2);
+  assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).Exhaustion.count,CONDITION_USAGE_KEY),1);
 
   await page.click('[data-action="skills-filter"]');
   const proficient=[...new Set([...c.skills,...c.expertise])].sort();
@@ -113,6 +124,10 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.setOfflineMode(true);
   await page.reload({waitUntil:'networkidle0'});
   assert.ok(await page.$(entry('pack',gear.id)),'Inventory favorite reloads offline');
+  await page.$$eval('.condition-tray img',images=>Promise.all(images.map(img=>img.decode())));
+  await page.click('.condition-more');
+  await page.$$eval('#modal .condition-icon',images=>Promise.all(images.map(img=>img.decode())));
+  await page.click('#modal [data-action="close"]');
   assert.equal(await page.$$eval('.sheet-spell',n=>n.length),3);
   await page.setOfflineMode(false);
   await page.setViewport({width:1440,height:1100});
