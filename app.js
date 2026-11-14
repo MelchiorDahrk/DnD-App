@@ -50,7 +50,7 @@ function toast(message,error=false) {
   if(error)sound.play('ui.error');
   const el=document.createElement('div');el.className=`toast${error?' error':''}`;el.innerHTML=icon(error?'flag':'check')+`<span>${esc(message)}</span>`;$('#toasts').append(el);setTimeout(()=>el.remove(),4800);
 }
-function navigate(next) { if(!Object.hasOwn(routes,next))return;clearEffects();sound.stopAmbience();if(['journal','spells'].includes(next)&&next!==route)sound.play('book.open');route=next;query='';filter='All';location.hash=next;render();window.scrollTo({top:0,behavior:'instant'});$('#main').focus({preventScroll:true}); }
+function navigate(next) { if(!Object.hasOwn(routes,next))return;clearEffects();sound.stopAmbience();route=next;query='';filter='All';location.hash=next;render();window.scrollTo({top:0,behavior:'instant'});$('#main').focus({preventScroll:true}); }
 function setModal(title,body,onSubmit=null) {
   sound.stopAmbience();
   clearEffects();
