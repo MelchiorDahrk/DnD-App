@@ -1,0 +1,514 @@
+{
+  "/wondrous-items:the-infernal-machine-of-lum-the-mad": [
+    [
+      [
+        "Infernal Machine Properties"
+      ],
+      [
+        "d100",
+        "Beneficial Property",
+        "Detrimental Property"
+      ],
+      [
+        "01",
+        "Fly 150 feet; lose other movement.",
+        "Blinded."
+      ],
+      [
+        "02",
+        "Cast Speak with Animals at will for one chosen animal.",
+        "Animals despise you; Animal Handling disadvantage."
+      ],
+      [
+        "03",
+        "One carried item walks at 30 feet under your direction.",
+        "Unless naked, subtract 1d4 from AC each time attacked."
+      ],
+      [
+        "04",
+        "Cast Legend Lore three times.",
+        "Creature lore from Intelligence checks or divination includes DM-chosen trivia."
+      ],
+      [
+        "05",
+        "First metal weapon attack against you each combat has disadvantage.",
+        "Your touch rusts metal as a rust monster’s Rust Metal, including worn and held gear."
+      ],
+      [
+        "06",
+        "Advantage on thieves’ and tinker’s tools checks.",
+        "Worn or wielded metal becomes oily and leaves your fingerprints."
+      ],
+      [
+        "07",
+        "Cast Speak with Animals at will for insects only.",
+        "Creatures within 30 feet hear whispers evoking sad memories."
+      ],
+      [
+        "08",
+        "+1 Insight checks involving visible creatures.",
+        "Radiant vulnerability; attack disadvantage in direct sunlight."
+      ],
+      [
+        "09",
+        "Summon an obedient unicorn; it vanishes if ordered against its alignment.",
+        "Grow a unicorn horn."
+      ],
+      [
+        "10",
+        "Compass points to a named creature, place, or object on your plane, without distance.",
+        "A compass points toward you; seekers may be drawn to you. A creature’s first attack against you each encounter has advantage."
+      ],
+      [
+        "11",
+        "Clothes look fashionable; +1 Charisma checks.",
+        "Food and drink spoil as swallowed; poisoned for 1 hour after eating or drinking."
+      ],
+      [
+        "12",
+        "+1 weapon or spell attack rolls, your choice.",
+        "Cure Wounds restores no HP to you."
+      ],
+      [
+        "13",
+        "Automatically succeed on checks to avoid getting lost.",
+        "An unstoppable voice announces your direction and distance whenever you move."
+      ],
+      [
+        "14",
+        "See afterimages of events within 30 feet during the past hour.",
+        "Make a Wisdom save every 4 hours or gain 1 exhaustion level."
+      ],
+      [
+        "15",
+        "Understand all languages as Comprehend Languages.",
+        "Speak a random language whenever you speak."
+      ],
+      [
+        "16",
+        "+1 initiative.",
+        "Cannot hear speech louder than a whisper."
+      ],
+      [
+        "17",
+        "Gain an unequipped duplicate familiar with cat statistics.",
+        "An unequipped duplicate claims you are its familiar; if destroyed it returns in 1d4 hours."
+      ],
+      [
+        "18",
+        "While diseased, poisoned, or frightened, melee hits on humanoids transfer that affliction on a failed DC 15 Constitution save.",
+        "Water deals 1d6 acid at each turn’s start while submerged; drinking pure water poisons you for 1 hour."
+      ],
+      [
+        "19",
+        "Summon a random Huge beast as Conjure Animals; command it telepathically.",
+        "A random Huge beast appears and attacks."
+      ],
+      [
+        "20",
+        "Gain 1 Lucky feat luck point, or 1 extra if you have the feat.",
+        "Automatically fail Charisma checks; others perceive dishonesty."
+      ],
+      [
+        "21",
+        "At 0 HP summon a Faithful Hound guardian until you die, regain HP, or regain consciousness.",
+        "Disadvantage on Deception and Persuasion; automatically fail Intimidation."
+      ],
+      [
+        "22",
+        "Cast Gaseous Form on yourself three times, appearing as feathers.",
+        "Your body grows feathers."
+      ],
+      [
+        "23",
+        "Advantage on death saves.",
+        "Disadvantage on saves except death saves."
+      ],
+      [
+        "24",
+        "Cast Speak with Animals at will for dogs only.",
+        "Cats are automatically hostile."
+      ],
+      [
+        "25",
+        "Cast Raise Dead once without materials.",
+        "Automatically gain 1 failed death save at 0 HP."
+      ],
+      [
+        "26",
+        "After each short rest convert up to 100 owned sp to gp and 100 owned cp to sp.",
+        "Coins you touch become worthless tin."
+      ],
+      [
+        "27",
+        "Detect poisons within 50 feet, marked by a frog only you see.",
+        "A dozen loudly chirping frogs follow you."
+      ],
+      [
+        "28",
+        "Gain Nondetection.",
+        "Appearance randomly changes as Disguise Self, determined by the DM."
+      ],
+      [
+        "29",
+        "Cast Mage Hand at will.",
+        "A spirit steals and scatters coins, crumbles food, and meddles with gear."
+      ],
+      [
+        "30",
+        "Decipher any text.",
+        "Cannot speak languages; verbal spell components still work."
+      ],
+      [
+        "31",
+        "Cast Speak with Plants three times.",
+        "Drink half a gallon of fresh water every 4 hours or take 1d4 necrotic damage."
+      ],
+      [
+        "32",
+        "Know whether creatures within 15 feet lie, as Zone of Truth.",
+        "Cannot speak when attempting to lie."
+      ],
+      [
+        "33",
+        "Sense direction toward a DM-chosen important goal.",
+        "Disadvantage on Intelligence checks and saves."
+      ],
+      [
+        "34",
+        "Creatures believe what you say as successful Deception or Persuasion until you act threateningly or deceitfully.",
+        "Favorite foods, hobbies, music, and other tastes become unbearable."
+      ],
+      [
+        "35",
+        "Your shadow becomes a controlled undead shadow sharing your alignment.",
+        "Your shadow steals, mocks, or taunts when unobserved."
+      ],
+      [
+        "36",
+        "Automatically succeed on checks and saves to escape grapples.",
+        "DC 10 Dexterity save for sitting, opening doors, and similar mundane tasks."
+      ],
+      [
+        "37",
+        "Flowers turn toward you.",
+        "Mundane animals cannot look at you."
+      ],
+      [
+        "38",
+        "After a short rest, leaves fall in 1d10 minutes to reveal 1d6 Goodberry fruits.",
+        "After 10 minutes still, shoes root; DC 20 Strength check to pull free."
+      ],
+      [
+        "39",
+        "Three times, choose a visible creature: DC 15 Dexterity save or drop one held item, DM’s choice.",
+        "On a 1 on a Dexterity check, drop one held object, DM’s choice."
+      ],
+      [
+        "40",
+        "Singing forest animals follow and can perform Prestidigitation tasks.",
+        "Sing whenever you roll a 1 on any die."
+      ],
+      [
+        "41",
+        "Possessions change to give DM-chosen hints of future events.",
+        "−5 initiative."
+      ],
+      [
+        "42",
+        "A 1 on a d20 grants advantage on your next d20 roll.",
+        "A 1 on a d20 imposes disadvantage on your next d20 roll."
+      ],
+      [
+        "43",
+        "Plants grow in your footsteps; ignore plant-created difficult terrain.",
+        "Seeing a plant harmed imposes disadvantage on ability checks for 1 minute."
+      ],
+      [
+        "44",
+        "Know the direction of the greatest danger within 500 feet.",
+        "Black footprints let anyone automatically follow you."
+      ],
+      [
+        "45",
+        "Cast Detect Thoughts three times.",
+        "Creatures within 30 feet automatically know your surface thoughts."
+      ],
+      [
+        "46",
+        "Cast Misty Spell three times, beginning and ending in shadow.",
+        "Disadvantage on attacks and sight-based Perception in direct sunlight."
+      ],
+      [
+        "47",
+        "Enemies cannot gain attack advantage against you from Help.",
+        "Disadvantage on Acrobatics."
+      ],
+      [
+        "48",
+        "Walking speed +10 feet; hold breath twice as long.",
+        "Exertion causes flame that deals you 1d4 fire damage."
+      ],
+      [
+        "49",
+        "Cast Daylight three times.",
+        "An evil undead first entering within 30 feet is charmed by you until your next turn ends."
+      ],
+      [
+        "50",
+        "Duplicate touched copper coins, maximum 1,000.",
+        "Must eat twice the normal food to avoid hunger."
+      ],
+      [
+        "51",
+        "Shed light like a torch, as Light.",
+        "Others cannot short rest within 40 feet of you."
+      ],
+      [
+        "52",
+        "Cast Divination once.",
+        "Intelligence checks or saves impose disadvantage on your next attack, check, or save."
+      ],
+      [
+        "53",
+        "Once as an action become incorporeal for 10 minutes; move through creatures and objects as difficult terrain, taking 1d10 force if ending a turn inside an object.",
+        "Disadvantage on Perception."
+      ],
+      [
+        "54",
+        "During your short rest, a 50-foot area looks like an illusory forest glade.",
+        "The first visible ally taking damage from a failed save transfers it to you."
+      ],
+      [
+        "55",
+        "Bonus action: learn a DM-chosen secret of a creature within 10 feet.",
+        "Remove Curse, Lesser Restoration, and Greater Restoration do not affect you."
+      ],
+      [
+        "56",
+        "Predict weather perfectly for 24 hours.",
+        "A rain cloud constantly drizzles on you, even indoors."
+      ],
+      [
+        "57",
+        "Telepathy 120 feet.",
+        "Hear uncertain thoughts from visible creatures at the DM’s discretion."
+      ],
+      [
+        "58",
+        "Cast Speak with Animals at will for goats; a goat spoken to is charmed for 1 hour.",
+        "Unless all clothing is one color, disadvantage on Intelligence, Wisdom, and Charisma checks and saves."
+      ],
+      [
+        "59",
+        "Fire resistance.",
+        "Potions provide no benefit."
+      ],
+      [
+        "60",
+        "Immune to charmed and frightened.",
+        "Monotone speech; disadvantage on Charisma checks."
+      ],
+      [
+        "61",
+        "You and creatures within 10 feet resist necrotic damage.",
+        "Medicine checks you make or that help you have disadvantage."
+      ],
+      [
+        "62",
+        "First creature hit by your weapon each turn takes 1d4 fire at its next turn’s start.",
+        "Blinded in bright light; shadow looks monstrous."
+      ],
+      [
+        "63",
+        "Alignment cannot be magically learned; Charisma advantage with creatures sharing it.",
+        "Charisma disadvantage with creatures of different alignment."
+      ],
+      [
+        "64",
+        "Bonus action: teleport-swap positions with a visible willing ally.",
+        "On a d20 roll of 1, teleport-swap with a visible ally."
+      ],
+      [
+        "65",
+        "Three times, use an action to make difficult terrain within 50 feet normal.",
+        "Moving through difficult terrain reduces speed by 10 feet until your next turn ends."
+      ],
+      [
+        "66",
+        "Increase one ability score by 2, even above 20, until this property ends.",
+        "A 1 on an attack, check, or save using your highest ability deals you 1d4 psychic."
+      ],
+      [
+        "67",
+        "Action: learn direction and distance to nearest magic item not held by you or allies.",
+        "Creatures within 30 feet know what magic items you carry."
+      ],
+      [
+        "68",
+        "Three times, use an action in dim light or darkness for Invisibility; bright light also ends it.",
+        "Disadvantage on initiative in bright light."
+      ],
+      [
+        "69",
+        "Read and understand commonly spoken languages within 1 mile.",
+        "Nonsense words impose disadvantage on Charisma checks."
+      ],
+      [
+        "70",
+        "Know one DM-chosen cantrip and cast one DM-chosen 1st-level spell at will.",
+        "Roll Wild Magic Surge whenever casting or activating an item with an action or bonus action."
+      ],
+      [
+        "71",
+        "On a d20 roll of 20, immediately end one effect on yourself.",
+        "On a d20 roll of 1, blinded until your next turn ends."
+      ],
+      [
+        "72",
+        "Clothing maps known local areas; advantage finding secret doors and retracing routes.",
+        "Touched ropes become poisonous snakes that attack you."
+      ],
+      [
+        "73",
+        "Summon an obedient slithering tracker.",
+        "Skin appears translucent, showing bones and organs."
+      ],
+      [
+        "74",
+        "Advantage on Persuasion checks.",
+        "Failed Persuasion makes the subject resent and undermine you."
+      ],
+      [
+        "75",
+        "Cast Control Weather.",
+        "Dealing or taking fire or cold damage requires DC 10 Charisma save or summons a hostile corresponding elemental."
+      ],
+      [
+        "76",
+        "A tiny gynosphinx construct answers up to 10 campaign yes-or-no questions truthfully at the DM’s discretion.",
+        "A tiny gynosphinx construct asks impossible riddles and insults those who fail."
+      ],
+      [
+        "77",
+        "A DM-determined two-beast hybrid serves as Conjure Animals.",
+        "A DM-determined two-beast hybrid attacks unless you pass DC 12 Animal Handling, then wanders off."
+      ],
+      [
+        "78",
+        "Cast Teleport once, always arriving on target.",
+        "Entering a doorway requires DC 10 Intelligence or you and allies within 10 feet disappear for 1d4 minutes."
+      ],
+      [
+        "79",
+        "Cast Haste on yourself three times.",
+        "After dropping to 0 HP and being stabilized, suffer Slow."
+      ],
+      [
+        "80",
+        "No breathing required; immune to inhaled poison and suffocation.",
+        "Before speaking, including verbal spell components, use a bonus action to breathe."
+      ],
+      [
+        "81",
+        "Immune to poison and poisoned; cast Speak with Animals at will for snakes.",
+        "Speech-based Charisma disadvantage; DC 15 Constitution check to cast spells with verbal components."
+      ],
+      [
+        "82",
+        "Breathe air and water; two 10-foot-reach tentacles perform hand actions but cannot attack or grapple.",
+        "1d4 air- and water-breathing octopuses follow at 30-foot walking speed; DC 13 Animal Handling each combat or they attack."
+      ],
+      [
+        "83",
+        "Cast Misty Step three times between fire areas; fire damage taken that turn is restored at turn’s end.",
+        "Starting within 30 feet of ongoing fire requires DC 13 Wisdom save or movement toward and into it if possible."
+      ],
+      [
+        "84",
+        "Advantage on checks to avoid becoming lost outdoors.",
+        "Disadvantage on indoor Perception."
+      ],
+      [
+        "85",
+        "Cast Healing Word three times.",
+        "Cannot hide from undead; each undead has advantage on its first attack against you in combat."
+      ],
+      [
+        "86",
+        "Touched food becomes delicious; advantage on Charisma checks with those who eat it.",
+        "Disadvantage on initiative and Dexterity checks."
+      ],
+      [
+        "87",
+        "Advantage on Intelligence checks.",
+        "Forget your own name and need reminders."
+      ],
+      [
+        "88",
+        "Turn small nonmagical objects into chocolate by touch.",
+        "Eating or drinking imposes disadvantage on Strength checks for 1 hour."
+      ],
+      [
+        "89",
+        "After a short rest, you and creatures resting within 30 feet throughout regain 1d8 HP.",
+        "After a short rest, take 3d8 psychic; you may transfer any amount to creatures resting within 30 feet throughout."
+      ],
+      [
+        "90",
+        "After a short rest, gain 1d10 gems worth 10 gp each.",
+        "Recipients of your coins or gems believe the wealth was stolen from them."
+      ],
+      [
+        "91",
+        "First time you hit a creature in an encounter, reduce its AC by 1.",
+        "On a weapon attack roll of 1, the weapon shatters and reforms in 1d4 rounds."
+      ],
+      [
+        "92",
+        "Settlements treat you as a known friend.",
+        "On a 1 on an attack, check, or save, grow 1 inch; gear does not grow."
+      ],
+      [
+        "93",
+        "Once, cast Teleport from a doorway to another known doorway.",
+        "After each short rest, forget and distrust one DM-chosen ally until your next short rest ends."
+      ],
+      [
+        "94",
+        "Three times, use an action for a 10-foot-radius rock storm for 1 minute; hostile entrants save DC 12 Constitution or take 1d6 bludgeoning and are blinded 1 round.",
+        "Fire and water creatures regard you as an enemy and focus attacks on you."
+      ],
+      [
+        "95",
+        "Action: learn names of all humanoids within 30 feet.",
+        "On a 1 on a Strength or Dexterity check touching an object, stick for 1 minute; DC 20 Strength frees you."
+      ],
+      [
+        "96",
+        "Cast Modify Memory once.",
+        "Intelligence checks and saves require DC 13 Charisma save or lose memories of the past hour."
+      ],
+      [
+        "97",
+        "Ignore verbal components of your spells.",
+        "You must shout verbal components."
+      ],
+      [
+        "98",
+        "Action: summon a visible, mindless duplicate controlled like Unseen Servant.",
+        "Seeing your reflection requires DC 12 Charisma save or confuse allies and enemies for 1 minute; repeat at each turn’s end."
+      ],
+      [
+        "99",
+        "Action: replace a hand with a reasonably sized nonmagical weapon, tool, or adventuring item.",
+        "Disadvantage on Sleight of Hand, thieves’ and artisan’s tools Dexterity checks, and your first weapon attack each encounter."
+      ],
+      [
+        "00",
+        "A DM-chosen nonhumanoid creature type cannot be hostile unless you provoke, threaten, or attack it.",
+        "Meeting a DM-chosen nonhumanoid type has a cumulative 1% chance to summon the tarrasque within 1 mile; it rampages for 1d6 × 10 minutes."
+      ]
+    ]
+  ]
+}

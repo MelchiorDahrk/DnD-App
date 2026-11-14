@@ -1,0 +1,8384 @@
+[
+  {
+    "path": "/wondrous-items:armblade",
+    "name": "Armblade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-gleaming",
+    "name": "Armor of Gleaming",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:band-of-loyalty",
+    "name": "Band of Loyalty",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "WGTE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bead-of-nourishment",
+    "name": "Bead of Nourishment",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bead-of-refreshment",
+    "name": "Bead of Refreshment",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-false-tracks",
+    "name": "Boots of False Tracks",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bottle-of-boundless-coffee",
+    "name": "Bottle of Boundless Coffee",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:breathing-bubble",
+    "name": "Breathing Bubble",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:candle-of-the-deep",
+    "name": "Candle of the Deep",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cast-off-armor",
+    "name": "Cast-Off Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:charlatans-die",
+    "name": "Charlatan's Die",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:chest-of-preserving",
+    "name": "Chest of Preserving",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cleansing-stone",
+    "name": "Cleansing Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-billowing",
+    "name": "Cloak of Billowing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-many-fashions",
+    "name": "Cloak of Many Fashions",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:clockwork-amulet",
+    "name": "Clockwork Amulet",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:clothes-of-mending",
+    "name": "Clothes of Mending",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:coin-of-delving",
+    "name": "Coin of Delving",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cuddly-strixhaven-mascot",
+    "name": "Cuddly Strixhaven Mascot",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dark-shard-amulet",
+    "name": "Dark Shard Amulet",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dread-helm",
+    "name": "Dread Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ear-horn-of-hearing",
+    "name": "Ear Horn of Hearing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:earring-of-message",
+    "name": "Earring of Message",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:enduring-spellbook",
+    "name": "Enduring Spellbook",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ersatz-eye",
+    "name": "Ersatz Eye",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:everbright-lantern",
+    "name": "Everbright Lantern",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:feather-token",
+    "name": "Feather Token",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:glamerweave",
+    "name": "Glamerweave",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common",
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hat-of-vermin",
+    "name": "Hat of Vermin",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hat-of-wizardry",
+    "name": "Hat of Wizardry",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hewards-handy-spice-pouch",
+    "name": "Heward's Handy Spice Pouch",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horn-of-silent-alarm",
+    "name": "Horn of Silent Alarm",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:illuminators-tattoo",
+    "name": "Illuminator's Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:imbued-wood-focus",
+    "name": "Imbued Wood Focus",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:instrument-of-illusions",
+    "name": "Instrument of Illusions",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:instrument-of-scribing",
+    "name": "Instrument of Scribing",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:keycharm",
+    "name": "Keycharm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lantern-of-tracking",
+    "name": "Lantern of Tracking",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lock-of-trickery",
+    "name": "Lock of Trickery",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:masque-charm",
+    "name": "Masque Charm",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:masquerade-tattoo",
+    "name": "Masquerade Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-muscle",
+    "name": "Medal of Muscle",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-the-conch",
+    "name": "Medal of the Conch",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-the-horizonback",
+    "name": "Medal of the Horizonback",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-the-maze",
+    "name": "Medal of the Maze",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-the-meat-pie",
+    "name": "Medal of the Meat Pie",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-the-wetlands",
+    "name": "Medal of the Wetlands",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medal-of-wit",
+    "name": "Medal of Wit",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mind-crystal",
+    "name": "Mind Crystal",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Common",
+      "Uncommon",
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:moodmark-paint",
+    "name": "Moodmark Paint",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:moon-touched-sword",
+    "name": "Moon-Touched Sword",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mystery-key",
+    "name": "Mystery Key",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-direction",
+    "name": "Orb of Direction",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-gonging",
+    "name": "Orb of Gonging",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-shielding",
+    "name": "Orb of Shielding",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-time",
+    "name": "Orb of Time",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:perfume-of-bewitching",
+    "name": "Perfume of Bewitching",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pipe-of-remembrance",
+    "name": "Pipe of Remembrance",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pipe-of-smoke-monsters",
+    "name": "Pipe of Smoke Monsters",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pole-of-angling",
+    "name": "Pole of Angling",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pole-of-collapsing",
+    "name": "Pole of Collapsing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pot-of-awakening",
+    "name": "Pot of Awakening",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-climbing",
+    "name": "Potion of Climbing",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-healing",
+    "name": "Potion of Healing",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Common",
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-watchful-rest",
+    "name": "Potion of Watchful Rest",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pressure-capsule",
+    "name": "Pressure Capsule",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:prosthetic-limb",
+    "name": "Prosthetic Limb",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rope-of-mending",
+    "name": "Rope of Mending",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruby-of-the-war-mage",
+    "name": "Ruby of the War Mage",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scribes-pen",
+    "name": "Scribe's Pen",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sekolahian-worshipping-statuette",
+    "name": "Sekolahian Worshipping Statuette",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-expression",
+    "name": "Shield of Expression",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shiftweave",
+    "name": "Shiftweave",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:smoldering-armor",
+    "name": "Smoldering Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spell-scroll",
+    "name": "Spell Scroll",
+    "itemType": "Scroll",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Common",
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spellshard",
+    "name": "Spellshard",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spellwrought-tattoo",
+    "name": "Spellwrought Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Common",
+      "Uncommon",
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-adornment",
+    "name": "Staff of Adornment",
+    "itemType": "Staff",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-birdcalls",
+    "name": "Staff of Birdcalls",
+    "itemType": "Staff",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-flowers",
+    "name": "Staff of Flowers",
+    "itemType": "Staff",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:strixhaven-pennant",
+    "name": "Strixhaven Pennant",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:talking-doll",
+    "name": "Talking Doll",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tankard-of-plenty",
+    "name": "Tankard of Plenty",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tankard-of-sobriety",
+    "name": "Tankard of Sobriety",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:thermal-cube",
+    "name": "Thermal Cube",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:unbreakable-arrow",
+    "name": "Unbreakable Arrow",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:veterans-cane",
+    "name": "Veteran's Cane",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:vox-seeker",
+    "name": "Vox Seeker",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:walloping-ammunition",
+    "name": "Walloping Ammunition",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-conducting",
+    "name": "Wand of Conducting",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-pyrotechnics",
+    "name": "Wand of Pyrotechnics",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-scowls",
+    "name": "Wand of Scowls",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-smiles",
+    "name": "Wand of Smiles",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "XGE",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-sheath",
+    "name": "Wand Sheath",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Common"
+    ]
+  },
+  {
+    "path": "/wondrous-items:adamantine-armor",
+    "name": "Adamantine Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:alchemy-jug",
+    "name": "Alchemy Jug",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:alchemy-jug-blue",
+    "name": "Alchemy Jug (Blue)",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:alchemy-jug-orange",
+    "name": "Alchemy Jug (Orange)",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:all-purpose-tool",
+    "name": "All-Purpose Tool",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ammunition",
+    "name": "Ammunition, +1, +2, or +3",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-proof-against-detection-and-locatio",
+    "name": "Amulet of Proof Against Detection and Location",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-the-devout",
+    "name": "Amulet of the Devout",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-the-drunkard",
+    "name": "Amulet of the Drunkard",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:arcane-grimoire",
+    "name": "Arcane Grimoire",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-fungal-spores",
+    "name": "Armor Of Fungal Spores",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-the-fallen",
+    "name": "Armor Of The Fallen",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-weightlessness",
+    "name": "Armor Of Weightlessness",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bag-of-bounty",
+    "name": "Bag of Bounty",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WGTE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bag-of-holding",
+    "name": "Bag of Holding",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bag-of-tricks",
+    "name": "Bag of Tricks",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:balance-of-harmony",
+    "name": "Balance of Harmony",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:balloon-pack",
+    "name": "Balloon Pack",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:barrier-tattoo",
+    "name": "Barrier Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blasted-goggles",
+    "name": "Blasted Goggles",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blood-of-the-lycanthrope-antidote",
+    "name": "Blood of the Lycanthrope Antidote",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blood-spear",
+    "name": "Blood Spear",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bloodrage-greataxe",
+    "name": "Bloodrage Greataxe",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bloodwell-vial",
+    "name": "Bloodwell Vial",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boomerang-shield",
+    "name": "Boomerang Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-elvenkind",
+    "name": "Boots of Elvenkind",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-striding-and-springing",
+    "name": "Boots of Striding and Springing",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-the-winterlands",
+    "name": "Boots of the Winterlands",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bottled-breath",
+    "name": "Bottled Breath",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bracers-of-archery",
+    "name": "Bracers of Archery",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:brooch-of-living-essence",
+    "name": "Brooch of Living Essence",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:brooch-of-shielding",
+    "name": "Brooch of Shielding",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:broom-of-flying",
+    "name": "Broom of Flying",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cap-of-water-breathing",
+    "name": "Cap of Water Breathing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:card-sharps-deck",
+    "name": "Card Sharp's Deck",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:circlet-of-blasting",
+    "name": "Circlet of Blasting",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:circlet-of-human-perfection",
+    "name": "Circlet of Human Perfection",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-elvenkind",
+    "name": "Cloak of Elvenkind",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-protection",
+    "name": "Cloak of Protection",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-the-manta-ray",
+    "name": "Cloak of the Manta Ray",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:coiling-grasp-tattoo",
+    "name": "Coiling Grasp Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cracked-driftglobe",
+    "name": "Cracked Driftglobe",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cursed-luckstone",
+    "name": "Cursed Luckstone",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:decanter-of-endless-water",
+    "name": "Decanter of Endless Water",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-illusions",
+    "name": "Deck of Illusions",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-miscellany",
+    "name": "Deck Of Miscellany",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-wonder",
+    "name": "Deck Of Wonder",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-vessel",
+    "name": "Dragon Vessel",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragonhide-belt",
+    "name": "Dragonhide Belt",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragons-wrath-weapon",
+    "name": "Dragon's Wrath Weapon",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-touched-focus",
+    "name": "Dragon-Touched Focus",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dried-leech",
+    "name": "Dried Leech",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:driftglobe",
+    "name": "Driftglobe",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dust-of-corrosion",
+    "name": "Dust of Corrosion",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dust-of-deliciousness",
+    "name": "Dust of Deliciousness",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dust-of-disappearance",
+    "name": "Dust of Disappearance",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dust-of-dryness",
+    "name": "Dust of Dryness",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dust-of-sneezing-and-choking",
+    "name": "Dust of Sneezing and Choking",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:earworm",
+    "name": "Earworm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eldritch-claw-tattoo",
+    "name": "Eldritch Claw Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:elemental-gem",
+    "name": "Elemental Gem",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:emerald-pen",
+    "name": "Emerald Pen",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eversmoking-bottle",
+    "name": "Eversmoking Bottle",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eyes-of-charming",
+    "name": "Eyes of Charming",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eyes-of-minute-seeing",
+    "name": "Eyes of Minute Seeing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eyes-of-the-eagle",
+    "name": "Eyes of the Eagle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fabulist-gem",
+    "name": "Fabulist Gem",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:feywild-shard",
+    "name": "Feywild Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:figurine-of-wondrous-power",
+    "name": "Figurine of Wondrous Power",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:finders-goggles",
+    "name": "Finder's Goggles",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gauntlets-of-ogre-power",
+    "name": "Gauntlets of Ogre Power",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gem-of-brightness",
+    "name": "Gem of Brightness",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gloves-of-missile-snaring",
+    "name": "Gloves of Missile Snaring",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gloves-of-swimming-and-climbing",
+    "name": "Gloves of Swimming and Climbing",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gloves-of-thievery",
+    "name": "Gloves of Thievery",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:goggles-of-night",
+    "name": "Goggles of Night",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:goggles-of-object-reading",
+    "name": "Goggles of Object Reading",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:guardian-emblem",
+    "name": "Guardian Emblem",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:guild-keyrune",
+    "name": "Guild Keyrune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:guild-signet",
+    "name": "Guild Signet",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:harkon-s-bite",
+    "name": "Harkon's Bite",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "VRGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hat-of-disguise",
+    "name": "Hat of Disguise",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:headband-of-intellect",
+    "name": "Headband of Intellect",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hellfire-weapon",
+    "name": "Hellfire Weapon",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-comprehending-languages",
+    "name": "Helm of Comprehending Languages",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-telepathy",
+    "name": "Helm of Telepathy",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-underwater-action",
+    "name": "Helm of Underwater Action",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:house-of-cards",
+    "name": "House Of Cards",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:immovable-rod",
+    "name": "Immovable Rod",
+    "itemType": "Rod",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:infernal-puzzle-box",
+    "name": "Infernal Puzzle Box",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:inquisitives-goggles",
+    "name": "Inquisitive's Goggles",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WGTE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:insignia-of-claws",
+    "name": "Insignia of Claws",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:instrument-of-the-bards",
+    "name": "Instrument of the Bards",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:javelin-of-lightning",
+    "name": "Javelin of Lightning",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:keoghtoms-ointment",
+    "name": "Keoghtom's Ointment",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lantern-of-revealing",
+    "name": "Lantern of Revealing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:living-gloves",
+    "name": "Living Gloves",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lorehold-primer",
+    "name": "Lorehold Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mariners-armor",
+    "name": "Mariner's Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mask-of-the-beast",
+    "name": "Mask of the Beast",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:medallion-of-thoughts",
+    "name": "Medallion of Thoughts",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mind-carapace-armor",
+    "name": "Mind Carapace Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "VGM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mithral-armor",
+    "name": "Mithral Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mizzium-apparatus",
+    "name": "Mizzium Apparatus",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:moon-sickle",
+    "name": "Moon Sickle",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mummy-rot-antidote",
+    "name": "Mummy Rot Antidote",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:natures-mantle",
+    "name": "Nature's Mantle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:necklace-of-adaptation",
+    "name": "Necklace of Adaptation",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:night-caller",
+    "name": "Night Caller",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:oil-of-slipperiness",
+    "name": "Oil of Slipperiness",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:paper-bird",
+    "name": "Paper Bird",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pearl-of-power",
+    "name": "Pearl of Power",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:periapt-of-health",
+    "name": "Periapt of Health",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:periapt-of-wound-closure",
+    "name": "Periapt of Wound Closure",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:philter-of-love",
+    "name": "Philter of Love",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pipes-of-haunting",
+    "name": "Pipes of Haunting",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pipes-of-the-sewers",
+    "name": "Pipes of the Sewers",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:piwafwi",
+    "name": "Piwafwi",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pixie-dust",
+    "name": "Pixie Dust",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:plate-of-knights-fellowship",
+    "name": "Plate Of Knight's Fellowship",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:portal-compass",
+    "name": "Portal Compass",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PSAIM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-advantage",
+    "name": "Potion of Advantage",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-animal-friendship",
+    "name": "Potion of Animal Friendship",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-fire-breath",
+    "name": "Potion of Fire Breath",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-giant-strength",
+    "name": "Potion of Giant Strength",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-growth",
+    "name": "Potion of Growth",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-poison",
+    "name": "Potion of Poison",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-polychromy",
+    "name": "Potion Of Polychromy",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-psionic-fortitude",
+    "name": "Potion of Psionic Fortitude",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-resistance",
+    "name": "Potion of Resistance",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-water-breathing",
+    "name": "Potion of Water Breathing",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:prehistoric-figurines-of-wondrous-power",
+    "name": "Prehistoric Figurines of Wondrous Power",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:prismari-primer",
+    "name": "Prismari Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:propeller-helm",
+    "name": "Propeller Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:psi-crystal",
+    "name": "Psi Crystal",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pyroconverger",
+    "name": "Pyroconverger",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:quandrix-primer",
+    "name": "Quandrix Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:quiver-of-ehlonna",
+    "name": "Quiver of Ehlonna",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rhythm-makers-drum",
+    "name": "Rhythm Maker's Drum",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-jumping",
+    "name": "Ring of Jumping",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-mind-shielding",
+    "name": "Ring of Mind Shielding",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-obscuring",
+    "name": "Ring of Obscuring",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-puzzlers-wit",
+    "name": "Ring Of Puzzler's Wit",
+    "itemType": "Ring",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-swimming",
+    "name": "Ring of Swimming",
+    "itemType": "Ring",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-the-orator",
+    "name": "Ring of the Orator",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-truth-telling",
+    "name": "Ring of Truth Telling",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-warmth",
+    "name": "Ring of Warmth",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-water-walking",
+    "name": "Ring of Water Walking",
+    "itemType": "Ring",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rings-of-shared-suffering",
+    "name": "Rings of Shared Suffering",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "WGE",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-serpents",
+    "name": "Robe of Serpents",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-useful-items",
+    "name": "Robe of Useful Items",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-retribution",
+    "name": "Rod of Retribution",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-the-pact-keeper",
+    "name": "Rod of the Pact Keeper, +1, +2, +3",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rope-of-climbing",
+    "name": "Rope of Climbing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:saddle-of-the-cavalier",
+    "name": "Saddle of the Cavalier",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scaled-ornament",
+    "name": "Scaled Ornament",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:seeker-dart",
+    "name": "Seeker Dart",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sending-stones",
+    "name": "Sending Stones",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sensory-stone",
+    "name": "Sensory Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PSAIM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sentinel-shield",
+    "name": "Sentinel Shield",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:serpent-scale-armor",
+    "name": "Serpent Scale Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shatterspike",
+    "name": "Shatterspike",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-1-2-3",
+    "name": "Shield, +1, +2, +3",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-the-tortoise",
+    "name": "Shield Of The Tortoise",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:silverquill-primer",
+    "name": "Silverquill Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:skyblinder-staff",
+    "name": "Skyblinder Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sling-of-giant-felling",
+    "name": "Sling Of Giant Felling",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:slippers-of-spider-climbing",
+    "name": "Slippers of Spider Climbing",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:smokepowder",
+    "name": "Smokepowder",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:soul-coin",
+    "name": "Soul Coin",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spell-gem",
+    "name": "Spell Gem",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spies-murmur",
+    "name": "Spies' Murmur",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-adder",
+    "name": "Staff of the Adder",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-python",
+    "name": "Staff of the Python",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:luckstone",
+    "name": "Stone of Good Luck (Luckstone)",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stone-of-ill-luck",
+    "name": "Stone of Ill Luck",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:storm-boomerang",
+    "name": "Storm Boomerang",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-vengeance",
+    "name": "Sword of Vengeance",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:thessaltoxin-antidote",
+    "name": "Thessaltoxin Antidote",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:trident-of-fish-command",
+    "name": "Trident of Fish Command",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-entangle",
+    "name": "Wand of Entangle",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-magic-detection",
+    "name": "Wand of Magic Detection",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-magic-missiles",
+    "name": "Wand of Magic Missiles",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-secrets",
+    "name": "Wand of Secrets",
+    "itemType": "Wand",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-the-war-mage",
+    "name": "Wand of the War Mage",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-web",
+    "name": "Wand of Web",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:weapon-1-2-3",
+    "name": "Weapon, +1, +2, or +3",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:weapon-of-warning",
+    "name": "Weapon of Warning",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wheel-of-wind-and-water",
+    "name": "Wheel of Wind and Water",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wildspace-orrery",
+    "name": "Wildspace Orrery",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SAS",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wind-fan",
+    "name": "Wind Fan",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:winged-ammunition",
+    "name": "Winged Ammunition",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:winged-boots",
+    "name": "Winged Boots",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wingwear",
+    "name": "Wingwear",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:witherbloom-primer",
+    "name": "Witherbloom Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Uncommon"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wraps-of-unarmed-prowess",
+    "name": "Wraps Of Unarmed Prowess",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Uncommon",
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:acheron-blade",
+    "name": "Acheron Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:alchemical-compendium",
+    "name": "Alchemical Compendium",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-health",
+    "name": "Amulet of Health",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-protection-from-turning",
+    "name": "Amulet of Protection from Turning",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-1-2-3",
+    "name": "Armor, +1, +2, or +3",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-resistance",
+    "name": "Armor of Resistance",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-vulnerability",
+    "name": "Armor of Vulnerability",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:arrow-catching-shield",
+    "name": "Arrow-Catching Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:astral-shard",
+    "name": "Astral Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:astromancy-archive",
+    "name": "Astromancy Archive",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:atlas-of-endless-horizons",
+    "name": "Atlas of Endless Horizons",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:badge-of-the-watch",
+    "name": "Badge of the Watch",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bag-of-beans",
+    "name": "Bag of Beans",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:banner-of-the-krig-rune",
+    "name": "Banner of the Krig Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:battering-shield",
+    "name": "Battering Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bead-of-force",
+    "name": "Bead of Force",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bell-branch",
+    "name": "Bell Branch",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:belt-of-dwarvenkind",
+    "name": "Belt of Dwarvenkind",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:belt-of-giant-strength",
+    "name": "Belt of Giant Strength",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:berserker-axe",
+    "name": "Berserker Axe",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blod-stone",
+    "name": "Blod Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bonecounter",
+    "name": "Bonecounter",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "SDW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-levitation",
+    "name": "Boots of Levitation",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:boots-of-speed",
+    "name": "Boots of Speed",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bow-of-conflagration",
+    "name": "Bow Of Conflagration",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bowl-of-commanding-water-elementals",
+    "name": "Bowl of Commanding Water Elementals",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bracer-of-flying-daggers",
+    "name": "Bracer of Flying Daggers",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bracers-of-celerity",
+    "name": "Bracers of Celerity",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bracers-of-defense",
+    "name": "Bracers of Defense",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:brazier-of-commanding-fire-elementals",
+    "name": "Brazier of Commanding Fire Elementals",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:breastplate-of-balance",
+    "name": "Breastplate Of Balance",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bridle-of-capturing",
+    "name": "Bridle of Capturing",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:butchers-bib",
+    "name": "Butcher's Bib",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cape-of-the-mountebank",
+    "name": "Cape of the Mountebank",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cauldron-of-plenty",
+    "name": "Cauldron of Plenty",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:censer-of-controlling-air-elementals",
+    "name": "Censer of Controlling Air Elementals",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:charm-of-plant-command",
+    "name": "Charm of Plant Command",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GoS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:chime-of-opening",
+    "name": "Chime of Opening",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:chromatic-rose",
+    "name": "Chromatic Rose",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:claw-of-the-wyrm-rune",
+    "name": "Claw of the Wyrm Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:claws-of-the-umber-hulk",
+    "name": "Claws of the Umber Hulk",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-displacement",
+    "name": "Cloak of Displacement",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-the-bat",
+    "name": "Cloak of the Bat",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:corpse-slayer",
+    "name": "Corpse Slayer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crown-of-the-wrath-bringer",
+    "name": "Crown of the Wrath Bringer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crystal-blade",
+    "name": "Crystal Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cube-of-force",
+    "name": "Cube of Force",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:daerns-instant-fortress",
+    "name": "Daern's Instant Fortress",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dagger-of-blindsight",
+    "name": "Dagger of Blindsight",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dagger-of-venom",
+    "name": "Dagger of Venom",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-oracles",
+    "name": "Deck Of Oracles",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:delvers-claws",
+    "name": "Delver's Claws",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:demon-skin",
+    "name": "Demon Skin",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:devotees-censer",
+    "name": "Devotee's Censer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dimensional-shackles",
+    "name": "Dimensional Shackles",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:docent",
+    "name": "Docent",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dodecahedron-of-doom",
+    "name": "Dodecahedron of Doom",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:donjons-sundering-sphere",
+    "name": "Donjon's Sundering Sphere",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-slayer",
+    "name": "Dragon Slayer",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-wing-bow",
+    "name": "Dragon Wing Bow",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragontooth-dagger",
+    "name": "Dragontooth Dagger",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:duplicitous-manuscript",
+    "name": "Duplicitous Manuscript",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eagle-whistle",
+    "name": "Eagle Whistle",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:elemental-essence-shard",
+    "name": "Elemental Essence Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:elixir-of-health",
+    "name": "Elixir of Health",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:elven-chain",
+    "name": "Elven Chain",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:far-realm-shard",
+    "name": "Far Realm Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fate-dealers-deck",
+    "name": "Fate Dealer's Deck",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:feather-of-diatryma-summoning",
+    "name": "Feather of Diatryma Summoning",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:feywrought-armor",
+    "name": "Feywrought Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:flame-tongue",
+    "name": "Flame Tongue",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:flayer-slayer",
+    "name": "Flayer Slayer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:flying-chariot",
+    "name": "Flying Chariot",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:folding-boat",
+    "name": "Folding Boat",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fulminating-treatise",
+    "name": "Fulminating Treatise",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:galders-bubble-pipe",
+    "name": "Galder's Bubble Pipe",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gamblers-blade",
+    "name": "Gambler's Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gauntlets-of-flaming-fury",
+    "name": "Gauntlets of Flaming Fury",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gavel-of-the-venn-rune",
+    "name": "Gavel of the Venn Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gem-of-seeing",
+    "name": "Gem of Seeing",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ghost-lantern",
+    "name": "Ghost Lantern",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:giant-slayer",
+    "name": "Giant Slayer",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:glamoured-studded-leather",
+    "name": "Glamoured Studded Leather",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:glimmering-moonbow",
+    "name": "Glimmering Moonbow",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gloomwrought-armor",
+    "name": "Gloomwrought Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:glowrune-pigment",
+    "name": "Glowrune Pigment",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:grasping-whip",
+    "name": "Grasping Whip",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gulthias-staff",
+    "name": "Gulthias Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:heart-weavers-primer",
+    "name": "Heart Weaver's Primer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hell-hound-cloak",
+    "name": "Hell Hound Cloak",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-teleportation",
+    "name": "Helm of Teleportation",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-the-gods",
+    "name": "Helm of the Gods",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hewards-handy-haversack",
+    "name": "Heward's Handy Haversack",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hook-of-fishers-delight",
+    "name": "Hook of Fisher's Delight",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horn-of-blasting",
+    "name": "Horn of Blasting",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horn-of-the-endless-maze",
+    "name": "Horn of the Endless Maze",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horn-of-valhalla",
+    "name": "Horn of Valhalla",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horseshoes-of-speed",
+    "name": "Horseshoes of Speed",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:iggwylvs-horn",
+    "name": "Iggwylv's Horn",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ioun-stone",
+    "name": "Ioun Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG, LLK",
+    "rarities": [
+      "Rare",
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:iron-bands-of-bilarro",
+    "name": "Iron Bands of Bilarro",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:kagonesti-forest-shroud",
+    "name": "Kagonesti Forest Shroud",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "D:SDQ",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:knaves-eye-patch",
+    "name": "Knave's Eye Patch",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lash-of-immolation",
+    "name": "Lash of Immolation",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:leather-golem-armor",
+    "name": "Leather Golem Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:libram-of-souls-and-flesh",
+    "name": "Libram of Souls and Flesh",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:loadstone",
+    "name": "Loadstone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:luminous-war-pick",
+    "name": "Luminous War Pick",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lyre-of-building",
+    "name": "Lyre of Building",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mace-of-disruption",
+    "name": "Mace of Disruption",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mace-of-smiting",
+    "name": "Mace of Smiting",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mace-of-terror",
+    "name": "Mace of Terror",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mantle-of-spell-resistance",
+    "name": "Mantle of Spell Resistance",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mimir",
+    "name": "Mimir",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PSAIM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mind-blade",
+    "name": "Mind Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "VGM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mind-lash",
+    "name": "Mind Lash",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "VGM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mirror-of-the-past",
+    "name": "Mirror of the Past",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mizzium-armor",
+    "name": "Mizzium Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mizzium-mortar",
+    "name": "Mizzium Mortar",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:molten-bronze-skin",
+    "name": "Molten Bronze Skin",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:necklace-of-fireballs",
+    "name": "Necklace of Fireballs",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:necklace-of-prayer-beads",
+    "name": "Necklace of Prayer Beads",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:needle-of-mending",
+    "name": "Needle of Mending",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:oil-of-etherealness",
+    "name": "Oil of Etherealness",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:opal-of-the-ild-rune",
+    "name": "Opal of the Ild Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-the-stein-rune",
+    "name": "Orb of the Stein Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:outer-essence-shard",
+    "name": "Outer Essence Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pariahs-shield",
+    "name": "Pariah's Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:periapt-of-proof-against-poison",
+    "name": "Periapt of Proof against Poison",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:piwafwi-of-fire-resistance",
+    "name": "Piwafwi of Fire Resistance",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:planecallers-codex",
+    "name": "Planecaller's Codex",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:portable-hole",
+    "name": "Portable Hole",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-aqueous-form",
+    "name": "Potion of Aqueous Form",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-clairvoyance",
+    "name": "Potion of Clairvoyance",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-diminution",
+    "name": "Potion of Diminution",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-gaseous-form",
+    "name": "Potion of Gaseous Form",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-heroism",
+    "name": "Potion of Heroism",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-invulnerability",
+    "name": "Potion of Invulnerability",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-maximum-power",
+    "name": "Potion of Maximum Power",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-mind-control",
+    "name": "Potion of Mind Control",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-mind-reading",
+    "name": "Potion of Mind Reading",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:professor-orb",
+    "name": "Professor Orb",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:protective-verses",
+    "name": "Protective Verses",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:quaals-feather-token",
+    "name": "Quaal's Feather Token",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:revelers-concertina",
+    "name": "Reveler's Concertina",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-animal-influence",
+    "name": "Ring of Animal Influence",
+    "itemType": "Ring",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-evasion",
+    "name": "Ring of Evasion",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-feather-falling",
+    "name": "Ring of Feather Falling",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-free-action",
+    "name": "Ring of Free Action",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-protection",
+    "name": "Ring of Protection",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-resistance",
+    "name": "Ring of Resistance",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-spell-storing",
+    "name": "Ring of Spell Storing",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-temporal-salvation",
+    "name": "Ring of Temporal Salvation",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-the-ram",
+    "name": "Ring of the Ram",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-x-ray-vision",
+    "name": "Ring of X-Ray Vision",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-eyes",
+    "name": "Robe of Eyes",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-summer",
+    "name": "Robe of Summer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-rulership",
+    "name": "Rod of Rulership",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-the-vonindod",
+    "name": "Rod of the Vonindod",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rogues-mantle",
+    "name": "Rogue's Mantle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rope-of-entanglement",
+    "name": "Rope of Entanglement",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruinous-flail",
+    "name": "Ruinous Flail",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sages-signet",
+    "name": "Sage's Signet",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare",
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:saint-markovias-thighbone",
+    "name": "Saint Markovia's Thighbone",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scissors-of-shadow-snipping",
+    "name": "Scissors of Shadow Snipping",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scorpion-armor",
+    "name": "Scorpion Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scroll-of-protection",
+    "name": "Scroll of Protection",
+    "itemType": "Scroll",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:serpent-s-fang",
+    "name": "Serpent's Fang",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shadowfell-brand-tattoo",
+    "name": "Shadowfell Brand Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shadowfell-shard",
+    "name": "Shadowfell Shard",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shard-of-xeluan",
+    "name": "Shard of Xeluan",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "KGV",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-far-sight",
+    "name": "Shield of Far Sight",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "VGM",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-missile-attraction",
+    "name": "Shield of Missile Attraction",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shrieking-greaves",
+    "name": "Shrieking Greaves",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:siren-song-lyre",
+    "name": "Siren Song Lyre",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spelljamming-helm",
+    "name": "Spelljamming Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SAS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spider-staff",
+    "name": "Spider Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "LMP and PBTSO",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-charming",
+    "name": "Staff of Charming",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-defense",
+    "name": "Staff of Defense",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "LMP and PBTSO",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-healing",
+    "name": "Staff of Healing",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-ruling",
+    "name": "Staff of Ruling",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-swarming-insects",
+    "name": "Staff of Swarming Insects",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-ivory-claw",
+    "name": "Staff of the Ivory Claw",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-rooted-hills",
+    "name": "Staff of the Rooted Hills",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-woodlands",
+    "name": "Staff of the Woodlands",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-withering",
+    "name": "Staff of Withering",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:starshot-crossbow",
+    "name": "Starshot Crossbow",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stone-of-controlling-earth-elementals",
+    "name": "Stone of Controlling Earth Elementals",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stonespeaker-crystal",
+    "name": "Stonespeaker Crystal",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sun-blade",
+    "name": "Sun Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sun-staff",
+    "name": "Sun Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sunforger",
+    "name": "Sunforger",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-life-stealing",
+    "name": "Sword of Life Stealing",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-wounding",
+    "name": "Sword of Wounding",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:teleportation-tablet",
+    "name": "Teleportation Tablet",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tentacle-rod",
+    "name": "Tentacle Rod",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:two-birds-sling",
+    "name": "Two-Birds Sling",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ventilating-lungs",
+    "name": "Ventilating Lungs",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:vicious-weapon",
+    "name": "Vicious Weapon",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:voidwalker-armor",
+    "name": "Voidwalker Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-binding",
+    "name": "Wand of Binding",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-enemy-detection",
+    "name": "Wand of Enemy Detection",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-fear",
+    "name": "Wand of Fear",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-fireballs",
+    "name": "Wand of Fireballs",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-lightning-bolts",
+    "name": "Wand of Lightning Bolts",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-paralysis",
+    "name": "Wand of Paralysis",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-viscid-globs",
+    "name": "Wand of Viscid Globs",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-winter",
+    "name": "Wand of Winter",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-wonder",
+    "name": "Wand of Wonder",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:war-horn-of-valor",
+    "name": "War Horn of Valor",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:warriors-passkey",
+    "name": "Warrior's Passkey",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wayfarers-boots",
+    "name": "Wayfarer's Boots",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:weapon-of-certain-death",
+    "name": "Weapon of Certain Death",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:weird-tank",
+    "name": "Weird Tank",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wings-of-flying",
+    "name": "Wings of Flying",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:woodcutter-s-axe",
+    "name": "Woodcutter's Axe",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:zephyr-armor",
+    "name": "Zephyr Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:abracadabrus",
+    "name": "Abracadabrus",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:absorbing-tattoo",
+    "name": "Absorbing Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amethyst-lodestone",
+    "name": "Amethyst Lodestone",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-the-black-skull",
+    "name": "Amulet of the Black Skull",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:amulet-of-the-planes",
+    "name": "Amulet of the Planes",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:animated-shield",
+    "name": "Animated Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:antimagic-armor",
+    "name": "Antimagic Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:arcane-cannon",
+    "name": "Arcane Cannon",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:arcane-propulsion-arm",
+    "name": "Arcane Propulsion Arm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-safeguarding",
+    "name": "Armor of Safeguarding",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:arrow-of-slaying",
+    "name": "Arrow of Slaying",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bag-of-devouring",
+    "name": "Bag of Devouring",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:baleful-talon",
+    "name": "Baleful Talon",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:battle-standard-of-infernal-power",
+    "name": "Battle Standard of Infernal Power",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blade-of-the-medusa",
+    "name": "Blade of the Medusa",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blast-scepter",
+    "name": "Blast Scepter",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bloodaxe",
+    "name": "Bloodaxe",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bloodseeker-ammunition",
+    "name": "Bloodseeker Ammunition",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bloodshed-blade",
+    "name": "Bloodshed Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bobbing-lily-pad",
+    "name": "Bobbing Lily Pad",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bow-of-melodies",
+    "name": "Bow Of Melodies",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bracelet-of-rock-magic",
+    "name": "Bracelet of Rock Magic",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:candle-of-invocation",
+    "name": "Candle of Invocation",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cape-of-enlargement",
+    "name": "Cape of Enlargement",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:carpet-of-flying",
+    "name": "Carpet of Flying",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cauldron-of-rebirth",
+    "name": "Cauldron of Rebirth",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:chime-of-exile",
+    "name": "Chime of Exile",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "VEOR",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:chronolometer",
+    "name": "Chronolometer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-arachnida",
+    "name": "Cloak of Arachnida",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:clockwork-armor",
+    "name": "Clockwork Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:conch-of-teleportation",
+    "name": "Conch of Teleportation",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:constantoris-portrait",
+    "name": "Constantori's Portrait",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "KGV",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crown-of-whirling-comets",
+    "name": "Crown Of Whirling Comets",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crystal-ball",
+    "name": "Crystal Ball",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare",
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crystalline-chronicle",
+    "name": "Crystalline Chronicle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dancing-sword",
+    "name": "Dancing Sword",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-dimensions",
+    "name": "Deck Of Dimensions",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-wild-cards",
+    "name": "Deck Of Wild Cards",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:demon-armor",
+    "name": "Demon Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:devastation-orb",
+    "name": "Devastation Orb",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dimensional-loop",
+    "name": "Dimensional Loop",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dispelling-stone",
+    "name": "Dispelling Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-scale-mail",
+    "name": "Dragon Scale Mail",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:duskcrusher",
+    "name": "Duskcrusher",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dwarven-plate",
+    "name": "Dwarven Plate",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dwarven-thrower",
+    "name": "Dwarven Thrower",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dyrrns-tentacle-whip",
+    "name": "Dyrrn's Tentacle Whip",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:efreeti-bottle",
+    "name": "Efreeti Bottle",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eldritch-staff",
+    "name": "Eldritch Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:far-gear",
+    "name": "Far Gear",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fate-cutter-shears",
+    "name": "Fate Cutter Shears",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fish-suit",
+    "name": "Fish Suit",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SAS",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:flying-citadel-helm",
+    "name": "Flying Citadel Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "D:SDQ",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fools-blade",
+    "name": "Fool's Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:forcebreaker-weapon",
+    "name": "Forcebreaker Weapon",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:frost-brand",
+    "name": "Frost Brand",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ghost-step-tattoo",
+    "name": "Ghost Step Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hammer-of-runic-focus",
+    "name": "Hammer of Runic Focus",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-brilliance",
+    "name": "Helm of Brilliance",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-devil-command",
+    "name": "Helm of Devil Command",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hewards-hireling-armor",
+    "name": "Heward's Hireling Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horned-ring",
+    "name": "Horned Ring",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horseshoes-of-a-zephyr",
+    "name": "Horseshoes of a Zephyr",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hunters-coat",
+    "name": "Hunter's Coat",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:illusionists-bracers",
+    "name": "Illusionist's Bracers",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ingot-of-the-skold-rune",
+    "name": "Ingot of the Skold Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:kyrzins-ooze",
+    "name": "Kyrzin's Ooze",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:last-stand-armor",
+    "name": "Last Stand Armor",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lifewell-tattoo",
+    "name": "Lifewell Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:living-armor",
+    "name": "Living Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lords-ensemble",
+    "name": "Lord's Ensemble",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lucent-destroyer",
+    "name": "Lucent Destroyer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:manual-of-bodily-health",
+    "name": "Manual of Bodily Health",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:manual-of-gainful-exercise",
+    "name": "Manual of Gainful Exercise",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:manual-of-golems",
+    "name": "Manual of Golems",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:manual-of-quickness-of-action",
+    "name": "Manual of Quickness of Action",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mindblasting-cap",
+    "name": "Mindblasting Cap",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mindguard-crown",
+    "name": "Mindguard Crown",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mirror-of-life-trapping",
+    "name": "Mirror of Life Trapping",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mirror-of-reflected-pasts",
+    "name": "Mirror of Reflected Pasts",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "D:SDQ",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mistral-mantle",
+    "name": "Mistral Mantle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mudslick-tower",
+    "name": "Mudslick Tower",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "PBTSO",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:navigation-orb",
+    "name": "Navigation Orb",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nimbus-coronet",
+    "name": "Nimbus Coronet",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nine-lives-stealer",
+    "name": "Nine Lives Stealer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nolzurs-marvelous-pigments",
+    "name": "Nolzur's Marvelous Pigments",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:oathbow",
+    "name": "Oathbow",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:oil-of-sharpness",
+    "name": "Oil of Sharpness",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-the-veil",
+    "name": "Orb of the Veil",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ornithopter-of-flying",
+    "name": "Ornithopter of Flying",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pennant-of-the-vind-rune",
+    "name": "Pennant of the Vind Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:peregrine-mask",
+    "name": "Peregrine Mask",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:polymorph-blade",
+    "name": "Polymorph Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-flying",
+    "name": "Potion of Flying",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-invisibility",
+    "name": "Potion of Invisibility",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-longevity",
+    "name": "Potion of Longevity",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-possibility",
+    "name": "Potion of Possibility",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-speed",
+    "name": "Potion of Speed",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-vitality",
+    "name": "Potion of Vitality",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:reincarnation-dust",
+    "name": "Reincarnation Dust",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-amity",
+    "name": "Ring of Amity",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-red-fury",
+    "name": "Ring of Red Fury",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-regeneration",
+    "name": "Ring of Regeneration",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-shooting-stars",
+    "name": "Ring of Shooting Stars",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-telekinesis",
+    "name": "Ring of Telekinesis",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-scintillating-colors",
+    "name": "Robe of Scintillating Colors",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-stars",
+    "name": "Robe of Stars",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-absorption",
+    "name": "Rod of Absorption",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-alertness",
+    "name": "Rod of Alertness",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-hellish-flames",
+    "name": "Rod Of Hellish Flames",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-security",
+    "name": "Rod of Security",
+    "itemType": "Rod",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rotor-of-return",
+    "name": "Rotor of Return",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruidium-armor",
+    "name": "Ruidium Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruidium-shield",
+    "name": "Ruidium Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruidium-weapon",
+    "name": "Ruidium Weapon",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sanctum-amulet",
+    "name": "Sanctum Amulet",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sapphire-buckler",
+    "name": "Sapphire Buckler",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scimitar-of-speed",
+    "name": "Scimitar of Speed",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shard-of-the-ise-rune",
+    "name": "Shard of the Ise Rune",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-the-uven-rune",
+    "name": "Shield of the Uven Rune",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:skull-helm",
+    "name": "Skull Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sling-bullets-of-althemone",
+    "name": "Sling Bullets of Althemone",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:speaking-stone",
+    "name": "Speaking Stone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spear-of-backbiting",
+    "name": "Spear of Backbiting",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spellguard-shield",
+    "name": "Spellguard Shield",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-dunamancy",
+    "name": "Staff of Dunamancy",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-fate",
+    "name": "Staff of Fate",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "CM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-fire",
+    "name": "Staff of Fire",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-frost",
+    "name": "Staff of Frost",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-power",
+    "name": "Staff of Power",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-striking",
+    "name": "Staff of Striking",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-thunder-and-lightning",
+    "name": "Staff of Thunder and Lightning",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:steel",
+    "name": "Steel",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stonemaker-war-pick",
+    "name": "Stonemaker War Pick",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sun-pellet",
+    "name": "Sun Pellet",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DPM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-sharpness",
+    "name": "Sword of Sharpness",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-the-paruns",
+    "name": "Sword of the Paruns",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tashas-creeping-keepboat",
+    "name": "Tasha's Creeping Keepboat",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:thunderbuss",
+    "name": "Thunderbuss",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tidecaller-trident",
+    "name": "Tidecaller Trident",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:timepiece-of-travel",
+    "name": "Timepiece of Travel",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tome-of-clear-thought",
+    "name": "Tome of Clear Thought",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tome-of-leadership-and-influence",
+    "name": "Tome of Leadership and Influence",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tome-of-understanding",
+    "name": "Tome of Understanding",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:voyager-staff",
+    "name": "Voyager Staff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-polymorph",
+    "name": "Wand of Polymorph",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:watchful-helm",
+    "name": "Watchful Helm",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "CM",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:weapon-of-thrones-command",
+    "name": "Weapon of Throne's Command",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wheel-of-stars",
+    "name": "Wheel of Stars",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wyrmreaver-gauntlets",
+    "name": "Wyrmreaver Gauntlets",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Very Rare"
+    ]
+  },
+  {
+    "path": "/wondrous-items:apparatus-of-kwalish",
+    "name": "Apparatus of Kwalish",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:armor-of-invulnerability",
+    "name": "Armor of Invulnerability",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:azuredge",
+    "name": "Azuredge",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:belashyrras-beholder-crown",
+    "name": "Belashyrra's Beholder Crown",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "E:RLW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:black-crystal-tablet",
+    "name": "Black Crystal Tablet",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blackrazor",
+    "name": "Blackrazor",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blackstaff",
+    "name": "Blackstaff",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blood-fury-tattoo",
+    "name": "Blood Fury Tattoo",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bookmark",
+    "name": "Bookmark",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cloak-of-invisibility",
+    "name": "Cloak of Invisibility",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:cubic-gate",
+    "name": "Cubic Gate",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:danoths-visor",
+    "name": "Danoth's Visor",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dawnbringer",
+    "name": "Dawnbringer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "OoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-many-more-things",
+    "name": "Deck of Many More Things",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-many-things",
+    "name": "Deck of Many Things",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:deck-of-several-things",
+    "name": "Deck of Several Things",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:defender",
+    "name": "Defender",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragon-mask",
+    "name": "Dragon Mask",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragonlance",
+    "name": "Dragonlance",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "D:SDQ, FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dragonstaff-of-ahghairon",
+    "name": "Dragonstaff of Ahghairon",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:drown",
+    "name": "Drown",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:efreeti-chain",
+    "name": "Efreeti Chain",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:euryales-aegis",
+    "name": "Euryale's Aegis",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fane-eater",
+    "name": "Fane-Eater",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:fedifensor",
+    "name": "Fedifensor",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DPM",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:flail-of-tiamat",
+    "name": "Flail of Tiamat",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gloves-of-soul-catching",
+    "name": "Gloves of Soul Catching",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "CM",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:grimoire-infinitus",
+    "name": "Grimoire Infinitus",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gurts-greataxe",
+    "name": "Gurt's Greataxe",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hammer-of-thunderbolts",
+    "name": "Hammer of Thunderbolts",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hammock-of-worlds",
+    "name": "Hammock of Worlds",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "JRC",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:harp-of-gilded-plenty",
+    "name": "Harp of Gilded Plenty",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hazirawn",
+    "name": "Hazirawn",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-disjunction",
+    "name": "Helm of Disjunction",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "HAT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-the-scavenger",
+    "name": "Helm of the Scavenger",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:heretic",
+    "name": "Heretic",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hide-of-the-feral-guardian",
+    "name": "Hide of the Feral Guardian",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:hither-thither-staff",
+    "name": "Hither-Thither Staff",
+    "itemType": "Staff",
+    "attuned": "-",
+    "sourceCode": "HAT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:holy-avenger",
+    "name": "Holy Avenger",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:holy-symbol-of-ravenkind",
+    "name": "Holy Symbol of Ravenkind",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:horn-of-beckoning-death",
+    "name": "Horn of Beckoning Death",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "HAT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:icon-of-ravenloft",
+    "name": "Icon of Ravenloft",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:infernal-tack",
+    "name": "Infernal Tack",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:infiltrators-key",
+    "name": "Infiltrator's Key",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:iron-flask",
+    "name": "Iron Flask",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ironfang",
+    "name": "Ironfang",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:jesters-mask",
+    "name": "Jester's Mask",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:jewel-of-three-prayers",
+    "name": "Jewel of Three Prayers",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "CR:CN",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:korolnor-scepter",
+    "name": "Korolnor Scepter",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:longbow-of-the-healing-hearth",
+    "name": "Longbow of the Healing Hearth",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lost-crown-of-besilmer",
+    "name": "Lost Crown of Besilmer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:luck-blade",
+    "name": "Luck Blade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:luxon-beacon",
+    "name": "Luxon Beacon",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:matalotok",
+    "name": "Matalotok",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:moonblade",
+    "name": "Moonblade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:murgaxor-s-orb",
+    "name": "Murgaxor's Orb",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "SCC",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nepenthe",
+    "name": "Nepenthe",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "VRGR",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nether-scroll-of-azumar",
+    "name": "Nether Scroll of Azumar",
+    "itemType": "Scroll",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nightbringer",
+    "name": "Nightbringer",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MCV2",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:nightfall-pearl",
+    "name": "Nightfall Pearl",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:obsidian-flint-dragon-plate",
+    "name": "Obsidian Flint Dragon Plate",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-skoraeus",
+    "name": "Orb of Skoraeus",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orcsplitter",
+    "name": "Orcsplitter",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:plate-armor-of-etherealness",
+    "name": "Plate Armor of Etherealness",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:platinum-scarf",
+    "name": "Platinum Scarf",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-dragons-majesty",
+    "name": "Potion of Dragon's Majesty",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:potion-of-giant-size",
+    "name": "Potion of Giant Size",
+    "itemType": "Potion",
+    "attuned": "-",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:powered-armor",
+    "name": "Powered Armor",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "LLK",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:pyxis-of-pandemonium",
+    "name": "Pyxis of Pandemonium",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rakdos-riteknife",
+    "name": "Rakdos Riteknife",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "GGR",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:reapers-scream",
+    "name": "Reaper's Scream",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:red-wizard-blade",
+    "name": "Red Wizard Blade",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "HAT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-djinni-summoning",
+    "name": "Ring of Djinni Summoning",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-elemental-command",
+    "name": "Ring of Elemental Command",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-invisibility",
+    "name": "Ring of Invisibility",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-spell-turning",
+    "name": "Ring of Spell Turning",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-three-wishes",
+    "name": "Ring of Three Wishes",
+    "itemType": "Ring",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:robe-of-the-archmagi",
+    "name": "Robe of the Archmagi",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-lordly-might",
+    "name": "Rod of Lordly Might",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-resurrection",
+    "name": "Rod of Resurrection",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruby-weave-gem",
+    "name": "Ruby Weave Gem",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruinblade",
+    "name": "Ruinblade",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scarab-of-protection",
+    "name": "Scarab of Protection",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scroll-of-tarrasque-summoning",
+    "name": "Scroll of Tarrasque Summoning",
+    "itemType": "Scroll",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:scroll-of-the-comet",
+    "name": "Scroll of the Comet",
+    "itemType": "Scroll",
+    "attuned": "-",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shard-solitaire",
+    "name": "Shard Solitaire",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "KGV",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-the-blazing-dreadnought",
+    "name": "Shield of the Blazing Dreadnought",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-the-hidden-lord",
+    "name": "Shield of the Hidden Lord",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:snicker-snack",
+    "name": "Snicker-Snack",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sovereign-glue",
+    "name": "Sovereign Glue",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spell-bottle",
+    "name": "Spell Bottle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sphere-of-annihilation",
+    "name": "Sphere Of Annihilation",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:spindle-of-fate",
+    "name": "Spindle Of Fate",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-magi",
+    "name": "Staff of the Magi",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stonebreakers-breastplate",
+    "name": "Stonebreaker's Breastplate",
+    "itemType": "Armor",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stormgirdle",
+    "name": "Stormgirdle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sunsword",
+    "name": "Sunsword",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-answering",
+    "name": "Sword of Answering",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-the-planes",
+    "name": "Sword of the Planes",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tablet-of-reawakening",
+    "name": "Tablet of Reawakening",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "HAT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:talarith",
+    "name": "Talarith",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SAS",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:talisman-of-pure-good",
+    "name": "Talisman of Pure Good",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:talisman-of-the-sphere",
+    "name": "Talisman of the Sphere",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:talisman-of-ultimate-evil",
+    "name": "Talisman of Ultimate Evil",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:telescopic-transporter",
+    "name": "Telescopic Transporter",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "BOMT",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tinderstrike",
+    "name": "Tinderstrike",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tome-of-the-stilled-tongue",
+    "name": "Tome of the Stilled Tongue",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:topaz-annihilator",
+    "name": "Topaz Annihilator",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "FTD",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:universal-solvent",
+    "name": "Universal Solvent",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:verminshroud",
+    "name": "Verminshroud",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:vorpal-sword",
+    "name": "Vorpal Sword",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wave",
+    "name": "Wave",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:waythe",
+    "name": "Waythe",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "TYP",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:well-of-many-worlds",
+    "name": "Well of Many Worlds",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:whelm",
+    "name": "Whelm",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:windvane",
+    "name": "Windvane",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "PoA",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:witchlight-vane",
+    "name": "Witchlight Vane",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:witchlight-watch",
+    "name": "Witchlight Watch",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wreath-of-the-prism",
+    "name": "Wreath of the Prism",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ythryn-mythallar",
+    "name": "Ythryn Mythallar",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ID:RF",
+    "rarities": [
+      "Legendary"
+    ]
+  },
+  {
+    "path": "/wondrous-items:adze-of-annam",
+    "name": "Adze of Annam",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:akmon",
+    "name": "Akmon, Hammer of Purphoros",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:axe-of-the-dwarvish-lords",
+    "name": "Axe of the Dwarvish Lords",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:baba-yagas-mortar-and-pestle",
+    "name": "Baba Yaga's Mortar and Pestle",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:bigbys-beneficent-bracelet",
+    "name": "Bigby's Beneficent Bracelet",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blade-of-avernus",
+    "name": "Blade of Avernus",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:blade-of-broken-mirrors",
+    "name": "Blade of Broken Mirrors",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:book-of-exalted-deeds",
+    "name": "Book of Exalted Deeds",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:book-of-vile-darkness",
+    "name": "Book of Vile Darkness",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:book-of-vile-darkness-variant",
+    "name": "Book of Vile Darkness (Variant)",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "KGV",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crook-of-rao",
+    "name": "Crook of Rao",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crown-of-lies",
+    "name": "Crown of Lies",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "VEOR",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:daouds-wondrous-lantern",
+    "name": "Daoud's Wondrous Lantern",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "QIS",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:dekella",
+    "name": "Dekella, Bident of Thassa",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:demonomicon-of-iggwilv",
+    "name": "Demonomicon of Iggwilv",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ephixis",
+    "name": "Ephixis, Bow of Nyela",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:eye-and-hand-of-vecna",
+    "name": "Eye and Hand of Vecna",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:grovelthrash",
+    "name": "Grovelthrash",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:helm-of-perfect-potential",
+    "name": "Helm of Perfect Potential",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "BP:GOG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:iggwilv-s-cauldron",
+    "name": "Iggwilv's Cauldron",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WBW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:khrusor",
+    "name": "Khrusor, Spear of Heliod",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lash-of-shadows",
+    "name": "Lash of Shadows",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:lubas-tarokka-of-souls",
+    "name": "Luba's Tarokka of Souls",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mace-of-the-black-crown",
+    "name": "Mace of the Black Crown",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mastix",
+    "name": "Mastix, Whip of Erebos",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "MOT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mighty-servant-of-leuk-o",
+    "name": "Mighty Servant of Leuk-o",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orb-of-dragonkind",
+    "name": "Orb of Dragonkind",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orrery-of-the-wanderer",
+    "name": "Orrery Of The Wanderer",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "AI",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ring-of-winter",
+    "name": "Ring of Winter",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:rod-of-seven-parts",
+    "name": "Rod of Seven Parts",
+    "itemType": "Rod",
+    "attuned": "Attuned",
+    "sourceCode": "VEOR",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruins-wake",
+    "name": "Ruin's Wake",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:ruinstone",
+    "name": "Ruinstone",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DC",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:silken-spite",
+    "name": "Silken Spite",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:staff-of-the-forgotten-one",
+    "name": "Staff of the Forgotten One",
+    "itemType": "Staff",
+    "attuned": "Attuned",
+    "sourceCode": "ToA",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stone-of-golorr",
+    "name": "Stone of Golorr",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "WDH",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-kas",
+    "name": "Sword of Kas",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:sword-of-zariel",
+    "name": "Sword of Zariel",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "BG:DA",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:teeth-of-dahlver-nar",
+    "name": "Teeth of Dahlver-Nar",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "TCE",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:the-bloody-end",
+    "name": "The Bloody End",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:the-infernal-machine-of-lum-the-mad",
+    "name": "The Infernal Machine Of Lum The Mad",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "IMR",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wand-of-orcus",
+    "name": "Wand of Orcus",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "DMG",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:will-of-the-talon",
+    "name": "Will of the Talon",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "EGW",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:wyrmskull-throne",
+    "name": "Wyrmskull Throne",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "SKT",
+    "rarities": [
+      "Artifact"
+    ]
+  },
+  {
+    "path": "/wondrous-items:draakhorn",
+    "name": "Draakhorn",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "RoT",
+    "rarities": [
+      "Unique"
+    ]
+  },
+  {
+    "path": "/wondrous-items:gnomengarde-grenade",
+    "name": "Gnomengarde Grenade",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "DC",
+    "rarities": [
+      "Unique"
+    ]
+  },
+  {
+    "path": "/wondrous-items:mask-of-the-dragon-queen",
+    "name": "Mask of the Dragon Queen",
+    "itemType": "Wondrous Item",
+    "attuned": "Attuned",
+    "sourceCode": "ToD",
+    "rarities": [
+      "Unique"
+    ]
+  },
+  {
+    "path": "/wondrous-items:crusaders-shortsword",
+    "name": "Crusader's Shortsword",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:orcus-figurine",
+    "name": "Orcus Figurine",
+    "itemType": "Wondrous Item",
+    "attuned": "-",
+    "sourceCode": "CM",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:radiance",
+    "name": "Radiance",
+    "itemType": "Wand",
+    "attuned": "Attuned",
+    "sourceCode": "CM",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:shield-of-the-silver-dragon",
+    "name": "Shield of the Silver Dragon",
+    "itemType": "Armor",
+    "attuned": "-",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:stonkys-ring",
+    "name": "Stonky's Ring",
+    "itemType": "Ring",
+    "attuned": "Attuned",
+    "sourceCode": "CM",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:tearulai",
+    "name": "Tearulai",
+    "itemType": "Weapon",
+    "attuned": "Attuned",
+    "sourceCode": "WDMM",
+    "rarities": [
+      "Unknown"
+    ]
+  },
+  {
+    "path": "/wondrous-items:yester-hill-axe",
+    "name": "Yester Hill Axe",
+    "itemType": "Weapon",
+    "attuned": "-",
+    "sourceCode": "CoS",
+    "rarities": [
+      "Unknown"
+    ]
+  }
+]

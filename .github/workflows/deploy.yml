@@ -134,6 +134,12 @@ jobs:
           THEME_TEST_URL: http://127.0.0.1:4173/DnD-App/
           THEME_TEST_PRODUCTION: '1'
         run: npm run test:themes
+      - name: Browser magic item and offline checks
+        timeout-minutes: 3
+        env:
+          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          MAGIC_ITEM_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:magic-items
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4

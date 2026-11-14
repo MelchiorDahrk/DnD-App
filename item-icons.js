@@ -11,7 +11,7 @@ export function itemIconMarkup(item, fallbackName) {
 
 /** Use the same named/base-weapon artwork on sheets, dialogs and attack VFX. */
 export function attackIconMarkup(attack, fallbackName) {
-  const artwork = equipmentIconURL(attack) ? attack : attackWeapon(attack) || attack;
+  const artwork = validItemIconKey(attack.iconKey) ? attack : attackWeapon(attack) || attack;
   return itemIconMarkup({...artwork,category:'Weapon'},fallbackName || (artwork.family?.endsWith('ranged')?'bow':'sword'));
 }
 

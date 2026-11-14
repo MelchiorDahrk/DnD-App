@@ -1,6 +1,8 @@
 // Explicit equipment names, never inventory IDs (itemFromEquipment generates those).
 // Re-render after editing: npm run build:item-icons (build:portraits packs new parts).
 // Every shipped item/action is mapped; custom entries can choose any library icon.
+import {MAGIC_ITEM_ICON_NAMES} from './magic-item-icon-names.js';
+
 export const EQUIPMENT_ICONS = {
   longsword: {part:'98370',color:71,view:{yaw:90},names:['Longsword']},
   shortsword: {part:'3847',color:71,view:{yaw:90},names:['Shortsword']},
@@ -147,6 +149,33 @@ export const CURRENCY_ICONS = {
 // Found by searching official LDraw descriptions/!KEYWORDS for sword, axe,
 // spear, shield, helmet, wand, crystal, food, container, lantern and tool.
 export const EXTRA_ITEM_ICONS = {
+  amulet:{part:'99250',color:297,label:'Amulet and medallion',group:'Magic & treasure',keywords:'amulet necklace pendant periapt talisman brooch medal'},
+  belt:{part:'27145',color:6,label:'Magic belt',group:'Magic & treasure',keywords:'utility belt giant strength dwarvenkind',view:{yaw:-20,pitch:15}},
+  broom:{part:'4332',color:6,label:'Flying broom',group:'Magic & treasure',keywords:'broom sweeping flying baba yaga',view:{yaw:90}},
+  goggles:{part:'30162',color:0,label:'Magic goggles',group:'Magic & treasure',keywords:'goggles binoculars eyes lenses night',view:{yaw:0,pitch:15}},
+  wings:{part:'10183',color:15,label:'Wings of flying',group:'Magic & treasure',keywords:'fairy wings flight feather'},
+  bat:{part:'30103',color:0,label:'Bat',group:'Animals & travel',keywords:'bat cloak flying',view:{yaw:0,pitch:15}},
+  hourglass:{part:'23945p01',color:297,label:'Magic hourglass',group:'Magic & treasure',keywords:'time hourglass sundial chronolometer'},
+  statuette:{part:'90398',color:297,label:'Wondrous figurine',group:'Magic & treasure',keywords:'statuette figurine idol servant golem'},
+  crystalball:{parts:[{id:'3941',color:297,at:[0,18,0]},{id:'33176',color:43,at:[0,18,0]}],label:'Crystal ball on stand',group:'Magic & treasure',keywords:'crystal ball scrying orb divination',view:{yaw:-20,pitch:10}},
+  cauldron:{part:'4341',color:0,label:'Magic cauldron',group:'Magic & treasure',keywords:'cauldron rebirth plenty censer brazier',view:{yaw:-25,pitch:20}},
+  magicbowl:{part:'34172',color:43,label:'Elemental water bowl',group:'Magic & treasure',keywords:'bowl water elemental',view:{yaw:-25,pitch:25}},
+  pearl:{part:'32474',color:15,label:'Pearl',group:'Magic & treasure',keywords:'pearl power nightfall',view:{yaw:0,pitch:15}},
+  tattoo:{parts:[{id:'3068bp40',color:19,m:[1,0,0,0,0,-1,0,1,0]},{id:'87989',color:71,at:[36,0,0]}],label:'Magic tattoo needle',group:'Magic & treasure',keywords:'tattoo needle ink spellwrought barrier',view:{yaw:0,pitch:0}},
+  magiccarpet:{parts:[{id:'3032',color:4},{id:'3068bp40',color:19,at:[0,-8,-20]},{id:'3068bp40',color:19,at:[0,-8,20]}],label:'Flying carpet',group:'Magic & treasure',keywords:'carpet flying rug tapestry',view:{yaw:-20,pitch:65}},
+  crystalstaff:{parts:[{id:'95049',color:6},{id:'30153',color:43,at:[0,-43,0]}],label:'Crystal-tipped staff',group:'Magic & treasure',keywords:'staff magic power frost wizard'},
+  flamingblade:{parts:[{id:'98370',color:71},{id:'6126a',color:57,at:[0,-28,0],m:[0,-1,0,0,0,-1,1,0,0]}],label:'Flaming sword',group:'Weapons',keywords:'flame tongue fire burning blade',view:{yaw:90}},
+  frostblade:{part:'98370',color:43,label:'Frost sword',group:'Weapons',keywords:'frost brand ice blue blade',view:{yaw:90}},
+  sunblade:{part:'98370',color:46,label:'Sun blade',group:'Weapons',keywords:'sun blade sunsword holy avenger radiant',view:{yaw:90}},
+  snake:{part:'30115',color:2,label:'Serpent',group:'Animals & travel',keywords:'snake staff python adder',view:{yaw:0,pitch:75}},
+  annihilation:{part:'32474',color:0,label:'Sphere of annihilation',group:'Magic & treasure',keywords:'sphere annihilation black orb',view:{yaw:0,pitch:15}},
+  wingedboots:{parts:[{id:'3816',color:6,at:[-10,0,0]},{id:'3817',color:6,at:[10,0,0]},{id:'87693',color:15,at:[-24,20,-2],m:[0,1,0,0,0,-1,1,0,0]},{id:'87693',color:15,at:[24,20,-2],m:[0,-1,0,0,0,-1,1,0,0]}],label:'Winged boots',group:'Armor & shields',keywords:'boots flying wings',view:{yaw:-15,pitch:10}},
+  spiderstaff:{parts:[{id:'95049',color:71},{id:'30238',color:0,at:[0,-45,0],m:[1,0,0,0,0,-1,0,1,0]}],label:'Spider staff',group:'Weapons',keywords:'staff spider drow arachnid'},
+  magicring:{part:'11010',color:297,label:'Magic ring',group:'Magic & treasure',keywords:'ring band signet attunement',view:{pitch:70}},
+  cloak:{part:'4524',color:2,label:'Magic cloak',group:'Armor & shields',keywords:'cape mantle robe protection'},
+  boots:{parts:[{id:'3816',color:0,at:[-10,0,0]},{id:'3817',color:0,at:[10,0,0]}],label:'Magic boots',group:'Armor & shields',keywords:'boots shoes slippers walking flying',view:{yaw:-20,pitch:10}},
+  gloves:{parts:[{id:'3820',color:6,at:[-12,0,0]},{id:'3820',color:6,at:[12,0,0]}],label:'Magic gloves',group:'Armor & shields',keywords:'gloves gauntlets bracers hands'},
+  wizardhat:{part:'6131',color:1,label:'Wizard hat',group:'Magic & treasure',keywords:'hat wizardry disguise vermin'},
   uruksword:{part:'10050',color:72,label:'Orc sword',group:'Weapons',keywords:'uruk hai cleaver blade',view:{yaw:90}},
   curvedsword:{part:'10053',color:71,label:'Curved sword',group:'Weapons',keywords:'saber blade',view:{yaw:90}},
   doubleblade:{part:'11103',color:71,label:'Double blade',group:'Weapons',keywords:'sword twin',view:{yaw:90}},
@@ -294,8 +323,11 @@ export const ITEM_ICON_LIBRARY = Object.entries(LDRAW_ICONS).map(([key,entry]) =
 
 export const validItemIconKey = key => typeof key==='string' && Object.hasOwn(LDRAW_ICONS,key);
 
-const byName = new Map(Object.entries({...EQUIPMENT_ICONS,...ACTION_ICONS}).flatMap(([key,entry]) =>
-  entry.names.map(name => [normalizeEquipmentName(name),key])));
+const byName = new Map([
+  ...MAGIC_ITEM_ICON_NAMES.map(([name,key])=>[normalizeEquipmentName(name),key]),
+  ...Object.entries({...EQUIPMENT_ICONS,...ACTION_ICONS}).flatMap(([key,entry]) =>
+    entry.names.map(name => [normalizeEquipmentName(name),key]))
+]);
 
 export function equipmentIconURL(item) {
   const key = validItemIconKey(item?.iconKey) ? item.iconKey : byName.get(normalizeEquipmentName(item?.name));

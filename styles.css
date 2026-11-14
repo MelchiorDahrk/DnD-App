@@ -55,6 +55,14 @@ dialog{border:1px solid var(--border-subtle);background:var(--paper);border-radi
 .character-choice .custom-choice{margin-top:12px}.custom-choice[hidden]{display:none}
 .form-grid>.catalog-preview.full{grid-column:1/-1;margin-top:0}
 .catalog-browser{margin-bottom:24px}.catalog-browser .catalog-preview{min-height:65px}
+.catalog-browser [hidden]{display:none!important}
+.catalog-item-art{float:right;width:72px;height:72px;margin:0 0 12px 12px}
+.catalog-item-art .equipment-icon{width:72px;height:72px}
+.catalog-rules{white-space:pre-line;clear:both}
+.catalog-table-scroll{max-width:100%;overflow-x:auto;margin:12px 0;border:1px solid var(--border-subtle);border-radius:6px;clear:both}
+.catalog-table-scroll table{width:100%;border-collapse:collapse;font-size:11px;text-align:left}
+.catalog-table-scroll th,.catalog-table-scroll td{padding:8px 10px;border-bottom:1px solid var(--border-subtle);min-width:70px;vertical-align:top}
+.catalog-table-scroll th{background:var(--surface-raised);color:var(--text-primary)}
 .inventory-stats{white-space:pre-line;overflow-wrap:anywhere;font-size:11px;line-height:1.7;color:var(--text-secondary);margin:10px 0 0;max-width:620px}
 @media(max-width:760px){.catalog-picker{padding:14px}.catalog-picker .form-grid,.catalog-browser .form-grid{grid-template-columns:minmax(0,1fr)}.catalog-preview{padding:12px;font-size:12px}.catalog-preview dl>div{grid-template-columns:minmax(78px,1fr) minmax(0,2fr);gap:8px}.catalog-preview dt{font-size:10px}.inventory-stats{font-size:11px}}
 @media(max-width:760px){.sheet-copy dt{font-size:11px}.hero-player{font-size:9px}.combat-notes{padding:13px 18px}}

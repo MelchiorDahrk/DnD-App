@@ -1,6 +1,6 @@
 # Equipment and character option catalog
 
-The catalog follows the app’s 2024 rules scope. It is bundled with the static app, included in the build and offline cache, and does not need a network request to browse or fill a preset.
+The catalog uses 2024 rules for shared items and also includes earlier-only magic items. It is bundled with the static app, included in the build and offline cache, and does not need a network request to browse or fill a preset.
 
 Rules links prefer [the 2024 Wikidot wiki](https://dnd2024.wikidot.com/) and [the earlier 5e wiki](https://dnd5e.wikidot.com/) according to each option’s edition. Feats and spells open their individual pages, including the selected feat during level-up. Known older D&D Beyond rules links in saved characters resolve to matching wiki references when displayed; backups and custom URLs are preserved. The free publisher Basic Rules remain the fallback for general rules without a wiki page.
 
@@ -10,7 +10,7 @@ Rules links prefer [the 2024 Wikidot wiki](https://dnd2024.wikidot.com/) and [th
 
 | Dropdown | Included data |
 | --- | --- |
-| Equipment | 207 entries: 38 weapons; 13 armor/shields; adventuring supplies and spellbook; 7 equipment packs; 23 tools/kits; 10 instruments; 4 gaming sets; 5 ammunition bundles; 11 focuses; 9 tack/drawn-vehicle entries; 8 mounts; 7 ships/airships |
+| Equipment | 1,229 presets: 503 current magic items, 502 earlier-only items, 18 potency choices, and basic equipment (sharing Potion of Healing). Basic coverage: 38 weapons; 13 armor/shields; adventuring supplies and spellbook; 7 equipment packs; 23 tools/kits; 10 instruments; 4 gaming sets; 5 ammunition bundles; 11 focuses; 9 tack/drawn-vehicle entries; 8 mounts; 7 ships/airships |
 | Class | 12 core classes and supplemental Artificer; hit die, primary abilities, saves, armor/weapon training, skill choices, level 1 feature summary |
 | Species/race | 10 core species plus Elf, Gnome, and Tiefling lineage variants; size, speed, senses, trait summary |
 | Background | All 16 core backgrounds; ability choices, skill/tool proficiencies, Origin feat |
@@ -19,6 +19,8 @@ Rules links prefer [the 2024 Wikidot wiki](https://dnd2024.wikidot.com/) and [th
 | Features & resources | 544 presets: 183 class entries, 127 subclass references/features, 72 species/lineage traits, 77 feat options (75 core feats with three Magic Initiate lists), 20 maneuvers, 10 Metamagic options, 28 invocations, 23 earlier feats, and 4 custom templates |
 
 The equipment editor has a type dropdown, text search, and grouped item dropdown. The attack editor has a searchable weapon dropdown. The feature editor has a searchable, categorized feature/resource catalog. The compendium also exposes the full feature catalog.
+
+See [magic-item coverage, rules stats, artwork, and regeneration](magic-items.md) for both wiki catalogs and the 2024 revision precedence rules.
 
 ## Feature and resource selection
 
