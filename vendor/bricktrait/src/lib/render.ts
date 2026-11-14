@@ -1,8 +1,11 @@
 // Turns a portrait into pixels: owns the stage and the current figure model.
 import type { Box3 } from 'three';
 import { library, placements, type Figure } from './ldraw';
-import { Stage, type View } from './scene';
+import type { View } from './scene';
+import { PortraitStage } from './portrait-scene.ts';
 import { compose, type Style } from './compose';
+import { disposePortraitModel, preparePortraitModel } from './materials.ts';
+import type { PortraitTheme } from './lighting.ts';
 
 // Retro mode renders at about a third of the size and lets the upscale soften it
 const RETRO_SCALE = 0.3;
@@ -10,11 +13,18 @@ const RETRO_SCALE = 0.3;
 export type ImageFormat = 'png' | 'webp' | 'jpeg';
 
 export class PortraitRenderer {
-	private stage: Stage | null = null;
+	private stage: PortraitStage | null = null;
 	private focus: Box3 | null = null;
 	private body: Box3 | null = null;
 	private key = '';
 	private version = 0;
+	private theme: PortraitTheme = 'light';
+
+	setTheme(theme: PortraitTheme) {
+		if (theme === this.theme) return;
+		this.theme = theme;
+		this.stage?.setTheme(theme);
+	}
 
 	/** Rebuilds the model if the figure changed. Resolves false if a newer call won. */
 	async update(figure: Figure) {
@@ -26,9 +36,14 @@ export class PortraitRenderer {
 		const model = await library.build(
 			placements(figure, find(figure.torso.id), find(figure.head.id), find(figure.legs.id))
 		);
-		if (version !== this.version) return false;
-		this.stage ??= new Stage();
+		if (version !== this.version) {
+			disposePortraitModel(model);
+			return false;
+		}
+		preparePortraitModel(model, library.catalog);
+		this.stage ??= new PortraitStage();
 		this.stage.setModel(model);
+		this.stage.setTheme(this.theme);
 		const names = [figure.head.id, figure.headgear.id].filter(Boolean).map((id) => `${id}.dat`);
 		this.focus = this.stage.box(names);
 		this.body = this.stage.box();
@@ -57,6 +72,14 @@ export class PortraitRenderer {
 			ctx.drawImage(canvas, 0, 0);
 		}
 		return new Promise<Blob | null>((r) => out.toBlob(r, `image/${format}`, 0.92));
+	}
+
+	dispose() {
+		this.version++;
+		this.stage?.dispose();
+		this.stage = null;
+		this.focus = this.body = null;
+		this.key = '';
 	}
 }
 

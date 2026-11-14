@@ -332,7 +332,7 @@
 	input[type='search'],
 	select {
 		height: 32px;
-		background: rgba(0, 0, 0, 0.35);
+		background: var(--sunk);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-sm);
 		color: var(--ink);
@@ -399,7 +399,7 @@
 		gap: 3px;
 		padding: 3px;
 		border-radius: var(--radius-sm);
-		background: rgba(0, 0, 0, 0.35);
+		background: var(--sunk);
 		border: 1px solid var(--line);
 	}
 
@@ -420,12 +420,12 @@
 	}
 
 	.views button:hover {
-		color: #ffffff;
+		color: var(--ink);
 	}
 
 	.views button[aria-pressed='true'] {
 		background: var(--card-hover);
-		color: #ffffff;
+		color: var(--ink);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 	}
 
@@ -474,7 +474,7 @@
 		padding: 0 11px;
 		border: 1px solid var(--line);
 		border-radius: 14px;
-		background: rgba(255, 255, 255, 0.03);
+		background: color-mix(in srgb, var(--ink) 3%, transparent);
 		color: var(--ink-2);
 		font-weight: 600;
 		font-size: 0.78rem;
@@ -484,12 +484,12 @@
 	.kinds button:hover {
 		border-color: var(--line-focus);
 		color: var(--ink);
-		background: rgba(255, 255, 255, 0.06);
+		background: color-mix(in srgb, var(--ink) 6%, transparent);
 	}
 
 	.kinds button[aria-pressed='true'] {
-		border-color: rgba(255, 208, 0, 0.4);
-		background: rgba(255, 208, 0, 0.12);
+		border-color: color-mix(in srgb, var(--yellow) 40%, transparent);
+		background: color-mix(in srgb, var(--yellow) 12%, transparent);
 		color: var(--yellow);
 	}
 
@@ -556,7 +556,7 @@
 	}
 
 	.selected .pick {
-		background: rgba(255, 208, 0, 0.08);
+		background: color-mix(in srgb, var(--yellow) 8%, transparent);
 		border-color: var(--yellow);
 		box-shadow:
 			0 0 0 1px var(--yellow),
@@ -590,7 +590,7 @@
 	}
 
 	.selected .name {
-		color: #ffffff;
+		color: var(--ink);
 		font-weight: 700;
 	}
 
@@ -603,8 +603,8 @@
 		padding: 0;
 		border: 0;
 		border-radius: 50%;
-		background: rgba(0, 0, 0, 0.4);
-		color: rgba(255, 255, 255, 0.3);
+		background: var(--sunk);
+		color: var(--muted);
 		font-size: 0.95rem;
 		line-height: 1;
 		opacity: 0;
@@ -629,13 +629,13 @@
 	}
 
 	.star:hover {
-		color: #ffffff;
+		color: var(--ink);
 		transform: scale(1.15);
 	}
 
 	.star.on {
 		color: var(--yellow);
-		background: rgba(0, 0, 0, 0.6);
+		background: var(--sunk);
 		text-shadow: 0 0 8px var(--yellow-glow);
 	}
 

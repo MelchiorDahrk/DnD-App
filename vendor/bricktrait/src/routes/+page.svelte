@@ -12,6 +12,7 @@
 		type Pose
 	} from '#lib/ldraw.ts';
 	import { MIN_ZOOM } from '#lib/scene.ts';
+	import { appearance, applyAppearance } from '#lib/appearance.svelte.ts';
 	import { renderer, PortraitRenderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
 	import { RING_PRESETS, setBackdropImage, transparentStyle } from '#lib/compose.ts';
 	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
@@ -99,6 +100,7 @@
 			const snapshot = $state.snapshot(portrait);
 			const figure = applyPortraitSelections(snapshot.figure, selections, [...selectable, standard], colors.filter(c => !c.alpha));
 			photoPreview ??= new PortraitRenderer();
+			photoPreview.setTheme(appearance.theme);
 			await photoPreview.update(figure);
 			const blob = await photoPreview.image(256, snapshot.view, transparentStyle(snapshot.style), 'webp');
 			if (!blob) throw new Error('Could not render the reviewed choices.');
@@ -124,6 +126,7 @@
 			const snapshot = $state.snapshot(portrait);
 			snapshot.style = transparentStyle(snapshot.style);
 			if (!await renderer.update(snapshot.figure)) throw new Error('The figure changed. Try saving again.');
+			renderer.setTheme(appearance.theme);
 			const blob = await renderer.image(256, snapshot.view, snapshot.style, 'webp');
 			if (!blob) throw new Error('Could not render this portrait. Please try again.');
 			const image = await new Promise<string>((resolve, reject) => {
@@ -142,8 +145,19 @@
 	}
 
 	onMount(() => {
+		const media = window.matchMedia('(prefers-color-scheme: dark)');
+		const followSystem = () => {
+			if (embedded) return;
+			let preference = 'system';
+			try { preference = localStorage.getItem('questlog.appearance') || 'system'; } catch { /* Private browsing. */ }
+			applyAppearance(preference === 'light' || preference === 'dark' ? preference : media.matches ? 'dark' : 'light');
+		};
+		followSystem();
+		media.addEventListener('change', followSystem);
+		window.addEventListener('storage', followSystem);
 		function receive(event: MessageEvent) {
 			if (event.origin !== location.origin || event.source !== window.parent || event.data?.session !== session) return;
+			if (event.data.type === 'questlog:portrait-init' || event.data.type === 'questlog:portrait-theme') applyAppearance(event.data.theme);
 			if (event.data.type === 'questlog:portrait-init' && event.data.design) {
 				const design = structuredClone(event.data.design);
 				design.style = transparentStyle(design.style);
@@ -165,7 +179,13 @@
 		}
 		window.addEventListener('message', receive);
 		if (embedded) send('questlog:portrait-ready');
-		return () => window.removeEventListener('message', receive);
+		return () => {
+			window.removeEventListener('message', receive);
+			media.removeEventListener('change', followSystem);
+			window.removeEventListener('storage', followSystem);
+			renderer.dispose();
+			photoPreview?.dispose();
+		};
 	});
 
 	$effect(() => {
@@ -993,7 +1013,7 @@
 		font-weight: 850;
 		font-size: 1.4rem;
 		letter-spacing: -0.04em;
-		color: #ffffff;
+		color: var(--ink);
 	}
 
 	.pro-tag {
@@ -1002,9 +1022,9 @@
 		letter-spacing: 0.12em;
 		padding: 2px 6px;
 		border-radius: 4px;
-		background: rgba(255, 208, 0, 0.16);
+		background: color-mix(in srgb, var(--yellow) 16%, transparent);
 		color: var(--yellow);
-		border: 1px solid rgba(255, 208, 0, 0.3);
+		border: 1px solid color-mix(in srgb, var(--yellow) 30%, transparent);
 	}
 
 	.tagline {
@@ -1125,16 +1145,16 @@
 		width: 38px;
 		height: 38px;
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.14);
+		border: 1px solid var(--line);
 		border-radius: 50%;
-		background: rgba(15, 18, 28, 0.7);
-		color: #ffffff;
+		background: var(--card);
+		color: var(--ink);
 		backdrop-filter: blur(12px);
 		box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 		transition: all 0.16s cubic-bezier(0.16, 1, 0.3, 1);
 	}
 	.chip:hover:not(:disabled) {
-		background: rgba(30, 36, 56, 0.95);
+		background: var(--card-hover);
 		border-color: rgba(255, 255, 255, 0.3);
 		transform: translateY(-2px) scale(1.05);
 		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
@@ -1148,8 +1168,8 @@
 		text-align: center;
 		font-size: 0.75rem;
 		color: var(--muted);
-		border-top: 1px solid rgba(255, 255, 255, 0.05);
-		background: rgba(0, 0, 0, 0.2);
+		border-top: 1px solid var(--line);
+		background: var(--sunk);
 	}
 
 	.export {
@@ -1246,7 +1266,7 @@
 		display: flex;
 		padding: 4px 6px;
 		border-bottom: 1px solid var(--line);
-		background: rgba(0, 0, 0, 0.25);
+		background: var(--sunk);
 		gap: 4px;
 	}
 	.modes button {
@@ -1265,11 +1285,11 @@
 		transition: all 0.15s ease;
 	}
 	.modes button:hover {
-		color: #ffffff;
-		background: rgba(255, 255, 255, 0.05);
+		color: var(--ink);
+		background: color-mix(in srgb, var(--ink) 5%, transparent);
 	}
 	.modes button[aria-selected='true'] {
-		color: #ffffff;
+		color: var(--ink);
 		background: var(--card-hover);
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 	}
@@ -1322,7 +1342,7 @@
 		gap: 8px 14px;
 		padding: 8px 12px;
 		border-radius: var(--radius-sm);
-		background: rgba(0, 0, 0, 0.25);
+		background: var(--sunk);
 		border: 1px solid var(--line);
 		min-height: 40px;
 	}
@@ -1336,7 +1356,7 @@
 	.badge {
 		padding: 2px 8px;
 		border-radius: 4px;
-		background: rgba(255, 208, 0, 0.12);
+		background: color-mix(in srgb, var(--yellow) 12%, transparent);
 		color: var(--yellow);
 		font-size: 0.68rem;
 		font-weight: 700;
@@ -1344,7 +1364,7 @@
 	.current strong {
 		font-size: 0.94rem;
 		letter-spacing: -0.01em;
-		color: #ffffff;
+		color: var(--ink);
 	}
 	.current .none {
 		color: var(--muted);
@@ -1399,7 +1419,7 @@
 		padding: 0 6px;
 		border: 1px solid var(--line);
 		border-radius: 5px;
-		background: rgba(0, 0, 0, 0.3);
+		background: var(--sunk);
 		text-align: right;
 		color: var(--ink);
 		font-size: 0.82rem;
@@ -1425,7 +1445,7 @@
 		padding: 14px 16px 16px;
 		border: 1px solid var(--line);
 		border-radius: var(--radius-md);
-		background: rgba(0, 0, 0, 0.2);
+		background: var(--sunk);
 	}
 	.group legend {
 		padding: 0 8px;
@@ -1456,8 +1476,8 @@
 		box-shadow: var(--shadow-sm);
 	}
 	.preset:hover {
-		border-color: rgba(255, 208, 0, 0.5);
-		background: rgba(255, 208, 0, 0.1);
+		border-color: color-mix(in srgb, var(--yellow) 50%, transparent);
+		background: color-mix(in srgb, var(--yellow) 10%, transparent);
 		color: var(--yellow);
 		transform: translateY(-1px);
 	}
@@ -1498,7 +1518,7 @@
 		gap: 2px;
 		border: 1px solid var(--line);
 		border-radius: var(--radius-sm);
-		background: rgba(0, 0, 0, 0.4);
+		background: var(--sunk);
 		padding: 3px;
 	}
 	.seg button {
@@ -1516,12 +1536,12 @@
 		transition: all 0.14s ease;
 	}
 	.seg button:hover:not([aria-pressed='true']) {
-		color: #ffffff;
-		background: rgba(255, 255, 255, 0.05);
+		color: var(--ink);
+		background: color-mix(in srgb, var(--ink) 5%, transparent);
 	}
 	.seg button[aria-pressed='true'] {
 		background: var(--card-hover);
-		color: #ffffff;
+		color: var(--ink);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 	}
 	.seg.small button {
@@ -1541,7 +1561,7 @@
 		padding: 0;
 		border: 4px solid var(--c);
 		border-radius: 50%;
-		background: #0b0d14;
+		background: var(--card);
 		cursor: pointer;
 		transition: transform 0.12s ease;
 	}
@@ -1663,7 +1683,7 @@
 		height: 8px;
 		border: 1px solid var(--line);
 		border-radius: 4px;
-		background: rgba(0, 0, 0, 0.4);
+		background: var(--sunk);
 		overflow: hidden;
 	}
 	.bar span {
@@ -1791,7 +1811,7 @@
 			gap: 10px;
 			padding: 6px 12px;
 			border-radius: var(--radius-sm);
-			background: rgba(0, 0, 0, 0.25);
+			background: var(--sunk);
 			border: 1px solid var(--line);
 			min-height: 38px;
 			flex: none;
@@ -1926,7 +1946,7 @@
 		.menu summary {
 			width: 64px;
 			height: 32px;
-			border-left: 1px solid rgba(255, 255, 255, 0.2);
+			border-left: 1px solid var(--line);
 			border-top: 0;
 			border-radius: 0 0 var(--radius-sm) var(--radius-sm);
 		}

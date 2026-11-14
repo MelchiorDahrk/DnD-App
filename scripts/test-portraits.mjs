@@ -92,8 +92,32 @@ try {
   assert.match(attribution[2],/Creative Commons/i);
   assert.deepEqual((await imagePixels(new URL('assets/portrait-adventurer.webp',base).href)).corners,[0,0,0,0],'Bundled starter portrait must be transparent');
   pass();
-  startCheck('bundled editor thumbnails and missing-asset WebGL fallback');
+  startCheck('embedded portrait editor loads');
   let frame=await open();
+  pass();
+  startCheck('portrait studio follows site appearance and redraws lighting without changing the design');
+  const preference=await page.evaluate(()=>window.QuestlogTheme.preference);
+  await page.evaluate(()=>window.QuestlogTheme.set('light'));
+  await frame.waitForFunction(()=>document.documentElement.dataset.theme==='light');
+  const daylight=await frame.$eval('.preview canvas',canvas=>canvas.toDataURL());
+  const lightPanel=await frame.$eval('.panel',el=>getComputedStyle(el).getPropertyValue('--card').trim());
+  assert.equal(lightPanel,'#faf5e9');
+  const beforeThemeChange=await state();
+  await page.evaluate(()=>window.QuestlogTheme.set('dark'));
+  await frame.waitForFunction(before=>document.documentElement.dataset.theme==='dark'&&document.querySelector('.preview canvas').toDataURL()!==before,{},daylight);
+  assert.equal(await frame.$eval('.panel',el=>getComputedStyle(el).getPropertyValue('--card').trim()),'#222c27');
+  assert.deepEqual(await state(),beforeThemeChange,'Changing lighting does not mutate saved characters');
+  const night=await frame.$eval('.preview canvas',canvas=>canvas.toDataURL());
+  assert.deepEqual((await imagePixels(night)).corners,[0,0,0,0]);
+  // Invalid messages cannot override the theme of a session-bound editor.
+  await page.evaluate(()=>document.querySelector('.portrait-editor').contentWindow.postMessage({type:'questlog:portrait-theme',session:'wrong-session',theme:'light'},location.origin));
+  await frame.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.equal(await frame.$eval('html',el=>el.dataset.theme),'dark');
+  await page.evaluate(value=>window.QuestlogTheme.set(value),preference);
+  const resolvedTheme=await page.$eval('html',el=>el.dataset.theme);
+  await frame.waitForFunction(theme=>document.documentElement.dataset.theme===theme,{},resolvedTheme);
+  pass();
+  startCheck('bundled editor thumbnails and missing-asset WebGL fallback');
   const thumbnail=await frame.waitForSelector('.picker .pick[aria-pressed="false"] .thumb img[src*="/thumbs/"]');
   await thumbnail.evaluate(img=>img.decode());
   const thumbContainer=await thumbnail.evaluateHandle(img=>img.parentElement);
@@ -116,7 +140,7 @@ try {
   assert.ok((await imagePixels(original.image)).count>1000,'Portrait must contain a real figure');
   if(process.argv.includes('--write-default')) {
     await fs.writeFile(resolve('assets/portrait-adventurer.webp'),Buffer.from(original.image.split(',')[1],'base64'));
-    console.log('Generated starter portrait using the reused Bricktrait renderer.');
+    console.log('Generated starter portrait using the journal portrait renderer.');
   }
   pass();
 

@@ -1,34 +1,31 @@
-@import '@fontsource-variable/archivo';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
+@import '../../../theme.css';
 
 
-/* LEGO Pro Studio Theme: Deep Slate, Glass Surfaces, Precision Lighting, Vibrant LEGO Accents */
+/* Use the journal's tokens in both the embedded editor and standalone studio. */
 :root {
-	color-scheme: dark;
-	--bg-app: #0b0d14;
-	--bg-stage: #06070b;
-	--paper: #0b0d14;
-	--card: #151824;
-	--card-hover: #1c2132;
-	--card-active: #22283c;
-	--sunk: #0f121b;
-	--ink: #f3f5fa;
-	--ink-2: #9ba3b8;
-	--muted: #64748b;
-	--line: rgba(255, 255, 255, 0.08);
-	--line-focus: rgba(255, 255, 255, 0.18);
-	--line-glow: rgba(255, 208, 0, 0.4);
+	--bg-app: var(--surface-page);
+	--bg-stage: var(--surface-recessed);
+	--stage-light: var(--art-light);
+	--paper: var(--surface-panel);
+	--card: var(--surface-panel);
+	--card-hover: var(--surface-hover);
+	--card-active: var(--surface-raised);
+	--sunk: var(--surface-recessed);
+	--ink: var(--text-primary);
+	--ink-2: var(--text-secondary);
+	--muted: var(--text-faint);
+	--line: var(--border-subtle);
+	--line-focus: var(--border-control);
+	--line-glow: var(--accent-edge);
 
-	/* Vibrant LEGO Palette */
-	--yellow: #ffd000;
-	--yellow-hover: #ffe033;
-	--yellow-glow: rgba(255, 208, 0, 0.25);
-	--red: #e52521;
-	--red-glow: rgba(229, 37, 33, 0.3);
-	--blue: #2563eb;
-	--blue-glow: rgba(37, 99, 235, 0.3);
-	--green: #10b981;
+	--yellow: var(--accent-brass);
+	--yellow-hover: var(--accent-edge);
+	--yellow-glow: color-mix(in srgb, var(--accent-brass) 18%, transparent);
+	--red: var(--status-danger);
+	--red-glow: var(--status-danger-bg);
+	--blue: var(--status-magic);
+	--blue-glow: var(--status-magic-bg);
+	--green: var(--status-success);
 
 	--radius-sm: 6px;
 	--radius: 10px;
@@ -36,13 +33,12 @@
 	--radius-lg: 16px;
 	--radius-full: 9999px;
 
-	--font: 'Archivo Variable', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	--mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+	--font: var(--sans);
 
-	--shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
-	--shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
-	--shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.65);
-	--shadow-yellow: 0 0 20px rgba(255, 208, 0, 0.35);
+	--shadow-sm: 0 1px 3px var(--shadow-color);
+	--shadow-md: 0 4px 14px var(--shadow-color);
+	--shadow-lg: 0 10px 30px var(--shadow-deep);
+	--shadow-yellow: 0 0 12px var(--yellow-glow);
 }
 
 * {
@@ -72,11 +68,11 @@ body {
 	background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-	background: rgba(255, 255, 255, 0.14);
+	background: color-mix(in srgb, var(--ink) 14.000000000000002%, transparent);
 	border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-	background: rgba(255, 255, 255, 0.25);
+	background: color-mix(in srgb, var(--ink) 25%, transparent);
 }
 
 button,
@@ -126,7 +122,7 @@ a {
 .btn:hover:not(:disabled) {
 	background: var(--card-hover);
 	border-color: var(--line-focus);
-	color: #ffffff;
+	color: var(--ink);
 	transform: translateY(-1px);
 	box-shadow: var(--shadow-md);
 }
@@ -135,21 +131,21 @@ a {
 	background: var(--card-active);
 }
 .btn.primary {
-	background: linear-gradient(180deg, #ffe033 0%, var(--yellow) 100%);
-	color: #0b0d14;
-	border: 1px solid rgba(255, 255, 255, 0.25);
+	background: var(--button-primary);
+	color: var(--button-text);
+	border: 1px solid var(--border-control);
 	font-weight: 700;
-	box-shadow: 0 2px 10px rgba(255, 208, 0, 0.32);
+	box-shadow: var(--shadow-sm);
 }
 .btn.primary:hover:not(:disabled) {
-	background: linear-gradient(180deg, #ffea66 0%, #ffd61a 100%);
-	box-shadow: 0 4px 18px rgba(255, 208, 0, 0.48);
+	background: color-mix(in srgb, var(--button-primary) 90%, var(--button-text));
+	box-shadow: var(--shadow-md);
 	transform: translateY(-1px);
-	color: #000;
+	color: var(--button-text);
 }
 .btn.primary:active:not(:disabled) {
 	transform: translateY(0);
-	box-shadow: 0 2px 6px rgba(255, 208, 0, 0.25);
+	box-shadow: var(--shadow-sm);
 }
 .btn.quiet {
 	border-color: transparent;
@@ -158,7 +154,7 @@ a {
 	box-shadow: none;
 }
 .btn.quiet:hover:not(:disabled) {
-	background: rgba(255, 255, 255, 0.07);
+	background: color-mix(in srgb, var(--ink) 7%, transparent);
 	color: var(--ink);
 	transform: none;
 }
@@ -187,10 +183,10 @@ kbd {
 	font-size: 0.72rem;
 	font-weight: 500;
 	padding: 1px 6px;
-	border: 1px solid rgba(255, 255, 255, 0.12);
-	border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+	border: 1px solid var(--line);
+	border-bottom: 2px solid var(--line);
 	border-radius: 4px;
-	background: rgba(255, 255, 255, 0.05);
+	background: color-mix(in srgb, var(--ink) 5%, transparent);
 	color: var(--ink);
 }
 

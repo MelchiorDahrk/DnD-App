@@ -17,7 +17,7 @@ const BATCH = 40;
 // Files that change how a thumbnail looks (new parts are simply added).
 // Other changes that matter bump THUMB_VERSION in thumb-render.ts.
 const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts', 'scripts/thumbs/main.ts'];
-if (equipment) INPUTS.push('../../equipment-icons.js', 'static/ldraw/catalog.json');
+if (equipment) INPUTS.push('../../equipment-icons.js', 'static/ldraw/catalog.json', 'src/lib/portrait-scene.ts', 'src/lib/lighting.ts', 'src/lib/materials.ts', 'src/lib/equipment-render.ts');
 
 const CHROME =
 	process.env.CHROME_PATH ??

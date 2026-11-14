@@ -175,7 +175,7 @@
 		gap: 3px;
 		padding: 2px;
 		border-radius: var(--radius-sm);
-		background: rgba(0, 0, 0, 0.35);
+		background: var(--sunk);
 		border: 1px solid var(--line);
 	}
 
@@ -200,7 +200,7 @@
 
 	.targets button[aria-selected='true'] {
 		background: var(--card-hover);
-		color: #ffffff;
+		color: var(--ink);
 		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 	}
 
@@ -225,7 +225,7 @@
 		min-width: 0;
 		padding: 2px 8px;
 		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.04);
+		background: color-mix(in srgb, var(--ink) 4%, transparent);
 	}
 
 	.preview-dot {
@@ -259,7 +259,7 @@
 		padding: 0 10px;
 		border: 1px solid var(--line);
 		border-radius: 13px;
-		background: rgba(255, 255, 255, 0.03);
+		background: color-mix(in srgb, var(--ink) 3%, transparent);
 		color: var(--ink-2);
 		font-size: 0.74rem;
 		font-weight: 600;
@@ -271,7 +271,7 @@
 	.more:hover {
 		border-color: var(--line-focus);
 		color: var(--ink);
-		background: rgba(255, 255, 255, 0.07);
+		background: color-mix(in srgb, var(--ink) 7%, transparent);
 	}
 
 	.more svg {
@@ -314,8 +314,8 @@
 		gap: 4px;
 		padding: 2px 5px;
 		border-radius: 6px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px dashed rgba(255, 255, 255, 0.14);
+		background: color-mix(in srgb, var(--ink) 5%, transparent);
+		border: 1px dashed var(--line);
 	}
 
 	.sep {
@@ -323,7 +323,7 @@
 		width: 1px;
 		height: 20px;
 		margin: 0 4px;
-		background: rgba(255, 255, 255, 0.1);
+		background: color-mix(in srgb, var(--ink) 10%, transparent);
 	}
 
 	.palette {
@@ -332,7 +332,7 @@
 		right: 0;
 		z-index: 50;
 		width: min(420px, calc(100vw - 32px));
-		background: #181d2c;
+		background: var(--card);
 		border: 1px solid var(--line-focus);
 		border-radius: var(--radius-md);
 		box-shadow: 0 12px 36px rgba(0, 0, 0, 0.75);
@@ -364,7 +364,7 @@
 		width: 100%;
 		height: 32px;
 		padding: 0 12px 0 30px;
-		background: rgba(0, 0, 0, 0.35);
+		background: var(--sunk);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-sm);
 		font-size: 0.82rem;

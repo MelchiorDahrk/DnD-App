@@ -19,6 +19,9 @@ export function openPortraitMaker({character,onSave}) {
   // Keep the URL stable so the editor can reopen from the service-worker cache.
   frame.src='./portrait-maker/';
   document.body.append(dialog);
+  const theme=()=>document.documentElement.dataset.theme==='dark'?'dark':'light';
+  const syncTheme=()=>frame.contentWindow.postMessage({type:'questlog:portrait-theme',session,theme:theme()},location.origin);
+  document.addEventListener('questlog:theme',syncTheme);
   function showError(message) {error.textContent=message;error.hidden=false;}
   const timeout=setTimeout(()=>{status.textContent='The portrait maker is taking longer than expected. Close it and try again when the app is available.';},30000);
   function receive(event) {
@@ -26,7 +29,7 @@ export function openPortraitMaker({character,onSave}) {
     switch(event.data.type) {
       case 'questlog:portrait-ready':
         clearTimeout(timeout);status.textContent='Loading portrait parts…';
-        frame.contentWindow.postMessage({type:'questlog:portrait-init',session,design:character.portrait?.design},location.origin);
+        frame.contentWindow.postMessage({type:'questlog:portrait-init',session,design:character.portrait?.design,theme:theme()},location.origin);
         break;
       case 'questlog:portrait-loaded':
         status.hidden=event.data.webgl;
@@ -51,6 +54,6 @@ export function openPortraitMaker({character,onSave}) {
   window.addEventListener('message',receive);
   dialog.querySelector('[data-portrait-close]').addEventListener('click',()=>dialog.close());
   use.addEventListener('click',()=>{error.hidden=true;use.disabled=true;use.textContent='Rendering…';frame.contentWindow.postMessage({type:'questlog:portrait-request-save',session},location.origin);});
-  dialog.addEventListener('close',()=>{clearTimeout(timeout);photos.dispose();window.removeEventListener('message',receive);dialog.remove();},{once:true});
+  dialog.addEventListener('close',()=>{clearTimeout(timeout);photos.dispose();document.removeEventListener('questlog:theme',syncTheme);window.removeEventListener('message',receive);dialog.remove();},{once:true});
   dialog.showModal();
 }

@@ -5,6 +5,7 @@
 	import { t } from '#lib/i18n.svelte.ts';
 	import { hold, release } from '#lib/history.svelte.ts';
 	import { transparentStyle } from '#lib/compose.ts';
+	import { appearance } from '#lib/appearance.svelte.ts';
 	let { transparent = false }: { transparent?: boolean } = $props();
 
 	const SIZE = 640;
@@ -38,6 +39,7 @@
 
 	$effect(() => {
 		void [portrait.view.yaw, portrait.view.pitch, portrait.view.zoom, { ...portrait.style }];
+		renderer.setTheme(appearance.theme);
 		draw();
 	});
 
@@ -131,7 +133,7 @@
 		aspect-ratio: 1;
 		border-radius: var(--radius);
 		overflow: hidden;
-		background: #020309;
+		background: radial-gradient(ellipse at 35% 20%, var(--stage-light), transparent 75%), var(--bg-stage);
 	}
 	canvas {
 		display: block;
@@ -165,7 +167,7 @@
 		padding: 8px 8px 8px 12px;
 		border-radius: 8px;
 		background: var(--red);
-		color: #fff;
+		color: var(--surface-panel);
 		font-size: 0.9rem;
 	}
 	.error button {
@@ -185,7 +187,7 @@
 		place-items: center;
 		margin: 0;
 		padding: 40px;
-		color: #fff;
+		color: var(--ink);
 		text-align: center;
 		line-height: 1.5;
 	}

@@ -108,7 +108,7 @@
 
 	.active .pick {
 		border-color: var(--yellow);
-		background: rgba(255, 208, 0, 0.08);
+		background: color-mix(in srgb, var(--yellow) 8%, transparent);
 		box-shadow:
 			0 0 0 1px var(--yellow),
 			0 0 16px var(--yellow-glow),
@@ -156,21 +156,21 @@
 	}
 
 	.empty .tile {
-		border: 1.5px dashed rgba(255, 255, 255, 0.12);
-		background: rgba(255, 255, 255, 0.02);
+		border: 1.5px dashed var(--line);
+		background: color-mix(in srgb, var(--ink) 2%, transparent);
 		width: 76%;
 		border-radius: 8px;
 	}
 
 	.empty .pick {
-		background: rgba(255, 255, 255, 0.02);
+		background: color-mix(in srgb, var(--ink) 2%, transparent);
 		border-style: dashed;
-		border-color: rgba(255, 255, 255, 0.1);
+		border-color: var(--line);
 	}
 
 	.empty .pick:hover {
 		border-color: var(--line-focus);
-		background: rgba(255, 255, 255, 0.04);
+		background: color-mix(in srgb, var(--ink) 4%, transparent);
 	}
 
 	.plus {
@@ -212,7 +212,7 @@
 	}
 
 	.active .label {
-		color: #ffffff;
+		color: var(--ink);
 		font-weight: 800;
 	}
 
@@ -226,9 +226,9 @@
 		width: 20px;
 		height: 20px;
 		padding: 0;
-		border: 1px solid rgba(255, 255, 255, 0.15);
+		border: 1px solid var(--line);
 		border-radius: 50%;
-		background: #242938;
+		background: var(--card);
 		color: var(--ink-2);
 		opacity: 0;
 		transform: scale(0.85);
@@ -251,7 +251,7 @@
 	.remove:hover {
 		background: var(--red);
 		border-color: var(--red);
-		color: #ffffff;
+		color: var(--surface-panel);
 		transform: scale(1.1);
 		box-shadow: 0 2px 10px var(--red-glow);
 	}

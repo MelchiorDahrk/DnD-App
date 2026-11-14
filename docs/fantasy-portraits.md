@@ -1,8 +1,41 @@
 # Fantasy Bricktrait portraits and equipment
 
 Questlog extends its existing vendored Bricktrait, pinned at
-`f333d939753526469e4169481d578aed74e955ed`. The renderer, LDraw library,
-parts picker, colours, poses, camera, history, and message bridge remain in use.
+`f333d939753526469e4169481d578aed74e955ed`. The LDraw library, parts picker,
+colours, poses, camera, history, and message bridge remain in use. Portraits use
+the dedicated journal renderer in `src/lib/portrait-scene.ts` and `materials.ts`.
+
+## Journal portrait renderer
+
+The portrait stage uses AgX tone mapping, environment reflections, a warm key,
+soft fill, brass rim light and filtered shadows. Light mode uses parchment
+daylight; dark mode uses warmer candlelight. The editor imports the site's
+`theme.css` tokens, receives the resolved appearance through the existing
+session-checked bridge and redraws without rebuilding geometry or changing the
+design. Standalone use follows the saved appearance preference and system theme.
+
+Materials retain print colours, transparency and metallic finishes. Plastic has
+a restrained clearcoat; cloth and rubber stay matte. Loader-smoothed normals and
+authored hard edges are preserved, with normalization and missing-normal repair.
+Material variants and geometry are isolated from the loader palette and released
+when a model is replaced or a renderer is disposed.
+
+LDraw luminous colours retain their emission. Flame geometry gains emission;
+translucent crystal geometry receives a smaller glow. These effects use explicit
+geometry IDs, so an ordinary face or flame-printed torso stays unlit. Up to three
+small bounce lights illuminate neighbouring surfaces and follow the posed model.
+Emission strength adapts to the appearance without adding opaque export pixels.
+
+Equipment icons use the same journal renderer, daylight lighting, material
+finishes and selective emission as portraits. Their existing camera angles and
+transparent 160-pixel framing are preserved. The build fingerprints the shared
+renderer and regenerates all equipment icons whenever its appearance changes.
+The catalogue and photo-matching references keep their existing neutral pipeline.
+
+The new lighting applies to portrait previews, reviewed photo previews and
+exports. Saved portraits remain flattened transparent images: switch appearance
+in the editor and save to capture different lighting.
+Existing images are not regenerated when the site's appearance changes.
 
 ## Transparent portraits and existing saves
 
@@ -314,7 +347,7 @@ running the test command. Use `--write-default` with
 starter from Bricktrait, then `node scripts/build.mjs` to copy it to `dist/`.
 
 The build fetches/caches LDraw as before, validates the catalog, renders missing
-or stale equipment WebPs through **the existing `drawThumb` and `Stage`**, builds
+or stale equipment WebPs through **`drawEquipmentIcon` and `PortraitStage`**, builds
 the editor, and copies static assets. `npm run build:item-icons` rerenders just
 equipment once LDraw is built. Renderer/source/catalog fingerprints avoid
 unnecessary renders. A failed equipment render fails the build.

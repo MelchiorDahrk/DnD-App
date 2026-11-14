@@ -28,6 +28,7 @@ try {
   }
   browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox']});
   const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
+  console.log('RUN item icon search, selection, persistence and mobile layout');
   await page.setViewport({width:1280,height:1000});
   await page.goto(base,{waitUntil:'networkidle0'});
   await page.evaluate(state=>localStorage.setItem('questlog.v2',JSON.stringify(state)),defaultPartyState());
@@ -79,13 +80,31 @@ try {
   await page.click('.item-icon-auto');await submit();assert.equal((await item()).iconKey,'');
   await edit();assert.match(await page.$eval('[data-item-icon-preview] img',node=>node.src),/backpack.webp$/);await close();
   // Every shipped image must load, including choices that are not used by presets.
-  const missing=await page.evaluate(async keys=>{
-    const loaded=await Promise.all(keys.map(key=>new Promise(resolve=>{const img=new Image();img.onload=()=>resolve('');img.onerror=()=>resolve(key);img.src=`./assets/equipment/${key}.webp`;})));
-    return loaded.filter(Boolean);
+  console.log(`RUN ${ITEM_ICON_LIBRARY.length} icon images: dimensions, transparency, geometry and framing`);
+  const artwork=await page.evaluate(async keys=>{
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=160;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    const results=[];
+    for(const key of keys) {
+      const img=new Image();img.src=`./assets/equipment/${key}.webp`;
+      try {await img.decode();}catch {results.push({key,missing:true});continue;}
+      ctx.clearRect(0,0,160,160);ctx.drawImage(img,0,0);
+      const data=ctx.getImageData(0,0,160,160).data;
+      let count=0,minX=160,minY=160,maxX=0,maxY=0;
+      for(let y=0;y<160;y++)for(let x=0;x<160;x++)if(data[(y*160+x)*4+3]>8){count++;minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}
+      results.push({key,width:img.naturalWidth,height:img.naturalHeight,count,bounds:[minX,minY,maxX,maxY],corners:[data[3],data[159*4+3],data[159*160*4+3],data[160*160*4-1]]});
+    }
+    return results;
   },ITEM_ICON_LIBRARY.map(entry=>entry.key));
-  assert.deepEqual(missing,[]);
-  await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
-  await page.waitForFunction(()=>navigator.serviceWorker.controller);
+  for(const asset of artwork) {
+    assert.ok(!asset.missing,`${asset.key}: icon loads`);
+    assert.equal(asset.width,160,asset.key);assert.equal(asset.height,160,asset.key);
+    assert.ok(asset.count>0,`${asset.key}: nonempty geometry`);
+    assert.deepEqual(asset.corners,[0,0,0,0],`${asset.key}: transparent corners`);
+    if(visualChecks)assert.ok(asset.bounds[0]>0&&asset.bounds[1]>0&&asset.bounds[2]<159&&asset.bounds[3]<159,`${asset.key}: unclipped geometry`);
+  }
+  console.log('RUN offline icon loading and selection');
+  await page.waitForFunction(()=>navigator.serviceWorker.controller,{timeout:30000});
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});
   await edit();await page.click('.item-icon-picker summary');await search('chakram');await choose('chakram');await submit();
   assert.equal((await item()).iconKey,'chakram','library choices save offline');

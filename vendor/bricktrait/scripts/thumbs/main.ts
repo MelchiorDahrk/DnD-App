@@ -3,6 +3,8 @@ import { library, STANDARD_LEGS, type Part, type Placement } from '../../src/lib
 import { Stage, type View } from '../../src/lib/scene';
 import { drawThumb } from '../../src/lib/thumb-render';
 import { THUMB_COLORS } from '../../src/lib/thumbs';
+import { PortraitStage } from '../../src/lib/portrait-scene';
+import { drawEquipmentIcon } from '../../src/lib/equipment-render';
 import './references';
 
 declare global {
@@ -16,6 +18,7 @@ declare global {
 
 library.base = '/ldraw/';
 const stage = new Stage();
+let equipmentStage: PortraitStage | null = null;
 
 window.thumbsReady = library.init().then(() => {
 	const standard: Part = { id: STANDARD_LEGS, name: 'Standard hips and legs', cat: 'legs' };
@@ -28,7 +31,10 @@ window.renderThumbs = async (items) => {
 	const out: string[] = [];
 	for (const { id, color, parts, view } of items) {
 		try {
-			out.push((await drawThumb(stage, id, color, parts, view)).toDataURL('image/webp', 0.9));
+			const canvas = parts
+				? await drawEquipmentIcon(equipmentStage ??= new PortraitStage(), parts, view)
+				: await drawThumb(stage, id, color, undefined, view);
+			out.push(canvas.toDataURL('image/webp', 0.9));
 		} catch {
 			out.push('');
 		}
