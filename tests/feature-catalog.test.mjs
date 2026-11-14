@@ -19,7 +19,7 @@ test('feature catalog covers every supported class, subclass, species family and
   assert.equal(FEATURE_CATALOG.filter(e=>e.group==='General feats').length,43);
   assert.equal(FEATURE_CATALOG.filter(e=>e.group==='Fighting styles').length,10);
   assert.equal(FEATURE_CATALOG.filter(e=>e.group==='Epic boons').length,12);
-  for(const e of FEATURE_CATALOG){assert.match(e.id,/^[a-z0-9-]+$/);assert.ok(e.details);assert.match(e.wiki,/^https:\/\/www.dndbeyond.com\//);}
+  for(const e of FEATURE_CATALOG){assert.match(e.id,/^[a-z0-9-]+$/);assert.ok(e.details);assert.ok(e.group==='Custom resources'||/^https:\/\/dnd(?:5e|2024)\.wikidot.com\//.test(e.wiki));}
 });
 test('suggestions honor class, subclass, lineage families, and level while All options remains unrestricted',()=>{
   const c=makeCharacter({class:'Fighter',subclass:'Battle Master',race:'Wood Elf',level:3});

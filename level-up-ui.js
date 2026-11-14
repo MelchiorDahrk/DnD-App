@@ -1,4 +1,4 @@
-import {mod,signed,ABILITIES,safeURL} from './model.js';
+import {mod,signed,ABILITIES,referenceURL} from './model.js';
 import {SPECIES} from './catalog.js';
 import {levelUpPlan,applyLevelUp,LEVEL_SUBCLASSES,canonicalSubclass,spellKey,FEAT_ABILITIES} from './level-up.js';
 
@@ -47,10 +47,8 @@ export function openLevelUp(character,{setModal,onComplete}){
       applyLevelUp(character,selection);onComplete();
     });
     const form=document.querySelector('#modal-form');
-    if(feat&&safeURL(feat.entry.wiki)){
-      const reference=new URL(feat.entry.wiki);
-      if(!reference.hash)reference.hash=feat.label.replace(/\s*\([^)]*\)/g,'').replace(/[^a-z0-9]/gi,'');
-      form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<p class="form-help level-feat-reference"><strong>${esc(feat.label)}</strong> <a href="${esc(reference.href)}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read feat ↗</a></p>`);
+    if(feat&&referenceURL(feat.entry.wiki,feat.label,'feat')){
+      form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<p class="form-help level-feat-reference"><strong>${esc(feat.label)}</strong> <a href="${esc(referenceURL(feat.entry.wiki,feat.label,'feat'))}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read feat ↗</a></p>`);
     }
     const abilityInputs=[...form.querySelectorAll('[name^="ability-"]')];
     if(abilityInputs.length){

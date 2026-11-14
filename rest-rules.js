@@ -1,5 +1,6 @@
 import {REST_REFERENCES} from './rest-reference-data.js';
 import {SUBCLASS_ALIASES} from './progression-options.js';
+import {referenceURL} from './reference-links.js';
 
 const normalize=value=>String(value||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const same=(a,b)=>normalize(a)===normalize(b);
@@ -78,7 +79,7 @@ export function restReminders(c,kind='long') {
  const add=(name,detail,url,extra={})=>{
   const key=extra.key||normalize(name);
   if(keys.has(key))return;keys.add(key);
-  result.push({key,title:name,detail,wiki:url,target:'features',...extra});
+  result.push({key,title:name,detail,wiki:url?referenceURL(url,name,extra.target==='spells'?'spell':extra.target==='inventory'?'equipment':c.class):url,target:'features',...extra});
  };
  const recorded=c.features||[];
  const subclass=Object.entries(SUBCLASS_ALIASES).find(([name])=>same(name,c.subclass))?.[1]||c.subclass;

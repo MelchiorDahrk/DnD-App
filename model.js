@@ -1,9 +1,10 @@
 import {validPortrait} from './portrait.js';
 import {validSheetLayout} from './sheet-layout.js';
+import {wikiURL} from './reference-links.js';
+export {RULES_URL,wikiURL,subclassURL,referenceURL,safeURL} from './reference-links.js';
 
 export const SAVE_VERSION = 2;
 export const STORAGE_KEY = `questlog.v${SAVE_VERSION}`;
-export const RULES_URL = 'https://www.dndbeyond.com/sources/dnd/br-2024';
 export const ABILITIES = {str:'Strength', dex:'Dexterity', con:'Constitution', int:'Intelligence', wis:'Wisdom', cha:'Charisma'};
 export const SKILLS = {Acrobatics:'dex','Animal Handling':'wis',Arcana:'int',Athletics:'str',Deception:'cha',History:'int',Insight:'wis',Intimidation:'cha',Investigation:'int',Medicine:'wis',Nature:'int',Perception:'wis',Performance:'cha',Persuasion:'cha',Religion:'int','Sleight of Hand':'dex',Stealth:'dex',Survival:'wis'};
 export const COINS = {copper:'cp',silver:'sp',electrum:'ep',gold:'gp',platinum:'pp'};
@@ -53,22 +54,6 @@ export function rollFeature(feature, roller = randomDie) {
   return result;
 }
 export function castingAbility(c) { return Object.hasOwn(ABILITIES,c.spellAbility) ? c.spellAbility : ['Wizard','Artificer'].includes(c.class) ? 'int' : ['Bard','Paladin','Sorcerer','Warlock'].includes(c.class) ? 'cha' : 'wis'; }
-export function wikiURL(label, category = '') {
-  const key = label.toLowerCase().replace(/['’]/g,'').replace(/-/g,' ');
-  const spellLinks = {'hunters mark':'2619166-hunters-mark','cure wounds':'2619079-cure-wounds','speak with animals':'2619059-speak-with-animals',longstrider:'2619004-longstrider',goodberry:'2618952-goodberry','ensnaring strike':'2619172-ensnaring-strike'};
-  if (category==='spell') return spellLinks[key] ? `https://www.dndbeyond.com/spells/${spellLinks[key]}` : `${RULES_URL}/spell-descriptions`;
-  const cls = Object.keys(CLASSES).find(name=>name.toLowerCase()===key);
-  if (cls && cls!=='Artificer') return `${RULES_URL}/character-classes#${cls}`;
-  if (category==='ranger') return `${RULES_URL}/character-classes#Ranger`;
-  const sections = {classes:'character-classes',spells:'spell-descriptions',weapons:'equipment#Weapons',armor:'equipment#Armor',equipment:'equipment','adventuring-gear':'equipment#AdventuringGear','adventuring gear':'equipment#AdventuringGear','wondrous-items':'magic-items','wondrous items':'magic-items',backgrounds:'character-origins#CharacterBackgrounds',species:'character-origins#CharacterSpecies',feats:'feats',conditions:'rules-glossary',rules:'rules-glossary'};
-  return `${RULES_URL}/${sections[category] || sections[key] || 'rules-glossary'}`;
-}
-export function referenceURL(url,label,category='') {
-  return url ? safeURL(url) : wikiURL(label,category);
-}
-export function safeURL(url) {
-  try { const u = new URL(url); return ['https:','http:'].includes(u.protocol) ? u.href : ''; } catch { return ''; }
-}
 export function makeCharacter(values = {}) {
   const cls = Object.hasOwn(CLASSES, values.class) ? values.class : 'Ranger';
   const stats = values.stats || {str:10,dex:14,con:14,int:10,wis:12,cha:10};
@@ -90,7 +75,7 @@ export function demoCharacter() {
     {id:uid(),name:'Longbow',category:'Weapon',qty:1,weight:2,equipped:true,description:'1d8 piercing; range 150/600 ft.; ammunition, heavy, two-handed. Mastery: Slow. Heavy ranged weapons require Dexterity 13 to avoid disadvantage.',wiki:wikiURL('weapons')},
     {id:uid(),name:'Shortsword',category:'Weapon',qty:2,weight:2,equipped:true,description:'1d6 piercing; finesse, light. Mastery: Vex.',wiki:wikiURL('weapons')},
     {id:uid(),name:'Leather armor',category:'Armor',qty:1,weight:10,equipped:true,description:'AC 11 + Dexterity modifier. Armor class is tracked manually on your sheet.',wiki:wikiURL('armor')},
-    {id:uid(),name:'Potion of healing',category:'Consumable',qty:2,weight:0.5,equipped:false,description:'As a Bonus Action, drink it or administer it to a creature within 5 ft. Restores 2d4 + 2 HP; using it here heals this character.',wiki:wikiURL('equipment')},
+    {id:uid(),name:'Potion of healing',category:'Consumable',qty:2,weight:0.5,equipped:false,description:'As a Bonus Action, drink it or administer it to a creature within 5 ft. Restores 2d4 + 2 HP; using it here heals this character.',wiki:wikiURL('Potion of healing','equipment')},
     {id:uid(),name:'Arrows',category:'Gear',qty:20,weight:0.05,equipped:false,description:'A quiver of goose-feather arrows.',wiki:wikiURL('weapons')},
     {id:uid(),name:"Explorer’s pack",category:'Gear',qty:1,weight:55,equipped:false,description:'Backpack, bedroll, 2 flasks of oil, 10 days of rations, rope, tinderbox, 10 torches, and waterskin. Adjust weight as supplies change.',wiki:wikiURL('adventuring-gear')},
     {id:uid(),name:'Moonstone pendant',category:'Treasure',qty:1,weight:0.1,equipped:false,description:'A keepsake from home. Warm to the touch under moonlight.',wiki:''}
@@ -119,11 +104,11 @@ export function demoCharacter() {
     {id:uid(),name:'Favored Enemy',description:'Hunter’s Mark is always prepared. Cast it without a spell slot twice per Long Rest at this level. Spend a use here when choosing No slot in the spellbook.',maxUses:2,used:0,reset:'long',wiki:wikiURL('Ranger')},
     {id:uid(),name:'Weapon Mastery',description:'Chosen weapons: Longbow (Slow) and Shortsword (Vex). Change your choices on a Long Rest. Apply mastery effects at the table.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('weapons')},
     {id:uid(),name:'Deft Explorer',description:'Expertise in Survival; two additional languages (Sylvan and Goblin) are recorded on the sheet.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('Ranger')},
-    {id:uid(),name:'Fighting Style: Archery',description:'The +2 bonus to ranged weapon attack rolls is included in the Longbow attack.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('feats')},
+    {id:uid(),name:'Fighting Style: Archery',description:'The +2 bonus to ranged weapon attack rolls is included in the Longbow attack.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('Archery','feat')},
     {id:uid(),name:'Hunter’s Lore',description:'While Hunter’s Mark affects a creature, learn its Immunities, Resistances, and Vulnerabilities, if any.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('hunter','ranger')},
     {id:uid(),name:'Hunter’s Prey: Colossus Slayer',description:'Once per turn, a weapon hit deals an extra 1d8 damage if the target is below its HP maximum. Roll this damage separately. May switch to Horde Breaker on a Short or Long Rest.',maxUses:0,used:0,reset:'manual',rollFormula:'1d8',wiki:wikiURL('hunter','ranger')},
-    {id:uid(),name:'Savage Attacker (Origin feat)',description:'Soldier background feat: once per turn when a weapon attack hits, roll the weapon’s damage dice twice and use either roll. Resolve this manually.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('feats')},
-    {id:uid(),name:'Wood Elf: Longstrider',description:'One free Longstrider casting per Long Rest. Choose No slot and spend this use; Wisdom is the chosen lineage spellcasting ability.',maxUses:1,used:0,reset:'long',wiki:wikiURL('species')}
+    {id:uid(),name:'Savage Attacker (Origin feat)',description:'Soldier background feat: once per turn when a weapon attack hits, roll the weapon’s damage dice twice and use either roll. Resolve this manually.',maxUses:0,used:0,reset:'manual',wiki:wikiURL('Savage Attacker','feat')},
+    {id:uid(),name:'Wood Elf: Longstrider',description:'One free Longstrider casting per Long Rest. Choose No slot and spend this use; Wisdom is the chosen lineage spellcasting ability.',maxUses:1,used:0,reset:'long',wiki:wikiURL('Wood Elf','species')}
   ];
   c.features = c.features.map(f=>({rollFormula:'',shortRestRecovery:0,...f}));
   c.attacks = c.attacks.map(a=>({rollMode:'normal',...a}));

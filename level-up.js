@@ -1,4 +1,4 @@
-import {levelUp,uid,mod,SKILLS,ABILITIES,RULES_URL,parseBackup,SAVE_VERSION} from './model.js';
+import {levelUp,uid,mod,SKILLS,ABILITIES,wikiURL,subclassURL,parseBackup,SAVE_VERSION} from './model.js';
 import {FEATURE_CATALOG,featureFields,featureMatchesCharacter} from './feature-catalog.js';
 import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
@@ -30,7 +30,7 @@ export function classProgression(c,level=c.level){
 }
 function reference(name,owner,level,source='2024'){
   const resource=({'Arcane Shot':'two-short','Giant’s Might':'pb-long','Magic Awareness':'pb-long','Bolstering Magic':'pb-long','Fighting Spirit':'three-long','Unleash Incarnation':'con-long','Reclaim Potential':'con-long','Chronal Shift':'two-long','Momentary Stasis':'int-long',Bladesong:'pb-long','Healing Light':'healing-light','Steps of the Fey':'cha-long','Warding Flare':'wis-long','War Priest':'wis-short','Hexblade’s Curse':'one-short','Form of Dread':'pb-long'})[name];
-  return {id:`progression-${normalized(owner)}-${level}-${normalized(name)}`,name,owner,level,source,resource,details:`${owner} feature at level ${level}. Consult the linked rules for its effects and any choices.`,wiki:`https://www.dndbeyond.com/sources/dnd/${source==='2014'?'phb-2014':'phb-2024'}/character-classes`,group:'Subclass features'};
+  return {id:`progression-${normalized(owner)}-${level}-${normalized(name)}`,name,owner,level,source,resource,details:`${owner} feature at level ${level}. Consult the linked rules for its effects and any choices.`,wiki:subclassURL(owner,'',source),group:'Subclass features'};
 }
 function subclassEntries(c){
   const subclass=canonicalSubclass(c.subclass),option=LEVEL_SUBCLASSES.find(s=>s.name===subclass&&s.className===c.class);
@@ -371,7 +371,7 @@ export function applyLevelUp(character,selection={}){
     const match=line.match(/^([0-9])\s*\|\s*(.{1,200})$/);
     if(!match)throw new Error('Enter additional spells as level | name, for example 2 | My book’s spell.');
     const name=match[2].trim();if(!name)throw new Error('Enter a name for each additional spell.');
-    addSpell({id:spellKey(name),name,level:Number(match[1]),school:'Other',castingTime:'See spell rules',range:'See spell rules',duration:'See spell rules',concentration:false,wiki:`${RULES_URL}/spell-descriptions`,notes:'Book / table selection during level-up. Fill casting details and effects from your source in the spell editor.'},'Book / table choice');
+    addSpell({id:spellKey(name),name,level:Number(match[1]),school:'Other',castingTime:'See spell rules',range:'See spell rules',duration:'See spell rules',concentration:false,wiki:wikiURL(name,'spell'),notes:'Book / table selection during level-up. Fill casting details and effects from your source in the spell editor.'},'Book / table choice');
   }
   c.skills=[...new Set(c.skills)];c.expertise=[...new Set(c.expertise)];
   c.maxHp=Math.min(9999,c.maxHp);c.hp=Math.min(c.hp,c.maxHp);

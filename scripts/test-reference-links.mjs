@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+import {existsSync} from 'node:fs';
+import {spawn} from 'node:child_process';
+import {resolve} from 'node:path';
+import puppeteer from 'puppeteer-core';
+import {demoCharacter,SAVE_VERSION} from '../model.js';
+import {FEATURE_CATALOG} from '../feature-catalog.js';
+
+const root=resolve(import.meta.dirname,'..'),port=process.env.REFERENCE_TEST_PORT||'4196';
+const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/chromium'].find(existsSync);
+assert.ok(executablePath,'Set BROWSER_PATH to a Chromium browser.');
+const current='https://dnd2024.wikidot.com',beyond='https://www.dndbeyond.com';
+const c=demoCharacter();
+c.features.push({id:'chef',name:'Chef',description:'Prepare treats after a Long Rest.',wiki:beyond+'/sources/dnd/phb-2024/feats',maxUses:0,used:0,reset:'manual',rollFormula:'',shortRestRecovery:0});
+c.features[0].wiki='https://example.com/custom-feature';
+c.spells.find(s=>s.name==='Cure Wounds').wiki=beyond+'/spells/2619079-cure-wounds';
+c.spells.find(s=>s.name==='Goodberry').wiki='https://example.com/custom-spell';
+c.items[0].wiki=beyond+'/sources/dnd/br-2024/equipment#Weapons';
+c.items[1].wiki='https://example.com/custom-item';
+const initial={version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}};
+let server,browser;
+try{
+  server=spawn(process.execPath,['scripts/serve.mjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe'],windowsHide:true});
+  await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(new Error('Server did not start')),10000);server.once('error',reject);server.stdout.once('data',()=>{clearTimeout(timer);resolve();});server.stderr.once('data',data=>reject(new Error(String(data))));});
+  browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox']});
+  const page=await browser.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.setViewport({width:1280,height:1000});
+  await page.goto(`http://127.0.0.1:${port}${process.env.REFERENCE_TEST_PATH||'/'}`,{waitUntil:'networkidle0'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),initial);
+  await page.reload({waitUntil:'networkidle0'});
+  const navigate=route=>page.click(`#sidebar [data-action="navigate"][data-route="${route}"]`);
+  const linkInRow=(selector,name)=>page.$$eval(selector,(rows,name)=>{
+    const row=rows.find(row=>row.textContent.includes(name)),a=row?.matches('a')?row:row?.querySelector('a');
+    return a?{href:a.href,target:a.target,rel:a.rel}:null;
+  },name);
+  const check=async(selector,name,url)=>{const link=await linkInRow(selector,name);assert.ok(link,name);assert.equal(link.href,url,name);assert.equal(link.target,'_blank');assert.match(link.rel,/noopener/);};
+  await check('[data-sheet-section="features"] .action-row','Chef',current+'/feat:chef');
+  await check('[data-sheet-section="features"] .action-row','Favored Enemy','https://example.com/custom-feature');
+  await page.click('[data-action="feature"]:not([data-id])');
+  await page.select('[data-catalog-scope="feat"]','all');
+  await page.select('[data-catalog-pick="feat"]',FEATURE_CATALOG.find(f=>f.name==='Athlete').id);
+  assert.equal(await page.$eval('[data-catalog-preview="feat"] a',a=>a.href),current+'/feat:athlete');
+  await page.click('#modal [data-action="close"]');
+  await navigate('spells');
+  await check('.spell-card','Cure Wounds',current+'/spell:cure-wounds');
+  await check('.spell-card','Goodberry','https://example.com/custom-spell');
+  await navigate('inventory');
+  await check('.inventory-list .action-row','Longbow',current+'/equipment:weapon');
+  await check('.inventory-list .action-row','Shortsword','https://example.com/custom-item');
+  await navigate('wiki');
+  await check('.wiki-card','Feats',current+'/feat:all');
+  await page.select('[data-reference-kind]','Features & resources');
+  await page.select('[data-reference-entry]',FEATURE_CATALOG.find(f=>f.name==='Boon of Fate').id);
+  assert.equal(await page.$eval('[data-reference-preview] a',a=>a.href),current+'/feat:boon-of-fate');
+  await navigate('sheet');
+  await page.click('[data-action="rest"][data-kind="long"]');
+  await check('.rest-reminder-list li','Chef',current+'/feat:chef');
+  await page.click('#modal [data-action="close"]');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
+  assert.equal(saved.characters[0].features.find(f=>f.name==='Chef').wiki,beyond+'/sources/dnd/phb-2024/feats','Rendering leaves saved source URLs intact');
+  assert.deepEqual(errors,[]);
+  console.log('PASS saved feat/spell/item references, custom URLs, feature picker, compendium, rest reminders and unchanged saved data');
+}finally{
+  await browser?.close();server?.kill();
+}

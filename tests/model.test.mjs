@@ -52,9 +52,9 @@ test('2024 demo has current Ranger features, healing, mastery, and rest resource
   assert.equal(attackBonus(c,c.attacks[0]),8);assert.ok(c.expertise.includes('Survival'));
 });
 
-test('reference defaults use current rules and explicit links open without compatibility rewriting',()=>{
-  assert.equal(wikiURL('Ranger'),RULES_URL+'/character-classes#Ranger');
-  assert.equal(wikiURL('cure-wounds','spell'),'https://www.dndbeyond.com/spells/2619079-cure-wounds');
+test('reference defaults use Wikidot and custom links are preserved',()=>{
+  assert.equal(wikiURL('Ranger'),RULES_URL+'/ranger:main');
+  assert.equal(wikiURL('cure-wounds','spell'),'https://dnd2024.wikidot.com/spell:cure-wounds');
   assert.equal(referenceURL('','Ranger'),wikiURL('Ranger'));
   assert.equal(referenceURL('https://dnd5e.wikidot.com/ranger','Ranger'),'https://dnd5e.wikidot.com/ranger');
   assert.equal(referenceURL('https://dnd5e.wikidot.com/spell:cure-wounds','Cure Wounds','spell'),'https://dnd5e.wikidot.com/spell:cure-wounds');

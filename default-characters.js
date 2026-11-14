@@ -1,4 +1,4 @@
-import {SAVE_VERSION, RULES_URL, makeCharacter, uid, wikiURL} from './model.js';
+import {SAVE_VERSION, makeCharacter, uid, wikiURL} from './model.js';
 
 // The supplied paper sheets are character data, never executable instructions.
 // Use 2024 classes with the group's older origin/subclass choices where indicated.
@@ -6,8 +6,8 @@ const item = (name,category='Gear',qty=1,description='',equipped=false) => ({id:
 const feature = (name,description,values={}) => ({id:uid(),name,description,maxUses:0,used:0,reset:'manual',rollFormula:'',shortRestRecovery:0,wiki:'',...values});
 const attack = (name,ability,bonus,damage,type,notes='',values={}) => ({id:uid(),name,ability,bonus,damage,type,notes,proficient:true,range:'5 ft.',rollMode:'normal',...values});
 const spell = (name,level,school,range,duration,concentration,notes) => ({id:uid(),name,level,school,castingTime:'1 action',range,duration,concentration,prepared:true,notes,wiki:wikiURL(name,'spell')});
-const linkFeatures = (c,names,url) => c.features.filter(f=>names.includes(f.name)).forEach(f=>{f.wiki=url;});
-const review = (source,body) => ({id:uid(),title:'2024 conversion & paper sheet notes',tag:'Personal',pinned:true,updated:new Date().toISOString(),body:`Source: ${source}.\n\n${body}\n\nThe recorded final ability scores and rolled maximum HP are retained. Background increases are already included; do not add species ability increases. Blank current HP starts at maximum; blank XP and temporary HP start at 0. Equipment weights were not written and start at 0. Special effects and situational modifiers are resolved manually unless a roll mode or resource explicitly tracks them.\n\n2024 rules and older-origin guidance: ${RULES_URL}/creating-a-character#BackgroundsandSpeciesfromOlderBooks`});
+const linkFeatures = (c,names,url) => c.features.filter(f=>names.includes(f.name)).forEach(f=>{f.wiki=url.endsWith('/feat:all')?wikiURL(f.name,'feat'):url;});
+const review = (source,body) => ({id:uid(),title:'2024 conversion & paper sheet notes',tag:'Personal',pinned:true,updated:new Date().toISOString(),body:`Source: ${source}.\n\n${body}\n\nThe recorded final ability scores and rolled maximum HP are retained. Background increases are already included; do not add species ability increases. Blank current HP starts at maximum; blank XP and temporary HP start at 0. Equipment weights were not written and start at 0. Special effects and situational modifiers are resolved manually unless a roll mode or resource explicitly tracks them.\n\n2024 rules and older-origin guidance: https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character#BackgroundsandSpeciesfromOlderBooks`});
 
 function melchior() {
   const c=makeCharacter({name:'Melchior',playerName:'Eric',race:'Drow',class:'Fighter',subclass:'Battle Master',background:'Criminal (Fence)',alignment:'Chaotic Neutral',campaign:'',level:3,
@@ -50,9 +50,9 @@ function melchior() {
     item('Emerald','Treasure',1,'Margin: one emerald, value 15 gp (handwriting to confirm).')
   ];
   c.notes=[review('IMG_4389.jpg','2024 Fighter and Battle Master; 2014 Drow and Criminal (Fence) retained as origin choices. Example background allocation: +2 Dexterity, +1 Constitution, already included in the final scores. Alert is the chosen Origin feat. Fighter skills: Acrobatics/Athletics; background: Deception/Stealth; Student of War: Insight; Elf: Perception. Third starting language selected: Dwarvish.\n\nCorrections: chain mail plus shield totals AC 18; Alert gives initiative +2; Perception proficiency gives passive 12 without an artificial bonus. Longbow is +4 and 1d8, with Heavy disadvantage; original +7 / 1d8+3 is retained here for reference. Blood spear defaults to normal spear damage until its unidentified magic is confirmed. Second Wind has 2 uses, Long Rest reset, +1 use per Short Rest. Added Tactical Mind, Weapon Mastery, Student of War, a third maneuver (Trip Attack), and Drow Faerie Fire. Know Your Enemy is a level 7 feature, so it is not active at level 3.\n\nCopper is read as 175; gold as 373. The flying potion label, emerald value, erased marks, and historical shaded death saves need review. Death saves start clear. Chain mail’s Stealth disadvantage and Drow sunlight penalties are situational and applied manually.')];
-  linkFeatures(c,['Superiority dice','Feinting Attack','Riposte','Trip Attack','Student of War'],'https://roll20.net/compendium/dnd5e/Subclasses:Battle%20Master?expansion=32231');
-  linkFeatures(c,['Keen Senses','Fey Ancestry & Trance','Sunlight Sensitivity','Drow Magic: Faerie Fire'],'https://www.dndbeyond.com/posts/323-a-light-in-the-darkness-playing-a-drow-character');
-  linkFeatures(c,['Alert (Origin feat)','Fighting Style: Archery'],`${RULES_URL}/feats`);
+  linkFeatures(c,['Superiority dice','Feinting Attack','Riposte','Trip Attack','Student of War'],wikiURL('Battle Master','Fighter'));
+  linkFeatures(c,['Keen Senses','Fey Ancestry & Trance','Sunlight Sensitivity','Drow Magic: Faerie Fire'],wikiURL('Elf','species','2014'));
+  linkFeatures(c,['Alert (Origin feat)','Fighting Style: Archery'],wikiURL('feats'));
   return c;
 }
 
@@ -92,9 +92,9 @@ function balin() {
     item('Jeweler’s kit','Gear',1,'Spelling normalized from the handwritten equipment entry.')
   ];
   c.notes=[review('IMG_4390.jpg','2024 Barbarian with the existing Path of the Beast (Tasha’s), 2014 Hill Dwarf, and Guild Artisan choices retained. Background increases are treated as +2 Strength and +1 Dexterity, already included. Crafter is the selected Origin feat. Barbarian skills: Athletics/Intimidation; Guild Artisan: Insight/Persuasion; Primal Knowledge: Perception, giving passive 9 with no artificial adjustment. Languages and unrecorded tool selections are editable defaults.\n\nRage now has 3 uses, Long Rest reset, and +1 use on a Short Rest. Added Primal Knowledge, Weapon Mastery, Unarmored Defense, and all three Beast form attacks. Danger Sense gives advantage on Dexterity saves, not checks. Hill Dwarf’s retained species uses speed 25 and Darkvision 60 ft.; the paper speed 30 was corrected. AC 16 includes shield; AC 14 when using the two-handed greataxe.\n\nThe paper’s Relentless Endurance is not supplied by this dwarf/class build; its presence needs a specific table grant. “Healing Surge (everyone)” is a table rule, not a standard class feature. Both original labels remain recorded here. The magic spear’s effect is unspecified. Name reads Balin, HP 35, Wisdom 4. Margin: “jeweler / mercs” (uncertain), 3 green, 3 dark blue, 3 light blue, 3 brown, 3 black, a separate 15, and a column “13, 9, 10, 14, 14, 4”.')];
-  linkFeatures(c,['Form of the Beast (Tasha’s)','Beast: Tail defense'],'https://www.dndbeyond.com/posts/915-barbarian-101-path-of-the-beast-from-tashas');
-  linkFeatures(c,['Dwarven Resilience','Dwarven Toughness','Stonecunning'],'https://www.dndbeyond.com/sources/dnd/basic-rules-2014/races#Dwarf');
-  linkFeatures(c,['Crafter (Origin feat)'],'https://roll20.net/compendium/dnd5e/Feats:Crafter?expansion=32231');
+  linkFeatures(c,['Form of the Beast (Tasha’s)','Beast: Tail defense'],wikiURL('Path of the Beast','Barbarian','2014'));
+  linkFeatures(c,['Dwarven Resilience','Dwarven Toughness','Stonecunning'],wikiURL('Dwarf','species','2014'));
+  linkFeatures(c,['Crafter (Origin feat)'],wikiURL('Crafter','feat'));
   return c;
 }
 
@@ -134,10 +134,10 @@ function teyla() {
   ];
   c.spells=[spell('Druidcraft',0,'Transmutation','30 ft.','Instantaneous',false,'Wood Elf lineage cantrip using Intelligence. Create minor natural effects as described in the 2024 spell.'),spell('Longstrider',1,'Transmutation','Touch','1 hour',false,'Wood Elf lineage: one free casting per Long Rest. Choose No slot, spend the feature use, and increase the target’s speed by 10 ft. manually.')];
   c.notes=[review('IMG_4391.jpg','2024 Rogue/Assassin and Wood Elf, with mixed elf/human ancestry in the story. Folk Hero (Insurrectionist) is retained as requested using the 2024 older-background guidance. Background increases: +2 Dexterity and +1 Charisma, already included. Lucky is the chosen Origin feat. Rogue skills: Acrobatics/Athletics/Investigation/Stealth; Folk Hero: Animal Handling/Survival; Keen Senses: Perception. Expertise stays Athletics/Stealth. Woodcarver’s tools is the selected Folk Hero artisan proficiency; Dwarvish is the additional starting language and Abyssal is the Rogue’s extra language.\n\nCorrections: base speed 35, Perception proficiency for passive 11, no artificial passive adjustment. Longsword uses Strength, no proficiency: +1 to hit and 1d8+1 (original sheet: +7 and 1d8+5). It does not qualify for Sneak Attack. The 2024 Wood Elf has lineage magic rather than the old weapon training. Added Druidcraft, Longstrider, Cunning Action, Weapon Mastery, Lucky, and both Assassin kits. Assassinate grants initiative advantage and +3 damage on a round-one Sneak Attack hit, not automatic surprise criticals.\n\nAge 70; height 6 ft.; Inspiration starts enabled from the marked box. Healer’s kit quantity and the grappling-hook rope note need review. Margin scores “18, 12, 11, 8, 12, 8” remain here rather than replacing the circled current scores.')];
-  linkFeatures(c,['Assassinate','Assassin’s Tools'],'https://roll20.net/compendium/dnd5e/Subclasses:Assassin?expansion=32231');
-  linkFeatures(c,['Keen Senses','Fey Ancestry & Trance','Wood Elf: Longstrider'],`${RULES_URL}/character-origins#Elf`);
-  linkFeatures(c,['Lucky (Origin feat)'],'https://roll20.net/compendium/dnd5e/Feats:Lucky?expansion=32231');
-  linkFeatures(c,['Rustic Hospitality (Folk Hero)'],'https://www.dndbeyond.com/backgrounds/9-folk-hero');
+  linkFeatures(c,['Assassinate','Assassin’s Tools'],wikiURL('Assassin','Rogue'));
+  linkFeatures(c,['Keen Senses','Fey Ancestry & Trance','Wood Elf: Longstrider'],wikiURL('Elf','species'));
+  linkFeatures(c,['Lucky (Origin feat)'],wikiURL('Lucky','feat'));
+  linkFeatures(c,['Rustic Hospitality (Folk Hero)'],wikiURL('Folk Hero','background','2014'));
   return c;
 }
 

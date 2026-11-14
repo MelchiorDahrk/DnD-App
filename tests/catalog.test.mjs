@@ -9,7 +9,7 @@ test('basic catalog covers each equipment family with unique IDs and usable nume
   assert.equal(new Set(EQUIPMENT.map(item=>item.id)).size,EQUIPMENT.length);
   for(const item of EQUIPMENT){
     assert.match(item.id,/^[a-z0-9-]+$/);assert.ok(Number.isFinite(item.weight)&&item.weight>=0);
-    assert.match(item.cost,/^[\d,.]+ (CP|SP|GP)$/);assert.ok(item.details.length>0);assert.ok(item.wiki.startsWith('https://www.dndbeyond.com/'));
+    assert.match(item.cost,/^[\d,.]+ (CP|SP|GP)$/);assert.ok(item.details.length>0);assert.ok(item.wiki.startsWith('https://dnd2024.wikidot.com/'));
   }
   for(const group of ['Weapons','Armor & shields','Adventuring gear','Equipment packs','Tools','Musical instruments','Gaming sets','Ammunition','Spellcasting focuses','Tack & drawn vehicles','Mounts','Ships & airships'])assert.ok(EQUIPMENT_GROUPS.includes(group),group);
   for(const id of ['net','thieves-tools','spellbook','potion-of-healing','waterskin','explorers-pack','warhorse','rowboat'])assert.ok(findEquipment(id),id);

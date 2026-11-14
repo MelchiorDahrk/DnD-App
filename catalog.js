@@ -1,10 +1,14 @@
 // Rules summaries adapted from the CC BY 4.0 SRD 5.2.1. See README.md for attribution.
 // Core-book options outside the SRD have short reference summaries, not full rules text.
-import {CLASSES, RULES_URL, mod, signed, uid} from './model.js';
+import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
 
-const equipmentURL = `${RULES_URL}/equipment`;
 const slug = value => value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const equipment = (name,group,weight,cost,details,extra={}) => ({id:slug(name),name,group,category:'Gear',weight,cost,details,wiki:equipmentURL,...extra});
+const equipmentURL=(name,group)=>{
+  const named=wikiURL(name,'equipment');
+  if(!named.endsWith('/equipment:all'))return named;
+  return wikiURL(/Weapons/.test(group)?'weapons':/Armor/.test(group)?'armor':/Tools|instruments|Gaming/.test(group)?'tools':/vehicles|Mounts|Ships/.test(group)?'mounts':'adventuring-gear');
+};
+const equipment = (name,group,weight,cost,details,extra={}) => ({id:slug(name),name,group,category:'Gear',weight,cost,details,wiki:equipmentURL(name,group),...extra});
 
 // name, damage, type, properties, mastery, weight (lb.), cost, family
 const weaponRows = [
@@ -176,9 +180,9 @@ const classRows = [
   ['Warlock','Charisma','wis,cha','Light','Simple weapons','Eldritch Invocations, Pact Magic (Charisma). Pact slots return after a Short or Long Rest.','Arcana, Deception, History, Intimidation, Investigation, Nature, Religion'],
   ['Wizard','Intelligence','int,wis','None','Simple weapons','Spellcasting (Intelligence), Ritual Adept, Arcane Recovery.','Arcana, History, Insight, Investigation, Medicine, Religion']
 ];
-export const CLASS_OPTIONS = classRows.map(([name,primary,saves,armor,weapons,details,skills])=>({name,hitDie:CLASSES[name],primary,saves:saves.split(','),armor,weapons,details,skills,skillCount:name==='Rogue'?4:['Bard','Ranger'].includes(name)?3:2,wiki:name==='Artificer'?'https://www.dndbeyond.com/classes':`${RULES_URL}/character-classes#${name}`}));
+export const CLASS_OPTIONS = classRows.map(([name,primary,saves,armor,weapons,details,skills])=>({name,hitDie:CLASSES[name],primary,saves:saves.split(','),armor,weapons,details,skills,skillCount:name==='Rogue'?4:['Bard','Ranger'].includes(name)?3:2,wiki:wikiURL(name)}));
 
-const species = (name,size,speed,senses,details) => ({name,size,speed,senses,details,wiki:`${name==='Aasimar'?'https://www.dndbeyond.com/sources/dnd/phb-2024':RULES_URL}/character-origins#${name.includes('Elf')||name==='Drow'?'Elf':name.includes('Gnome')?'Gnome':name.includes('Tiefling')?'Tiefling':name}`});
+const species = (name,size,speed,senses,details) => ({name,size,speed,senses,details,wiki:wikiURL(name,'species')});
 export const SPECIES = [
   species('Aasimar','Small or Medium',30,'Darkvision 60 ft.','Celestial Resistance (necrotic and radiant), Healing Hands, Light Bearer. Celestial Revelation at level 3. Core-book option.'),
   species('Dragonborn','Medium',30,'Darkvision 60 ft.','Choose draconic ancestry for damage resistance and Breath Weapon (Dex save, DC 8 + Con modifier + proficiency; uses = proficiency / Long Rest). Draconic Flight at level 5.'),
@@ -207,7 +211,7 @@ const backgroundRows = [
   ['Merchant','Constitution, Intelligence, Charisma','Lucky','Animal Handling, Persuasion','Navigator’s Tools'],['Noble','Strength, Intelligence, Charisma','Skilled','History, Persuasion','One Gaming Set'],['Sage','Constitution, Intelligence, Wisdom','Magic Initiate (Wizard)','Arcana, History','Calligrapher’s Supplies'],
   ['Sailor','Strength, Dexterity, Wisdom','Tavern Brawler','Acrobatics, Perception','Navigator’s Tools'],['Scribe','Dexterity, Intelligence, Wisdom','Skilled','Investigation, Perception','Calligrapher’s Supplies'],['Soldier','Strength, Dexterity, Constitution','Savage Attacker','Athletics, Intimidation','One Gaming Set'],['Wayfarer','Dexterity, Wisdom, Charisma','Lucky','Insight, Stealth','Thieves’ Tools']
 ];
-export const BACKGROUNDS = backgroundRows.map(([name,abilities,feat,skills,tool])=>({name,abilities,feat,skills,tool,details:`Increase one listed ability by 2 and another by 1, or all three by 1 (maximum 20). Choose the background’s starting equipment or 50 GP.`,wiki:`${['Acolyte','Criminal','Sage','Soldier'].includes(name)?RULES_URL:'https://www.dndbeyond.com/sources/dnd/phb-2024'}/character-origins#${name}`}));
+export const BACKGROUNDS = backgroundRows.map(([name,abilities,feat,skills,tool])=>({name,abilities,feat,skills,tool,details:`Increase one listed ability by 2 and another by 1, or all three by 1 (maximum 20). Choose the background’s starting equipment or 50 GP.`,wiki:wikiURL(name,'background')}));
 
 const subclassRows = {
   Artificer:[['Alchemist','Experimental elixirs.'],['Armorer','Magical armor.'],['Artillerist','Arcane artillery.'],['Battle Smith','Steel Defender and martial magic.']],
@@ -224,13 +228,13 @@ const subclassRows = {
   Warlock:[['Archfey Patron','Fey magic and enhanced Misty Step.'],['Celestial Patron','Healing Light and celestial spells.'],['Fiend Patron','Dark One’s Blessing and fiery magic.'],['Great Old One Patron','Telepathy and unsettling psychic magic.']],
   Wizard:[['Abjurer','Arcane Ward and protective magic.'],['Diviner','Portent and divination magic.'],['Evoker','Destructive magic and empowered cantrips.'],['Illusionist','Improved illusions and illusory creatures.']]
 };
-export const SUBCLASSES = Object.entries(subclassRows).flatMap(([className,rows])=>rows.map(([name,details])=>({name,className,details,level:3,wiki:className==='Artificer'?'https://www.dndbeyond.com/classes':`https://www.dndbeyond.com/sources/dnd/phb-2024/character-classes#${className}`})));
+export const SUBCLASSES = Object.entries(subclassRows).flatMap(([className,rows])=>rows.map(([name,details])=>({name,className,details,level:3,wiki:subclassURL(name,className)})));
 
 export const ORIGIN_FEATS = [
   ['Alert','Add proficiency bonus to initiative. Can swap initiative with a willing ally after rolling.'],['Crafter','Three Artisan’s Tools proficiencies, discounts on nonmagical items, and temporary crafted gear.'],['Healer','Use a Healer’s Kit to support healing with a Hit Die; reroll 1s on qualifying healing dice.'],['Lucky','Luck points equal proficiency bonus / Long Rest. Spend for advantage on your D20 Test or disadvantage on an attack against you.'],
   ['Magic Initiate (Cleric)','Choose two Cleric cantrips and one level 1 Cleric spell. Choose Int, Wis, or Cha; one free casting / Long Rest; may also use spell slots.'],['Magic Initiate (Druid)','Choose two Druid cantrips and one level 1 Druid spell. Choose Int, Wis, or Cha; one free casting / Long Rest; may also use spell slots.'],['Magic Initiate (Wizard)','Choose two Wizard cantrips and one level 1 Wizard spell. Choose Int, Wis, or Cha; one free casting / Long Rest; may also use spell slots.'],
   ['Musician','Three instrument proficiencies; after a Short or Long Rest, grant Heroic Inspiration to allies (up to proficiency bonus).'],['Savage Attacker','Once per turn when you hit with a weapon, roll its damage dice twice and use either result.'],['Skilled','Choose three skill or tool proficiencies.'],['Tavern Brawler','d4 unarmed damage, reroll 1s on unarmed damage, improvised weapon proficiency, and a once-per-turn 5-foot push on qualifying unarmed hits.'],['Tough','Maximum HP increases by 2 per character level.']
-].map(([name,details])=>({name,details,wiki:`${name==='Alert'||name.startsWith('Magic Initiate')||['Savage Attacker','Skilled'].includes(name)?RULES_URL:'https://www.dndbeyond.com/sources/dnd/phb-2024'}/feats`}));
+].map(([name,details])=>({name,details,wiki:wikiURL(name,'feat')}));
 
 export function applyStartingOptions(character) {
   const cls=CLASS_OPTIONS.find(option=>option.name===character.class);

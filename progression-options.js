@@ -1,3 +1,4 @@
+import {subclassURL} from './reference-links.js';
 // Feature names, unlock levels, and spell-list facts. Descriptions remain brief references.
 // 2024 options replace earlier versions; unrevised PHB options and the existing
 // supplemental Artificer/Beast options retain their earlier progression.
@@ -118,7 +119,7 @@ export const LEGACY_SUBCLASSES=[
   ['Wizard','Graviturgy Magic',[[3,'Adjust Density'],[6,'Gravity Well'],[10,'Violent Attraction'],[14,'Event Horizon']]],
   ['Wizard','Order of Scribes',[[3,'Wizardly Quill','Awakened Spellbook'],[6,'Manifest Mind'],[10,'Master Scrivener'],[14,'One with the Word']]],
   ['Wizard','War Magic',[[3,'Arcane Deflection','Tactical Wit'],[6,'Power Surge'],[10,'Durable Magic'],[14,'Deflecting Shroud']]]
-].map(([className,name,rows])=>({className,name,rows,source:'2014',wiki:`https://www.dndbeyond.com/sources/dnd/${['Knowledge Domain','Nature Domain','Tempest Domain','School of Conjuration','School of Enchantment','School of Necromancy','School of Transmutation'].includes(name)?'phb-2014':['Path of the Beast','Path of Wild Magic','College of Creation','College of Eloquence','Order Domain','Peace Domain','Twilight Domain','Circle of Spores','Circle of Wildfire','Rune Knight','Way of the Astral Self','Oath of the Watchers','Swarmkeeper','Phantom','Fathomless Patron','Genie Patron','Bladesinging','Order of Scribes'].includes(name)?'tcoe':['Path of the Battlerager','Arcana Domain','Purple Dragon Knight','Way of the Long Death','Oath of the Crown','Undying Patron'].includes(name)?'scag':['College of Spirits','Undead Patron'].includes(name)?'vrgtr':['Echo Knight','Chronurgy Magic','Graviturgy Magic'].includes(name)?'egtw':['Way of the Ascendant Dragon','Drakewarden'].includes(name)?'ftod':name==='Lunar Sorcery'?'dsotdq':['Death Domain','Oathbreaker'].includes(name)?'dmg-2014':'xgte'}`}));
+].map(([className,name,rows])=>({className,name,rows,source:'2014',wiki:subclassURL(name,className,'2014')}));
 // Each row: character/class level, always-prepared spells. These never consume
 // the class's ordinary prepared-spell allowance.
 export const SUBCLASS_SPELLS={

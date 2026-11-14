@@ -2,6 +2,10 @@
 
 The catalog follows the app’s 2024 rules scope. It is bundled with the static app, included in the build and offline cache, and does not need a network request to browse or fill a preset.
 
+Rules links prefer [the 2024 Wikidot wiki](https://dnd2024.wikidot.com/) and [the earlier 5e wiki](https://dnd5e.wikidot.com/) according to each option’s edition. Feats and spells open their individual pages, including the selected feat during level-up. Known older D&D Beyond rules links in saved characters resolve to matching wiki references when displayed; backups and custom URLs are preserved. The free publisher Basic Rules remain the fallback for general rules without a wiki page.
+
+`reference-links.js` centralizes resolution using the public paths in `reference-pages.js`. Refresh those indexes with `npm run build:references -- --download`, or rebuild from the ignored `.tmp/reference-pages/` cache without `--download`. Rebuild bundled spell links with `npm run build:progression` after changing reference resolution. Run `npm run test:references` and `npm run test:level-up` to check links in the browser.
+
 ## Coverage
 
 | Dropdown | Included data |

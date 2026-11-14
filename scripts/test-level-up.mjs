@@ -23,7 +23,8 @@ try{
   const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
   const active=s=>s.characters.find(c=>c.id===s.activeId);
   const set=async(name,value)=>page.$eval(`#modal [name="${name}"]`,(n,v)=>{n.value=String(v);n.dispatchEvent(new Event('change',{bubbles:true}));},value);
-  const open=()=>page.click('[data-action="level-up"]');
+  // Activate the intended control even while mobile viewport/portrait layout settles.
+  const open=()=>page.$eval('[data-action="level-up"]',button=>button.click());
   const submit=()=>page.click('#modal-form button[type="submit"]');
   const load=async c=>{const s=await state();s.characters=[c];s.activeId=c.id;await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),s);await page.reload({waitUntil:'networkidle0'});};
   await mkdir(resolve(root,'.tmp'),{recursive:true});
@@ -39,12 +40,12 @@ try{
   };
   let before=await state();await open();await page.click('#modal [data-action="close"]');assert.deepEqual(await state(),before);
   await open();const asi=FEATURE_CATALOG.find(f=>f.name==='Ability Score Improvement'&&f.group==='General feats');
-  await set('choice-feat',asi.id);assert.match(await page.$eval('[data-level-feat-reference]',n=>n.href),/#AbilityScoreImprovement$/);
+  await set('choice-feat',asi.id);assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.href),'https://dnd2024.wikidot.com/feat:ability-score-improvement');
   await set('ability-con',2);await set('ability-str',2);assert.equal(await page.$eval('[name="ability-str"]',n=>n.value),'0');
   await set('ability-con',1);await set('ability-dex',1);assert.match(await page.$eval('[data-level-ability-remaining]',n=>n.textContent),/^0 of 2/);
   const athlete=FEATURE_CATALOG.find(f=>f.name==='Athlete');await set('choice-feat',athlete.id);
   assert.equal(await page.$eval('[name="ability-dex"]',n=>n.value),'0','Changing feats clears previous increases');
-  assert.match(await page.$eval('[data-level-feat-reference]',n=>n.href),/#Athlete$/);
+  assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.href),'https://dnd2024.wikidot.com/feat:athlete');
   assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.target),'_blank');
   await set('ability-str',1);await set('ability-dex',1);assert.equal(await page.$eval('[name="ability-dex"]',n=>n.value),'0','A +1 feat shares one point across both scores');
   await set('choice-feat',asi.id);await set('choice-mastery','Club');await set('ability-con',2);await submit();
