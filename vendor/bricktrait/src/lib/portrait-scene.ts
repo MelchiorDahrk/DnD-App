@@ -1,5 +1,5 @@
 import {
-	AgXToneMapping,
+	NeutralToneMapping,
 	Box3,
 	DirectionalLight,
 	Group,
@@ -20,7 +20,8 @@ import {
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { LIGHTING, type LightingTheme } from './lighting.ts';
 import { MIN_ZOOM, type View } from './scene.ts';
-import { disposePortraitModel, emissionColor } from './materials.ts';
+import { disposePortraitModel, emissionBox, emissionColor } from './materials.ts';
+import { PortraitGlow } from './portrait-glow.ts';
 
 const FOV = 20;
 
@@ -38,6 +39,7 @@ export class PortraitStage {
 	private bounce = new Group();
 	private theme: LightingTheme = 'light';
 	private environment;
+	private glow = new PortraitGlow();
 
 	constructor() {
 		this.renderer = new WebGLRenderer({
@@ -47,7 +49,7 @@ export class PortraitStage {
 		});
 		this.renderer.setClearColor(0x000000, 0);
 		this.renderer.outputColorSpace = SRGBColorSpace;
-		this.renderer.toneMapping = AgXToneMapping;
+		this.renderer.toneMapping = NeutralToneMapping;
 		this.renderer.shadowMap.enabled = true;
 		this.renderer.shadowMap.type = PCFShadowMap;
 
@@ -59,7 +61,7 @@ export class PortraitStage {
 		pmrem.dispose();
 
 		const key = this.keyLight;
-		key.position.set(-130, 180, 180);
+		key.position.set(-200, 180, 140);
 		key.castShadow = true;
 		key.shadow.mapSize.set(1024, 1024);
 		key.shadow.intensity = 0.55;
@@ -107,6 +109,7 @@ export class PortraitStage {
 		}
 		this.bounce.clear();
 		this.model = model;
+		this.glow.setModel(model);
 		if (model) {
 			this.pivot.add(model);
 			// Measure in the unturned model frame; lights rotate with the accessory.
@@ -116,7 +119,9 @@ export class PortraitStage {
 				if (!(object instanceof Mesh) || this.bounce.children.length >= 3) return;
 				const color = emissionColor(object);
 				if (color.r + color.g + color.b < 0.1) return;
-				const center = new Box3().setFromObject(object).getCenter(new Vector3());
+				const bounds = emissionBox(object);
+				if (bounds.isEmpty()) return;
+				const center = bounds.getCenter(new Vector3());
 				// Several meshes can make one luminous part. Use one bounce per cluster.
 				if (this.bounce.children.some(light => light.position.distanceTo(center) < 12)) return;
 				color.multiplyScalar(1 / Math.max(color.r, color.g, color.b));
@@ -201,7 +206,7 @@ export class PortraitStage {
 		this.renderer.setPixelRatio(1);
 		this.renderer.setSize(size, size, false);
 		this.renderer.render(this.scene, this.camera);
-		return this.renderer.domElement;
+		return this.glow.render(this.renderer, this.scene, this.camera, size);
 	}
 }
 

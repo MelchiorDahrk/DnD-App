@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial } from 'three';
-import { preparePortraitModel, disposePortraitModel, emissionColor } from '../vendor/bricktrait/src/lib/materials.ts';
+import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, NoBlending, Vector3 } from 'three';
+import { preparePortraitModel, disposePortraitModel, emissionBox, emissionColor } from '../vendor/bricktrait/src/lib/materials.ts';
+import { portraitGlowMaterial } from '../vendor/bricktrait/src/lib/portrait-glow.ts';
 
 const piece = (id, material, geometry = new BoxGeometry()) => {
   const group = new Group();group.name = `${id}.dat`;
@@ -61,4 +62,51 @@ test('cloth and rubber stay matte while luminous palette colours retain emission
   assert.ok(rubber.mesh.material.roughness > 0.8);assert.equal(rubber.mesh.material.clearcoat,0);
   assert.ok(emissionColor(glow.mesh).g > 0);
   disposePortraitModel(model);
+});
+
+test('all existing emissive finishes have a glow mask, while white plastic stays an occluder', () => {
+  const model = new Group();
+  const emitters = [
+    ...['37775','6126a','6126b','85959','85959p01'].map(id=>piece(id,new MeshStandardMaterial({color:0xff8800}))),
+    ...['11127','30385','30213','79985'].map(id=>piece(id,new MeshStandardMaterial({color:0x55aaff,transparent:true,opacity:0.5}))),
+    piece('3626',new MeshStandardMaterial({color:0x88ff77,emissive:0x88ff77}))
+  ];
+  const white=piece('973',new MeshStandardMaterial({color:0xffffff}));
+  model.add(...emitters.map(p=>p.group),white.group);preparePortraitModel(model);
+  for(const {mesh} of emitters) {
+    assert.notEqual(emissionColor(mesh).getHex(),0);
+    const mask=portraitGlowMaterial(mesh.material);
+    assert.equal(mask.toneMapped,false);
+    assert.equal(mask.blending,NoBlending);
+    assert.equal(mask.premultipliedAlpha,true,'the transparent glow pass writes premultiplied pixels');
+    assert.equal(mask.depthWrite,true);
+    mask.dispose();
+  }
+  const occluder=portraitGlowMaterial(white.mesh.material);
+  assert.equal(occluder.opacity,0,'ordinary surfaces do not add a halo');
+  assert.equal(occluder.depthWrite,true,'opaque surfaces still hide emitters behind them');
+  occluder.dispose();disposePortraitModel(model);
+});
+
+test('wand emission and bounce follow the tip through part and figure transforms', () => {
+  const source=new MeshStandardMaterial({color:0x583927});
+  for(const [id,tip,shaft] of [['36752a',-44,0],['6124b',-62,-20],['28681',-62,-20]]) {
+    const geometry=new BufferGeometry();
+    geometry.setAttribute('position',new Float32BufferAttribute([0,tip,0,1,tip,0,0,shaft,0],3));
+    const wand=piece(id,source,geometry),body=piece('973',source),model=new Group();
+    wand.group.rotation.z=0.5;wand.group.position.set(12,20,3);model.rotation.x=Math.PI;
+    model.add(wand.group,body.group);preparePortraitModel(model);
+    assert.deepEqual([...wand.mesh.geometry.getAttribute('portraitEmissionMask').array],[1,1,0]);
+    assert.notEqual(emissionColor(wand.mesh).getHex(),0);
+    assert.equal(emissionColor(body.mesh).getHex(),0);
+    assert.equal(source.emissive.getHex(),0);
+    assert.equal(wand.mesh.material.color.getHex(),source.color.getHex(),'the wood/metal base colour is retained');
+    const center=emissionBox(wand.mesh).getCenter(new Vector3());
+    const tipCenter=new Vector3(0.5,tip,0).applyMatrix4(wand.mesh.matrixWorld);
+    assert.ok(center.distanceTo(tipCenter)<0.0001);
+    const mask=portraitGlowMaterial(wand.mesh.material);
+    const bodyMask=portraitGlowMaterial(body.mesh.material);
+    assert.notEqual(mask.customProgramCacheKey(),bodyMask.customProgramCacheKey(),'glow uses the same tip mask');
+    bodyMask.dispose();mask.dispose();disposePortraitModel(model);
+  }
 });
