@@ -53,6 +53,7 @@ try{
   const submit=()=>page.click('#modal button[type="submit"]');
   const clearAudio=()=>page.evaluate(()=>window.soundForTest.stopAll());
   const action=async(event,callback)=>{await new Promise(resolve=>setTimeout(resolve,250));const after=await mark();await callback();const error=await page.$eval('#form-error',n=>n.hidden?'':n.textContent).catch(()=>'');assert.equal(error,'',`${event}: ${error}`);await played(event,after);};
+  const adjustHP=async(amount,kind='damage')=>{await page.click('[data-action="hp"]');await page.$eval('#modal [name="amount"]',(n,amount)=>n.value=String(amount),amount);await page.click(`[data-action="hp-apply"][data-kind="${kind}"]`);};
 
   await navigate('dice');assert.equal(await mark(),0,'Opening dice does not request a sound');
   await dice([12]);await page.click('#dice-form button[type="submit"]');assert.equal(await page.evaluate(()=>window.audioMetrics.contexts),0,'Disabled gameplay allocates no audio');
@@ -127,7 +128,28 @@ try{
   parseBackup(JSON.stringify(await saved()));
   console.log('PASS rest ambience/cancel/completion, no-op healing, successful level-up/VFX and version 2 backup');
 
+  // Taking damage is an action even at 0 HP; its audio must not depend on a VFX delta.
+  const damage=async amount=>{
+    const after=await mark();await action('combat.damage',()=>adjustHP(amount));
+    assert.equal(await page.evaluate(after=>window.soundCalls.slice(after).filter(c=>c.name==='combat.damage').length,after),1,'One damage cue per action');
+  };
+  const fullHP=(await saved()).characters[0].hp;
+  await damage(2);assert.equal((await saved()).characters[0].hp,fullHP-2);
+  await action('magic.protect',()=>adjustHP(3,'temp'));
+  await damage(2);assert.equal((await saved()).characters[0].tempHp,1);assert.equal((await saved()).characters[0].hp,fullHP-2);
+  await damage(3);assert.equal((await saved()).characters[0].tempHp,0);assert.equal((await saved()).characters[0].hp,fullHP-4);
+  await damage(9999);assert.equal((await saved()).characters[0].hp,0);
+  await damage(2);assert.equal((await saved()).characters[0].hp,0);
+  const beforeZero=await mark();await adjustHP(0);assert.equal(await mark(),beforeZero,'Zero damage is silent');
+  await page.setViewport({width:390,height:844});
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  await damage(1);
+  await page.setViewport({width:1280,height:1000});await page.emulateMediaFeatures([]);
+  console.log('PASS damage to HP, temporary HP, overflow, 0 HP, zero amount and reduced-motion mobile playback');
+
   await navigate('settings');
+  await page.select('#sound-preview-event','combat.damage');await action('combat.damage',()=>page.click('[data-action="sound-preview"]'));
+  await page.select('#sound-preview-event','dice.roll');
   await page.evaluate(()=>{document.querySelector('#toasts').replaceChildren();document.querySelector('.sound-settings details').open=true;});
   for(const width of [390,320]){
     await page.setViewport({width,height:844});
@@ -136,14 +158,16 @@ try{
   }
   await page.setViewport({width:1280,height:1000});
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
-  const cached=await page.evaluate(async paths=>{const cacheNames=await caches.keys();const cache=await caches.open(cacheNames.find(n=>n.includes('v28-fantasy-sound-library')));return Promise.all(paths.map(async path=>!!await cache.match(new URL(path,location.href))));},SOUND_FILES);
+  const cached=await page.evaluate(async paths=>{const cacheNames=await caches.keys();const cache=await caches.open(cacheNames.find(n=>n.startsWith('questlog-app-')));return Promise.all(paths.map(async path=>!!await cache.match(new URL(path,location.href))));},SOUND_FILES);
   assert.ok(cached.every(Boolean),'Both encodings of the entire sound set are precached');
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});await instrument();
   await action('dice.roll',()=>page.click('[data-action="sound-preview"]'));
   await navigate('dice');await dice([12]);await action('dice.roll',()=>page.click('#dice-form button[type="submit"]'));
+  await navigate('sheet');await action('combat.damage',()=>adjustHP(1));
   await navigate('settings');await page.click('[data-action="sound"]');
   assert.equal(await page.evaluate(()=>window.soundForTest.diagnostics().voices),0,'Mute stops active playback');
   const starts=await page.evaluate(()=>window.audioMetrics.starts);await navigate('dice');await page.click('#dice-form button[type="submit"]');
+  await navigate('sheet');await adjustHP(1);
   assert.equal(await page.evaluate(()=>window.audioMetrics.starts),starts,'Muted offline gameplay stays silent');
   assert.deepEqual(errors,[]);assert.deepEqual(thirdPartyAudio,[]);
   console.log('PASS production build copies, /dist/ hosting, 320/390px settings, full offline cache/playback, mute and no external audio');

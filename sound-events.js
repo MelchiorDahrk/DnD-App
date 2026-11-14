@@ -18,7 +18,7 @@ export const SOUND_EVENTS={
   'combat.arrow-hit':event('combat',['arrow-impact'],.7),
   'combat.miss':event('combat',['swing-light','swing-sword'],.6),
   'combat.critical':event('combat',['metal-2'],.85,250),
-  'combat.damage':event('combat',['punch-1','blunt-1'],.5,150),
+  'combat.damage':event('combat',['punch-1','punch-2'],.8,150),
   'magic.cast':event('magic',['spell-cast-1','spell-cast-2'],.55,220),
   // Dedicated fire/dark recordings are a documented gap; use the neutral cast cue.
   'magic.fire':event('magic',['spell-cast-1'],.55,220),
