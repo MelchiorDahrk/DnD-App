@@ -1,6 +1,6 @@
 // Development only. Normal builds/playback never contact the source repositories.
 import {readFile,writeFile,mkdir} from 'node:fs/promises';
-import {resolve} from 'node:path';
+import {resolve,basename} from 'node:path';
 import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {unzipSync} from 'fflate';
@@ -35,11 +35,14 @@ const assets=[];
 for(const chosen of selection.sounds){
   if(!/^[a-z0-9-]+$/.test(chosen.id)||!['dice','combat','magic','progression','inventory','interface','ambient'].includes(chosen.category))throw Error('Unsafe asset ID/category');
   const entry=chosen.catalogId?catalog.sounds.find(s=>s.id===chosen.catalogId):chosen;
-  if(!entry||entry.license!=='CC0-1.0')throw Error(`Only verified CC0 assets are allowed: ${chosen.id}`);
+  const local=chosen.sourceType==='user-provided';
+  if(!entry||(!local&&entry.license!=='CC0-1.0'))throw Error(`Only verified CC0 or explicitly user-provided assets are allowed: ${chosen.id}`);
+  if(local&&(!/^scripts\/sfx-sources\/[a-zA-Z0-9_. -]+\.(wav|mp3)$/.test(chosen.localFile||'')||chosen.localFile.includes('..')))throw Error(`Unsafe local source: ${chosen.id}`);
   const format=chosen.catalogId?['ogg','wav','flac','mp3'].find(f=>entry[`file_${f}`]):chosen.format;
   const originalSha256=chosen.catalogId?entry[`sha256_${format}`]:chosen.sha256;
-  const sourceFileURL=chosen.catalogId?entry[`download_url_${format}`].replace('/main/',`/${selection.revision}/`):chosen.downloadUrl;
-  let bytes=await download(sourceFileURL,originalSha256);
+  const sourceFileURL=local?null:chosen.catalogId?entry[`download_url_${format}`].replace('/main/',`/${selection.revision}/`):chosen.downloadUrl;
+  let bytes=local?await readFile(resolve(root,chosen.localFile)):await download(sourceFileURL,originalSha256);
+  if(local&&hash(bytes)!==originalSha256)throw Error(`SHA-256 mismatch: ${chosen.localFile}`);
   if(chosen.archivePath){
     bytes=unzipSync(bytes)[chosen.archivePath];
     if(!bytes||hash(bytes)!==chosen.extractedSha256)throw Error(`Archive member mismatch: ${chosen.id}`);
@@ -61,7 +64,7 @@ for(const chosen of selection.sounds){
     const output=await readFile(resolve(root,path));files[outputFormat]=path;sha256[outputFormat]=hash(output);sizes[outputFormat]=output.length;
   }
   const pcm=run(['-hide_banner','-loglevel','error','-i',resolve(root,files.ogg),'-f','s16le','-ac','1','-ar','44100','-'],null).stdout;
-  assets.push({id:chosen.id,filename:`${chosen.id}.ogg`,category:chosen.category,files,catalogId:chosen.catalogId||null,author:chosen.author,pack:entry.pack,sourceURL:entry.source,sourceFileURL,license:entry.license,originalSha256,originalFormat:format,...(chosen.archivePath?{archivePath:chosen.archivePath,extractedSha256:chosen.extractedSha256}:{}),duration:Number((pcm.length/88200).toFixed(3)),tags:chosen.tags||entry.tags,edit:{start:chosen.start||0,duration:chosen.duration||null,normalizationDb},sha256,sizes});
+  assets.push({id:chosen.id,filename:`${chosen.id}.ogg`,category:chosen.category,files,catalogId:chosen.catalogId||null,author:chosen.author||null,pack:entry.pack,sourceURL:entry.source||null,sourceFileURL,license:entry.license||null,...(local?{sourceType:chosen.sourceType,localFile:chosen.localFile,originalFilename:basename(chosen.localFile)}:{}),originalSha256,originalFormat:format,...(chosen.archivePath?{archivePath:chosen.archivePath,extractedSha256:chosen.extractedSha256}:{}),duration:Number((pcm.length/88200).toFixed(3)),tags:chosen.tags||entry.tags,edit:{start:chosen.start||0,duration:chosen.duration||null,normalizationDb},sha256,sizes});
   console.log(`Imported ${chosen.id}`);
 }
 const manifest={version:1,source:{repository:selection.repository,revision:selection.revision,catalogURL,catalogSha256:selection.catalogSha256},encoding:{tool:version,ogg:'Vorbis q3, mono 44.1kHz',mp3:'LAME 96kbps, mono 44.1kHz',peakLimitDb:-3},assets};

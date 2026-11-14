@@ -142,24 +142,6 @@
       "author": "artisticdude"
     },
     {
-      "id": "pizzi-0",
-      "category": "progression",
-      "catalogId": "music-jingles_jingles_PIZZI00",
-      "author": "Kenney"
-    },
-    {
-      "id": "pizzi-1",
-      "category": "progression",
-      "catalogId": "music-jingles_jingles_PIZZI01",
-      "author": "Kenney"
-    },
-    {
-      "id": "pizzi-7",
-      "category": "progression",
-      "catalogId": "music-jingles_jingles_PIZZI07",
-      "author": "Kenney"
-    },
-    {
       "id": "pizzi-10",
       "category": "progression",
       "catalogId": "music-jingles_jingles_PIZZI10",
@@ -172,10 +154,71 @@
       "author": "Kenney"
     },
     {
-      "id": "pizzi-16",
+      "id": "long-rest",
       "category": "progression",
-      "catalogId": "music-jingles_jingles_PIZZI16",
-      "author": "Kenney"
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/24.wav",
+      "format": "wav",
+      "sha256": "130ccfeca4cea5edd7998fa1124a28ec0d03e3e3a985e745118e67bde47d90f1",
+      "pack": "User-provided gameplay sounds",
+      "tags": [
+        "rest",
+        "long rest"
+      ]
+    },
+    {
+      "id": "inspiration",
+      "category": "progression",
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Ability Learn.mp3",
+      "format": "mp3",
+      "sha256": "a6ab1b8eb90ae46699c7f13f474c791aa02aa9dda72ea785d1a6c324f72af393",
+      "pack": "User-provided gameplay sounds",
+      "tags": [
+        "inspiration",
+        "gain",
+        "spend"
+      ]
+    },
+    {
+      "id": "short-rest",
+      "category": "progression",
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Level Up.mp3",
+      "format": "mp3",
+      "sha256": "e4cb8e02fd932b50a331ba1451c554db4fbe474462b6ecb54a3f6096be1865d6",
+      "pack": "User-provided gameplay sounds",
+      "tags": [
+        "rest",
+        "short rest"
+      ]
+    },
+    {
+      "id": "level-up",
+      "category": "progression",
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Heavy_ConceptB.wav",
+      "format": "wav",
+      "sha256": "cf7aca1193530c804f41a22cfd9a2813c25d3c244fa96ad88c88c6206daa033d",
+      "pack": "User-provided gameplay sounds",
+      "tags": [
+        "level up",
+        "progression"
+      ]
+    },
+    {
+      "id": "gain-xp",
+      "category": "progression",
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/audio_oga-levelup-powerup_Rise03.wav",
+      "format": "wav",
+      "sha256": "11e9c529952eaa3c1424038ae2531576950c95d6df5762d3ca5f0a2e939860dc",
+      "pack": "User-provided gameplay sounds",
+      "tags": [
+        "xp",
+        "experience",
+        "progression"
+      ]
     },
     {
       "id": "book-open",

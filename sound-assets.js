@@ -161,27 +161,6 @@ export const SOUND_ASSETS = {
     },
     "duration": 3.25
   },
-  "pizzi-0": {
-    "files": {
-      "ogg": "assets/sfx/progression/pizzi-0.ogg",
-      "mp3": "assets/sfx/progression/pizzi-0.mp3"
-    },
-    "duration": 0.515
-  },
-  "pizzi-1": {
-    "files": {
-      "ogg": "assets/sfx/progression/pizzi-1.ogg",
-      "mp3": "assets/sfx/progression/pizzi-1.mp3"
-    },
-    "duration": 0.999
-  },
-  "pizzi-7": {
-    "files": {
-      "ogg": "assets/sfx/progression/pizzi-7.ogg",
-      "mp3": "assets/sfx/progression/pizzi-7.mp3"
-    },
-    "duration": 1.324
-  },
   "pizzi-10": {
     "files": {
       "ogg": "assets/sfx/progression/pizzi-10.ogg",
@@ -196,12 +175,40 @@ export const SOUND_ASSETS = {
     },
     "duration": 1.014
   },
-  "pizzi-16": {
+  "long-rest": {
     "files": {
-      "ogg": "assets/sfx/progression/pizzi-16.ogg",
-      "mp3": "assets/sfx/progression/pizzi-16.mp3"
+      "ogg": "assets/sfx/progression/long-rest.ogg",
+      "mp3": "assets/sfx/progression/long-rest.mp3"
     },
-    "duration": 0.459
+    "duration": 2.553
+  },
+  "inspiration": {
+    "files": {
+      "ogg": "assets/sfx/progression/inspiration.ogg",
+      "mp3": "assets/sfx/progression/inspiration.mp3"
+    },
+    "duration": 3.344
+  },
+  "short-rest": {
+    "files": {
+      "ogg": "assets/sfx/progression/short-rest.ogg",
+      "mp3": "assets/sfx/progression/short-rest.mp3"
+    },
+    "duration": 4.18
+  },
+  "level-up": {
+    "files": {
+      "ogg": "assets/sfx/progression/level-up.ogg",
+      "mp3": "assets/sfx/progression/level-up.mp3"
+    },
+    "duration": 11.842
+  },
+  "gain-xp": {
+    "files": {
+      "ogg": "assets/sfx/progression/gain-xp.ogg",
+      "mp3": "assets/sfx/progression/gain-xp.mp3"
+    },
+    "duration": 1.556
   },
   "book-open": {
     "files": {

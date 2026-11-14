@@ -83,7 +83,7 @@ try{
     return results;
   },manifest.assets);
   for(const r of decoded){assert.ok(r.duration>0&&r.duration<15,JSON.stringify(r));assert.ok(r.rms>.0003,`Silent: ${JSON.stringify(r)}`);assert.ok(r.onset>=0&&r.onset<.3,`Delayed onset: ${JSON.stringify(r)}`);}
-  assert.equal(decoded.length,98);console.log('PASS 49 effects × OGG/MP3 real decoding, non-silence and responsive onset');
+  assert.equal(decoded.length,SOUND_FILES.length);console.log(`PASS ${manifest.assets.length} effects × OGG/MP3 real decoding, non-silence and responsive onset`);
 
   await navigate('sheet');await clearAudio();
   const attack=(id,event,roll=12)=>action(event,async()=>{await page.click(`[data-action="attack-roll"][data-id="${id}"]`);await dice([roll]);await page.click('#modal [data-combat-action="roll"]');});

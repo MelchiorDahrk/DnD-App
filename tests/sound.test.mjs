@@ -31,12 +31,19 @@ test('curated local assets have approved provenance, hashes, formats and event m
   let bytes=0;
   for(const asset of manifest.assets){
     assert.ok(referenced.has(asset.id),`Unmapped asset: ${asset.id}`);
-    assert.equal(asset.license,'CC0-1.0');assert.ok(asset.author&&asset.pack&&asset.sourceURL);
-    const proof=evidence.find(p=>p.sourceURL===asset.sourceURL);assert.equal(proof?.license,'CC0-1.0');assert.equal(proof.evidenceType,'original-source-page');assert.match(proof.sourcePageSha256,/^[a-f0-9]{64}$/);
     assert.match(asset.originalSha256,/^[a-f0-9]{64}$/);
     const chosen=selection.sounds.find(s=>s.id===asset.id);assert.ok(chosen);
-    if(asset.catalogId){assert.equal(asset.catalogId,chosen.catalogId);assert.ok(asset.sourceFileURL.includes('/'+manifest.source.revision+'/'));}
-    else {assert.equal(chosen.license,'CC0-1.0');assert.equal(asset.originalSha256,chosen.sha256);}
+    if(asset.sourceType==='user-provided'){
+      assert.equal(chosen.sourceType,'user-provided');assert.equal(asset.localFile,chosen.localFile);
+      assert.match(asset.localFile,/^scripts\/sfx-sources\/[a-zA-Z0-9_. -]+\.(wav|mp3)$/);assert.ok(!asset.localFile.includes('..'));
+      assert.equal(asset.license,null,'Do not infer a license for user-provided files');
+      assert.equal(asset.originalSha256,chosen.sha256);assert.equal(hash(await read(asset.localFile)),chosen.sha256);
+    }else{
+      assert.equal(asset.license,'CC0-1.0');assert.ok(asset.author&&asset.pack&&asset.sourceURL);
+      const proof=evidence.find(p=>p.sourceURL===asset.sourceURL);assert.equal(proof?.license,'CC0-1.0');assert.equal(proof.evidenceType,'original-source-page');assert.match(proof.sourcePageSha256,/^[a-f0-9]{64}$/);
+      if(asset.catalogId){assert.equal(asset.catalogId,chosen.catalogId);assert.ok(asset.sourceFileURL.includes('/'+manifest.source.revision+'/'));}
+      else {assert.equal(chosen.license,'CC0-1.0');assert.equal(asset.originalSha256,chosen.sha256);}
+    }
     assert.ok(asset.duration>0&&asset.duration<=15,asset.id);
     for(const format of ['ogg','mp3']){
       const path=asset.files[format];assert.match(path,/^assets\/sfx\/[a-z0-9/-]+\.(ogg|mp3)$/);

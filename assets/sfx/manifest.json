@@ -918,120 +918,6 @@
       }
     },
     {
-      "id": "pizzi-0",
-      "filename": "pizzi-0.ogg",
-      "category": "progression",
-      "files": {
-        "ogg": "assets/sfx/progression/pizzi-0.ogg",
-        "mp3": "assets/sfx/progression/pizzi-0.mp3"
-      },
-      "catalogId": "music-jingles_jingles_PIZZI00",
-      "author": "Kenney",
-      "pack": "music-jingles",
-      "sourceURL": "https://kenney.nl/assets/music-jingles",
-      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI00.ogg",
-      "license": "CC0-1.0",
-      "originalSha256": "b442ade3308a2bbda4b8c572c86f9f1071c7bdbcfb1e6f915d35c605b61bd475",
-      "originalFormat": "ogg",
-      "duration": 0.515,
-      "tags": [
-        "jingle",
-        "jingles",
-        "music",
-        "pizzi00",
-        "stinger"
-      ],
-      "edit": {
-        "start": 0,
-        "duration": null,
-        "normalizationDb": 3.1
-      },
-      "sha256": {
-        "ogg": "cf16f936a4484d1380913b7fa0532f98b3648982045cdb16243afd69094ac237",
-        "mp3": "486c287eb5aeab89d4aed646e4dc3787430637c0d2cdbf08f479ae1e34f0b888"
-      },
-      "sizes": {
-        "ogg": 7233,
-        "mp3": 6269
-      }
-    },
-    {
-      "id": "pizzi-1",
-      "filename": "pizzi-1.ogg",
-      "category": "progression",
-      "files": {
-        "ogg": "assets/sfx/progression/pizzi-1.ogg",
-        "mp3": "assets/sfx/progression/pizzi-1.mp3"
-      },
-      "catalogId": "music-jingles_jingles_PIZZI01",
-      "author": "Kenney",
-      "pack": "music-jingles",
-      "sourceURL": "https://kenney.nl/assets/music-jingles",
-      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI01.ogg",
-      "license": "CC0-1.0",
-      "originalSha256": "3f8f2534a297d19386c233a7ee4fa8737cc40870dd206010263760e1983dde46",
-      "originalFormat": "ogg",
-      "duration": 0.999,
-      "tags": [
-        "jingle",
-        "jingles",
-        "music",
-        "pizzi01",
-        "stinger"
-      ],
-      "edit": {
-        "start": 0,
-        "duration": null,
-        "normalizationDb": 2.1
-      },
-      "sha256": {
-        "ogg": "4d9b102ab34ff4f73ba7a88870dc1458fd6b0ca38d26d7d66b9371b75172d6d2",
-        "mp3": "fe06c2e8156b054e3d0197bcc70dc7600147ce9e1aa2e4472c2974df529b3d68"
-      },
-      "sizes": {
-        "ogg": 11191,
-        "mp3": 12539
-      }
-    },
-    {
-      "id": "pizzi-7",
-      "filename": "pizzi-7.ogg",
-      "category": "progression",
-      "files": {
-        "ogg": "assets/sfx/progression/pizzi-7.ogg",
-        "mp3": "assets/sfx/progression/pizzi-7.mp3"
-      },
-      "catalogId": "music-jingles_jingles_PIZZI07",
-      "author": "Kenney",
-      "pack": "music-jingles",
-      "sourceURL": "https://kenney.nl/assets/music-jingles",
-      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI07.ogg",
-      "license": "CC0-1.0",
-      "originalSha256": "91870588924e0e498c6eb8d4f4ccf8595c9e7dc51fb553797b551062e642ce7c",
-      "originalFormat": "ogg",
-      "duration": 1.324,
-      "tags": [
-        "jingle",
-        "jingles",
-        "music",
-        "pizzi07",
-        "stinger"
-      ],
-      "edit": {
-        "start": 0,
-        "duration": null,
-        "normalizationDb": 2.7
-      },
-      "sha256": {
-        "ogg": "dcca99a386fd6b88e1ea0dbf28d6f994d1590a51259421504bda02727bf1d403",
-        "mp3": "939bab27fb34a66e47c85630603ad859a8ae7a354be886f19aa714f1b5bb08c7"
-      },
-      "sizes": {
-        "ogg": 12755,
-        "mp3": 16300
-      }
-    },
-    {
       "id": "pizzi-10",
       "filename": "pizzi-10.ogg",
       "category": "progression",
@@ -1108,41 +994,195 @@
       }
     },
     {
-      "id": "pizzi-16",
-      "filename": "pizzi-16.ogg",
+      "id": "long-rest",
+      "filename": "long-rest.ogg",
       "category": "progression",
       "files": {
-        "ogg": "assets/sfx/progression/pizzi-16.ogg",
-        "mp3": "assets/sfx/progression/pizzi-16.mp3"
+        "ogg": "assets/sfx/progression/long-rest.ogg",
+        "mp3": "assets/sfx/progression/long-rest.mp3"
       },
-      "catalogId": "music-jingles_jingles_PIZZI16",
-      "author": "Kenney",
-      "pack": "music-jingles",
-      "sourceURL": "https://kenney.nl/assets/music-jingles",
-      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/music-jingles/jingles_PIZZI16.ogg",
-      "license": "CC0-1.0",
-      "originalSha256": "1b1211b6360aae37ea685fee057bcabd034a749c1dfac6a9d643086d96e9b9aa",
-      "originalFormat": "ogg",
-      "duration": 0.459,
+      "catalogId": null,
+      "author": null,
+      "pack": "User-provided gameplay sounds",
+      "sourceURL": null,
+      "sourceFileURL": null,
+      "license": null,
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/24.wav",
+      "originalFilename": "24.wav",
+      "originalSha256": "130ccfeca4cea5edd7998fa1124a28ec0d03e3e3a985e745118e67bde47d90f1",
+      "originalFormat": "wav",
+      "duration": 2.553,
       "tags": [
-        "jingle",
-        "jingles",
-        "music",
-        "pizzi16",
-        "stinger"
+        "rest",
+        "long rest"
       ],
       "edit": {
         "start": 0,
         "duration": null,
-        "normalizationDb": 2.4
+        "normalizationDb": -2.5
       },
       "sha256": {
-        "ogg": "d37c1476523a2d52be03b36acab259e9b231b56c4df05e49e47c0fda10ae3302",
-        "mp3": "1418ac103abcf9c2904a3be2ca27fec3c5fd1698b15f2935fedf9e1be1e763a7"
+        "ogg": "701b86ddda1f6cf046eef6b1507151739f9935c38895eb01b9f054ec717daeb2",
+        "mp3": "f6657e033ca47ca882ee7ddada9c7f6d5eeb4fcea7487d2e4fe827fd77e927c0"
       },
       "sizes": {
-        "ogg": 7062,
-        "mp3": 5956
+        "ogg": 19338,
+        "mp3": 31033
+      }
+    },
+    {
+      "id": "inspiration",
+      "filename": "inspiration.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/inspiration.ogg",
+        "mp3": "assets/sfx/progression/inspiration.mp3"
+      },
+      "catalogId": null,
+      "author": null,
+      "pack": "User-provided gameplay sounds",
+      "sourceURL": null,
+      "sourceFileURL": null,
+      "license": null,
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Ability Learn.mp3",
+      "originalFilename": "Ability Learn.mp3",
+      "originalSha256": "a6ab1b8eb90ae46699c7f13f474c791aa02aa9dda72ea785d1a6c324f72af393",
+      "originalFormat": "mp3",
+      "duration": 3.344,
+      "tags": [
+        "inspiration",
+        "gain",
+        "spend"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.9
+      },
+      "sha256": {
+        "ogg": "4e11db64a057c4701c96a26bf436391d75984bfc1f91c52f53259e834ddad8e8",
+        "mp3": "3b61229c63fed2fd1b9c4b80e3b86166ca7d301cabe4c916c98cb8e91415b1c6"
+      },
+      "sizes": {
+        "ogg": 26389,
+        "mp3": 40438
+      }
+    },
+    {
+      "id": "short-rest",
+      "filename": "short-rest.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/short-rest.ogg",
+        "mp3": "assets/sfx/progression/short-rest.mp3"
+      },
+      "catalogId": null,
+      "author": null,
+      "pack": "User-provided gameplay sounds",
+      "sourceURL": null,
+      "sourceFileURL": null,
+      "license": null,
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Level Up.mp3",
+      "originalFilename": "Level Up.mp3",
+      "originalSha256": "e4cb8e02fd932b50a331ba1451c554db4fbe474462b6ecb54a3f6096be1865d6",
+      "originalFormat": "mp3",
+      "duration": 4.18,
+      "tags": [
+        "rest",
+        "short rest"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": -1.3
+      },
+      "sha256": {
+        "ogg": "621716ea4ec2f7621ede041eb46da86e0e8b078d345fe8f02493f5b0572a9ce7",
+        "mp3": "547153ce9afaac612302f7f7572977310fe60367ee79c848a877577c594680dc"
+      },
+      "sizes": {
+        "ogg": 33294,
+        "mp3": 50469
+      }
+    },
+    {
+      "id": "level-up",
+      "filename": "level-up.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/level-up.ogg",
+        "mp3": "assets/sfx/progression/level-up.mp3"
+      },
+      "catalogId": null,
+      "author": null,
+      "pack": "User-provided gameplay sounds",
+      "sourceURL": null,
+      "sourceFileURL": null,
+      "license": null,
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/Heavy_ConceptB.wav",
+      "originalFilename": "Heavy_ConceptB.wav",
+      "originalSha256": "cf7aca1193530c804f41a22cfd9a2813c25d3c244fa96ad88c88c6206daa033d",
+      "originalFormat": "wav",
+      "duration": 11.842,
+      "tags": [
+        "level up",
+        "progression"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.6
+      },
+      "sha256": {
+        "ogg": "66c121aeb008a4027e8faf28091ad839a980f221f72d4398838d50b7fe074a67",
+        "mp3": "9ff8a20dd4900f5aee403f4252aa94743d4c28fec3df6e01e619ed56a3152829"
+      },
+      "sizes": {
+        "ogg": 106055,
+        "mp3": 142629
+      }
+    },
+    {
+      "id": "gain-xp",
+      "filename": "gain-xp.ogg",
+      "category": "progression",
+      "files": {
+        "ogg": "assets/sfx/progression/gain-xp.ogg",
+        "mp3": "assets/sfx/progression/gain-xp.mp3"
+      },
+      "catalogId": null,
+      "author": null,
+      "pack": "User-provided gameplay sounds",
+      "sourceURL": null,
+      "sourceFileURL": null,
+      "license": null,
+      "sourceType": "user-provided",
+      "localFile": "scripts/sfx-sources/audio_oga-levelup-powerup_Rise03.wav",
+      "originalFilename": "audio_oga-levelup-powerup_Rise03.wav",
+      "originalSha256": "11e9c529952eaa3c1424038ae2531576950c95d6df5762d3ca5f0a2e939860dc",
+      "originalFormat": "wav",
+      "duration": 1.556,
+      "tags": [
+        "xp",
+        "experience",
+        "progression"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 1.8
+      },
+      "sha256": {
+        "ogg": "42fccf2f67683ed765447adfc3cbd6809e369e2f9d3d1afd69b4c1984c51c1fa",
+        "mp3": "2a29255896a9488c8592ff02dd183b45bcc73393dc63264231b4546c6e5b3366"
+      },
+      "sizes": {
+        "ogg": 12521,
+        "mp3": 19122
       }
     },
     {
