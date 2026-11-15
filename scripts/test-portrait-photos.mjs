@@ -51,7 +51,14 @@ async function apply(){await page.click('[data-photo="apply"]');await page.waitF
 try {
   console.log('RUN photo upload, matching and desktop selection');
   await page.goto(base,{waitUntil:'networkidle0'});await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());await page.reload({waitUntil:'networkidle0'});
-  await page.evaluate(()=>navigator.serviceWorker.ready);await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+  // The initial reload can race the first worker's clients.claim(). An activated
+  // registration controls the next navigation even when it missed this client.
+  await page.waitForFunction(async()=>{
+    const registration=await navigator.serviceWorker.getRegistration();
+    return registration?.active?.state==='activated';
+  },{timeout:60000});
+  if(!await page.evaluate(()=>!!navigator.serviceWorker.controller))await page.reload({waitUntil:'networkidle0'});
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:60000});
   // A rendered figure with deterministic sensor noise exercises the real worker,
   // Canvas regions and matcher. No network inference response is mocked.
   const generated=await page.evaluate(async()=>{

@@ -41,3 +41,8 @@ The shared browser helper now makes the test targets eager, waits at most 15 sec
 Opening a part palette schedules a native `details` toggle that rebuilds its buttons. Photo tests wait for that initial render, use locators that reacquire replaced controls, and verify the chosen part and enabled color control after clicking. Both 320px and 390px fresh-palette paths remain functional deployment checks. Set `PORTRAIT_PHOTO_CPU_RATE=4` when running `test:portrait-photos` to stress those mobile interactions under slower rendering.
 
 On failure, the photo suite records a screenshot and control geometry/state under `.tmp/browser-diagnostics/`. The deployment workflow uploads those diagnostics as `browser-failure-diagnostics`, while preserving the original test failure.
+
+Photo-test startup waits for the service worker to activate before checking control.
+If the initial navigation raced activation, it reloads once under the active worker.
+The control check retains the 60-second bound used by the portrait suite; all
+subsequent offline checks still require actual service-worker control.
