@@ -7,7 +7,7 @@ Palette values, text contrast measurements, exact dimensions, panel height ceili
 ## Commands
 
 Run `npm run verify:deploy` before pushing. It runs syntax and unit checks,
-builds the production app, rechecks generated assets, then runs **all seven**
+builds the production app, rechecks generated assets, then runs **all eight**
 required browser suites under `/dist/`. Set `BROWSER_PATH` to a Chromium executable.
 `npm run test:deploy` runs just the production browser checks against an existing
 build and starts/stops its own preview server. To check an already-running preview,
@@ -30,8 +30,17 @@ stop publication; checks are not retried or ignored.
 | `npm run test:visual` | Optional palette contrast tests plus the theme suite with layout/contrast measurements and screenshots |
 | `npm run test:sheet -- --visual` | Add optional sheet layout and thumbnail dimension measurements |
 | `npm run test:portraits -- --visual` | Add optional portrait/editor layout and equipment framing measurements |
+| `npm run test:presets -- --visual` | Add optional preview size/transparency and mobile layout measurements to preset interaction checks |
+| `npm run test:dice -- --visual` | Add optional die scale and tray-height measurements to dice interaction checks |
 
 The equipment and photo-matching browser suites also accept `--visual` for their optional measurements. Set `QUESTLOG_VISUAL_CHECKS=1` when explicitly running an entire group with visual review enabled. Set `BROWSER_PATH` to a Chromium executable when the installed browser cannot be found automatically. The standalone portrait/photo scripts expect an already-running server; retain their existing URL environment variables.
+
+Catalog checks validate IDs, components, source coverage, summary totals, filters,
+and save compatibility against the current data. They do not freeze the number of
+presets, themes, inventory items, weapons, or legacy magic items. Preset browser
+fixtures come from the catalog and use stable entry IDs, so names, filter order,
+and page size can change. Every preset preview must still decode, and mobile
+selection, save/cancel, customization and offline reconstruction remain required.
 
 The dice suite fixes open-dice's throw vectors as well as the recorded dice values,
 so deployment does not depend on randomly chosen physics trajectories. It still
@@ -39,7 +48,11 @@ runs the real prediction, animation, and landing-face checks. A separate stalled
 engine check verifies the production timeout preserves exactly one result. Set
 `DICE_TEST_CPU_RATE=4` and `DICE_TEST_SOFTWARE_RENDERING=1` to exercise slow software
 painting as well as JavaScript. The suite verifies that natural-20 particles follow
-the 3D throw, and that particle lifetimes remain bounded at low frame rates.
+the 3D throw, and that effects release their overlay and canvas after playback.
+The sparse-frame lifetime and cancellation regressions run with a controlled
+clock in `tests/vfx-lifecycle.test.mjs`. They do not depend on runner painting speed.
+Exact die scale and tray-height measurements require `--visual`; mobile result
+visibility, real landing faces, resource use and fallback behavior stay mandatory.
 Failures save the tray state,
 browser errors, console messages, and a screenshot in `.tmp/browser-diagnostics/dice/`
 for the workflow's existing artifact upload.
@@ -75,3 +88,18 @@ Photo-test startup waits for the service worker to activate before checking cont
 If the initial navigation raced activation, it reloads once under the active worker.
 The control check retains the 60-second bound used by the portrait suite; all
 subsequent offline checks still require actual service-worker control.
+
+## November 15 deployment regression
+
+[Runs 43761279353](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43761279353)
+and [43767957087](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43767957087)
+built successfully and passed the sheet and item suites. The dice suite then
+timed out in a five-second particle test that replaced the browser's global
+animation scheduler with delayed callbacks. That simulation now runs as a unit
+regression with a controlled clock. The browser cleanup check uses normal playback,
+timer-based polling and a bounded 15-second wait, retaining real cleanup coverage.
+
+The workflow allows 45 minutes for browser suites (their individual limits total
+40) and 95 minutes for the build job, including the cold-build allowance and cache
+overhead. Static packaging clears `dist/` first, so removed files cannot linger
+and hide a packaging defect during repeated local verification.

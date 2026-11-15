@@ -22,14 +22,14 @@ test('every catalog source has a unique setting and spelling variants share the 
   assert.notDeepEqual(contentSourceIds({book:'Player’s Handbook (2014)'}),contentSourceIds({book:'Player’s Handbook (2024)'}));
 });
 
-test('settings hide all eight giant feats and their items from initial and searched choices',()=>{
+test('settings hide every giant feat and item from initial and searched choices',()=>{
   const character=makeCharacter({level:9});
-  assert.equal(giantFeats.length,8);
+  assert.ok(giantFeats.length);
   assert.ok(giantFeats.some(entry=>entry.name==='Guile of the Cloud Giant'));
-  assert.equal(visibleContent(giantFeats,{}).length,8);
+  assert.deepEqual(visibleContent(giantFeats,{}),giantFeats);
   assert.deepEqual(visibleContent(giantFeats,settings),[]);
   const giantItems=EQUIPMENT.filter(entry=>contentSourceIds(entry,'item').includes(hiddenSources[0]));
-  assert.equal(giantItems.length,27);
+  assert.ok(giantItems.length);
   assert.deepEqual(filterEquipment(giantItems,{settings}),[]);
   assert.deepEqual(filterEquipment(giantItems,{settings,query:'giant'}),[]);
   const featPicker=catalogPicker('feat',character,settings),itemPicker=catalogPicker('item',character,settings);

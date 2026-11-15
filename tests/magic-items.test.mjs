@@ -12,7 +12,8 @@ test('magic catalog covers every indexed item page exactly once, retaining varia
   const category=/^\/magic-item:(?:all|armor|consumable|crafting|potion|ring|rod|scroll|sources|staff|type|wand|weapon|wondrous-item)$/;
   const expected=PAGES_2024.filter(path=>path.startsWith('/magic-item:')&&!category.test(path)).sort();
   const parents=MAGIC_ITEMS.filter(item=>!item.variantOf);
-  assert.equal(MAGIC_ITEM_AUDIT.uniqueItems,503);
+  assert.ok(expected.length);
+  assert.equal(MAGIC_ITEM_AUDIT.uniqueItems,expected.length);
   assert.deepEqual(parents.map(item=>new URL(item.wiki).pathname).sort(),expected);
   assert.deepEqual(MAGIC_ITEM_AUDIT.sourcePaths,expected);
   assert.equal(new Set(EQUIPMENT.map(item=>item.id)).size,EQUIPMENT.length);

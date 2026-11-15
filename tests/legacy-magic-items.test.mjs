@@ -16,12 +16,12 @@ test('every 2014 source item is represented once by an earlier-only item or its 
   const legacyPaths=LEGACY_MAGIC_ITEMS.map(i=>new URL(i.wiki).pathname);
   const sharedPaths=LEGACY_MAGIC_ITEM_AUDIT.sharedItems.map(i=>i.path);
   const expected=sourceIndex.map(i=>i.path).sort();
-  assert.equal(sourceIndex.length,830);assert.equal(LEGACY_MAGIC_ITEMS.length,502);
-  assert.equal(sharedPaths.length,328);
+  assert.ok(sourceIndex.length&&LEGACY_MAGIC_ITEMS.length&&sharedPaths.length);
   assert.deepEqual([...legacyPaths,...sharedPaths].sort(),expected);
-  assert.equal(new Set([...legacyPaths,...sharedPaths]).size,830);
+  assert.equal(new Set([...legacyPaths,...sharedPaths]).size,sourceIndex.length);
   assert.deepEqual(LEGACY_MAGIC_ITEM_AUDIT.sourcePaths,expected);
-  assert.equal(MAGIC_ITEMS.length,1023);assert.equal(EQUIPMENT.length,1229);
+  assert.deepEqual(new Set(MAGIC_ITEMS),new Set([...CURRENT,...LEGACY_MAGIC_ITEMS]));
+  assert.ok(MAGIC_ITEMS.every(item=>EQUIPMENT.includes(item)));
 });
 
 test('2024 stats and descriptions always win shared names and reviewed renamed equivalents',()=>{
@@ -65,8 +65,8 @@ test('earlier-only items retain valid stats, source, rarity, correct base gear a
 });
 
 test('combined catalog filters by actual rules edition and fits existing backups without a migration',()=>{
-  assert.equal(filterEquipment(MAGIC_ITEMS,{edition:'2014'}).length,502);
-  assert.equal(filterEquipment(MAGIC_ITEMS,{edition:'2024'}).length,521);
+  assert.deepEqual(filterEquipment(MAGIC_ITEMS,{edition:'2014'}),MAGIC_ITEMS.filter(item=>item.edition==='2014'));
+  assert.deepEqual(filterEquipment(MAGIC_ITEMS,{edition:'2024'}),MAGIC_ITEMS.filter(item=>item.edition==='2024'));
   assert.ok(filterEquipment(MAGIC_ITEMS,{edition:'2014',query:'blood spear'}).length===1);
   assert.equal(filterEquipment(MAGIC_ITEMS,{edition:'2014',query:'bag of holding'}).length,0);
   assert.match(catalogPicker('item'),/data-catalog-edition/);

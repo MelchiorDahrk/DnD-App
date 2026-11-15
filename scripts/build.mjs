@@ -1,7 +1,9 @@
-import {mkdir,copyFile,cp} from 'node:fs/promises';
+import {mkdir,copyFile,cp,rm} from 'node:fs/promises';
 import {resolve} from 'node:path';
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
+// Always package from source so removed files cannot survive a local rebuild.
+await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
 for(const file of ['dice-roller.js','dice-roller.css'])await copyFile(resolve(root,file),resolve(out,file));
 await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true});

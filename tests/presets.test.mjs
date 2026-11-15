@@ -18,7 +18,12 @@ import {state} from './helpers/bricktrait-state.mjs';
 const vendor=resolve(import.meta.dirname,'../vendor/bricktrait');
 
 test('the populated catalog validates every component and color and has no duplicate configurations or IDs',async()=>{
-  assert.ok(catalog.stats.official>100);assert.ok(catalog.stats.original>100);
+  for(const kind of ['official','original']){
+    const entries=catalog.presets.filter(p=>p.kind===kind);
+    assert.ok(entries.length,`${kind} collection is populated`);
+    assert.equal(entries.length,catalog.stats[kind],`${kind} summary matches the catalog`);
+  }
+  for(const status of ['complete','partial'])assert.equal(catalog.presets.filter(p=>p.compatibility.status===status).length,catalog.stats[status]);
   const ids=new Set(),configs=new Set();
   for(const p of catalog.presets){
     assert.deepEqual(validatePreset(p,assets.parts,assets.colors),[],p.id);

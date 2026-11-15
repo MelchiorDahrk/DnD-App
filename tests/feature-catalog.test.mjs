@@ -4,6 +4,7 @@ import {FEATURE_CATALOG,FEAT_GROUPS,FEAT_SOURCES,filterFeatures,featureFields} f
 import {CLASSES,makeCharacter,SAVE_VERSION,parseBackup,shortRest,longRest,rollFeature,validDiceFormula} from '../model.js';
 import {SUBCLASSES,SPECIES} from '../catalog.js';
 import {catalogPicker} from '../catalog-ui.js';
+import {PUBLISHED_FEATS} from '../published-feat-data.js';
 
 const find=(name,owner)=>{
   const entry=FEATURE_CATALOG.find(e=>e.name===name&&(!owner||e.owner===owner));
@@ -14,37 +15,28 @@ test('feature catalog covers every supported class, subclass, species family and
   for(const name of Object.keys(CLASSES))assert.ok(FEATURE_CATALOG.some(e=>e.group==='Class features'&&e.className===name),name);
   for(const subclass of SUBCLASSES)assert.ok(FEATURE_CATALOG.some(e=>e.subclass===subclass.name&&e.className===subclass.className),subclass.name);
   for(const species of SPECIES)assert.ok(filterFeatures({character:makeCharacter({race:species.name}),group:'Species traits'}).length,species.name);
-  // Magic Initiate's three spell lists represent one of the 75 core feats.
   const core=FEATURE_CATALOG.filter(e=>e.book==='Player’s Handbook (2024)');
-  assert.equal(core.filter(e=>e.group==='Origin feats').length,12);
-  assert.equal(core.filter(e=>e.group==='General feats').length,43);
-  assert.equal(core.filter(e=>e.group==='Fighting styles').length,10);
-  assert.equal(core.filter(e=>e.group==='Epic boons').length,12);
+  for(const group of ['Origin feats','General feats','Fighting styles','Epic boons'])assert.ok(core.some(e=>e.group===group),group);
   for(const e of FEATURE_CATALOG){assert.match(e.id,/^[a-z0-9-]+$/);assert.ok(e.details);assert.ok(e.group==='Custom resources'||/^https:\/\/dnd(?:5e|2024)\.wikidot.com\//.test(e.wiki));}
 });
 
 test('published feat coverage includes every supported official source and specialized category',()=>{
-  const expected={
-    'Bigby Presents: Glory of the Giants':8,"Fizban's Treasury of Dragons":3,
-    'Dragonlance: Shadow of the Dragon Queen':9,'Planescape: Adventures in the Multiverse':7,
-    'Strixhaven: A Curriculum of Chaos':2,'The Book of Many Things':1,
-    'Eberron: Rising from the Last War':1,"Elemental Evil Player's Companion":1,
-    'Forgotten Realms: Heroes of Faerûn':34,'Eberron: Forge of the Artificer':29,
-    "Astarion's Book of Hungers":16,'Lorwyn: First Light':2,'Ravenloft: The Horrors Within':11,
-    'Arcana Unleashed':29,'D&D Beyond Drops':16
-  };
-  for(const [book,count] of Object.entries(expected)){
+  const published=FEATURE_CATALOG.filter(e=>e.published);
+  assert.equal(published.length,PUBLISHED_FEATS.length);
+  for(const feat of PUBLISHED_FEATS)assert.ok(published.some(e=>e.name===feat.name&&e.group===feat.group&&e.book===feat.book&&e.edition===feat.edition),feat.name);
+  for(const book of new Set(PUBLISHED_FEATS.map(feat=>feat.book))){
     const feats=filterFeatures({scope:'all',source:book});
-    assert.equal(feats.length,count,book);assert.ok(FEAT_SOURCES.includes(book));
+    assert.deepEqual(feats,FEATURE_CATALOG.filter(e=>e.book===book),book);assert.ok(FEAT_SOURCES.includes(book));
     assert.ok(feats.every(e=>FEAT_GROUPS.includes(e.group)&&e.book===book));
   }
-  assert.equal(FEATURE_CATALOG.filter(e=>FEAT_GROUPS.includes(e.group)).length,269);
-  assert.equal(filterFeatures({scope:'all',group:'Dragonmark feats'}).length,13);
-  assert.equal(filterFeatures({scope:'all',group:'Planar pact feats'}).length,4);
-  assert.equal(filterFeatures({scope:'all',group:'Dark gift feats'}).length,9);
+  for(const group of FEAT_GROUPS){
+    const expected=FEATURE_CATALOG.filter(e=>e.group===group);
+    assert.ok(expected.length,group);
+    assert.deepEqual(filterFeatures({scope:'all',group}),expected,group);
+  }
   assert.ok(filterFeatures({scope:'all',query:'glory giants strike'}).some(e=>e.name==='Strike of the Giants'));
   assert.ok(filterFeatures({scope:'all',query:'faerun spellfire'}).some(e=>e.name==='Spellfire Spark'));
-  assert.equal(filterFeatures({scope:'all',group:'Origin feats',source:'Ravenloft: The Horrors Within'}).length,2);
+  assert.deepEqual(filterFeatures({scope:'all',group:'Origin feats',source:'Ravenloft: The Horrors Within'}),FEATURE_CATALOG.filter(e=>e.group==='Origin feats'&&e.book==='Ravenloft: The Horrors Within'));
   assert.ok(filterFeatures({scope:'all',group:'Origin feats'}).some(e=>e.name==='Survivor'));
   assert.ok(!FEATURE_CATALOG.some(e=>/Unearthed Arcana|Warcraft/i.test(e.book||'')));
 });

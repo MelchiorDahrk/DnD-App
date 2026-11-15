@@ -12,8 +12,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Accommodate a 35-minute cold build plus the bounded browser suites.
-    timeout-minutes: 80
+    # Accommodate a 35-minute cold build, browser suites and install/cache overhead.
+    timeout-minutes: 95
     permissions:
       contents: read
     env:
@@ -114,7 +114,8 @@ jobs:
       - name: Check production interactions, assets and offline behavior
         # The shared runner preserves each suite's timeout and runs quick sheet
         # checks before the serial SwiftShader portrait/editor sessions.
-        timeout-minutes: 36
+        # Eight per-suite limits total 40 minutes; allow runner/diagnostic overhead.
+        timeout-minutes: 45
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           DEPLOY_TEST_URL: http://127.0.0.1:4173/DnD-App/

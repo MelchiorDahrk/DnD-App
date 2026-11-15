@@ -58,7 +58,7 @@
   {:else}
     <div class="grid">
       {#each visible as preset (preset.id)}
-        <article class="card">
+        <article class="card" data-preset-id={preset.id}>
           <button class="choose" type="button" disabled={!ready} onclick={()=>apply(preset)} aria-label={`Load ${preset.name}`}>
             <img src={asset(preset.thumbnail)} alt={preset.name} width="192" height="192" loading="lazy" decoding="async" />
             <strong>{preset.name}</strong><span class="theme">{preset.theme}</span>

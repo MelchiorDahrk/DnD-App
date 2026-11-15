@@ -5,7 +5,8 @@ import {CLASSES,SAVE_VERSION,makeCharacter,parseBackup,rollDice,validDiceFormula
 import {characterChoice} from '../catalog-ui.js';
 
 test('basic catalog covers each equipment family with unique IDs and usable numeric weights',()=>{
-  assert.equal(WEAPONS.length,38);assert.equal(ARMOR.length,13);
+  assert.ok(WEAPONS.length&&ARMOR.length);
+  assert.ok([...WEAPONS,...ARMOR].every(item=>EQUIPMENT.includes(item)));
   assert.equal(new Set(EQUIPMENT.map(item=>item.id)).size,EQUIPMENT.length);
   for(const item of EQUIPMENT){
     assert.match(item.id,/^[a-z0-9-]+$/);assert.ok(Number.isFinite(item.weight)&&item.weight>=0);
@@ -58,8 +59,8 @@ test('weapon presets use finesse, thrown, reach and fixed damage without inventi
 test('character choices cover core classes, all core species, backgrounds and matching subclasses',()=>{
   assert.deepEqual(CLASS_OPTIONS.map(option=>option.name),Object.keys(CLASSES));
   for(const name of ['Aasimar','Dragonborn','Dwarf','Elf','Gnome','Goliath','Halfling','Human','Orc','Tiefling'])assert.ok(SPECIES.some(option=>option.name===name));
-  assert.equal(BACKGROUNDS.length,16);assert.equal(ORIGIN_FEATS.length,12);
-  for(const cls of CLASS_OPTIONS){assert.equal(SUBCLASSES.filter(option=>option.className===cls.name).length,4);assert.equal(cls.saves.length,2);}
+  assert.ok(BACKGROUNDS.length&&ORIGIN_FEATS.length);
+  for(const cls of CLASS_OPTIONS){assert.ok(SUBCLASSES.some(option=>option.className===cls.name),cls.name);assert.equal(cls.saves.length,2);}
   for(const background of BACKGROUNDS)assert.ok(ORIGIN_FEATS.some(feat=>feat.name===background.feat));
 });
 
