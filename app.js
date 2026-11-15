@@ -411,18 +411,24 @@ function castSpell(id) {const c=character(),s=c.spells.find(s=>s.id===id);if(!s)
 
 function rollBreakdown(r) {if(!r.rolls.length)return `Fixed result: ${r.total}`;return `${r.rolls.join(r.mode==='normal'?' + ':' & ')}${r.mode!=='normal'?` → ${r.mode==='advantage'?'higher':'lower'} die`:''}${r.bonus?' '+signed(r.bonus):''} = ${r.total}`;}
 function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,result=null,featureId='') {
-  const r=recordRoll(result||rollDice(expression,mode),label);
+  clearEffects();
+  const r=recordRoll(result||rollDice(expression,mode),label,{celebrate:true});
   if(inDialog)setModal(esc(label),`<div class="roll-modal"><div class="roll-expression">${esc(r.expression)}${mode!=='normal'?' · '+mode:''}</div><div class="big-die">${icon('dice')}<strong>${r.total}</strong></div>${r.natural===20?'<div class="roll-critical">✦ NATURAL 20! ✦</div>':r.natural===1?'<div class="roll-critical fail">NATURAL 1. A NEW PLOT TWIST.</div>':''}<div class="roll-breakdown">${esc(rollBreakdown(r))}</div></div><div class="modal-actions">${btn('close','Keep adventuring','btn')}${featureId?btn('feature-roll',icon('dice')+'Use & roll again','btn btn-primary',`data-id="${featureId}" ${character().features.some(f=>f.id===featureId&&f.maxUses&&f.used>=f.maxUses)?'disabled':''}`):btn('reroll',icon('dice')+'Roll again','btn btn-primary',`data-expression="${esc(expression)}" data-label="${esc(label)}" data-mode="${mode}"`)}</div>`);
   else render();
-  if(r.natural===20)playEffect('critical',{label:'Natural 20!',detail:'A LEGENDARY ROLL',target:inDialog?'.big-die':'#tray-die'});
   return r;
 }
-function recordRoll(result,label,{criticalFeedback=true}={}) {
+function recordRoll(result,label,{criticalFeedback=true,celebrate=false}={}) {
   const r={...result,label,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
   const event=rollSoundEvent(r,label);if(event)sound.play(event);
   if(criticalFeedback&&r.natural===20)sound.play('dice.critical',{delay:.2});else if(r.natural===1)sound.play('dice.failure',{delay:.2});
   // Rules and their callers finish rendering before the tray mounts (including combat dialogs).
-  queueMicrotask(()=>presentDice(r,modal.open?modal.querySelector('.modal-body'):$('#dice-stage')));
+  queueMicrotask(async()=>{
+    const inDialog=modal.open,host=inDialog?modal.querySelector('.modal-body'):$('#dice-stage');
+    const status=await presentDice(r,host);
+    // Expensive celebration particles follow the throw, so software renderers can finish it.
+    if(celebrate&&r.natural===20&&lastRoll===r&&host?.isConnected&&['settled','static'].includes(status))
+      playEffect('critical',{label:'Natural 20!',detail:'A LEGENDARY ROLL',target:inDialog?'.big-die':'#tray-die'});
+  });
   return r;
 }
 function startAttack(id,damageOnly=false) {

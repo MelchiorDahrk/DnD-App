@@ -21,7 +21,10 @@ The dice suite fixes open-dice's throw vectors as well as the recorded dice valu
 so deployment does not depend on randomly chosen physics trajectories. It still
 runs the real prediction, animation, and landing-face checks. A separate stalled
 engine check verifies the production timeout preserves exactly one result. Set
-`DICE_TEST_CPU_RATE=4` to exercise slower rendering. Failures save the tray state,
+`DICE_TEST_CPU_RATE=4` and `DICE_TEST_SOFTWARE_RENDERING=1` to exercise slow software
+painting as well as JavaScript. The suite verifies that natural-20 particles follow
+the 3D throw, and that particle lifetimes remain bounded at low frame rates.
+Failures save the tray state,
 browser errors, console messages, and a screenshot in `.tmp/browser-diagnostics/dice/`
 for the workflow's existing artifact upload.
 

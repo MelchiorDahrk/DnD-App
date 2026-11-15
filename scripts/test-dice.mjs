@@ -19,7 +19,8 @@ try {
     server=spawn(process.execPath,['scripts/serve.mjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe'],windowsHide:true});
     await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('Server did not start')),10000);server.once('error',reject);server.stdout.once('data',()=>{clearTimeout(timer);resolve();});server.stderr.once('data',data=>reject(Error(String(data))));});
   }
-  browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+  const softwarePainting=process.env.DICE_TEST_SOFTWARE_RENDERING==='1'?['--disable-accelerated-2d-canvas','--disable-gpu-compositing','--disable-gpu-rasterization']:[];
+  browser=await puppeteer.launch({executablePath,headless:true,args:['--no-sandbox','--enable-unsafe-swiftshader','--use-angle=swiftshader',...softwarePainting]});
   page=await browser.newPage();
   if(process.env.DICE_TEST_CPU_RATE)await page.emulateCPUThrottling(Number(process.env.DICE_TEST_CPU_RATE));
   page.on('pageerror',error=>errors.push(error.message));
@@ -31,7 +32,11 @@ try {
   await page.goto(base+'#dice',{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
   const instrument=()=>page.evaluate(async()=>{
-    window.testDice=[];window.diceSettled=null;
+    window.testDice=[];window.diceSettled=null;window.criticalEvents=[];
+    new MutationObserver(records=>{
+      for(const record of records)for(const node of record.addedNodes)
+        if(node.nodeType===1&&node.matches('.vfx-critical'))window.criticalEvents.push(document.querySelector('.dice-stage')?.dataset.state);
+    }).observe(document.body,{childList:true,subtree:true});
     const original=crypto.getRandomValues.bind(crypto);
     crypto.getRandomValues=array=>{if(window.testDice.length){array[0]=window.testDice.shift()-1;return array;}return original(array);};
     document.addEventListener('dice-settled',event=>window.diceSettled=event.detail);
@@ -57,16 +62,21 @@ try {
     phase=`${expression} (${mode})`;
     await page.click(`[data-action="roll-mode"][data-mode="${mode}"]`);
     await page.evaluate(({expression,values})=>{
-      window.testDice=[...values];window.diceSettled=null;
+      window.testDice=[...values];window.diceSettled=null;window.criticalEvents=[];
       document.querySelector('#dice-expression').value=expression;
       document.querySelector('#dice-form').requestSubmit();
     },{expression,values});
     if(settled) {
+      if(expression==='1d20'&&values[0]===20) {
+        await page.waitForSelector('.dice-stage[data-state="rolling"]');
+        assert.equal(await page.$('.vfx-canvas'),null,'natural-20 particles must wait for the 3D throw');
+      }
       await waitForSettled();
       assert.ok(await page.$('.dice-stage canvas'),expression+' has real 3D dice');
       const outcome=await page.evaluate(()=>window.diceSettled);
       assert.equal(outcome.total,values.reduce((a,b)=>a+b,0),'engine targets match the rolled faces');
       assert.ok(outcome.results.every(r=>r.visible===r.value||(['d10','d100'].includes(r.type)&&r.visible===0&&[10,100].includes(r.value))),'visible faces match targets');
+      if(expression==='1d20'&&values[0]===20)assert.deepEqual(await page.evaluate(()=>window.criticalEvents),['settled'],'celebrate only after the actual throw settles');
     }
   };
   for(const sides of [4,6,8,10,12,20,100]) {
@@ -79,6 +89,19 @@ try {
   await roll('1d20-2',[3,17],'disadvantage');assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'1');
   await mkdir(resolve(root,'.tmp'),{recursive:true});await page.screenshot({path:resolve(root,'.tmp/dice-desktop.png'),fullPage:true});
   console.log('Modifiers and advantage/disadvantage verified');
+
+  phase='particle lifetime at low frame rate';
+  const particlesStarted=await page.evaluate(async()=>{
+    const {clearEffects,playEffect}=await import(new URL('./vfx.js',location.href).href);
+    clearEffects();window.normalAnimationFrame=requestAnimationFrame;
+    window.requestAnimationFrame=callback=>window.normalAnimationFrame(()=>setTimeout(()=>callback(performance.now()),250));
+    playEffect('critical',{label:'Timing check'});
+    return !!document.querySelector('.vfx-canvas');
+  });
+  assert.ok(particlesStarted);
+  await page.waitForFunction(()=>!document.querySelector('.vfx-canvas'),{timeout:5000});
+  await page.evaluate(()=>{window.requestAnimationFrame=window.normalAnimationFrame;});
+  console.log('Particle lifetime stays bounded when frames are slow');
 
   // A new roll cancels animation only: both outcomes are recorded exactly once.
   const count=await page.$$eval('.history-row',nodes=>nodes.length);

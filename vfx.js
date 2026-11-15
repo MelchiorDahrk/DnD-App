@@ -113,12 +113,14 @@ function resize() {
 function draw(now) {
   frame=0;
   if(!context||document.hidden||reduced()){clearEffects();return;}
-  const dt=Math.min((now-previous)/1000,.04);previous=now;
+  const elapsed=Math.max(0,(now-previous)/1000),dt=Math.min(elapsed,.04);previous=now;
   context.clearRect(0,0,innerWidth,innerHeight);
   context.globalCompositeOperation='lighter';
   particles=particles.filter(p=>p.age<p.life);
   for(const p of particles) {
-    p.age+=dt;if(p.age<0)continue;
+    // Lifetimes follow wall time even when software painting drops frames.
+    // Clamp only the movement step, otherwise a two-second burst can last fifteen seconds.
+    p.age+=elapsed;if(p.age<0||p.age>=p.life)continue;
     const progress=Math.min(p.age/p.life,1);
     if(p.orbit) {
       p.angle+=dt*2.7;p.radius+=dt*22;
