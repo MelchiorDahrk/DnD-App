@@ -1,5 +1,8 @@
 # Fantasy Bricktrait portraits and equipment
 
+The complete-figure **Presets** browser, source pipeline, catalog coverage,
+licensing and refresh commands are documented in [minifigure-presets.md](minifigure-presets.md).
+
 Questlog extends its existing vendored Bricktrait, pinned at
 `f333d939753526469e4169481d578aed74e955ed`. The LDraw library, parts picker,
 colours, poses, camera, history, and message bridge remain in use. Portraits use

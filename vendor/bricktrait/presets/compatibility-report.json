@@ -1,0 +1,4161 @@
+{
+  "version": 1,
+  "stats": {
+    "total": 290,
+    "official": 152,
+    "original": 138,
+    "complete": 179,
+    "partial": 111,
+    "themes": [
+      "Adventurers",
+      "Castle",
+      "Indiana Jones",
+      "Lord of the Rings",
+      "Original Fantasy",
+      "Pharaoh's Quest",
+      "Pirates",
+      "Western"
+    ],
+    "sourceModels": 74,
+    "unavailable": 33,
+    "deduplicated": 28
+  },
+  "modelsWithoutFigures": [
+    {
+      "number": "2845-1",
+      "name": "Indian Chief",
+      "theme": "Western",
+      "url": "https://library.ldraw.org/media/omr_models/353/2845-1.mpd?v=1758937614",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "2846-1",
+      "name": "Indian Kayak",
+      "theme": "Western",
+      "url": "https://library.ldraw.org/media/omr_models/354/2846-1.mpd?v=1758937614",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "6054-1",
+      "name": "Forestmen's Hideout",
+      "theme": "Castle > Forestmen",
+      "url": "https://library.ldraw.org/media/omr_models/825/6054-1.mpd?v=1758937629",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "70127-1",
+      "name": "Wolf Legend Beast",
+      "theme": "Legends of Chima",
+      "url": "https://library.ldraw.org/media/omr_models/390/70127-1.mpd?v=1758937615",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "7410-1",
+      "name": "Jungle River",
+      "theme": "Adventurers > Orient Expedition",
+      "url": "https://library.ldraw.org/media/omr_models/352/7410-1.mpd?v=1758937614",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75948-1",
+      "name": "Hogwarts Clock Tower",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1520/75948-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75953-1",
+      "name": "Hogwarts Whomping Willow",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1518/75953-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75954-1",
+      "name": "Hogwarts Great Hall",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1519/75954-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75966-1",
+      "name": "Hogwarts Room of Requirement",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1522/75966-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75968-1",
+      "name": "4 Privet Drive",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1524/75968-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75969-1",
+      "name": "Hogwarts Astronomy Tower",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1521/75969-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    },
+    {
+      "number": "75980-1",
+      "name": "Attack on The Burrow",
+      "theme": "Harry Potter",
+      "url": "https://library.ldraw.org/media/omr_models/1523/75980-1.mpd?v=1758937652",
+      "reason": "No isolated compatible minifigure assembly in this model"
+    }
+  ],
+  "unavailable": [
+    {
+      "id": "omr-2541-1-f88c552da4024bea",
+      "name": "Adventurers Car · 2541-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "3795",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4600",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4600",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2540",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4871",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2420",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2420",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30165",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c01",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2531",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-2541-1-5b3d344dc249de78",
+      "name": "Baron Von Barron · 2541-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "3815c01",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2531",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-2542-1-96f610f6469d4f60",
+      "name": "Adventurers Aeroplane · 2542-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "4871",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3034",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3795",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2420",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2420",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4859",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4488",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2419",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4865a",
+          "color": 47,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2421",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4600",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3641",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30171",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-2542-1-08a63c2556633d1f",
+      "name": "Harry Cane · 2542-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3815c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30171",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30090-1-c70f6cc614b2c24e",
+      "name": "Desert Glider · 30090-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30162",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "30162",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "30132",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "3795",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "48183",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3794b",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4488",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "41769",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "41770",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2655",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2496",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "47457",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4592c01",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "44661",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4865b",
+          "color": 40,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2421",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c02",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30171",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30090-1-7a8fe62769ee97e9",
+      "name": "Jake Raines · 30090-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30132",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "3815c02",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30171",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30091-1-82d714e4a5d3be1a",
+      "name": "Desert Rover · 30091-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30132",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "3795",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4600",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4600",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3020",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3004",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "50946",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "50947",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "50947",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4081b",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4081b",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3794b",
+          "color": 320,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3829c01",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 47,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 47,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4624",
+          "color": 71,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87414",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87414",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87414",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87414",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c02",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30091-1-ae24ac5636692910",
+      "name": "Jake Raines · 30091-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30132",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "3815c02",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30201-1-8dddf1f6c78842d9",
+      "name": "Ghost · 30201-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3004",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6141",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30104k01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "32474",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-30201-1-be76846b2b4c22d5",
+      "name": "Ghost Torso · 30201-1",
+      "status": "unavailable",
+      "issues": [],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-365-1-c705fd16ec5893f3",
+      "name": "Wild West Scene - Cowboy+Horse1 · 365-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "legs",
+          "reason": "Multiple components compete for one slot"
+        },
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "15",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "15",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3001",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3069a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-365-1-1a79f78d980737d1",
+      "name": "Wild West Scene - Coach · 365-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "legs",
+          "reason": "Multiple components compete for one slot"
+        },
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "15",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "15",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3035",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3009",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3010",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3009",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3184",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3020",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3001",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3010",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3183a",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3069a",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3137c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3137c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3139",
+          "color": 256,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3139",
+          "color": 256,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3139",
+          "color": 256,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3139",
+          "color": 256,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "15",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-365-1-6ee501e68c4e9f44",
+      "name": "Wild West Scene - Cowboy+Horse2 · 365-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "legs",
+          "reason": "Multiple components compete for one slot"
+        },
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "15",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "15",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3001",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3039",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3069a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-5920-1-b2f455e93dddca0d",
+      "name": "Minifig - Baron VonBarron · 5920-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30171",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2531",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c02",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-5935-1-34c405e02e84aab2",
+      "name": "Minifig - Miss Gail Storm · 5935-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "30170",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30171",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c02",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6034-1-b483a429f4c5e98b",
+      "name": "MiniFigGhost · 6034-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3004",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6040-1-e5cc5fdec9b9a2ad",
+      "name": "MiniFig1 · 6040-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3815c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4522",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6235-1-dda742d11158ec2b",
+      "name": "Main · 6235-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "70501a",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501a",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501b",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501b",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501c",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501c",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501d",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501d",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "2562",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2530",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3032",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3623",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3010",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4070",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4738b",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3957a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2423",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4739",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2335p30",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2550c01",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6235-1-cedd47c5313f3caa",
+      "name": "Buried Treasure · 6235-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "70501a",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501a",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501b",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501b",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501c",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501c",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501d",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "70501d",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "2562",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2530",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3032",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3623",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3010",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4070",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4738b",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3957a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2423",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4739",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2335p30",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2550c01",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815c01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6235-1-2dde01ac9935a0ee",
+      "name": "MiniFig1 · 6235-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "2562",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3815c01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6279-1-738805c4f770f472",
+      "name": "Pirate_1 · 6279-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3626bp34",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "head"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6279-1-e344bc8c3519c7d9",
+      "name": "Pirate_3 · 6279-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3815c02",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6279-1-25327d106fb5cf07",
+      "name": "Pirate_Captain · 6279-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "2531",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3817",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2532",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2532",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3626bp34",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2528p30",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "head",
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6279-1-d9bf83aad5843c8c",
+      "name": "Imperial_Guard_Officer · 6279-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "2562",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3815c01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6279-1-83da3d5c74b502ce",
+      "name": "Imperial_Guard_Soldier · 6279-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "2542",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2542",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3815c02",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6285-1-96f55cf9f36ad2c4",
+      "name": "figurehead · 6285-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "4475",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4286",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4286",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4286",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4286",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3665a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3665a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3747a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4507",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4504",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "box5",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "box5",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "s/6285 - 3937s01",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3938",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2452",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3710",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3040b",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3040b",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4859",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3048a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3040b",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3040b",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-6718-1-1aa9fd18afcf8b96",
+      "name": "Raindance Ridge - Minifig2 · 6718-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "2586pw1",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3835",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "73200pw1",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30127p01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-7325-1-f75e89d3800ac68f",
+      "name": "Jake Raines · 7325-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3815c02",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-7325-1-15e95ad8b271ac24",
+      "name": "Helena Tova Skvalling · 7325-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "61976",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "64728",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3815c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-9471-1-425bf401c9890179",
+      "name": "uruk-armor · 9471-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "3817pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815pm0",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3816pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-9471-1-a31316f2a808482f",
+      "name": "uruk-helmet · 9471-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "10049",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3817pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815pm0",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3816pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-9471-1-bcf7252303014912",
+      "name": "uruk-hair · 9471-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "10049",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3817pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815pm0",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3816pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    },
+    {
+      "id": "omr-9476-1-a4d29d3d97cfb04a",
+      "name": "uruk-hai · 9476-1",
+      "status": "unavailable",
+      "issues": [
+        {
+          "part": "10049p01",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3817pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3815pm0",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3816pm0",
+          "color": 308,
+          "reason": "Unsupported component or attachment"
+        }
+      ],
+      "missingEssential": [
+        "legs"
+      ],
+      "hidden": false
+    }
+  ],
+  "duplicates": [
+    {
+      "id": "omr-1713-1-c79ee39af59bdac9",
+      "canonical": "omr-1713-1-6fef55c12339d102"
+    },
+    {
+      "id": "omr-6011-1-ff19f8bc54121936",
+      "canonical": "omr-6011-1-8f93d85f871ea997"
+    },
+    {
+      "id": "omr-6061-1-7c706407e219290b",
+      "canonical": "omr-6040-1-545a6575fe0a62c0"
+    },
+    {
+      "id": "omr-6066-1-f516c9750561976a",
+      "canonical": "omr-1974-3-50268507b308b574"
+    },
+    {
+      "id": "omr-6073-1-06a4026b3d62cf84",
+      "canonical": "omr-6062-1-edfd9adcb6a9ac65"
+    },
+    {
+      "id": "omr-6073-1-3d90411120737aa0",
+      "canonical": "omr-6062-1-b281a27a35d1e6bd"
+    },
+    {
+      "id": "omr-6073-1-592b0769dbe8c33d",
+      "canonical": "omr-6062-1-edfd9adcb6a9ac65"
+    },
+    {
+      "id": "omr-6073-1-7a439b9c9d4b83ec",
+      "canonical": "omr-6062-1-b281a27a35d1e6bd"
+    },
+    {
+      "id": "omr-6073-1-9a9879bb12b3e8a7",
+      "canonical": "omr-6062-1-edfd9adcb6a9ac65"
+    },
+    {
+      "id": "omr-6074-1-6c558897ea939b67",
+      "canonical": "omr-6074-1-0ef4ddebfdc3a738"
+    },
+    {
+      "id": "omr-6074-1-988423420a800ee0",
+      "canonical": "omr-6074-1-0c68f3f95c6b8d16"
+    },
+    {
+      "id": "omr-6080-1-2c892c68eda4bf93",
+      "canonical": "omr-6062-1-4d0416afef0a35e2"
+    },
+    {
+      "id": "omr-6080-1-bddf2835516341e9",
+      "canonical": "omr-6080-1-1fd0c8bb520dec48"
+    },
+    {
+      "id": "omr-6080-1-d07e6a204d85451e",
+      "canonical": "omr-6040-1-545a6575fe0a62c0"
+    },
+    {
+      "id": "omr-6080-1-f2848d6a45458c93",
+      "canonical": "omr-6080-1-ad1c41e44db361f2"
+    },
+    {
+      "id": "omr-6102-1-eccf2b33fd9abe4d",
+      "canonical": "omr-6074-1-0c68f3f95c6b8d16"
+    },
+    {
+      "id": "omr-6285-1-f696e29b5bcd0aac",
+      "canonical": "omr-6279-1-0bbd1656467bfc44"
+    },
+    {
+      "id": "omr-6286-1-9731909ff8ba32b8",
+      "canonical": "omr-6285-1-5a8fedfe15d010f6"
+    },
+    {
+      "id": "omr-6286-1-c9bd7463b48bc4bf",
+      "canonical": "omr-6285-1-add2b7d4c19d7eed"
+    },
+    {
+      "id": "omr-6286-1-db63d750ef1bb58b",
+      "canonical": "omr-6285-1-7908158ad5560606"
+    },
+    {
+      "id": "omr-6709-1-f9cb7a35b7e02feb",
+      "canonical": "omr-6709-1-7622a13c335f34f8"
+    },
+    {
+      "id": "omr-6761-1-36284bf949c9effe",
+      "canonical": "omr-6761-1-077fc2fa29e091f0"
+    },
+    {
+      "id": "omr-6765-1-0e67296c98c1d189",
+      "canonical": "omr-6765-1-036b2fbd3453a3d1"
+    },
+    {
+      "id": "omr-6790-1-fe3a0c5c49ab6c1e",
+      "canonical": "omr-6790-1-74d68b1bb81bb76b"
+    },
+    {
+      "id": "omr-7306-1-b34f9f7a4179788c",
+      "canonical": "omr-7306-1-9b23206c9551fb73"
+    },
+    {
+      "id": "omr-7326-1-b6a9a98f81eb1409",
+      "canonical": "omr-7325-1-23f7a6509b4f6c9b"
+    },
+    {
+      "id": "omr-7326-1-c4df0d8564114f27",
+      "canonical": "omr-7306-1-9b23206c9551fb73"
+    },
+    {
+      "id": "original-scabbard-shadowblade",
+      "canonical": "original-belted-robed-infiltrator"
+    }
+  ],
+  "partial": [
+    {
+      "id": "omr-10176-1-0383297eab9d21b0",
+      "name": "Soldier 3 · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-0b235bc874fb6a49",
+      "name": "Soldier 1 · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3846",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-19ae01b850f13afa",
+      "name": "Red Knight · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-302f7b199f7b49c5",
+      "name": "Soldier 4 · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-43f0bec19e83cfcf",
+      "name": "Soldier 2 · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3846",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-509b6a6948e3c0e8",
+      "name": "Wizard · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30115",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30152",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-82531ab85fd12351",
+      "name": "Dwarf · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "48495",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4522",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-83177cae8611a745",
+      "name": "Black Knight · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2586",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4497614c",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-86f7be7edf5a0e7e",
+      "name": "King · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-10176-1-e61e6e341245f053",
+      "name": "Ghost · 10176-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing patterns; retail inventory accuracy requires review."
+        },
+        {
+          "slot": "source",
+          "reason": "Source OMR model reports missing stickers; retail inventory accuracy requires review."
+        }
+      ]
+    },
+    {
+      "id": "omr-1680-1-67f5e6839064f6d7",
+      "name": "Minifig 3 · 1680-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2488",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-1680-1-9537b1381cc9c15b",
+      "name": "Minifig 2 · 1680-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-1680-1-992aeb024c720f1f",
+      "name": "Minifig 1 · 1680-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87694",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-1713-1-6fef55c12339d102",
+      "name": "Shipwrecked Pirate · 1713-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2542",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2335p30",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3957a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3062b",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2654",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3020",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3022",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2436a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3032",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-1974-3-50268507b308b574",
+      "name": "Minifig 1 · 1974-3",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87693",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-1974-3-a830ca18346b08ab",
+      "name": "Minifig 2 · 1974-3",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2488",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-20004-1-b6967060506fafdc",
+      "name": "minifig · 20004-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "61975",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-30210-1-668b0172a8fed5e7",
+      "name": "Minifig - Frodo · 30210-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "33078",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-365-1-06755a1c6ab07e4f",
+      "name": "Wild West Scene - Cowboy2 · 365-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        }
+      ]
+    },
+    {
+      "id": "omr-365-1-0d087775f6c85995",
+      "name": "Wild West Scene - Cowgirl1 · 365-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        }
+      ]
+    },
+    {
+      "id": "omr-365-1-1d768e056eefe0ea",
+      "name": "Wild West Scene - Cowboy3 · 365-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        }
+      ]
+    },
+    {
+      "id": "omr-365-1-311a60b93f4b70fd",
+      "name": "Wild West Scene - Cowboy1 · 365-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        }
+      ]
+    },
+    {
+      "id": "omr-365-1-df97c288ca0fe9a5",
+      "name": "Wild West Scene - Cowgirl2 · 365-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        }
+      ]
+    },
+    {
+      "id": "omr-5934-1-6adf0d1b231db565",
+      "name": "Minifig - Dr Charles Lightning · 5934-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3899",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-5934-1-836da823dbb0a563",
+      "name": "Minifig - Johnny Thunder · 5934-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30162",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "30141",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6011-1-8f93d85f871ea997",
+      "name": "Minifig · 6011-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "4493c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3020",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4488",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4508c01",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4587",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3032",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3023",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4623",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3004",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3040b",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4489a",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4738b",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4739a",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6021-1-6d7884e03ac257f3",
+      "name": "Minifig 1 · 6021-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4495a",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87694",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6021-1-b8a7789001a31eda",
+      "name": "Minifig 2 · 6021-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4495a",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87694",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6030-1-63e85ab17d861a26",
+      "name": "Minifig 2 · 6030-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3876",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6030-1-cd46ddb13cb1a0d2",
+      "name": "Minifig 1 · 6030-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3876",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6034-1-7823b8df196960ef",
+      "name": "MiniFig · 6034-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2446",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6034 - s/6034 - 2594s01",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6034 - s/6034 - 2594s01",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4cylc",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4cylc",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4ring1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect2p",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6035-1-72459a0cf59d4036",
+      "name": "Minifig 2 · 6035-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6040-1-545a6575fe0a62c0",
+      "name": "MiniFig2 · 6040-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6041-1-f6b6a459ff15a1ff",
+      "name": "MiniFig1 · 6041-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2335p45",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6049-1-ceb178da15ca45f8",
+      "name": "MiniFig2 · 6049-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6059-1-11823324c847b4be",
+      "name": "MiniFig1 · 6059-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        }
+      ]
+    },
+    {
+      "id": "omr-6059-1-c3ede0c0b5e050e1",
+      "name": "MiniFig5 · 6059-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p45",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2446",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6059 - s/6059 - 2594s01",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6059 - s/6059 - 2594s01",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4cylc",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4cylc",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4-4ring1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect2p",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "rect1",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87692",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6061-1-82b13e62abc6bb8a",
+      "name": "MiniFig1 · 6061-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3876",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6061-1-a0e7270a8d9bc918",
+      "name": "MiniFig4 · 6061-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6062-1-26870d8f9e6f6c5e",
+      "name": "MiniFig1 · 6062-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6062-1-4d0416afef0a35e2",
+      "name": "MiniFig2 · 6062-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6062-1-73ba4f92d5c4489f",
+      "name": "MiniFig4 · 6062-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6062-1-b281a27a35d1e6bd",
+      "name": "MiniFig5 · 6062-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3846p45",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6066-1-7b21c5ca3768bee1",
+      "name": "Minifig 2 · 6066-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6066-1-90d12591c5e7cd7f",
+      "name": "Minifig 4 · 6066-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6066-1-faebe014078b8210",
+      "name": "Minifig 3 · 6066-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6066-1-fe2cdfb35edf5976",
+      "name": "Minifig 5 · 6066-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "87693",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6067-1-5f470c845fdba883",
+      "name": "MiniFig3 · 6067-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6067-1-80bad777f7343676",
+      "name": "MiniFig4 · 6067-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4528",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6067-1-bf0f68bef1afec9e",
+      "name": "MiniFig1 · 6067-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        }
+      ]
+    },
+    {
+      "id": "omr-6071-1-04b6188c2e26ee19",
+      "name": "Minifig 2 · 6071-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87692",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6071-1-81c996d3426f58dd",
+      "name": "Minifig 1 · 6071-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87693",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6071-1-96cce1f3b9fd2b26",
+      "name": "Minifig 3 · 6071-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "87693",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6071-1-dfede491dab6f0d5",
+      "name": "Minifig 4 · 6071-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6073-1-5b4038674ae5d134",
+      "name": "MiniFig6 · 6073-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6073-1-d42e54e3d7d1c81c",
+      "name": "MiniFig5 · 6073-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p45",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6074-1-0ef4ddebfdc3a738",
+      "name": "MiniFig1 · 6074-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        }
+      ]
+    },
+    {
+      "id": "omr-6074-1-88d88ee88a9993bf",
+      "name": "MiniFig6 · 6074-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6074-1-e579a5414df20537",
+      "name": "MiniFig5 · 6074-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p45",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6080-1-1fd0c8bb520dec48",
+      "name": "MiniFig4 · 6080-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6080-1-ad1c41e44db361f2",
+      "name": "MiniFig3 · 6080-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4495a",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-0e77c4b591e32b87",
+      "name": "MiniFig03-04 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-30b94a7286ccbf32",
+      "name": "MiniFig10 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-8968d6ea263e9e0e",
+      "name": "MiniFig11 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-8ecce595a6e5eaf3",
+      "name": "MiniFig01-02 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-98b94312f0299344",
+      "name": "MiniFig12 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 4,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6085-1-bcef2786a7812ae7",
+      "name": "MiniFig09 · 6085-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4c",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "87692",
+          "color": 14,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6102-1-0a2f248b43bff4f5",
+      "name": "MiniFig3 · 6102-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4h",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6102-1-15d63866499cd0d7",
+      "name": "MiniFig6 · 6102-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p46",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6102-1-8b0d32c915e4570c",
+      "name": "MiniFig5 · 6102-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p45",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6102-1-d98c574114f7c4a2",
+      "name": "MiniFig2 · 6102-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3846p4g",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        }
+      ]
+    },
+    {
+      "id": "omr-6232-1-d454c3c152c1298a",
+      "name": "Pirate · 6232-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2562",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6245-1-0bee44a13437ff32",
+      "name": "MiniFig1 · 6245-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2542",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2542",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2528",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6285-1-7908158ad5560606",
+      "name": "pirate6 · 6285-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2562",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6706-1-5e6f3eb97cb11d82",
+      "name": "Cavalry Lieutenant with Bandana · 6706-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "71342",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "30141",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6706-1-701b34be517b2cd9",
+      "name": "Cavalry Soldier with Bandana · 6706-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3069bp03",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6709-1-7622a13c335f34f8",
+      "name": "Tribal Chief - Main Model · 6709-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3835",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "2586pw2",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4493pw2c00",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491b",
+          "color": 1,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30127p01",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6064",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30115",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6712-1-ca43a02b1097b7b7",
+      "name": "Bandit · 6712-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3069bpw2",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6716-1-b3dd27f0984d4dd4",
+      "name": "Cavalry Soldier · 6716-1",
+      "status": "partial",
+      "issues": [
+        {
+          "slot": "torso",
+          "reason": "Incomplete separate arm/hand inventory; matching torso/head colors used pending review"
+        },
+        {
+          "part": "30132",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "2488",
+          "reason": "Hand attachment requires a reviewed slot mapping"
+        },
+        {
+          "part": "977",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "977",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6718-1-95cec0f6aea2837a",
+      "name": "Raindance Ridge - Minifig1 · 6718-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        }
+      ]
+    },
+    {
+      "id": "omr-6755-1-4c6630c0eec1cce6",
+      "name": "Sheriff's Lock-Up - Bandit2 · 6755-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3069bp03",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6755-1-81f49783ffb6a792",
+      "name": "Sheriff's Lock-Up - Sheriff · 6755-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6761-1-077fc2fa29e091f0",
+      "name": "Cannon · 6761-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4600",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3795",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2527",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2533c01",
+          "color": 8,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "50254",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6761-1-50b8cb9633d5f615",
+      "name": "Cavalry Lieutenant · 6761-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "71342",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "4493c02",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491b",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4095",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2335pw1",
+          "color": 15,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6761-1-8e560eb87b0f797d",
+      "name": "Cavalry Soldier · 6761-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "4493c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491b",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6765-1-036b2fbd3453a3d1",
+      "name": "Bandit · 6765-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4493c01",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491b",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6765-1-2e27168ba5c73d4f",
+      "name": "Soldier · 6765-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2488",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6765-1-3e6b093414c5caa9",
+      "name": "Cowboy2 · 6765-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6769-1-08e7229062cbb702",
+      "name": "Cavalry Lieutenant · 6769-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6769-1-2acaffd09e5e1e40",
+      "name": "Cavalry Soldier with Bandana1 · 6769-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6769-1-b29182e9471ff4c7",
+      "name": "Cavalry Soldier · 6769-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6769-1-ce829b4f16eff161",
+      "name": "Cavalry Lieutenant with Bandana · 6769-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "71342",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6769-1-dbf40681bdbbc2e3",
+      "name": "Cavalry Soldier with Bandana2 · 6769-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "2488",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6790-1-74d68b1bb81bb76b",
+      "name": "Bandit · 6790-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "3021",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3839b",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3020",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "6157",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2436b",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2555",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2431pw0",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2470",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "2489",
+          "color": 6,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "3069bp03",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-6799-1-aee4f52a60a2f2c5",
+      "name": "Cowboy · 6799-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30141",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "2488",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-6799-1-db2487406f201db0",
+      "name": "Bandit1 · 6799-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3069bp03",
+          "color": 7,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7306-1-9b23206c9551fb73",
+      "name": "Mummy Warrior 1 · 7306-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "93251",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "30168",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30168a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7306-1-b1dd0c1c6a100a78",
+      "name": "Mac McCloud · 7306-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30171",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "30170",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7325-1-23f7a6509b4f6c9b",
+      "name": "Mummy Warrior · 7325-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30115",
+          "color": 2,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "90462pq0",
+          "color": 28,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "30168a",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7326-1-c3bc1ff886d6fcf8",
+      "name": "Jake Raines · 7326-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "64728",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-7327-1-1e8c483507eb8dcd",
+      "name": "Mummy Warrior · 7327-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4497",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "93250pq0",
+          "color": 272,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7327-1-58221ea9117bbc0e",
+      "name": "Amset-Ra · 7327-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "90462pq1",
+          "color": 82,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-7327-1-d33951f2565d557b",
+      "name": "Professor Archibald Hale · 7327-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "61976",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "3068bpq0",
+          "color": 19,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9469-1-c535240134278889",
+      "name": "frodo · 9469-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "33009c01",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9469-1-cfe3b1f8e0d9b217",
+      "name": "gandalf · 9469-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "522",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "63965",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9470-1-74fc179b217c5a66",
+      "name": "Sam · 9470-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "30153",
+          "color": 47,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9470-1-dc9d4df3db64d90b",
+      "name": "Frodo · 9470-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "11010",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-9471-1-9f2034a632c79cb0",
+      "name": "eomer · 9471-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "90391p02",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "75902p01",
+          "slot": "handL",
+          "reason": "Handheld orientation needs manual review"
+        },
+        {
+          "part": "98370",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "10354c01",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "10352c01",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "10350p01c01",
+          "color": 70,
+          "reason": "Unsupported component or attachment"
+        },
+        {
+          "part": "4491b",
+          "color": 72,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9476-1-426c65921d743766",
+      "name": "lurtz · 9476-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "10049p01",
+          "slot": "handR",
+          "reason": "Handheld orientation needs manual review"
+        }
+      ]
+    },
+    {
+      "id": "omr-9476-1-d6f16a5ab46302b3",
+      "name": "baldorc · 9476-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "3837",
+          "reason": "Not attached to a hand"
+        },
+        {
+          "part": "98138",
+          "color": 179,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    },
+    {
+      "id": "omr-9476-1-de5246b44f4acd50",
+      "name": "blacksmith · 9476-1",
+      "status": "partial",
+      "issues": [
+        {
+          "part": "4522",
+          "color": 0,
+          "reason": "Unsupported component or attachment"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "OMR is fan-authored; source model omissions are not a guarantee of retail inventory completeness. Models flagged for missing parts or prints remain partial until reviewed.",
+    "Unsupported compound accessories, asymmetric limbs and attachment orientations are reported rather than guessed.",
+    "Rebrickable optional API imports require a build-time key and verified external part/color mappings. No key is needed to build or browse the checked-in catalog."
+  ]
+}

@@ -18,13 +18,15 @@
 	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
 	import { applyPortraitSelections } from '../../../../portrait-scan.js';
 	import { fromHash, initial, portrait, randomize, toHash } from '#lib/state.svelte.ts';
-	import { history as timeline, hold, redo, release, track, undo } from '#lib/history.svelte.ts';
+	import { history as timeline, hold, redo, release, track, undo, transaction } from '#lib/history.svelte.ts';
 	import { used } from '#lib/prefs.svelte.ts';
 	import { changeLang, i18n, LANGS, pieces, t, type Lang } from '#lib/i18n.svelte.ts';
 	import Preview from '#lib/components/Preview.svelte';
 	import PartPicker from '#lib/components/PartPicker.svelte';
 	import Slot from '#lib/components/Slot.svelte';
 	import ColorBar from '#lib/components/ColorBar.svelte';
+	import PresetBrowser from '#lib/components/PresetBrowser.svelte';
+	import { presetFigure } from '#lib/presets.js';
 
 	type SlotId = 'headgear' | 'head' | 'neck' | 'back' | 'torso' | 'legs' | 'handR' | 'handL';
 	// Top to bottom, like the figure
@@ -192,9 +194,13 @@
 		if (embedded && ready) send('questlog:portrait-loaded', { webgl: webglAvailable(), catalog: $state.snapshot([...selectable, standard]), colors: $state.snapshot(colors.filter((c) => !c.alpha)) });
 	});
 	// The panel next to the portrait: what is being edited
-	type Mode = 'parts' | 'pose' | 'camera' | 'scene';
-	const MODES: Mode[] = embedded ? ['parts', 'pose', 'camera'] : ['parts', 'pose', 'camera', 'scene'];
+	type Mode = 'presets' | 'parts' | 'pose' | 'camera' | 'scene';
+	const MODES: Mode[] = embedded ? ['presets', 'parts', 'pose', 'camera'] : ['presets', 'parts', 'pose', 'camera', 'scene'];
 	let mode: Mode = $state('parts');
+	function applyMinifigurePreset(preset: any) {
+		const figure = presetFigure($state.snapshot(preset));
+		transaction(() => { portrait.figure = figure; });
+	}
 
 	const standard = $derived<Part>({ id: STANDARD_LEGS, name: t('standardLegs'), cat: 'legs' });
 	const selectable = $derived(fantasyCatalog(catalog));
@@ -456,7 +462,9 @@
 
 {#snippet icon(name: string)}
 	<svg viewBox="0 0 20 20" aria-hidden="true">
-		{#if name === 'parts'}
+		{#if name === 'presets'}
+			<rect x="2" y="2" width="6" height="6" rx="1" /><rect x="12" y="2" width="6" height="6" rx="1" /><rect x="2" y="12" width="6" height="6" rx="1" /><rect x="12" y="12" width="6" height="6" rx="1" />
+		{:else if name === 'parts'}
 			<rect x="2.5" y="8" width="15" height="8.5" rx="1.5" />
 			<rect x="5" y="4.5" width="4" height="3.5" rx="0.8" />
 			<rect x="11" y="4.5" width="4" height="3.5" rx="0.8" />
@@ -686,7 +694,9 @@
 			</div>
 
 			<div class="body" class:parts={mode === 'parts'} role="tabpanel">
-				{#if mode === 'parts'}
+				{#if mode === 'presets'}
+					<PresetBrowser ready={ready} onapply={applyMinifigurePreset} oncustomize={() => mode = 'parts'} />
+				{:else if mode === 'parts'}
 					<div class="parts-layout">
 						<div class="slots" role="group" aria-label={t('parts')}>
 							{#each SLOTS as s (s.id)}

@@ -1,0 +1,11 @@
+{
+  "_notes": ["Key by stable preset ID. Set hidden:true to withhold a source assembly; use figure slots, name, theme, species, archetypes, tags or compatibility to apply reviewed corrections. This file is never rewritten by importers."],
+  "presets": {
+    "original-gold-stole-magister": {"figure":{"legs":{"id":"36036p01","color":1,"hips":1}}},
+    "original-ornate-stole-celebrant": {"figure":{"legs":{"id":"36036p01","color":15,"hips":15}}},
+    "original-emerald-pactbinder": {"figure":{"legs":{"id":"36036p03","color":0,"hips":0}}},
+    "original-silver-dotted-enchantress": {"figure":{"legs":{"id":"36036pm0","color":0,"hips":0}}},
+    "original-crown-trim-duchess": {"figure":{"legs":{"id":"24068","color":4,"hips":4}}},
+    "original-white-apron-host": {"figure":{"legs":{"id":"36036p04","color":6,"hips":6}}}
+  }
+}

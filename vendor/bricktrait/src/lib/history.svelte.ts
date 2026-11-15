@@ -62,6 +62,14 @@ export function release() {
 	if (!held) commit();
 }
 
+/** A discrete action must not merge with the previous pending edit. */
+export function transaction(change: () => void) {
+	if (!current) current = JSON.stringify($state.snapshot(portrait));
+	if (!held) commit();
+	hold();
+	try { change(); } finally { release(); }
+}
+
 export function undo() {
 	if (!held) commit();
 	const prev = past.pop();

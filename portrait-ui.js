@@ -6,7 +6,7 @@ export function openPortraitMaker({character,onSave}) {
   dialog.className='portrait-dialog';
   dialog.setAttribute('aria-labelledby','portrait-title');
   dialog.innerHTML=`<header class="portrait-header"><div><h2 id="portrait-title">Make your character portrait.</h2><p>Choose fantasy parts, colours, and a pose. Portraits save with a transparent background. Made with <a href="https://github.com/Maxichance/bricktrait" target="_blank" rel="noopener noreferrer">Bricktrait by Maxichance</a>.</p></div><div class="portrait-actions"><button type="button" class="btn" data-portrait-close>Cancel</button><button type="button" class="btn btn-primary portrait-use" disabled>Use portrait</button></div></header><p class="portrait-status" role="status">Opening Bricktrait…</p><p class="portrait-error" role="alert" hidden></p><iframe title="Bricktrait character portrait maker" class="portrait-editor" allow="clipboard-write"></iframe>`;
-  dialog.querySelector('.portrait-header p').firstChild.textContent='Choose fantasy and CMF parts, colours, and a pose, or start from a LEGO photo. Portraits save with a transparent background. Made with ';
+  dialog.querySelector('.portrait-header p').firstChild.textContent='Browse minifigure presets, choose fantasy and CMF parts, colours, and a pose, or start from a LEGO photo. Portraits save with a transparent background. Made with ';
   const photoPanel=document.createElement('details');photoPanel.className='portrait-photo-panel';
   dialog.querySelector('.portrait-header').after(photoPanel);
   const frame=dialog.querySelector('iframe');

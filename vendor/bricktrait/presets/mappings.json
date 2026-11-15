@@ -1,0 +1,29 @@
+{
+  "_notes": [
+    "External ID mappings must be evidenced by source external_ids or an explicit reviewed entry here. No fuzzy printed part matches.",
+    "Grips use the existing Bricktrait bar-along-Y attachment convention; source OMR positions determine left/right hand. Original source transforms are retained.",
+    "Plain 3815/3816/3817 a/b mould revisions normalize to Bricktrait standard legs, with exact source colors. Printed components never use that normalization."
+  ],
+  "parts": {},
+  "colors": {},
+  "legAssemblies": [
+    {"parts":["3815pa9","3816pa9","3817pa9"],"id":"73200bpa9","hips":"parent","evidence":"LDraw Indiana Jones gunbelt pattern; corrected hips/leg mould revision."},
+    {"parts":["3815b","3816bpw3","3817bpw3"],"id":"73200bpw3","hips":"parent","evidence":"LDraw shortcut !HISTORY and Dark Turquoise/White Triangles, White Fringe pattern."},
+    {"parts":["3815b","3816bpw2","3817bpw2"],"id":"73200bpw2","hips":1,"evidence":"LDraw shortcut explicitly fixes 3815b hips to blue (1); Blue/White Triangles, Fringe pattern."},
+    {"parts":["3815pq0","3816pq0","3817pq0"],"id":"73200bpq0","hips":"parent","evidence":"LDraw shortcut !HISTORY credits original pattern design; Mummy Warrior Dark Blue Loincloth."},
+    {"parts":["3815pq1","3816pq1","3817pq1"],"id":"73200bpq1","hips":"parent","evidence":"LDraw shortcut !HISTORY credits original pattern design; Amset-Ra decorated gold loincloth."},
+    {"parts":["3815pm1","3816pm1","3817pm1"],"id":"73200bpm1","hips":72,"evidence":"LDraw LOTR Scale Armour shortcut fixes hips to Dark Bluish Grey (72), including Eomer/King Theoden."}
+  ],
+  "grips": {
+    "59": {"spin": 0}, "3847": {"spin": 0}, "3848": {"spin": 0},
+    "3849": {"spin": 0}, "4497": {"spin": 0}, "6123": {"spin": 0},
+    "2530": {"spin": 0}, "2343": {"spin": 0}, "6269": {"spin": 0},
+    "4499": {"spin": 0}, "2570": {"spin": 0}, "3837": {"spin": 0},
+    "3841": {"spin": 0}, "10050": {"spin": 0}, "10053": {"spin": 0},
+    "93247": {"spin": 0}, "93252": {"spin": 0}, "30173a": {"spin": 0},
+    "30173b": {"spin": 0}, "30172": {"spin": 0}, "30132": {"spin": 0},
+    "30133": {"spin": 0}, "3959": {"spin": 0}, "98370": {"spin": 0},
+    "88288": {"spin": 0}, "55295": {"spin": 0}, "80503": {"spin": 0},
+    "6124b": {"spin": 0}, "95049": {"spin": 0}, "95050": {"spin": 0}
+  }
+}

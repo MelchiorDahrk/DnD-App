@@ -6,6 +6,7 @@ export const LANGS = { en: 'English', fr: 'Français' } as const;
 export type Lang = keyof typeof LANGS;
 
 const en = {
+	presets: 'Presets',
 	tagline: 'Minifig portraits from real parts',
 	undo: 'Undo',
 	redo: 'Redo',
@@ -142,6 +143,7 @@ const en = {
 type Key = keyof typeof en;
 
 const fr: Record<Key, string> = {
+	presets: 'Modèles',
 	tagline: 'Des portraits de minifig avec de vraies pièces',
 	undo: 'Annuler',
 	redo: 'Rétablir',

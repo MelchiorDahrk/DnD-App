@@ -1,7 +1,7 @@
 import {LDRAW_ICONS} from './equipment-icons.js';
 import {SOUND_FILES} from './sound-assets.js';
 import {CONDITION_ICON_FILES} from './icons.js';
-const CACHE = 'questlog-app-v52-content-sources';
+const CACHE = 'questlog-app-v53-minifigure-presets';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./reference-links.js','./reference-pages.js');
 ASSETS.push('./published-feat-data.js','./content-sources.js');
@@ -23,6 +23,27 @@ ASSETS.push('./portrait-image-analysis.js','./portrait-match.js','./portrait-mat
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('questlog-app-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 let paletteCaching=null;
+let presetCaching=null;
+self.addEventListener('message',event=>{
+  if(event.data?.type!=='questlog:cache-minifigure-presets')return;
+  const reply=data=>event.source?.postMessage({type:'questlog:minifigure-presets-cache',...data});
+  if(!presetCaching)presetCaching=(async()=>{
+    const cache=await caches.open(CACHE);
+    const catalogURL=new URL('./portrait-maker/preset-catalog.json',self.location.href);
+    const response=await fetch(catalogURL);if(!response.ok)throw new Error('Catalog unavailable');
+    await cache.put(catalogURL,response.clone());const {presets}=await response.json();
+    const parts=new Set(['3815','3816','3817','3818','3819','3820']);
+    for(const preset of presets)for(const part of Object.values(preset.figure))if(part?.id&&part.id!=='standard')parts.add(part.id);
+    const paths=[...presets.map(p=>`./portrait-maker/${p.thumbnail}`),...['catalog.json','colors.json','LDConfig.ldr','core.ldr',...[...parts].map(id=>`p/${encodeURIComponent(id)}.ldr`)].map(f=>`./portrait-maker/ldraw/${f}`)];
+    let done=0;reply({done,total:paths.length});
+    for(let i=0;i<paths.length;i+=4){
+      await Promise.all(paths.slice(i,i+4).map(async path=>{const url=new URL(path,self.location.href);if(!await cache.match(url))await cache.add(url);}));
+      done=Math.min(i+4,paths.length);reply({done,total:paths.length});
+    }
+    return paths.length;
+  })().finally(()=>{presetCaching=null;});
+  event.waitUntil(presetCaching.then(total=>reply({done:total,total,complete:true})).catch(()=>reply({error:'The collection could not finish downloading. Reconnect and retry.'})));
+});
 self.addEventListener('message',event=>{
   if(event.data?.type!=='questlog:cache-portrait-palette')return;
   const reply=data=>event.source?.postMessage({type:'questlog:portrait-palette-cache',...data});

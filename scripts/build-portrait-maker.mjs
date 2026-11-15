@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {checkFantasyCatalog} from './check-fantasy-catalog.mjs';
 import {LDRAW_ICONS,equipmentIconParts} from '../equipment-icons.js';
 import {buildPortraitMatchIndex} from './build-portrait-match-index.mjs';
+import {buildPresets} from './build-minifigure-presets.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const vendor=resolve(root,'vendor/bricktrait');
@@ -28,6 +29,13 @@ export async function buildPortraitMaker() {
     run('build-parts.mjs');
   }
   checkFantasyCatalog();
+  const {catalog:presets}=await buildPresets();
+  await mkdir(resolve(vendor,'static/preset-thumbs'),{recursive:true});
+  for(const preset of presets.presets) {
+    const source=resolve(vendor,'presets/thumbnails',`${preset.id}.webp`);
+    if(!await exists(source))throw new Error(`Missing preset preview ${preset.id}. Run npm run build:preset-thumbnails after updating the catalog.`);
+    await cp(source,resolve(vendor,'static',preset.thumbnail));
+  }
   run('build-thumbs.mjs','--equipment');
   await buildPortraitMatchIndex();
   const {build}=await import('vite');
