@@ -31,6 +31,29 @@ try {
   await page.evaluate(state=>localStorage.setItem('questlog.v2',JSON.stringify(state)),defaultPartyState());
   await page.goto(base+'#dice',{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
+  phase='custom dice colors';
+  const colors={body:'#7c3aed',numbers:'#e6ffb3'};
+  const controls=()=>page.$$eval('[data-dice-color]',inputs=>Object.fromEntries(inputs.map(input=>[input.dataset.diceColor,input.value])));
+  const setColor=(key,value)=>page.$eval(`[data-dice-color="${key}"]`,(input,value)=>{
+    input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));
+  },value);
+  assert.deepEqual(await controls(),{body:'#365f58',numbers:'#fff5d7'});
+  await setColor('body',colors.body);await setColor('numbers',colors.numbers);
+  assert.deepEqual(await page.$eval('[data-dice-color-preview]',node=>({body:node.style.getPropertyValue('--dice-body'),numbers:node.style.getPropertyValue('--dice-numbers')})),colors);
+  await page.goto(base+'#settings',{waitUntil:'networkidle0'});
+  assert.deepEqual(await controls(),colors,'Settings shares the dice roller preferences');
+  await page.$eval('[data-action="reset-dice-colors"]',node=>node.click());
+  assert.deepEqual(await controls(),{body:'#365f58',numbers:'#fff5d7'});
+  await page.reload({waitUntil:'networkidle0'});
+  assert.deepEqual(await controls(),{body:'#365f58',numbers:'#fff5d7'},'reset persists');
+  await setColor('body',colors.body);await setColor('numbers',colors.numbers);
+  await page.goto(base+'#dice',{waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'networkidle0'});
+  assert.deepEqual(await controls(),colors,'custom colors survive reloading');
+  assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.dice-colors.v1'))),colors);
+  await mkdir(resolve(root,'.tmp'),{recursive:true});
+  await page.screenshot({path:resolve(root,'.tmp/dice-color-controls.png'),fullPage:true});
+  console.log('Independent color pickers, preview, shared Settings, reset and persistence verified');
   const instrument=()=>page.evaluate(async()=>{
     window.testDice=[];window.diceSettled=null;window.criticalEvents=[];
     new MutationObserver(records=>{
@@ -50,9 +73,14 @@ try {
       return {xPos:random(),yPos:random(),zPos:random(),rotAxis:[random(),random(),random()],rotAngle:random(),vel:[random(),random(),random()],angVel:[random(),random(),random()]};
     };
     const originalRoll=DiceRoller.prototype.roll;
-    DiceRoller.prototype.roll=function(dice){window.testThrowIndex=0;window.testDiceRoller=this;return originalRoll.call(this,dice);};
+    DiceRoller.prototype.roll=function(dice){window.testThrowIndex=0;window.testDiceRoller=this;window.testDiceConfig=dice.map(({diceColor,backgroundColor,textColor})=>({diceColor,backgroundColor,textColor}));return originalRoll.call(this,dice);};
   });
   await instrument();
+  const assertDiceColors=async()=>{
+    const actual=await page.evaluate(()=>window.testDiceConfig);
+    assert.ok(actual?.length,'dice colors reach the real engine');
+    assert.ok(actual.every(die=>die.diceColor===0xffffff&&die.backgroundColor===colors.body&&die.textColor===colors.numbers),'body and number colors apply independently to every die');
+  };
   const waitForSettled=async(selector='.dice-stage')=>{
     await page.waitForFunction(selector=>['settled','static'].includes(document.querySelector(selector)?.dataset.state),{timeout:20000},selector);
     const result=await page.$eval(selector,node=>({state:node.dataset.state,status:node.querySelector('.dice-stage-status')?.textContent,note:node.querySelector('.dice-stage-note')?.textContent}));
@@ -88,6 +116,7 @@ try {
       await waitForSettled();
       assert.ok(await page.$eval('#tray-die',node=>getComputedStyle(node).visibility==='visible'&&!node.inert&&node.getAttribute('aria-hidden')!=='true'));
       assert.ok(await page.$('.dice-stage canvas'),expression+' has real 3D dice');
+      await assertDiceColors();
       const outcome=await page.evaluate(()=>window.diceSettled);
       assert.equal(outcome.total,values.reduce((a,b)=>a+b,0),'engine targets match the rolled faces');
       assert.ok(outcome.results.every(r=>r.visible===r.value||(['d10','d100'].includes(r.type)&&r.visible===0&&[10,100].includes(r.value))),'visible faces match targets');
@@ -134,6 +163,7 @@ try {
   assert.equal(await page.$('.dice-stage'),null);
   await page.click('[data-action="ability-roll"][data-key="str"]');
   await page.waitForSelector('#modal .dice-stage canvas');
+  await assertDiceColors();
   await page.click('#modal [data-action="close"]');
   await page.waitForFunction(()=>!document.querySelector('.dice-stage'));
   console.log('Fast rerolls, navigation, sheet rolls and dialog cleanup verified');
@@ -186,6 +216,7 @@ try {
       await page.locator(submit).click();
       await waitForSettled();
       assert.ok(await page.$('.dice-stage canvas'),'mobile roll keeps the 3D dice');
+      await assertDiceColors();
       assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),String(values.reduce((sum,value)=>sum+value,0)));
       for(const die of await dieGeometry()){
         const baseline=desktopGeometry.get(die.type);
@@ -213,6 +244,7 @@ try {
   await page.waitForSelector('.dice-stage[data-state="static"]');
   assert.equal(await page.$('.dice-stage canvas'),null);
   assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'20');
+  assert.deepEqual(await page.$eval('.dice-stage-faces span',node=>({body:getComputedStyle(node).backgroundColor,numbers:getComputedStyle(node).color})),{body:'rgb(124, 58, 237)',numbers:'rgb(230, 255, 179)'},'reduced motion also uses the chosen dice colors');
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
   await roll('1d3',[3],'normal',false);await page.waitForSelector('.dice-stage[data-state="static"]');
   await roll('50d6',Array(50).fill(2),'normal',false);await page.waitForSelector('.dice-stage[data-state="static"]');

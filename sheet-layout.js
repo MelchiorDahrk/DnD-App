@@ -57,7 +57,7 @@ export function mountSheetLayout(root,c) {
     while (body.nextSibling) body.append(body.nextSibling);
 
     for (let entry of body.querySelectorAll('[data-sheet-entry]')) {
-      if (entry.matches('button')) {
+      if (entry.matches('button, .combat-stat')) {
         const wrapper=document.createElement('div');
         wrapper.className=`sheet-tile ${entry.classList.contains('ability-card')?'ability-entry':entry.classList.contains('combat-stat')?'combat-entry':'sheet-inline-entry'}`;
         wrapper.dataset.sheetEntry=entry.dataset.sheetEntry;

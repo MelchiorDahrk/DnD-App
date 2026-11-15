@@ -2,7 +2,37 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {rollDice} from '../model.js';
 import {rollAttackDamage} from '../attack-rules.js';
-import {diceAnimationPlan,facesMatch} from '../dice-roller.js';
+import {diceAnimationPlan,facesMatch,createDiceColorPreferences,DICE_COLORS_KEY,DEFAULT_DICE_COLORS} from '../dice-roller.js';
+
+test('dice colors persist independently, merge one color at a time, and reset to the original palette',()=>{
+  const data=new Map([['questlog.v2','character data']]);
+  const storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
+  const prefs=createDiceColorPreferences(storage);
+  assert.deepEqual(prefs.get(),DEFAULT_DICE_COLORS);
+  assert.equal(prefs.set({body:'#7C3AED'}),true);
+  assert.deepEqual(prefs.get(),{body:'#7c3aed',numbers:DEFAULT_DICE_COLORS.numbers});
+  prefs.set({numbers:'#E6FFB3'});
+  assert.deepEqual(createDiceColorPreferences(storage).get(),{body:'#7c3aed',numbers:'#e6ffb3'});
+  const copy=prefs.get();copy.body='#000000';
+  assert.equal(prefs.get().body,'#7c3aed');
+  prefs.set(DEFAULT_DICE_COLORS);
+  assert.deepEqual(JSON.parse(data.get(DICE_COLORS_KEY)),DEFAULT_DICE_COLORS);
+  assert.equal(data.get('questlog.v2'),'character data');
+});
+
+test('invalid or unavailable color storage preserves usable defaults and in-memory choices',()=>{
+  for(const saved of ['broken JSON','null','[]','42','"#ffffff"','{"body":"red","numbers":5}']) {
+    assert.deepEqual(createDiceColorPreferences({getItem:()=>saved}).get(),DEFAULT_DICE_COLORS);
+  }
+  const prefs=createDiceColorPreferences({getItem:()=>'{"body":"#123ABC","numbers":"#fff"}',setItem:()=>{throw Error('Storage blocked');}});
+  assert.deepEqual(prefs.get(),{body:'#123abc',numbers:DEFAULT_DICE_COLORS.numbers});
+  assert.equal(prefs.set({numbers:'#000000',extra:'ignored'}),false);
+  assert.deepEqual(prefs.get(),{body:'#123abc',numbers:'#000000'});
+  const blocked=createDiceColorPreferences({getItem:()=>{throw Error('Storage blocked');}});
+  assert.deepEqual(blocked.get(),DEFAULT_DICE_COLORS);
+  assert.equal(blocked.set({body:'#ffffff'}),false);
+  assert.equal(blocked.get().body,'#ffffff');
+});
 
 test('3D targets preserve every recorded face and leave modifiers in the rules model',()=>{
   for(const sides of [4,6,8,10,12,20,100]) {

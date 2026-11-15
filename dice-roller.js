@@ -3,6 +3,30 @@ const SUPPORTED=new Set([4,6,8,10,12,20,100]);
 const MAX_PHYSICAL_DICE=20;
 let current=null,engineModule=null;
 
+export const DICE_COLORS_KEY='questlog.dice-colors.v1';
+export const DEFAULT_DICE_COLORS=Object.freeze({body:'#365f58',numbers:'#fff5d7'});
+
+function normalizeDiceColors(input) {
+  return Object.fromEntries(Object.entries(DEFAULT_DICE_COLORS).map(([key,fallback])=>
+    [key,typeof input?.[key]==='string'&&/^#[0-9a-f]{6}$/i.test(input[key])?input[key].toLowerCase():fallback]));
+}
+
+// Appearance stays on this device, independently of character saves and backups.
+export function createDiceColorPreferences(storage) {
+  try {storage??=globalThis.localStorage;}catch{}
+  let colors={...DEFAULT_DICE_COLORS};
+  try {colors=normalizeDiceColors(JSON.parse(storage?.getItem(DICE_COLORS_KEY)||'null'));}catch{}
+  return {
+    get:()=>({...colors}),
+    set(update) {
+      colors=normalizeDiceColors({...colors,...update});
+      try {if(storage){storage.setItem(DICE_COLORS_KEY,JSON.stringify(colors));return true;}}catch{}
+      return false;
+    }
+  };
+}
+export const diceColorPreferences=createDiceColorPreferences();
+
 export function beginDice() {
   clearDice();
   document.body.classList.add('dice-pending');
@@ -68,6 +92,8 @@ export function presentDice(result,host) {
   if(!host?.isConnected||!result.rolls?.length||document.hidden)return Promise.resolve('skipped');
   const plan=diceAnimationPlan(result),motion=matchMedia('(prefers-reduced-motion: reduce)');
   const stage=document.createElement('section');stage.className='dice-stage';stage.dataset.state='loading';
+  const colors=diceColorPreferences.get();
+  stage.style.setProperty('--dice-body',colors.body);stage.style.setProperty('--dice-numbers',colors.numbers);
   stage.setAttribute('aria-label','Dice tray');
   const heading=document.createElement('div');heading.className='dice-stage-heading';
   const label=document.createElement('span');label.textContent=result.label||'Dice roll';
@@ -142,7 +168,8 @@ export function presentDice(result,host) {
     session.resize.observe(surface);
     stage.dataset.state='rolling';status.textContent='Rolling…';
     const size=matchMedia('(max-width:760px)').matches?3:1;
-    const dice=plan.dice.map(die=>({...die,size,diceColor:0xffffff,backgroundColor:'#365f58',textColor:'#fff5d7'}));
+    // Keep the material tint white so body and number colors remain independent.
+    const dice=plan.dice.map(die=>({...die,size,diceColor:0xffffff,backgroundColor:colors.body,textColor:colors.numbers}));
     // roll() may stay pending after destroy; completion uses the callback and our own cancelable promise.
     session.engine.roll(dice).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));
   }).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));

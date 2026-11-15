@@ -7,7 +7,7 @@
 .dice-stage-note{margin:0;padding:0 16px 14px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
 .dice-stage-faces{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:0 14px 14px;font:13px var(--mono);color:var(--text-primary)}
 .dice-stage-faces[hidden]{display:none}
-.dice-stage-faces span{min-width:30px;padding:5px 8px;text-align:center;border:1px solid var(--border-subtle);border-radius:5px;background:var(--surface-page)}
+.dice-stage-faces span{min-width:30px;padding:5px 8px;text-align:center;border:1px solid var(--border-subtle);border-radius:5px;background:var(--dice-body);color:var(--dice-numbers)}
 .dice-stage-faces .dice-face-kept{border-color:var(--accent-edge);box-shadow:inset 0 -2px var(--hero-brass)}
 .dice-stage[data-state="loading"] .dice-stage-faces,.dice-stage[data-state="rolling"] .dice-stage-faces{visibility:hidden}
 .dice-stage[data-state="static"] .dice-stage-faces{padding-top:14px}
@@ -18,6 +18,18 @@
 .dice-stage-host:has(.dice-stage)~.big-die,.modal-body:has(>.dice-stage) .roll-modal .big-die{width:auto;height:auto;margin:0 auto 20px;background:none;border:0;box-shadow:none;transform:none;color:var(--text-primary)}
 .dice-stage-host:has(.dice-stage)~.big-die>.icon,.modal-body:has(>.dice-stage) .roll-modal .big-die>.icon{display:none}
 .dice-stage-host:has(.dice-stage)~.big-die strong,.modal-body:has(>.dice-stage) .roll-modal .big-die strong{position:static;font-size:46px;transform:none}
+.dice-color-settings{margin-top:24px;padding-top:20px;border-top:1px solid var(--border-subtle);text-align:left}
+.dice-color-settings h3{display:flex;align-items:center;gap:8px;margin:0;font-size:13px;color:var(--text-primary)}
+.dice-color-settings h3 .icon{width:17px;height:17px}
+.dice-color-settings p{margin:8px 0 14px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
+.dice-color-controls{display:flex;align-items:center;gap:18px;margin-bottom:14px}
+.dice-color-preview{display:grid;place-items:center;flex-shrink:0;width:64px;height:72px;clip-path:polygon(50% 0,96% 25%,96% 75%,50% 100%,4% 75%,4% 25%);background:var(--dice-body);color:var(--dice-numbers);font:600 26px var(--display)}
+.dice-color-fields{display:grid;gap:10px;min-width:0}
+.dice-color-field{display:grid;grid-template-columns:60px 44px 7ch;align-items:center;gap:10px;font-size:11px;color:var(--text-primary)}
+.dice-color-field input{width:44px;height:36px;min-width:0;padding:3px;border:1px solid var(--border-control);border-radius:var(--radius-button);background:var(--surface-panel);cursor:pointer}
+.dice-color-field output{font:10px var(--mono);color:var(--text-secondary)}
+.dice-color-settings>.text-btn{min-height:36px}
+.settings-grid .dice-color-settings{margin:0;padding:20px 22px;border-top:0;border-bottom:1px solid var(--border-subtle)}
 @media(max-width:760px){
   .dice-surface{height:clamp(140px,28svh,230px)}
   .dice-tray{padding:20px 14px;overflow-anchor:none}
@@ -26,4 +38,11 @@
   .dice-selection{margin:16px 0}
   .dice-stage-heading{font-size:9px;padding:12px 12px 0}
   .dice-stage-note{padding:0 12px 12px;font-size:10px}
+}
+@media(max-width:400px){
+  .dice-color-controls{gap:12px}
+  .dice-color-preview{width:50px;height:58px;font-size:23px}
+  .dice-color-field{grid-template-columns:52px 40px 7ch;gap:7px}
+  .dice-color-field input{width:40px}
+  .settings-grid .dice-color-settings{padding-inline:18px}
 }
