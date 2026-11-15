@@ -103,3 +103,18 @@ The workflow allows 45 minutes for browser suites (their individual limits total
 40) and 95 minutes for the build job, including the cold-build allowance and cache
 overhead. Static packaging clears `dist/` first, so removed files cannot linger
 and hide a packaging defect during repeated local verification.
+
+## Critical-hit sheet regression
+
+[Run 43769607769](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43769607769)
+failed after a successful natural-20 attack. Its saved HTML and screenshot show
+the settled result and critical damage controls. The sheet test waited for
+`.roll-modal`, but critical hits intentionally show accuracy in a compact
+disclosure instead. The random d20 made that assertion fail intermittently.
+
+Sheet interaction checks now wait for the completed recorded dice, independently
+of the surrounding result layout. Every run explicitly exercises a natural 1,
+a normal roll, and a natural 20 from a collapsed favorite attack, and verifies
+the corresponding miss, hit confirmation, and damage controls. Actual clicks,
+rules, dice rendering and feature-use checks remain in place. Set
+`SHEET_TEST_CPU_RATE=4` with `npm run test:sheet` to stress slower browser execution.

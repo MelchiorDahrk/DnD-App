@@ -1,4 +1,4 @@
-import {visualChecks,waitForImages} from '../tests/helpers/browser-checks.mjs';
+import {visualChecks,waitForImages,waitForRollResult} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {catalogSheetState} from '../tests/helpers/sheet-fixtures.mjs';
 import {checkSheetImprovements} from '../tests/helpers/sheet-improvements.mjs';
@@ -32,8 +32,10 @@ try {
       server.stdout.once('data',()=>{clearTimeout(timer);resolve();});
     });
   }
-  browser=await puppeteer.launch({executablePath,browser:/firefox/i.test(executablePath)?'firefox':'chrome',headless:true,args:['--no-sandbox']});
+  const firefox=/firefox/i.test(executablePath);
+  browser=await puppeteer.launch({executablePath,browser:firefox?'firefox':'chrome',headless:true,args:['--no-sandbox',...(firefox?[]:['--enable-unsafe-swiftshader','--use-angle=swiftshader'])]});
   page=await browser.newPage();
+  if(process.env.SHEET_TEST_CPU_RATE)await page.emulateCPUThrottling(Number(process.env.SHEET_TEST_CPU_RATE));
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',message=>{consoleMessages.push(`${message.type()}: ${message.text()}`);if(consoleMessages.length>50)consoleMessages.shift();});
   await page.setViewport({width:1440,height:1100});
@@ -153,22 +155,46 @@ try {
   }
   console.log('PASS all ten sections collapse by keyboard and retain only favorite entries');
 
-  await page.click(`${entrySelector('abilities',selected.abilities)} [data-action="ability-roll"]`);
-  await page.waitForSelector('#modal[open] .roll-modal');
-  await page.click('#modal [data-action="close"]');
-  await page.click(`${entrySelector('attacks',selected.attacks)} [data-action="attack-roll"]`);
-  await page.click('#modal [data-combat-action="roll"]');
-  await page.waitForSelector('#modal[open] .roll-modal');
-  await page.click('#modal [data-action="close"]');
+  phase='collapsed favorite ability roll';
+  await page.locator(`${entrySelector('abilities',selected.abilities)} [data-action="ability-roll"]`).click();
+  await waitForRollResult(page);
+  await page.locator('#modal [data-action="close"]').click();
+  // Fix only the sampled dice, keeping the real click handler, rules and tray.
+  // Exercise every attack result branch rather than letting a random 20 make CI fail.
+  await page.evaluate(()=>{
+    window.sheetTestRandom=crypto.getRandomValues.bind(crypto);
+    crypto.getRandomValues=array=>{
+      if(window.sheetTestDice?.length){array[0]=window.sheetTestDice.shift()-1;return array;}
+      return window.sheetTestRandom(array);
+    };
+  });
+  try {
+    for(const natural of [1,12,20]) {
+      phase=`collapsed favorite attack: natural ${natural}`;console.log(`RUN ${phase}`);
+      await page.locator(`${entrySelector('attacks',selected.attacks)} [data-action="attack-roll"]`).click();
+      await page.evaluate(value=>window.sheetTestDice=[value],natural);
+      await page.locator('#modal [data-combat-action="roll"]').click();
+      assert.deepEqual(await waitForRollResult(page),[natural],phase);
+      assert.equal(await page.$('#modal [data-combat-action="roll"]'),null,'The attack left setup and produced a result.');
+      if(natural===20)assert.ok(await page.$('#modal [data-combat-action="damage"]'),'A natural 20 offers critical damage.');
+      else if(natural===1)assert.ok(await page.$('#modal .combat-miss'),'A natural 1 is a miss.');
+      else assert.ok(await page.$('#modal [data-combat-action="hit"]'),'Other rolls allow hit confirmation.');
+      await page.locator('#modal [data-combat-action="close"]').click();
+    }
+  } finally {
+    await page.evaluate(()=>{crypto.getRandomValues=window.sheetTestRandom;delete window.sheetTestRandom;delete window.sheetTestDice;});
+  }
+  phase='collapsed favorite feature roll and resource use';
   const featureBefore=active(await state()).features.find(f=>f.id===selected.features);
-  await page.click(`${entrySelector('features',selected.features)} [data-action="feature-roll"]`);
-  await page.waitForSelector('#modal[open] .roll-modal');
-  await page.click('#modal [data-action="close"]');
+  await page.locator(`${entrySelector('features',selected.features)} [data-action="feature-roll"]`).click();
+  await waitForRollResult(page);
+  await page.locator('#modal [data-action="close"]').click();
   assert.equal(active(await state()).features.find(f=>f.id===selected.features).used,featureBefore.used+1);
   await page.click(`${entrySelector('skills',selected.skills)} [data-action="skill-prof"]`);
   assert.deepEqual(await visibleKeys('skills'),[selected.skills]);
   console.log('PASS collapsed favorites still roll abilities and attacks, spend resources, and edit proficiency');
 
+  phase='favorite persistence and character switching';
   const layout=active(await state()).sheetLayout;
   await page.reload({waitUntil:'networkidle0'});
   assert.deepEqual(active(await state()).sheetLayout,layout);
