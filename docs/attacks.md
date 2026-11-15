@@ -2,6 +2,8 @@
 
 Choose **Roll to hit**, review the circumstances, then roll. Target AC and distance are optional. Without AC, confirm Hit, Critical hit, or Miss with the DM. The damage button on the sheet opens damage directly, with a critical-hit toggle.
 
+Once a hit is confirmed, the dialog leads with **Roll damage** and then the damage result. Damage totals come into view automatically when their dice finish rolling. The accuracy total stays below damage in a compact **To hit** footnote; expand it for the roll breakdown, Heroic Inspiration rerolls, or a feature's critical-hit override. Misses keep the accuracy roll visible.
+
 The attack editor has **Weapon rules** for the base weapon and **Unlocked mastery** for the character's actual choice. These are separate from proficiency. Custom names can retain a base weapon; spells and natural attacks can use Custom. A catalog weapon never unlocks mastery by itself. Old saves recognize exact weapon choices already recorded in a Weapon Mastery feature; all old saves still load without migration. Explicit None takes precedence over those notes.
 
 ## Mastery follow-ups

@@ -11,7 +11,8 @@ const button=(action,label,attrs='',primary=false)=>`<button type="button" class
 const input=(label,name,value='',attrs='')=>`<label class="form-field">${label}<input name="${name}" value="${esc(value)}" ${attrs}></label>`;
 const check=(label,name,checked=false)=>`<label class="check-field"><input type="checkbox" name="${name}" ${checked?'checked':''}>${label}</label>`;
 const select=(label,name,values,current)=>`<label class="form-field">${label}<select name="${name}">${values.map(([value,label])=>`<option value="${value}" ${value===current?'selected':''}>${label}</option>`).join('')}</select></label>`;
-const resultMarkup=(r,label)=>`<div class="roll-modal combat-result"><div class="roll-expression">${esc(label)} · ${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}</div><div class="big-die">${icon('dice')}<strong>${r.total}</strong></div><div class="roll-breakdown">${r.rolls.length?esc(r.rolls.join(r.mode==='normal'?' + ':' & '))+(r.mode!=='normal'?` → ${r.natural}`:'')+(r.bonus?' '+signed(r.bonus):''):'Fixed damage'} = ${r.total}</div></div>`;
+const rollBreakdown=r=>`${r.rolls.length?esc(r.rolls.join(r.mode==='normal'?' + ':' & '))+(r.mode!=='normal'?` → ${r.natural}`:'')+(r.bonus?' '+signed(r.bonus):''):'Fixed damage'} = ${r.total}`;
+const resultMarkup=(r,label)=>`<div class="roll-modal combat-result"><div class="roll-expression">${esc(label)} · ${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}</div><div class="big-die">${icon('dice')}<strong>${r.total}</strong></div><div class="roll-breakdown">${rollBreakdown(r)}</div></div>`;
 let controller;
 
 export function openAttack({character:c,attack:initial,modal,setModal,recordRoll,onChange,damageOnly=false}) {
@@ -41,6 +42,10 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     return true;
   }
   function animate(result,phase,damageLabel=a.type) {
+    if(phase==='damage'){
+      const results=modal.querySelectorAll(result===damage?'.combat-damage .combat-result':'.combat-extra-result .combat-result');
+      results[results.length-1]?.scrollIntoView({block:'nearest',behavior:'instant'});
+    }
     const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase});
     if(event)sound.play(event);
     if(phase==='attack'&&outcome==='critical')sound.play('combat.critical',{delay:.15});
@@ -83,11 +88,13 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     const inspiration=c.inspiration&&roll&&!damage&&!extras.length&&!save?`<div class="combat-inspiration"><p>Heroic Inspiration: reroll one die and keep its new value.</p>${roll.rolls.map((value,i)=>button('inspiration',`Reroll die ${i+1} (${value})`,`data-index="${i}"`)).join('')}</div>`:'';
     const specialCritical=roll&&outcome&&roll.natural!==1&&roll.natural!==20&&!damage&&!extras.length&&!save?`<p class="form-help">${button(outcome==='critical'?'hit':'critical',outcome==='critical'?'Use a normal hit':'Feature / target effect: critical hit')}</p>`:'';
     const formula=damageFormula(c,a,{twoHanded:options.twoHanded,omitAbility:['Cleave','Light extra attack'].includes(extraKind),keepAbility:extraKind==='Light extra attack'&&options.keepAbility});
-    const damagePanel=outcome&&outcome!=='miss'?`<section class="combat-followup"><h3>${outcome==='critical'?'Critical damage':'Damage'}</h3>${!roll&&!damage?check('Critical hit','directCritical',outcome==='critical'):''}<p>${esc(formula)}${outcome==='critical'?' · double dice, keep bonuses':''} · ${esc(a.type)}</p>${damage?resultMarkup(damage,a.type+' damage'):button('damage','Roll damage','',true)}</section>`:'';
+    const damagePanel=outcome&&outcome!=='miss'?`<section class="combat-followup combat-damage"><h3>${outcome==='critical'?'Critical damage':'Damage'}</h3>${!roll&&!damage?check('Critical hit','directCritical',outcome==='critical'):''}<p>${esc(formula)}${outcome==='critical'?' · double dice, keep bonuses':''} · ${esc(a.type)}</p>${damage?resultMarkup(damage,a.type+' damage'):button('damage','Roll damage','',true)}</section>`:'';
+    const accuracy=roll&&damagePanel?`<details class="combat-accuracy"><summary>To hit: <strong>${roll.total}</strong> · Roll details${inspiration?' & reroll':''}</summary><p>${esc(roll.expression)}${roll.mode!=='normal'?' · '+roll.mode:''} · ${rollBreakdown(roll)}</p>${modes}${inspiration}${specialCritical}</details>`:'';
+    const hitPanel=roll&&!damagePanel?`${resultMarkup(roll,'To hit')}${status}${modes}${inspiration}${specialCritical}`:status;
     const claws=roll&&!clawUsed&&/^Beast: Claws$/i.test(a.name)&&c.features.some(f=>/Form of the Beast/i.test(f.name))?`<section class="combat-followup"><h3>Beast Claws</h3><p>In Claws form during Rage, once on your turn after a claw attack in your Attack action, make one extra claw attack in that action. Confirm it is still available.</p>${button('claw','Extra claw attack')}</section>`:'';
     const reminders=[...context.warnings,a.notes].filter(Boolean);
     if(damage||extras.length)reminders.push('Apply resistance, vulnerability, and immunity by damage type. A concentrating target checks a Constitution save after taking damage: DC 10 or half the damage taken (round down), whichever is higher, capped at DC 30.');
-    setModal(esc(a.name)+(extraKind?' · '+esc(extraKind):''),`${header()}${roll?resultMarkup(roll,'To hit'):''}${status}${modes}${inspiration}${specialCritical}${damagePanel}${masteryMarkup()}${lightMarkup()}${claws}${extras.map(({label,result})=>`<div class="combat-extra-result">${esc(label)}${resultMarkup(result,'Extra damage')}</div>`).join('')}${extraMarkup()}${reminders.length?`<details class="combat-details"><summary>Weapon reminders & notes</summary>${reminders.map(n=>`<p>${esc(n)}</p>`).join('')}</details>`:''}<p class="form-help"><a href="${wikiURL('weapons')}" target="_blank" rel="noopener noreferrer">2024 weapon rules</a> · Apply damage and conditions to the target at the table.</p><div class="modal-actions">${button('close','Done')}${button('again','Another attack')}</div>`);
+    setModal(esc(a.name)+(extraKind?' · '+esc(extraKind):''),`${header()}${hitPanel}${damagePanel}${extras.map(({label,result})=>`<div class="combat-extra-result">${esc(label)}${resultMarkup(result,'Extra damage')}</div>`).join('')}${accuracy}${masteryMarkup()}${lightMarkup()}${claws}${extraMarkup()}${reminders.length?`<details class="combat-details"><summary>Weapon reminders & notes</summary>${reminders.map(n=>`<p>${esc(n)}</p>`).join('')}</details>`:''}<p class="form-help"><a href="${wikiURL('weapons')}" target="_blank" rel="noopener noreferrer">2024 weapon rules</a> · Apply damage and conditions to the target at the table.</p><div class="modal-actions">${button('close','Done')}${button('again','Another attack')}</div>`);
   }
   modal.addEventListener('click',event=>{
     const el=event.target.closest('[data-combat-action]');if(!el||el.disabled)return;

@@ -45,12 +45,17 @@ try{
 
   await open(axe.id,[20]);await click('roll');
   assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical hit/);
+  assert.match(await page.$eval('.combat-accuracy summary',n=>n.textContent),/To hit:/);
+  assert.equal(await page.$eval('.combat-accuracy',n=>n.open),false,'confirmed hits keep accuracy collapsed');
+  assert.equal(await page.$('#modal .big-die'),null,'accuracy no longer occupies the main result');
   await page.waitForSelector('.vfx-weapon img');
   assert.match(await page.$eval('.vfx-weapon img',n=>n.getAttribute('src')),/greataxe/);
   assert.equal(await page.$eval('.vfx-layer',n=>getComputedStyle(n).pointerEvents),'none');
   await dice([4,8]);await click('damage');
   assert.match(await page.$eval('.combat-followup .roll-expression',n=>n.textContent),/2d12\+3/);
   assert.equal(await page.$eval('.combat-followup .big-die strong',n=>n.textContent),'15');
+  assert.equal(await page.$$eval('#modal .big-die',nodes=>nodes.length),1,'only damage has a prominent total');
+  assert.ok(await page.$eval('.combat-damage',n=>Boolean(n.compareDocumentPosition(document.querySelector('.combat-accuracy'))&Node.DOCUMENT_POSITION_FOLLOWING)),'damage precedes the accuracy footnote');
   await click('cleave');assert.match(await page.$eval('.combat-weapon',n=>n.textContent),/Cleave/);
   await dice([12]);await click('roll');await click('hit');await dice([7]);await click('damage');
   assert.match(await page.$eval('.combat-followup .roll-expression',n=>n.textContent),/1d12$/);
@@ -78,6 +83,7 @@ try{
   }
 
   await open('rapier',[3]);await click('roll');
+  await click('hit');await page.click('.combat-accuracy summary');
   await dice([20]);await click('inspiration','[data-index="0"]');
   assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical/);
   assert.equal((await active()).inspiration,false);
@@ -114,6 +120,33 @@ try{
   assert.equal((await active()).attacks.find(a=>a.id===battleaxe.id).mastery,'');
   parseBackup(JSON.stringify(await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')))));
 
+  // Guided mobile attacks progress from accuracy to damage without a large hit roll above it.
+  await mkdir(resolve(root,'.tmp'),{recursive:true});
+  for(const viewport of [{width:390,height:844},{width:320,height:568}]){
+    await page.setViewport(viewport);
+    await open(axe.id,[12]);await click('roll');
+    assert.match(await page.$eval('#modal .roll-expression',n=>n.textContent),/To hit/);
+    assert.equal(await page.$(action('damage')),null,'wait for hit confirmation before offering damage');
+    assert.ok(await page.$(action('hit')));
+    await page.screenshot({path:resolve(root,`.tmp/attack-hit-${viewport.width}.png`)});
+    await click('hit');
+    assert.equal(await page.$('#modal .big-die'),null);
+    assert.equal(await page.$eval('.combat-accuracy',n=>n.open),false);
+    const visible=await page.$eval(action('damage'),n=>{const r=n.getBoundingClientRect(),dialog=n.closest('dialog').getBoundingClientRect();return r.top>=dialog.top&&r.bottom<=Math.min(dialog.bottom,innerHeight);});
+    assert.ok(visible,`${viewport.width}px: Roll damage is visible immediately after confirmation`);
+    await page.screenshot({path:resolve(root,`.tmp/attack-confirmed-${viewport.width}.png`)});
+    if(viewport.width===320){
+      await page.click('.combat-details summary');await page.$eval('[name="extraDamage"]',n=>n.value='2');await click('extra');
+      assert.equal(await page.$eval('.combat-extra-result .big-die strong',n=>n.textContent),'2','extra damage can precede the weapon damage roll');
+    }
+    await dice([7]);await click('damage');
+    assert.equal(await page.$eval('#modal .big-die strong',n=>n.textContent),'10');
+    assert.equal(await page.$eval('.combat-accuracy',n=>n.open),false);
+    assert.ok(await page.$eval('#modal .big-die strong',n=>{const r=n.getBoundingClientRect(),dialog=n.closest('dialog').getBoundingClientRect();return r.top>=dialog.top&&r.bottom<=Math.min(dialog.bottom,innerHeight);}),`${viewport.width}px: damage total is visible when the roll settles`);
+    await page.screenshot({path:resolve(root,`.tmp/attack-damage-${viewport.width}.png`)});
+    await close();
+  }
+
   // Direct damage supports a critical toggle, and mobile dialogs remain within the viewport.
   await page.setViewport({width:390,height:844});
   await page.click(`[data-action="damage-roll"][data-id="${axe.id}"]`);await page.click('[name="directCritical"]');await dice([4,4]);await click('damage');
@@ -128,7 +161,7 @@ try{
   // Reload restores scroll position; center the target above the persistent mobile nav.
   await page.$eval(`[data-action="attack-roll"][data-id="${axe.id}"]`,node=>node.scrollIntoView({block:'center'}));
   await page.click(`[data-action="attack-roll"][data-id="${axe.id}"]`);await click('roll');
-  assert.ok(await page.$('.combat-result'),'guided attacks work offline');
+  assert.ok(await page.$('.combat-result, .combat-accuracy'),'guided attacks work offline');
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
   if(/firefox/i.test(executablePath))calmBrowser=await puppeteer.launch({executablePath,browser:'firefox',headless:true,extraPrefsFirefox:{'ui.prefersReducedMotion':1}});
   const calmPage=await (calmBrowser||browser).newPage();calmPage.on('pageerror',error=>errors.push(error.message));
@@ -138,5 +171,5 @@ try{
   await calmPage.click(`[data-action="attack-roll"][data-id="${axe.id}"]`);await calmPage.click(action('roll'));
   assert.ok(await calmPage.$('.vfx-calm'));assert.equal(await calmPage.$('.vfx-weapon'),null,'reduced motion creates no moving weapon');
   assert.deepEqual(errors,[]);
-  console.log('Attack browser checks passed: all masteries, criticals, extra damage, resources, Inspiration, cover, range, editing, backup, mobile, reduced motion, and offline.');
+  console.log('Attack browser checks passed: damage-first results, all masteries, criticals, extra damage, resources, Inspiration, cover, range, editing, backup, mobile, reduced motion, and offline.');
 }finally{await calmBrowser?.close();await browser?.close();server?.kill();}
