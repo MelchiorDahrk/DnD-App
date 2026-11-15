@@ -1,7 +1,7 @@
 import {LDRAW_ICONS} from './equipment-icons.js';
 import {SOUND_FILES} from './sound-assets.js';
 import {CONDITION_ICON_FILES} from './icons.js';
-const CACHE = 'questlog-app-v42-published-feats';
+const CACHE = 'questlog-app-v43-dice-reveal';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./sheet-scan.js','./sheet-scan-ui.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./reference-links.js','./reference-pages.js');
 ASSETS.push('./published-feat-data.js');

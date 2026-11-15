@@ -16,7 +16,7 @@ import {openLevelUp} from './level-up-ui.js';
 import {restRefreshes,restReminders} from './rest-rules.js';
 import {MASTERIES,attackWeapon,attackMastery} from './attack-rules.js';
 import {openAttack} from './attack-ui.js';
-import {presentDice,clearDice} from './dice-roller.js';
+import {beginDice,presentDice,clearDice} from './dice-roller.js';
 import {sound,SOUND_CATEGORIES} from './sound.js';
 import {rollSoundEvent,spellSoundEvent,equipSoundEvent} from './sound-events.js';
 import {itemUses,removeEmptyItems,setItemQuantity,spendItemUse} from './inventory-rules.js';
@@ -322,6 +322,7 @@ function showRest(kind='short') {
   const preview=restRefreshes(c,{kind,skipFeatureIds:defaultSkips});
   setModal(kind==='long'?'A well-earned night’s rest.':'Catch your breath.',`<div class="rest-illustration rest-${kind}"><div class="rest-sky" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>${campArt()}<span class="rest-moon" aria-hidden="true">${effectGlyph(kind==='long'?'moon':'camp')}</span><span class="rest-scene-label">${kind==='long'?'UNDER A QUIET SKY':'A MOMENT BY THE FIRE'}</span></div><div class="choice-buttons">${btn('rest','Short rest',`btn${kind==='short'?' btn-primary':''}`,'data-kind="short"')}${btn('rest','Long rest',`btn${kind==='long'?' btn-primary':''}`,'data-kind="long"')}</div>${kind==='long'?`<p class="form-help">A Long Rest normally takes 8 hours. Wait at least 16 hours after the previous Long Rest before starting another. Finish once your DM confirms the rest qualifies.</p><label class="check-field"><input name="reduceExhaustion" type="checkbox" checked>Remove one Exhaustion level if eligible</label><p class="form-help">Uncheck recovery when an effect prevents it, including unresolved dehydration or malnutrition.</p>`:`<p class="modal-intro" style="margin-top:18px">A Short Rest takes at least 1 hour. You have ${c.hitDice} d${c.hitDie} available, with ${signed(mod(c.stats.con))} Constitution per die.</p>${field('Hit dice to spend','dice',0,'number',`required min="0" max="${c.hitDice}" step="1"`)}`}<section class="rest-section" aria-labelledby="rest-refresh-title"><h3 id="rest-refresh-title">What will refresh</h3><p>Available amounts before → after this rest. Uncheck a resource if another rule blocks its recovery.</p><div id="rest-refresh-preview" aria-live="polite">${preview.length?restRefreshList(preview):'<p>No tracked resources to refresh.</p>'}</div></section>${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">${kind==='long'?'Long Rest reminders':'Short Rest reminders'}</h3><p>Review choices and effects for this character. These changes are yours to apply; checking a reminder marks it reviewed.</p>${restReminderList(reminders)}</section>`:''}${actions(kind==='long'?'Finish long rest':'Finish short rest')}`,data=>{
     const beforeHP=c.hp,beforeDice=c.hitDice;
+    let hitDiceRoll=null;
     const skipFeatureIds=initial.filter(row=>row.featureId&&!data.getAll('restoreFeature').includes(row.featureId)).map(row=>row.featureId);
     const refreshed=restRefreshes(c,{kind,reduceExhaustion:data.has('reduceExhaustion'),skipFeatureIds});
     if(kind==='long')longRest(c,{reduceExhaustion:data.has('reduceExhaustion'),skipFeatureIds});
@@ -330,14 +331,15 @@ function showRest(kind='short') {
       const healing=shortRest(c,num(data,'dice'),sides=>{const value=randomDie(sides);rolls.push(value);return value;},{skipFeatureIds});
       if(rolls.length) {
         const bonus=healing-rolls.reduce((sum,value)=>sum+value,0);
-        recordRoll({expression:`${rolls.length}d${c.hitDie}${bonus?signed(bonus):''}`,rolls,total:healing,bonus,mode:'normal',natural:null},'Short Rest · Hit Dice');
+        hitDiceRoll=recordRoll({expression:`${rolls.length}d${c.hitDie}${bonus?signed(bonus):''}`,rolls,total:healing,bonus,mode:'normal',natural:null},'Short Rest · Hit Dice');
       }
       refreshed.unshift({key:'hp',title:'Hit points',before:beforeHP,after:c.hp},{key:'hit-dice',title:'Hit Dice',before:beforeDice,after:c.hitDice});
     }
     commit();
     setModal(kind==='long'?'Long rest complete.':'Short rest complete.',`<p class="modal-intro">${esc(c.name)} is ready for the road. Your sheet has been updated.</p><section class="rest-section" aria-labelledby="rest-refreshed-title"><h3 id="rest-refreshed-title">Refreshed & cleared</h3>${restRefreshList(refreshed,true)}</section>${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">Choices & reminders</h3><p>Work through these before your next adventure. Use Edit to update your sheet.</p>${restReminderList(reminders,true,data.getAll('reviewedReminder'))}</section>`:''}<div class="modal-actions">${btn('close','Done','btn btn-primary')}</div>`);
     sound.play(kind==='long'?'rest.long':'rest.short');
-    playEffect(kind==='long'?'long-rest':'short-rest',{label:kind==='long'?'Rested & restored':'A moment of respite',detail:`${c.hp>beforeHP?'+'+(c.hp-beforeHP)+' HP · ':''}${kind==='long'?'A NEW DAY AWAITS':'READY FOR THE ROAD'}`});
+    const feedback=()=>playEffect(kind==='long'?'long-rest':'short-rest',{label:kind==='long'?'Rested & restored':'A moment of respite',detail:`${c.hp>beforeHP?'+'+(c.hp-beforeHP)+' HP · ':''}${kind==='long'?'A NEW DAY AWAITS':'READY FOR THE ROAD'}`});
+    if(hitDiceRoll)afterRoll(hitDiceRoll,feedback);else feedback();
   });
   sound.startAmbience();
   for(const input of modal.querySelectorAll('[name="reduceExhaustion"], [name="restoreFeature"]'))input.addEventListener('change',()=>{
@@ -417,14 +419,25 @@ function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,re
   else render();
   return r;
 }
-function recordRoll(result,label,{criticalFeedback=true,celebrate=false}={}) {
+function afterRoll(result,callback) {
+  result.finished.then(status=>{if(lastRoll===result&&status!=='cancelled')callback();});
+}
+function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal}={}) {
   const r={...result,label,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
+  if(r.rolls.length)beginDice();
+  let finish;
+  Object.defineProperty(r,'finished',{value:new Promise(resolve=>{finish=resolve;})});
   const event=rollSoundEvent(r,label);if(event)sound.play(event);
-  if(criticalFeedback&&r.natural===20)sound.play('dice.critical',{delay:.2});else if(r.natural===1)sound.play('dice.failure',{delay:.2});
   // Rules and their callers finish rendering before the tray mounts (including combat dialogs).
   queueMicrotask(async()=>{
+    if(lastRoll!==r){finish('cancelled');return;}
     const inDialog=modal.open,host=inDialog?modal.querySelector('.modal-body'):$('#dice-stage');
+    if(!host?.isConnected){clearDice();finish('cancelled');return;}
     const status=await presentDice(r,host);
+    finish(status);
+    if(lastRoll!==r||status==='cancelled')return;
+    if(criticalFeedback&&r.natural===20)sound.play('dice.critical');else if(r.natural===1)sound.play('dice.failure');
+    if(onReveal)onReveal();
     // Expensive celebration particles follow the throw, so software renderers can finish it.
     if(celebrate&&r.natural===20&&lastRoll===r&&host?.isConnected&&['settled','static'].includes(status))
       playEffect('critical',{label:'Natural 20!',detail:'A LEGENDARY ROLL',target:inDialog?'.big-die':'#tray-die'});
@@ -502,7 +515,7 @@ document.addEventListener('click',event=>{
         break;
       }
       case 'death-counter':c[el.dataset.kind==='success'?'deathSuccess':'deathFailure']=Number(el.dataset.value);commit();break;
-      case 'death-roll':{if(c.hp>0||c.deathSuccess>=3||c.deathFailure>=3)break;const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll(`1d20${signed(-exhaustionPenalty(c))}`,'Death saving throw');if(r.natural===20){changeHP(c,1,'heal');toast('Natural 20! You regain 1 HP.');}else if(r.total>=10)c.deathSuccess=Math.min(3,c.deathSuccess+1);else c.deathFailure=Math.min(3,c.deathFailure+(r.natural===1?2:1));commit();if(r.natural===20)showHPFeedback(before,'heal','.big-die');break;}
+      case 'death-roll':{if(c.hp>0||c.deathSuccess>=3||c.deathFailure>=3)break;const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll(`1d20${signed(-exhaustionPenalty(c))}`,'Death saving throw');if(r.natural===20){changeHP(c,1,'heal');}else if(r.total>=10)c.deathSuccess=Math.min(3,c.deathSuccess+1);else c.deathFailure=Math.min(3,c.deathFailure+(r.natural===1?2:1));commit();if(r.natural===20)afterRoll(r,()=>{toast('Natural 20! You regain 1 HP.');showHPFeedback(before,'heal','.big-die');});break;}
       case 'rest':showRest(el.dataset.kind);break;
       case 'rest-review':modal.close();if(id)editFeature(id);else if(el.dataset.target==='stats')editCombat();else if(el.dataset.target==='conditions')showConditions();else {navigate(el.dataset.target==='features'?'sheet':el.dataset.target);if(el.dataset.target==='features')document.querySelector('[data-sheet-section="features"]')?.scrollIntoView({block:'start'});}break;
       case 'xp':showXP();break;
@@ -514,7 +527,7 @@ document.addEventListener('click',event=>{
       case 'unpack-item':{const item=c.items.find(i=>i.id===id);if(item)showUnpack(item);break;}
       case 'confirm-unpack-item':{const result=unpackItem(c,id);if(!result)break;modal.close();commit(result.pack.name+' unpacked.');sound.play('item.acquire');playEffect('unpack',{label:'Supplies ready',detail:result.pack.name,pack:result.pack,contents:result.contents.map(({entry})=>entry),sigil:false});break;}
       case 'use-item':{const item=c.items.find(i=>i.id===id);if(!item||item.qty<1)break;const uses=itemUses(item);if(uses.maxUses){if(!uses.usesLeft)break;setModal(itemUseTitle(item),`${itemUsesMarkup(item)}<p class="modal-intro">Spend one use.${uses.consumeOnEmpty?' The item is used up when its counter reaches zero.':''}</p>${item.description?`<div class="detail-paragraph">${esc(item.description)}</div>`:''}<p class="form-help">Apply the item’s effects at the table.</p><div class="modal-actions">${btn('close','Save it','btn')}${btn('confirm-use-item','Spend one use','btn btn-primary',`data-id="${id}"`)}</div>`);break;}if(item.category!=='Consumable'){showItemUse(item);break;}setModal(itemUseTitle(item),`<p class="modal-intro">This will use one item from your pack. ${/^potion of healing$/i.test(item.name)?'As a Bonus Action, drink it to roll 2d4 + 2 and restore that much HP to this character.':'Apply its effects at the table.'}</p><div class="modal-actions">${btn('close','Save it','btn')}${btn('confirm-use-item','Use item','btn btn-primary',`data-id="${id}"`)}</div>`);break;}
-      case 'confirm-use-item':{const item=c.items.find(i=>i.id===id);if(!item||!spendItemUse(c,item))break;sound.play(/potion/i.test(item.name)?'item.potion':'item.consume');if(/^potion of healing$/i.test(item.name)){const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll('2d4+2','Potion of healing');changeHP(c,r.total,'heal');commit(`${r.total} healing. A little better already.`);showHPFeedback(before,'heal','.big-die');}else{modal.close();commit(item.name+' used.');}break;}
+      case 'confirm-use-item':{const item=c.items.find(i=>i.id===id);if(!item||!spendItemUse(c,item))break;sound.play(/potion/i.test(item.name)?'item.potion':'item.consume');if(/^potion of healing$/i.test(item.name)){const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll('2d4+2','Potion of healing');changeHP(c,r.total,'heal');commit();afterRoll(r,()=>{toast(`${r.total} healing. A little better already.`);showHPFeedback(before,'heal','.big-die');});}else{modal.close();commit(item.name+' used.');}break;}
       case 'note':editNote(id);break;
       case 'view-note':viewNote(id);break;
       case 'pin-note':{const n=c.notes.find(n=>n.id===id);n.pinned=!n.pinned;commit(n.pinned?'Note pinned to your sheet.':'Note unpinned.');break;}

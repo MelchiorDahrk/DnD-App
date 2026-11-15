@@ -6,6 +6,7 @@
 .dice-surface canvas{display:block;width:100%;height:100%}
 .dice-stage-note{margin:0;padding:0 16px 14px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
 .dice-stage-faces{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:0 14px 14px;font:13px var(--mono);color:var(--text-primary)}
+.dice-stage-faces[hidden]{display:none}
 .dice-stage-faces span{min-width:30px;padding:5px 8px;text-align:center;border:1px solid var(--border-subtle);border-radius:5px;background:var(--surface-page)}
 .dice-stage-faces .dice-face-kept{border-color:var(--accent-edge);box-shadow:inset 0 -2px var(--hero-brass)}
 .dice-stage[data-state="loading"] .dice-stage-faces,.dice-stage[data-state="rolling"] .dice-stage-faces{visibility:hidden}
@@ -13,7 +14,8 @@
 .dice-stage[data-state="static"] .dice-stage-note{padding-top:10px}
 .dice-stage[data-state="static"] .dice-stage-heading{padding-top:14px}
 .dice-stage-host:empty{display:none}
+.dice-pending #tray-die,.dice-pending #roll-detail,.dice-pending .history-row:first-child,.dice-pending .modal-body>:not(.dice-stage){visibility:hidden}
 .dice-stage-host:has(.dice-stage)~.big-die,.modal-body:has(>.dice-stage) .roll-modal .big-die{width:auto;height:auto;margin:0 auto 20px;background:none;border:0;box-shadow:none;transform:none;color:var(--text-primary)}
 .dice-stage-host:has(.dice-stage)~.big-die>.icon,.modal-body:has(>.dice-stage) .roll-modal .big-die>.icon{display:none}
 .dice-stage-host:has(.dice-stage)~.big-die strong,.modal-body:has(>.dice-stage) .roll-modal .big-die strong{position:static;font-size:46px;transform:none}
-@media(max-width:600px){.dice-surface{height:230px}.dice-stage-heading{font-size:9px;padding:12px 12px 0}.dice-stage-note{padding:0 12px 12px;font-size:10px}}
+@media(max-width:600px){.dice-surface{height:460px}.dice-stage-heading{font-size:9px;padding:12px 12px 0}.dice-stage-note{padding:0 12px 12px;font-size:10px}}

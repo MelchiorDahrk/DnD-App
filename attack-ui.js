@@ -50,8 +50,8 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     if(!readOptions())return;
     const context=attackContext(c,a,options);
     if(context.blocked)throw new Error(context.blocked);
-    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);recordRoll(roll,a.name+' · to hit',{criticalFeedback:false});
-    outcome=attackOutcome(roll,options.ac,context.coverBonus);render();animate(roll,'attack');
+    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);recordRoll(roll,a.name+' · to hit',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
+    outcome=attackOutcome(roll,options.ac,context.coverBonus);render();
   }
   function masteryMarkup() {
     if(!mastery)return '';
@@ -99,14 +99,14 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
       if(['hit','critical','miss'].includes(action)){outcome=action;render();const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase:'impact'});if(event)sound.play(event);return;}
       if(action==='inspiration'){
         if(!c.inspiration||!roll||damage||extras.length||save)return;
-        roll=rerollAttackDie(roll,Number(el.dataset.index));c.inspiration=false;onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false});
-        outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);save=null;render();animate(roll,'attack');return;
+        roll=rerollAttackDie(roll,Number(el.dataset.index));c.inspiration=false;onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
+        outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);save=null;render();return;
       }
       if(action==='damage'){
         if(damage||!outcome||outcome==='miss')return;
         if(!roll)outcome=modal.querySelector('[name="directCritical"]').checked?'critical':'hit';
         const formula=damageFormula(c,a,{twoHanded:options.twoHanded,omitAbility:['Cleave','Light extra attack'].includes(extraKind),keepAbility:extraKind==='Light extra attack'&&options.keepAbility});
-        damage=rollAttackDamage(formula,outcome==='critical');recordRoll(damage,a.name+' · damage');render();animate(damage,'damage');return;
+        damage=rollAttackDamage(formula,outcome==='critical');recordRoll(damage,a.name+' · damage',{onReveal:()=>animate(damage,'damage')});render();return;
       }
       if(action==='topple'){
         const target=modal.querySelector('[name="targetCon"]');if(!target.reportValidity())return;
@@ -127,7 +127,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
         const result=rollAttackDamage(formula,critical);
         if(feature){usedFeatures.add(feature.id);if(feature.maxUses){feature.used++;onChange();}}
         if(action==='mark')usedFeatures.add('mark');
-        extras.push({label,result});recordRoll(result,a.name+' · '+label);render();animate(result,'damage',label);
+        extras.push({label,result});recordRoll(result,a.name+' · '+label,{onReveal:()=>animate(result,'damage',label)});render();
       }
     }catch(error){sound.play('ui.error');const errorNode=modal.querySelector('#form-error');errorNode.hidden=false;errorNode.className='form-error';errorNode.textContent=error.message;}
   },{signal});

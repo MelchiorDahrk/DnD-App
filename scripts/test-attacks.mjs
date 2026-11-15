@@ -33,7 +33,11 @@ try{
   await page.evaluate(()=>{window.attackTestDice=[];const original=crypto.getRandomValues.bind(crypto);crypto.getRandomValues=array=>{if(window.attackTestDice.length){array[0]=window.attackTestDice.shift()-1;return array;}return original(array);};});
   const dice=values=>page.evaluate(values=>window.attackTestDice=[...values],values);
   const action=name=>`#modal [data-combat-action="${name}"]`;
-  const click=name=>page.click(action(name));
+  const click=async(name,suffix='')=>{
+    await page.waitForFunction(()=>!document.body.classList.contains('dice-pending'),{timeout:20000});
+    await page.click(action(name)+suffix);
+    await page.waitForFunction(()=>!document.body.classList.contains('dice-pending'),{timeout:20000});
+  };
   const open=async(id,values=[12])=>{await page.click(`[data-action="attack-roll"][data-id="${id}"]`);await dice(values);};
   const close=async()=>{await click('close');await page.waitForFunction(()=>!document.querySelector('#modal').open);};
   const active=()=>page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));return s.characters.find(c=>c.id===s.activeId);});
@@ -74,14 +78,14 @@ try{
   }
 
   await open('rapier',[3]);await click('roll');
-  await dice([20]);await page.click(`${action('inspiration')}[data-index="0"]`);
+  await dice([20]);await click('inspiration','[data-index="0"]');
   assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical/);
   assert.equal((await active()).inspiration,false);
   await page.click('.combat-details summary');await dice([2,3,4,5]);
-  await page.click(`${action('feature')}[data-id="sneak"]`);
+  await click('feature','[data-id="sneak"]');
   assert.match(await page.$eval('.combat-extra-result .roll-expression',n=>n.textContent),/4d6/);
   const before=(await active()).features.find(f=>f.id==='superiority').used;
-  await page.click('.combat-details summary');await dice([5,6]);await page.click(`${action('feature')}[data-id="superiority"]`);
+  await page.click('.combat-details summary');await dice([5,6]);await click('feature','[data-id="superiority"]');
   assert.equal((await active()).features.find(f=>f.id==='superiority').used,before+1);
   await page.click('.combat-details summary');assert.equal(await page.$eval(`${action('feature')}[data-id="superiority"]`,n=>n.disabled),true);
   await close();

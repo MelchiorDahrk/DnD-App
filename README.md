@@ -190,7 +190,11 @@ Custom rolls, checks, saves, attacks, damage, feature dice, Hit Dice, and healin
 [open-dice](https://github.com/richardhealy/open-dice) (`open-dice-dnd` 1.13.0) for
 physical 3D throws. Dice land on the same unbiased random values recorded by the
 rules model; animations never change a result, spend a second resource, or delay
-HP updates. Advantage/disadvantage shows both d20s, with the kept die in gold.
+HP updates. Totals, breakdowns, combat outcomes, and the newest history entry
+appear after the dice settle. Reduced motion and unavailable 3D rendering reveal
+the result immediately. Advantage/disadvantage shows both d20s, with the kept
+result highlighted after settlement. Mobile dice use twice their previous drawing
+scale in a taller tray, preserving the complete throw without clipping.
 A d10's 0 means 10; percentile 00 + 0 means 100.
 
 The engine and its compatible Three.js/Cannon dependencies are bundled locally

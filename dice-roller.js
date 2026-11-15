@@ -3,6 +3,21 @@ const SUPPORTED=new Set([4,6,8,10,12,20,100]);
 const MAX_PHYSICAL_DICE=20;
 let current=null,engineModule=null;
 
+export function beginDice() {
+  clearDice();
+  document.body.classList.add('dice-pending');
+}
+
+function reveal(session) {
+  document.body.classList.remove('dice-pending');
+  for(const {node,inert,hidden} of session.concealed) {
+    node.inert=inert;
+    if(hidden===null)node.removeAttribute('aria-hidden');else node.setAttribute('aria-hidden',hidden);
+  }
+  session.concealed=[];
+  session.faces.hidden=false;
+}
+
 export function diceAnimationPlan(result) {
   const sides=Number(String(result.expression).match(/^\d*d(\d+)/i)?.[1]);
   if(!result.rolls?.length)return {dice:[],note:''};
@@ -29,8 +44,10 @@ function releaseEngine(session) {
 }
 
 export function clearDice() {
+  document.body.classList.remove('dice-pending');
   if(!current)return;
   const session=current;current=null;
+  reveal(session);
   session.observer.disconnect();session.motion.removeEventListener('change',session.onMotion);
   document.removeEventListener('visibilitychange',session.onVisibility);
   releaseEngine(session);session.stage.remove();session.resolve('cancelled');
@@ -48,7 +65,7 @@ export function presentDice(result,host) {
   heading.append(label,status);
   const surface=document.createElement('div');surface.className='dice-surface';surface.setAttribute('aria-hidden','true');
   const note=document.createElement('p');note.className='dice-stage-note';note.textContent=plan.note;note.hidden=!plan.note;
-  const faces=document.createElement('div');faces.className='dice-stage-faces';faces.setAttribute('aria-label','Individual dice results');
+  const faces=document.createElement('div');faces.className='dice-stage-faces';faces.hidden=true;faces.setAttribute('aria-label','Individual dice results');
   const kept=result.mode==='advantage'?Math.max(...result.rolls):result.mode==='disadvantage'?Math.min(...result.rolls):null;
   const keptIndex=kept===null?-1:result.rolls.indexOf(kept);
   result.rolls.forEach((value,index)=>{
@@ -59,12 +76,20 @@ export function presentDice(result,host) {
   stage.append(heading,surface,faces,note);host.prepend(stage);
   let resolve;
   const done=new Promise(finish=>{resolve=finish;});
-  const session={stage,surface,status,motion,resolve,engine:null,timer:null};current=session;
+  const session={stage,surface,status,motion,resolve,faces,engine:null,timer:null,concealed:[]};current=session;
+  document.body.classList.add('dice-pending');
+  const targets=[...document.querySelectorAll('#tray-die, #roll-detail, .history-row:first-child')];
+  if(host.classList.contains('modal-body'))targets.push(...[...host.children].filter(node=>node!==stage));
+  for(const node of targets) {
+    session.concealed.push({node,inert:node.inert,hidden:node.getAttribute('aria-hidden')});
+    node.inert=true;node.setAttribute('aria-hidden','true');
+  }
   const active=()=>current===session&&stage.isConnected;
   const fallback=message=>{
     if(!active())return;
     session.failed=true;
     releaseEngine(session);stage.dataset.state='static';surface.hidden=true;
+    reveal(session);
     status.textContent=`Result: ${result.total}`;note.hidden=false;note.textContent=message;
     resolve('static');
   };
@@ -89,6 +114,8 @@ export function presentDice(result,host) {
         if(!active())return;
         if(!facesMatch(outcome.results)) {fallback('See the recorded individual results below.');return;}
         clearTimeout(session.timer);stage.dataset.state='settled';status.textContent=`Result: ${result.total}`;
+        if(kept!==null){note.hidden=false;note.textContent=`Keep the ${result.mode==='advantage'?'higher':'lower'} result (${kept}).`;}
+        reveal(session);
         // Also lets browser checks verify the faces, not just that a canvas was created.
         stage.dispatchEvent(new CustomEvent('dice-settled',{bubbles:true,detail:outcome}));
         resolve('settled');
@@ -102,8 +129,7 @@ export function presentDice(result,host) {
     });
     session.resize.observe(surface);
     stage.dataset.state='rolling';status.textContent='Rolling…';
-    const dice=plan.dice.map((die,index)=>({...die,diceColor:0xffffff,backgroundColor:index===keptIndex?'#b87826':'#365f58',textColor:'#fff5d7'}));
-    if(kept!==null){note.hidden=false;note.textContent=`Gold die: keep the ${result.mode==='advantage'?'higher':'lower'} result (${kept}).`;}
+    const dice=plan.dice.map(die=>({...die,diceColor:0xffffff,backgroundColor:'#365f58',textColor:'#fff5d7'}));
     // roll() may stay pending after destroy; completion uses the callback and our own cancelable promise.
     session.engine.roll(dice).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));
   }).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));

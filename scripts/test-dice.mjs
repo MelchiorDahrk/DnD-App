@@ -67,11 +67,20 @@ try {
       document.querySelector('#dice-form').requestSubmit();
     },{expression,values});
     if(settled) {
+      await page.waitForSelector('.dice-stage[data-state="rolling"]');
+      assert.ok(await page.evaluate(()=>{
+        const hidden=selector=>getComputedStyle(document.querySelector(selector)).visibility==='hidden';
+        return hidden('#tray-die')&&hidden('#roll-detail')&&hidden('.history-row:first-child')&&
+          document.querySelector('.dice-stage-faces').hidden&&
+          document.querySelector('#tray-die').getAttribute('aria-hidden')==='true'&&
+          !/Result:|\(\d+\)/.test(document.querySelector('.dice-stage-status').textContent+' '+document.querySelector('.dice-stage-note').textContent);
+      }),'totals, history, kept results and accessible summaries stay concealed during the throw');
       if(expression==='1d20'&&values[0]===20) {
         await page.waitForSelector('.dice-stage[data-state="rolling"]');
         assert.equal(await page.$('.vfx-canvas'),null,'natural-20 particles must wait for the 3D throw');
       }
       await waitForSettled();
+      assert.ok(await page.$eval('#tray-die',node=>getComputedStyle(node).visibility==='visible'&&!node.inert&&node.getAttribute('aria-hidden')!=='true'));
       assert.ok(await page.$('.dice-stage canvas'),expression+' has real 3D dice');
       const outcome=await page.evaluate(()=>window.diceSettled);
       assert.equal(outcome.total,values.reduce((a,b)=>a+b,0),'engine targets match the rolled faces');
@@ -120,6 +129,8 @@ try {
   phase='attack';
   await page.click('[data-action="attack-roll"]');
   await page.evaluate(()=>window.testDice=[20]);await page.click('[data-combat-action="roll"]');
+  await page.waitForSelector('#modal .dice-stage[data-state="rolling"]');
+  assert.ok(await page.$eval('.combat-outcome',node=>getComputedStyle(node).visibility==='hidden'&&node.inert));
   await waitForSettled('#modal .dice-stage');
   assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical hit/);
   await page.click('[data-combat-action="damage"]');
@@ -142,7 +153,25 @@ try {
 
   await page.setViewport({width:390,height:844});
   await page.goto(base+'#dice',{waitUntil:'networkidle0'});
+  // Compare projected die size with the previous 230px mobile tray using the real camera.
+  await page.evaluate(()=>{
+    window.projectedDice=[];
+    const style=document.createElement('style');style.id='previous-dice-size';style.textContent='.dice-surface{height:230px!important}';document.head.append(style);
+  });
+  await page.evaluate(async()=>{
+    const {DiceRoller}=await import(new URL('./dice-engine/dice-engine.js',location.href).href);
+    const original=DiceRoller.prototype.roll;
+    DiceRoller.prototype.roll=function(dice){
+      const camera=this.camera;
+      window.projectedDice.push(this.height/(camera.top-camera.bottom)*camera.zoom);
+      return original.call(this,dice);
+    };
+  });
+  await roll('1d6',[6]);
+  await page.$eval('#previous-dice-size',style=>style.remove());
   await roll('1d100',[42]);
+  const scales=await page.evaluate(()=>window.projectedDice);
+  assert.equal(scales.at(-1)/scales.at(-2),2,'mobile dice project at exactly twice their previous size');
   assert.ok(await page.$eval('.dice-stage',n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}));
   await page.screenshot({path:resolve(root,'.tmp/dice-mobile.png'),fullPage:true});
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
