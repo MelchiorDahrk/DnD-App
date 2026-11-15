@@ -16,6 +16,16 @@ function reveal(session) {
   }
   session.concealed=[];
   session.faces.hidden=false;
+  // Tray insertion and scrolling to Roll can leave a mobile total behind the fixed chrome.
+  if(current===session&&session.stage.parentElement?.id==='dice-stage'&&matchMedia('(max-width:760px)').matches) {
+    const total=document.querySelector('#tray-die')?.getBoundingClientRect();
+    if(total) {
+      const top=(document.querySelector('.topbar')?.getBoundingClientRect().bottom||0)+12;
+      const bottom=(document.querySelector('.mobile-nav')?.getBoundingClientRect().top||innerHeight)-12;
+      const offset=total.top<top?total.top-top:total.bottom>bottom?total.bottom-bottom:0;
+      if(offset)window.scrollBy({top:offset,behavior:'instant'});
+    }
+  }
 }
 
 export function diceAnimationPlan(result) {

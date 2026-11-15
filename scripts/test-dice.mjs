@@ -157,29 +157,40 @@ try {
   await page.click('#modal [data-action="close"]');
   console.log('Combat, one-use feature spending and Short Rest Hit Dice verified');
 
+  // Use the Roll dice button, including rerolls, without scrolling to the result after settlement.
+  for(const viewport of [{width:390,height:844},{width:390,height:664},{width:320,height:568},{width:760,height:1024}]) {
+    await page.setViewport(viewport);
+    await page.goto(base+'#dice',{waitUntil:'networkidle0'});
+    await instrument();
+    for(const [expression,values] of [['1d6',[6]],['1d100',[42]]]) {
+      phase=`mobile ${viewport.width}×${viewport.height}: ${expression}`;
+      await page.evaluate(({expression,values})=>{
+        window.testDice=[...values];window.diceSettled=null;
+        document.querySelector('#dice-expression').value=expression;
+      },{expression,values});
+      const submit='#dice-form button[type="submit"]';
+      await page.$eval(submit,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+      await page.waitForFunction(selector=>{
+        const node=document.querySelector(selector),rect=node?.getBoundingClientRect();
+        return rect&&node.contains(document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2));
+      },{},submit);
+      await page.locator(submit).click();
+      await waitForSettled();
+      assert.ok(await page.$('.dice-stage canvas'),'mobile roll keeps the 3D dice');
+      assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),String(values[0]));
+      const layout=await page.evaluate(()=>{
+        const rect=selector=>document.querySelector(selector).getBoundingClientRect();
+        const stage=rect('.dice-stage'),surface=rect('.dice-surface'),total=rect('#tray-die strong');
+        const top=rect('.topbar').bottom,bottom=rect('.mobile-nav').top;
+        return {fits:stage.left>=0&&stage.right<=innerWidth,compact:surface.height<=innerHeight*.35,
+          resultVisible:total.top>=top&&total.bottom<=bottom,totalTop:total.top,totalBottom:total.bottom,top,bottom};
+      });
+      assert.ok(layout.fits&&layout.compact,`${phase}: compact tray fits the phone: ${JSON.stringify(layout)}`);
+      assert.ok(layout.resultVisible,`${phase}: total stays above mobile navigation: ${JSON.stringify(layout)}`);
+    }
+    if(viewport.width===390&&viewport.height===844)await page.screenshot({path:resolve(root,'.tmp/dice-mobile.png')});
+  }
   await page.setViewport({width:390,height:844});
-  await page.goto(base+'#dice',{waitUntil:'networkidle0'});
-  // Compare projected die size with the previous 230px mobile tray using the real camera.
-  await page.evaluate(()=>{
-    window.projectedDice=[];
-    const style=document.createElement('style');style.id='previous-dice-size';style.textContent='.dice-surface{height:230px!important}';document.head.append(style);
-  });
-  await page.evaluate(async()=>{
-    const {DiceRoller}=await import(new URL('./dice-engine/dice-engine.js',location.href).href);
-    const original=DiceRoller.prototype.roll;
-    DiceRoller.prototype.roll=function(dice){
-      const camera=this.camera;
-      window.projectedDice.push(this.height/(camera.top-camera.bottom)*camera.zoom);
-      return original.call(this,dice);
-    };
-  });
-  await roll('1d6',[6]);
-  await page.$eval('#previous-dice-size',style=>style.remove());
-  await roll('1d100',[42]);
-  const scales=await page.evaluate(()=>window.projectedDice);
-  assert.equal(scales.at(-1)/scales.at(-2),2,'mobile dice project at exactly twice their previous size');
-  assert.ok(await page.$eval('.dice-stage',n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}));
-  await page.screenshot({path:resolve(root,'.tmp/dice-mobile.png'),fullPage:true});
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
   assert.ok(await page.$('.dice-stage[data-state="settled"] canvas'),'changing motion preference keeps an already stationary tray stable');
   await roll('1d20+2',[18],'normal',false);

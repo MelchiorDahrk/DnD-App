@@ -18,4 +18,12 @@
 .dice-stage-host:has(.dice-stage)~.big-die,.modal-body:has(>.dice-stage) .roll-modal .big-die{width:auto;height:auto;margin:0 auto 20px;background:none;border:0;box-shadow:none;transform:none;color:var(--text-primary)}
 .dice-stage-host:has(.dice-stage)~.big-die>.icon,.modal-body:has(>.dice-stage) .roll-modal .big-die>.icon{display:none}
 .dice-stage-host:has(.dice-stage)~.big-die strong,.modal-body:has(>.dice-stage) .roll-modal .big-die strong{position:static;font-size:46px;transform:none}
-@media(max-width:600px){.dice-surface{height:460px}.dice-stage-heading{font-size:9px;padding:12px 12px 0}.dice-stage-note{padding:0 12px 12px;font-size:10px}}
+@media(max-width:760px){
+  .dice-surface{height:clamp(140px,28svh,230px)}
+  .dice-tray{padding:20px 14px;overflow-anchor:none}
+  .tray-eyebrow{margin-bottom:14px}
+  .dice-stage{margin-bottom:14px}
+  .dice-selection{margin:16px 0}
+  .dice-stage-heading{font-size:9px;padding:12px 12px 0}
+  .dice-stage-note{padding:0 12px 12px;font-size:10px}
+}
