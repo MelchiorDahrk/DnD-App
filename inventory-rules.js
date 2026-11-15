@@ -28,7 +28,17 @@ export function removeEmptyItems(character) {
   const favorites=character.sheetLayout?.favorites?.pack||[];
   const before=character.items.length;
   character.items=character.items.filter(item=>item.qty>0||favorites.includes(item.id));
+  removeMissingItemActions(character);
   return before-character.items.length;
+}
+
+export function removeMissingItemActions(character) {
+  const weapons=new Set(character.items.filter(item=>item.category==='Weapon').map(item=>item.id));
+  const removed=new Set((character.attacks||[]).filter(attack=>attack.itemId&&!weapons.has(attack.itemId)).map(attack=>attack.id));
+  if(!removed.size)return;
+  character.attacks=character.attacks.filter(attack=>!removed.has(attack.id));
+  const favorites=character.sheetLayout?.favorites?.attacks;
+  if(favorites)character.sheetLayout.favorites.attacks=favorites.filter(id=>!removed.has(id));
 }
 
 export function setItemQuantity(character,item,quantity) {

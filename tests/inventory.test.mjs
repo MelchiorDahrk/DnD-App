@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {makeCharacter,parseBackup,SAVE_VERSION,longRest,shortRest} from '../model.js';
-import {findEquipment,itemFromEquipment} from '../catalog.js';
+import {findEquipment,itemFromEquipment,WEAPONS,attackFromWeapon,attackFromEquipment} from '../catalog.js';
 import {PACK_CONTENTS,itemUses,removeEmptyItems,setItemQuantity,spendItemUse} from '../inventory-rules.js';
-import {packContents,unpackItem} from '../inventory.js';
+import {packContents,unpackItem,itemAttack,saveItemAttack,linkWeaponActions} from '../inventory.js';
 
 const item=id=>itemFromEquipment(findEquipment(id));
 const state=c=>({version:SAVE_VERSION,activeId:c.id,characters:[c],settings:{sound:false}});
@@ -110,4 +110,67 @@ test('unpacking respects quantity and entry limits without losing supplies',()=>
   const full=makeCharacter(),fullPack=item('explorers-pack');full.items=[fullPack,...Array.from({length:1999},()=>item('torch'))];
   const before=structuredClone(full.items);assert.throws(()=>unpackItem(full,fullPack.id),/inventory is full/);
   assert.deepEqual(full.items,before);
+});
+
+test('pack weapon defaults match every action preset and survive backup reloads',()=>{
+  const c=makeCharacter({stats:{str:8,dex:18,con:10,int:10,wis:10,cha:10}});
+  for(const weapon of WEAPONS){
+    const entry=itemFromEquipment(weapon);c.items.push(entry);
+    const defaults=attackFromEquipment(entry,c);
+    assert.deepEqual(defaults,{...attackFromWeapon(weapon,c),actionType:''});
+    saveItemAttack(c,entry,defaults);
+    assert.equal(itemAttack(c,entry).weaponId,weapon.id);
+  }
+  assert.equal(c.attacks.length,38);
+  assert.deepEqual(parseBackup(JSON.stringify(state(c))),state(c));
+});
+
+test('magic weapons use their documented base, potency, and complete special-damage notes',()=>{
+  const c=makeCharacter({stats:{str:16,dex:14,con:10,int:10,wis:10,cha:10}});
+  const dagger=attackFromEquipment(item('magic-dagger-of-venom'),c);
+  assert.equal(dagger.weaponId,'dagger');assert.equal(dagger.bonus,1);assert.equal(dagger.damage,'1d4+4');
+  assert.match(dagger.notes,/2d10 Poison/);
+  const magic=item('magic-weapon-1-2-or-3-2'),sword=attackFromEquipment(magic,c),bow=attackFromEquipment(magic,c,'longbow');
+  assert.equal(sword.weaponId,'longsword');assert.equal(sword.bonus,2);assert.equal(sword.damage,'1d8+5');
+  assert.equal(bow.weaponId,'longbow');assert.equal(bow.ability,'dex');assert.equal(bow.damage,'1d8+4');
+  assert.equal(attackFromEquipment(item('magic-weapon-1-2-or-3'),c).bonus,0,'variable potency must be reviewed');
+});
+
+test('legacy weapons adopt only unambiguous actions and retain custom attack settings and favorites',()=>{
+  const c=makeCharacter(),sword=item('longsword');c.items=[sword];
+  const existing={id:'old-action',...attackFromWeapon(findEquipment('longsword'),c),damage:'2d8+7',bonus:4,notes:'My house rules',mastery:'Sap',actionType:'reaction'};
+  c.attacks=[existing];c.sheetLayout={collapsed:[],favorites:{attacks:[existing.id]}};
+  linkWeaponActions(c);linkWeaponActions(c);
+  assert.equal(c.attacks.length,1);assert.equal(itemAttack(c,sword),existing);
+  assert.equal(existing.damage,'2d8+7');assert.equal(existing.bonus,4);assert.equal(existing.notes,'My house rules');
+  assert.equal(sword.actionType,'reaction');assert.deepEqual(c.sheetLayout.favorites.attacks,['old-action']);
+  assert.equal(itemAttack(c,{}),undefined,'an unsaved item cannot claim a standalone action');
+});
+
+test('duplicate weapon names link by item identity, with independent edits and cascading removal',()=>{
+  const c=makeCharacter(),first=item('dagger'),second=item('dagger');c.items=[first,second];
+  c.attacks=[{id:'standalone',...attackFromWeapon(findEquipment('dagger'),c)}];
+  linkWeaponActions(c);assert.equal(c.attacks.length,3);assert.equal(c.attacks[0].itemId,undefined);
+  const attack=itemAttack(c,first),other=itemAttack(c,second);first.name='Moon dagger';first.actionType='bonus';
+  saveItemAttack(c,first,{...attack,damage:'1d4+8',rollMode:'advantage',mastery:'Nick',proficient:false});
+  assert.equal(attack.name,'Moon dagger');assert.equal(attack.actionType,'bonus');assert.equal(attack.damage,'1d4+8');
+  assert.notEqual(other.id,attack.id);assert.notEqual(other.damage,attack.damage);
+  c.sheetLayout={collapsed:[],favorites:{attacks:[attack.id,other.id,'standalone']}};
+  first.qty=2;setItemQuantity(c,first,1);assert.ok(c.attacks.includes(attack));
+  setItemQuantity(c,first,0);assert.ok(!c.attacks.includes(attack));
+  assert.ok(c.attacks.includes(other));assert.equal(c.attacks[0].id,'standalone');
+  assert.deepEqual(c.sheetLayout.favorites.attacks,[other.id,'standalone']);
+  second.category='Gear';removeEmptyItems(c);assert.deepEqual(c.attacks.map(a=>a.id),['standalone']);
+});
+
+test('saved weapon links reject missing, duplicate, or malformed item references',()=>{
+  const c=makeCharacter(),weapon=item('spear');c.items=[weapon];linkWeaponActions(c);
+  for(const itemId of ['missing','<bad>',2]){
+    const invalid=structuredClone(c);invalid.attacks[0].itemId=itemId;
+    assert.throws(()=>parseBackup(JSON.stringify(state(invalid))),/attack item link/);
+  }
+  const duplicate=structuredClone(c);duplicate.attacks.push({...duplicate.attacks[0],id:'another-action'});
+  assert.throws(()=>parseBackup(JSON.stringify(state(duplicate))),/duplicate attack item link/);
+  const invalid=structuredClone(c);invalid.items[0].catalogId={bad:true};
+  assert.throws(()=>parseBackup(JSON.stringify(state(invalid))),/item catalog reference/);
 });

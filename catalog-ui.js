@@ -1,4 +1,4 @@
-import {EQUIPMENT,MAGIC_ITEMS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,SUBCLASSES,EQUIPMENT_GROUPS,equipmentFields,attackFromWeapon} from './catalog.js';
+import {EQUIPMENT,MAGIC_ITEMS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,SUBCLASSES,EQUIPMENT_GROUPS,equipmentFields,attackFromWeapon,attackFromEquipment} from './catalog.js';
 import {FEATURE_CATALOG,FEATURE_GROUPS,FEAT_GROUPS,FEAT_SOURCES,isFeat,filterFeatures,featureFields,featureRequirements} from './feature-catalog.js';
 import {itemIconMarkup} from './item-icons.js';
 
@@ -118,7 +118,7 @@ export function handleCatalogChoice(root,target,character) {
     const kind=target.dataset.catalogPick,entry=pickerEntries(kind).find(option=>(option.id||option.name)===target.value);
     root.querySelector(`[data-catalog-preview="${kind}"]`).innerHTML=statPreview(entry,kind);
     if(!entry)return true;
-    const values=kind==='item'?equipmentFields(entry):attackFromWeapon(entry,character);
+    const values=kind==='item'?{...equipmentFields(entry),...(entry.category==='Weapon'?attackFromEquipment(entry,character):{}),actionType:entry.actionType||''}:attackFromWeapon(entry,character);
     fillFields(root,values);
     return true;
   }

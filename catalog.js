@@ -174,7 +174,7 @@ export const EQUIPMENT = [...BASIC_EQUIPMENT.filter(item=>!MAGIC_ITEMS.some(magi
 export const EQUIPMENT_GROUPS = [...new Set(EQUIPMENT.map(item=>item.group))];
 export const findEquipment = id => EQUIPMENT.find(item=>item.id===id);
 export const equipmentDescription = item => [item.magic?`Rules: ${item.edition||'2024'}. ${item.typeDetails}\nRarity: ${item.rarity}. Attunement: ${item.attunement}.\nSource: ${item.source}.`:'',item.details,...(item.tables||[]).map(rows=>rows.map(cells=>cells.join(' | ')).join('\n')),`Cost: ${item.cost}.${item.carried===false?' Weight excluded from carried gear.':item.weightStatus?` Weight: ${item.weight} lb. · ${item.weightStatus}.`:` Weight: ${item.weight} lb.${item.weight===0?' (negligible)':''}`}`].filter(Boolean).join('\n\n');
-export const equipmentFields = item => ({name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...defaultItemUses(item),usesLeft:defaultItemUses(item).maxUses,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
+export const equipmentFields = item => ({catalogId:item.id,name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...defaultItemUses(item),usesLeft:defaultItemUses(item).maxUses,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
 export const itemFromEquipment = item => ({id:uid(),qty:1,equipped:false,...equipmentFields(item)});
 export function attackFromWeapon(weapon,character) {
   const ability=weapon.properties.includes('Finesse')?(character.stats.dex>character.stats.str?'dex':'str'):weapon.family.endsWith('ranged')?'dex':'str';
@@ -187,6 +187,26 @@ export function attackFromWeapon(weapon,character) {
   const range=weapon.family.endsWith('melee')?reach+(distance?`; thrown ${distance}`:''):distance||reach;
   const mastery=character.features.some(f=>/^weapon mastery\b/i.test(f.name)&&f.description.toLowerCase().includes(`${weapon.name} (${weapon.mastery})`.toLowerCase()))?weapon.mastery:'';
   return {name:weapon.name,weaponId:weapon.id,mastery,ability,bonus:0,proficient,rollMode:heavyDisadvantage?'disadvantage':'normal',damage:weapon.damage==='1'?String(Math.max(0,1+modifier)):weapon.damage+(modifier?signed(modifier):''),type:weapon.type,range,notes:weapon.details};
+}
+
+export function attackFromEquipment(item,character,weaponId) {
+  const entry=findEquipment(item.catalogId)||findEquipment(item.id)||EQUIPMENT.find(entry=>entry.name.toLowerCase()===item.name.toLowerCase());
+  // Magic presets already document a default base where several weapons qualify.
+  const base=entry?.weightStatus?.match(/^(?:Default base |Base )([^;.]+?)(?: weight|;|$)/i)?.[1];
+  const name=(base||item.name).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+  const weapon=weaponId!==undefined?WEAPONS.find(w=>w.id===weaponId):WEAPONS.find(w=>w.id===entry?.id)||[...WEAPONS].sort((a,b)=>b.name.length-a.name.length).find(w=>` ${name} `.includes(` ${w.name.toLowerCase()} `));
+  const attack=weapon?attackFromWeapon(weapon,character):{weaponId:'',mastery:'',ability:'str',bonus:0,proficient:false,rollMode:'normal',damage:'',type:'',range:'',notes:''};
+  if(entry?.magic){
+    // Only a single stated potency is automatic; variable or conditional effects
+    // remain in the notes, alongside their dice and activation requirements.
+    const bonuses=[...new Set([...entry.details.matchAll(/\+([1-3])\b/g)].map(match=>Number(match[1])))];
+    if(bonuses.length===1&&/\+([1-3]) (?:bonus to attack rolls and damage rolls|(?:to )?attack and damage|(?:magic |martial )?(?:weapon|sword|axe))/i.test(entry.details)){
+      attack.bonus=bonuses[0];
+      if(weapon){const modifier=mod(character.stats[attack.ability])+attack.bonus;attack.damage=weapon.damage==='1'?String(Math.max(0,1+modifier)):weapon.damage+(modifier?signed(modifier):'');}
+    }
+    attack.notes=[attack.notes,entry.details].filter(Boolean).join('\n\n').slice(0,20000);
+  }
+  return {...attack,name:item.name,actionType:item.actionType||''};
 }
 
 const classRows = [

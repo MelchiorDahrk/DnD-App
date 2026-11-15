@@ -212,6 +212,7 @@ function validateCharacter(c) {
   }
   c.items.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&['Weapon','Armor','Gear','Consumable','Treasure'].includes(v.category)&&integerIn(v.qty,0,99999)&&numberIn(v.weight,0,99999)&&typeof v.equipped==='boolean'&&string(v.description)&&string(v.wiki,2000),'invalid item.'));
   c.items.forEach(v=>requireThat(v.iconKey===undefined||(string(v.iconKey,100)&&/^[a-z0-9-]*$/.test(v.iconKey)),'invalid item icon.'));
+  c.items.forEach(v=>requireThat(v.catalogId===undefined||(string(v.catalogId,200)&&/^[a-z0-9-]*$/.test(v.catalogId)),'invalid item catalog reference.'));
   c.items.forEach(v=>{
     requireThat(v.maxUses===undefined||integerIn(v.maxUses,0,99999),'invalid item use limit.');
     requireThat(v.usesLeft===undefined||integerIn(v.usesLeft,0,itemUses(v).maxUses),'invalid remaining item uses.');
@@ -224,6 +225,7 @@ function validateCharacter(c) {
   c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,999)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&string(v.rollFormula,30)&&(v.rollFormula===''||validDiceFormula(v.rollFormula)),'invalid feature.'));
   c.features.forEach(v=>requireThat(integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));
   c.features.forEach(v=>requireThat(v.catalogId===undefined||string(v.catalogId,200),'invalid feature catalog reference.'));
+  const linkedItems=new Set();
   c.attacks.forEach(v=>{
     requireThat(string(v.name,200)&&v.name.trim()&&Object.hasOwn(ABILITIES,v.ability)&&integerIn(v.bonus,-99,99)&&typeof v.proficient==='boolean'&&string(v.damage,30)&&string(v.type,100)&&string(v.range,100),'invalid attack.');
     requireThat(string(v.notes),'invalid attack notes.');
@@ -231,6 +233,11 @@ function validateCharacter(c) {
     requireThat(validDiceFormula(v.damage),'invalid attack damage.');
     requireThat(v.weaponId===undefined||(string(v.weaponId,100)&&/^[a-z0-9-]*$/.test(v.weaponId)),'invalid attack weapon reference.');
     requireThat(v.mastery===undefined||['','Cleave','Graze','Nick','Push','Sap','Slow','Topple','Vex'].includes(v.mastery),'invalid attack mastery.');
+    if(v.itemId!==undefined){
+      requireThat(string(v.itemId,100)&&/^[a-zA-Z0-9_-]+$/.test(v.itemId)&&!linkedItems.has(v.itemId),'invalid or duplicate attack item link.');
+      requireThat(c.items.some(item=>item.id===v.itemId&&item.category==='Weapon'),'attack item link is missing its weapon.');
+      linkedItems.add(v.itemId);
+    }
   });
   return c;
 }

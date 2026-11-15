@@ -1,5 +1,38 @@
-import {EQUIPMENT,itemFromEquipment} from './catalog.js';
+import {EQUIPMENT,itemFromEquipment,attackFromEquipment} from './catalog.js';
+import {uid} from './model.js';
 import {PACK_CONTENTS,equipmentName,removeEmptyItems} from './inventory-rules.js';
+
+export function itemAttack(character,item) {
+  return item.id?character.attacks.find(attack=>attack.itemId===item.id):undefined;
+}
+
+export function saveItemAttack(character,item,fields) {
+  if(item.category!=='Weapon')return;
+  const existing=itemAttack(character,item);
+  if(!existing&&character.attacks.length>=2000)throw new Error('Your action list is full. Remove an action before adding a weapon.');
+  const attack={...fields,id:existing?.id||uid(),itemId:item.id,name:item.name,actionType:item.actionType||''};
+  if(existing)Object.assign(existing,attack);else character.attacks.push(attack);
+  return attack;
+}
+
+export function linkWeaponActions(character) {
+  removeEmptyItems(character);
+  const weapons=character.items.filter(item=>item.category==='Weapon');
+  for(const item of weapons){
+    if(itemAttack(character,item))continue;
+    // Adopt an older action only when both names are unambiguous. Its manually
+    // recorded bonuses, formulas, mastery, ID and favorites stay intact.
+    const name=equipmentName(item.name),matches=character.attacks.filter(attack=>equipmentName(attack.name)===name);
+    if(weapons.filter(other=>equipmentName(other.name)===name).length===1&&matches.length===1&&!matches[0].itemId){
+      matches[0].itemId=item.id;
+      item.actionType=matches[0].actionType||item.actionType||'';
+      matches[0].actionType=item.actionType;
+      continue;
+    }
+    const defaults=attackFromEquipment(item,character);
+    if(defaults.damage&&character.attacks.length<2000)saveItemAttack(character,item,defaults);
+  }
+}
 
 export function packContents(item) {
   const name=equipmentName(item.name),rows=Object.hasOwn(PACK_CONTENTS,name)?PACK_CONTENTS[name]:null;
