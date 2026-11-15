@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {FEATURE_CATALOG,filterFeatures,featureFields} from '../feature-catalog.js';
+import {FEATURE_CATALOG,FEAT_GROUPS,FEAT_SOURCES,filterFeatures,featureFields} from '../feature-catalog.js';
 import {CLASSES,makeCharacter,SAVE_VERSION,parseBackup,shortRest,longRest,rollFeature,validDiceFormula} from '../model.js';
 import {SUBCLASSES,SPECIES} from '../catalog.js';
 import {catalogPicker} from '../catalog-ui.js';
@@ -15,11 +15,52 @@ test('feature catalog covers every supported class, subclass, species family and
   for(const subclass of SUBCLASSES)assert.ok(FEATURE_CATALOG.some(e=>e.subclass===subclass.name&&e.className===subclass.className),subclass.name);
   for(const species of SPECIES)assert.ok(filterFeatures({character:makeCharacter({race:species.name}),group:'Species traits'}).length,species.name);
   // Magic Initiate's three spell lists represent one of the 75 core feats.
-  assert.equal(FEATURE_CATALOG.filter(e=>e.group==='Origin feats').length,12);
-  assert.equal(FEATURE_CATALOG.filter(e=>e.group==='General feats').length,43);
-  assert.equal(FEATURE_CATALOG.filter(e=>e.group==='Fighting styles').length,10);
-  assert.equal(FEATURE_CATALOG.filter(e=>e.group==='Epic boons').length,12);
+  const core=FEATURE_CATALOG.filter(e=>e.book==='Player’s Handbook (2024)');
+  assert.equal(core.filter(e=>e.group==='Origin feats').length,12);
+  assert.equal(core.filter(e=>e.group==='General feats').length,43);
+  assert.equal(core.filter(e=>e.group==='Fighting styles').length,10);
+  assert.equal(core.filter(e=>e.group==='Epic boons').length,12);
   for(const e of FEATURE_CATALOG){assert.match(e.id,/^[a-z0-9-]+$/);assert.ok(e.details);assert.ok(e.group==='Custom resources'||/^https:\/\/dnd(?:5e|2024)\.wikidot.com\//.test(e.wiki));}
+});
+
+test('published feat coverage includes every supported official source and specialized category',()=>{
+  const expected={
+    'Bigby Presents: Glory of the Giants':8,"Fizban's Treasury of Dragons":3,
+    'Dragonlance: Shadow of the Dragon Queen':9,'Planescape: Adventures in the Multiverse':7,
+    'Strixhaven: A Curriculum of Chaos':2,'The Book of Many Things':1,
+    'Eberron: Rising from the Last War':1,"Elemental Evil Player's Companion":1,
+    'Forgotten Realms: Heroes of Faerûn':34,'Eberron: Forge of the Artificer':29,
+    "Astarion's Book of Hungers":16,'Lorwyn: First Light':2,'Ravenloft: The Horrors Within':11,
+    'Arcana Unleashed':29,'D&D Beyond Drops':16
+  };
+  for(const [book,count] of Object.entries(expected)){
+    const feats=filterFeatures({scope:'all',source:book});
+    assert.equal(feats.length,count,book);assert.ok(FEAT_SOURCES.includes(book));
+    assert.ok(feats.every(e=>FEAT_GROUPS.includes(e.group)&&e.book===book));
+  }
+  assert.equal(FEATURE_CATALOG.filter(e=>FEAT_GROUPS.includes(e.group)).length,269);
+  assert.equal(filterFeatures({scope:'all',group:'Dragonmark feats'}).length,13);
+  assert.equal(filterFeatures({scope:'all',group:'Planar pact feats'}).length,4);
+  assert.equal(filterFeatures({scope:'all',group:'Dark gift feats'}).length,9);
+  assert.ok(filterFeatures({scope:'all',query:'glory giants strike'}).some(e=>e.name==='Strike of the Giants'));
+  assert.ok(filterFeatures({scope:'all',query:'faerun spellfire'}).some(e=>e.name==='Spellfire Spark'));
+  assert.equal(filterFeatures({scope:'all',group:'Origin feats',source:'Ravenloft: The Horrors Within'}).length,2);
+  assert.ok(filterFeatures({scope:'all',group:'Origin feats'}).some(e=>e.name==='Survivor'));
+  assert.ok(!FEATURE_CATALOG.some(e=>/Unearthed Arcana|Warcraft/i.test(e.book||'')));
+});
+
+test('giant feats keep prerequisite choices, reference pages and proficiency-based use pools',()=>{
+  const c=makeCharacter({level:9}),strike=find('Strike of the Giants');
+  assert.equal(strike.group,'Earlier feats');assert.equal(strike.level,1);
+  assert.equal(strike.wiki,'https://dnd5e.wikidot.com/feat:strike-of-the-giants');
+  assert.match(strike.details,/Cloud, Fire, Frost, Hill, Stone, or Storm/);
+  assert.match(strike.prerequisites,/Martial Weapon Proficiency or Giant Foundling/);
+  const f=featureFields(strike,c);assert.equal(f.maxUses,4);assert.equal(f.reset,'long');
+  for(const name of ['Ember of the Fire Giant','Fury of the Frost Giant','Guile of the Cloud Giant','Keenness of the Stone Giant','Soul of the Storm Giant','Vigor of the Hill Giant']){
+    const e=find(name);assert.equal(e.level,4,name);assert.equal(e.requiresFeat,strike.name);
+    assert.match(e.prerequisites,/Strike of the Giants \(.+ Strike\)/);
+  }
+  c.features=[{id:'strike',used:4,...f}];longRest(c);assert.equal(c.features[0].used,0);
 });
 test('suggestions honor class, subclass, lineage families, and level while All options remains unrestricted',()=>{
   const c=makeCharacter({class:'Fighter',subclass:'Battle Master',race:'Wood Elf',level:3});
@@ -83,6 +124,7 @@ test('picker exposes scope, categories, search, custom entries and initial chara
   const html=catalogPicker('feat',makeCharacter({class:'Fighter',subclass:'Battle Master',race:'Drow',level:3}));
   assert.match(html,/data-catalog-scope="feat"/);assert.match(html,/All options/);
   assert.match(html,/data-catalog-group="feat"/);assert.match(html,/data-catalog-search="feat"/);
+  assert.match(html,/data-catalog-source="feat"/);assert.match(html,/Glory of the Giants/);
   assert.match(html,/Superiority Dice/);assert.doesNotMatch(html,/<option[^>]*>Rage/);
   assert.match(html,/Custom entry/);assert.match(html,/data-feature-level/);
 });

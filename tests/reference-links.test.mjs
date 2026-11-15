@@ -65,5 +65,5 @@ test('rest reminders resolve older saved publisher feat links',()=>{
 });
 test('offline cache and static deployment include reference modules',async()=>{
   const [sw,build]=await Promise.all(['../sw.js','../scripts/build.mjs'].map(path=>readFile(new URL(path,import.meta.url),'utf8')));
-  for(const name of ['reference-links.js','reference-pages.js']){assert.ok(sw.includes(`'./${name}'`));assert.ok(build.includes(`'${name}'`));}
+  for(const name of ['reference-links.js','reference-pages.js','published-feat-data.js']){assert.ok(sw.includes(`'./${name}'`));assert.ok(build.includes(`'${name}'`));}
 });

@@ -2,6 +2,7 @@
 // Presets are editable snapshots, not a character builder. See docs/catalog.md.
 import {RULES_URL, wikiURL, subclassURL, mod, signed} from './model.js';
 import {ORIGIN_FEATS, SUBCLASSES} from './catalog.js';
+import {PUBLISHED_FEATS} from './published-feat-data.js';
 
 const slug=value=>value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const entries=[];
@@ -152,6 +153,19 @@ for(const [name,details,species,resource] of [
   ['Elven Accuracy','Enhanced qualifying Advantage rolls.',['Elf','Half-Elf']],['Fade Away','An invisibility reaction.',['Gnome'],'one-short'],['Fey Teleportation','High Elf teleportation and language.',['High Elf'],'one-short'],['Flames of Phlegethos','Fiery spellcasting benefits.',['Tiefling']],['Infernal Constitution','Constitution increase and resistances.',['Tiefling']],['Orcish Fury','Additional damage and an endurance follow-up.',['Half-Orc'],'one-short'],['Prodigy','Skill, tool, language, and Expertise.',['Human','Half-Elf','Half-Orc']],['Second Chance','Force an attack reroll.',['Gnome','Halfling','Human'],'one-short'],['Squat Nimbleness','Speed, skill, and escape benefits; Dwarf or Small species.'],['Wood Elf Magic','Druid cantrip and woodland spells.',['Wood Elf']]
 ])add('Earlier feats','Feat',[[4,name,`${details} Unreplaced 2014-rules feat reference; consult the original book for prerequisites and effects.`,resource]],{source:'2014',species,wiki:wikiURL(name,'feat','2014')});
 
+export const FEAT_GROUPS=['Origin feats','General feats','Fighting styles','Epic boons','Earlier feats','Dragonmark feats','Planar pact feats','Dark gift feats'];
+export const isFeat=entry=>FEAT_GROUPS.includes(entry.group);
+const earlierCore=['Dungeon Delver','Linguist','Martial Adept'];
+const tashaFeats=['Artificer Initiate','Eldritch Adept','Fighting Initiate','Gunner','Metamagic Adept'];
+for(const entry of entries.filter(isFeat)){
+  entry.edition=entry.source==='2014'?'2014':'2024';
+  entry.book=entry.edition==='2024'?'Player’s Handbook (2024)':earlierCore.includes(entry.name)?'Player’s Handbook (2014)':tashaFeats.includes(entry.name)?'Tasha’s Cauldron of Everything':"Xanathar's Guide to Everything";
+}
+for(const feat of PUBLISHED_FEATS){
+  entries.push({...feat,id:slug(`${feat.group}-Feat-${feat.name}`),owner:'Feat',source:feat.edition,published:true,
+    details:`${feat.details} Source: ${feat.book} (${feat.edition} rules). ${feat.prerequisites?`Prerequisites: ${feat.prerequisites}. `:''}Apply other benefits manually; track separate spells and limited benefits in their own resources.`});
+}
+
 add('Maneuvers','Battle Master',[
   ['Ambush','Improve Stealth or Initiative.'],['Bait and Switch','Exchange positions and grant an AC benefit.'],['Commanding Presence','Improve an eligible social check.'],['Commander’s Strike','Direct an ally’s reaction attack.'],['Disarming Attack','Attempt to disarm a target.'],['Distracting Strike','Help an ally attack the target.'],['Evasive Footwork','Defensive movement.'],['Feinting Attack','Feint to improve an attack.'],['Goading Attack','Encourage a foe to attack you.'],['Lunging Attack','Extend an attack through movement.'],['Maneuvering Attack','Help an ally reposition.'],['Menacing Attack','Attempt to Frighten the target.'],['Parry','Reaction to reduce damage.'],['Precision Attack','Improve an attack roll.'],['Pushing Attack','Attempt to push a target.'],['Rally','Grant temporary HP.'],['Riposte','Reaction counterattack.'],['Sweeping Attack','Damage another nearby target.'],['Tactical Assessment','Improve an eligible knowledge or perception check.'],['Trip Attack','Attempt to knock a target Prone.']
 ].map(([name,details])=>[3,name,`${details} Spend and roll from your shared Superiority Dice resource; this entry has no independent charges.`]),{className:'Fighter',subclass:'Battle Master',wiki:subclassURL('Battle Master','Fighter'),sharedPool:'Superiority Dice'});
@@ -163,7 +177,8 @@ add('Custom resources','Custom',[[1,'Custom feature','Name and describe any feat
 
 export const FEATURE_CATALOG=entries;
 export const FEATURE_GROUPS=[...new Set(entries.map(entry=>entry.group))];
-const normalized=value=>String(value||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+export const FEAT_SOURCES=[...new Set(entries.filter(isFeat).map(entry=>entry.book))].sort((a,b)=>a.localeCompare(b));
+const normalized=value=>String(value||'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const matches=(actual,expected)=>normalized(actual)===normalized(expected);
 function speciesMatches(race,allowed) {
   const value=normalized(race);
@@ -171,6 +186,7 @@ function speciesMatches(race,allowed) {
     if(matches(race,name))return true;
     if(name==='Elf')return !/^half elf$/.test(value)&&/\b(elf|drow)\b/.test(value);
     if(name==='Gnome')return /\bgnome\b/.test(value);
+    if(name==='Deep Gnome')return /\bdeep gnome\b|\bsvirfneblin\b/.test(value);
     if(name==='Dwarf')return /\bdwarf\b/.test(value);
     if(name==='Tiefling')return /\btiefling\b/.test(value);
     return false;
@@ -183,12 +199,13 @@ export function featureMatchesCharacter(entry,character={}) {
   if(entry.group==='Fighting styles'&&!['Fighter','Paladin','Ranger'].includes(character.class))return false;
   return true;
 }
-export function filterFeatures({character={},scope='character',group='All',query=''}={}) {
+export function filterFeatures({character={},scope='character',group='All',source='All',query=''}={}) {
   const terms=normalized(query).split(' ').filter(Boolean);
   return entries.filter(entry=>{
     if(group!=='All'&&entry.group!==group)return false;
+    if(source!=='All'&&entry.book!==source)return false;
     if(scope!=='all'&&(!featureMatchesCharacter(entry,character)||(scope==='character'&&entry.level>(character.level||1))))return false;
-    const haystack=normalized([entry.name,entry.details,entry.group,entry.owner,entry.className,entry.subclass,entry.source,...(entry.species||[])].join(' '));
+    const haystack=normalized([entry.name,entry.details,entry.group,entry.owner,entry.className,entry.subclass,entry.source,entry.book,...(entry.species||[])].join(' '));
     return terms.every(term=>haystack.includes(term));
   });
 }

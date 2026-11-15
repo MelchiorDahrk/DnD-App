@@ -8,6 +8,7 @@ await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true}
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
 await copyFile(resolve(root,'condition-usage.js'),resolve(out,'condition-usage.js'));
+await copyFile(resolve(root,'published-feat-data.js'),resolve(out,'published-feat-data.js'));
 for(const file of ['inventory-rules.js','inventory.js'])await copyFile(resolve(root,file),resolve(out,file));
 await copyFile(resolve(root,'magic-item-data.js'),resolve(out,'magic-item-data.js'));
 for(const file of ['legacy-magic-item-data.js','magic-item-icon-names.js'])await copyFile(resolve(root,file),resolve(out,file));

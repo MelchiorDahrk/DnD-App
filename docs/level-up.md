@@ -10,7 +10,7 @@
 | Subclasses | 48 2024 subclasses, 4 Artificer subclasses, and 67 unreplaced earlier-rules subclasses, with named unlocks at their progression levels |
 | Species | 10 core species and their lineages; Half-Elf/Half-Orc references; 20 additional earlier species/lineage magic progressions |
 | Spells | All 391 distinct 2024 PHB spells, plus 6 unreplaced supplemental spell references; class membership comes from the complete licensed PHB lists |
-| Feats | The existing 75 core feats, with Magic Initiate list variants, plus 23 unreplaced earlier feats |
+| Feats | 269 categorized published feat presets, including supplemental books and digital releases, with prerequisite chains and source labels. [Sources and limits](feats.md). Dark Gifts are campaign references outside ordinary ASI choices. |
 | Choices | ASIs, Epic Boons, skill proficiency/Expertise, Fighting Styles, maneuvers, Metamagic, invocations, additional masteries, selected subclass choices, Savant/Magical Discoveries, Spell Mastery/Signature Spells, Mystic Arcanum, and feat spells/training |
 
 Class tables determine cantrips, preparation capacity, spell tiers and slots. The generator verifies all 240 core class-level rows against the publisher’s class tables. This corrects errors in the community SRD JSON, including Wizard preparation capacity (25 at level 20). Full PHB spell lists also restore entries and class memberships missing from the free rules, including Word of Radiance, Sorcerous Burst, and Cleric/Wizard access to Toll the Dead.
@@ -25,7 +25,7 @@ Warlocks use Pact Magic slot progression, retain spent slots when the slot tier 
 
 ## Edition precedence
 
-The scope is the **2024 PHB rules with unreplaced 2014-rules options**. “2014” labels the rules family, including its later supplements, rather than the publication year of every option. Later revised books are outside this edition policy.
+Class and subclass progression uses the **2024 PHB rules with unreplaced 2014-rules options**. “2014” labels the rules family, including its later supplements, rather than the publication year of every option. The feat catalog additionally includes published current supplements, with source labels and current versions taking precedence; this does not revise class or subclass progression.
 
 Renamed replacements map to their current version: Totem Warrior → Wild Heart, old Monk ways → corresponding Warriors, Aberrant Mind/Clockwork Soul → their Sorcery versions, old Wizard school names → Abjurer/Diviner/Evoker/Illusionist, and other revised subclasses. Earlier subclasses gain their initial features at level 3. Legacy Cleric Divine Strike/Potent Spellcasting entries are suppressed in favor of the 2024 class’s Blessed Strikes choice. Expanded legacy Warlock spell lists are eligibility additions rather than automatically prepared spells. Spell aliases include Branding Smite → Shining Smite and Feeblemind → Befuddlement, plus named/SRD spell aliases.
 

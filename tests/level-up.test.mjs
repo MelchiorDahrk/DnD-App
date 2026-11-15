@@ -187,6 +187,50 @@ test('feat-specific skills and spell selections are required and persist',()=>{
   assert.ok(c.spells.some(s=>s.name==='Shield'));assert.ok(c.spells.some(s=>s.name==='Mage Hand'));roundTrip(c);
   assert.ok(FEAT_ABILITIES['Skill Expert']);
 });
+test('published feats honor chains, exclusivity, casting and background alternatives',()=>{
+  const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3});
+  const names=()=>levelUpPlan(c).choices.find(ch=>ch.id==='feat').options.map(o=>o.label);
+  assert.ok(names().includes('Strike of the Giants'));
+  assert.ok(!names().includes('Ember of the Fire Giant'));
+  c.features=[feature('Strike of the Giants',c)];
+  assert.ok(names().includes('Ember of the Fire Giant'));
+  assert.ok(!names().includes('Abjuration Adept'));
+  assert.ok(!names().includes('Echoing Soul'),'campaign gifts are selected separately from normal feat progression');
+  c.features=[feature('Mark of Detection',c)];
+  assert.ok(names().includes('Greater Mark of Detection'));
+  assert.ok(!names().includes('Greater Mark of Healing'));
+  assert.ok(!names().includes('Mark of Finding'));
+  c.features=[feature('Fey Pact',c)];
+  assert.ok(names().includes('Fey Sentinel'));assert.ok(!names().includes('Infernal Pact'));
+  c.features=[feature('Magic Initiate (Wizard)',c)];assert.ok(names().includes('Magic Connoisseur'));
+  c.class='Wizard';c.subclass='Evoker';c.features=[];
+  assert.ok(!names().includes('Strike of the Giants'));c.background='Giant Foundling';
+  assert.ok(names().includes('Strike of the Giants'));assert.ok(names().includes('Abjuration Adept'));
+});
+
+test('published half feats apply their allowed increases and reject invalid choices atomically',()=>{
+  for(const ability of ['str','cha']){
+    const c=makeCharacter({class:'Fighter',subclass:'Champion',level:3});c.features=[feature('Strike of the Giants',c)];
+    const s=selection(c),before=structuredClone(c);
+    s.choices.feat=[FEATURE_CATALOG.find(f=>f.name==='Ember of the Fire Giant').id];s.abilities={[ability]:1};
+    if(ability==='str'){applyLevelUp(c,s);assert.equal(c.stats.str,before.stats.str+1);roundTrip(c);}
+    else{assert.throws(()=>applyLevelUp(c,s),/ability/);assert.deepEqual(c,before);}
+  }
+});
+
+test('published feat snapshots retain repeatable boons and distinguish same-named class features',()=>{
+  const c=makeCharacter({class:'Wizard',subclass:'Evoker',level:18,skills:['Arcana','History']}),name='Boon of Magic School Mastery';
+  c.features=[feature(name,c)];
+  const s=selection(c);s.choices.feat=[FEATURE_CATALOG.find(f=>f.name===name).id];s.abilities={int:1};
+  applyLevelUp(c,s);assert.equal(c.features.filter(f=>f.name===name).length,2);roundTrip(c);
+  const fighter=makeCharacter({class:'Fighter',subclass:'Champion',level:18,skills:['Athletics','Perception']});
+  const classSurvivor=FEATURE_CATALOG.find(f=>f.name==='Survivor'&&f.group==='Subclass features');
+  fighter.features=[{id:crypto.randomUUID(),used:0,...featureFields(classSurvivor,fighter),catalogId:classSurvivor.id}];
+  const origin=FEATURE_CATALOG.find(f=>f.name==='Survivor'&&f.group==='Origin feats'),pick=selection(fighter);
+  pick.choices.feat=[origin.id];pick.abilities={};applyLevelUp(fighter,pick);
+  assert.equal(fighter.features.filter(f=>f.name==='Survivor').length,2);roundTrip(fighter);
+});
+
 test('all 13 classes can advance through levels 2–20 with legal selections and valid saves',()=>{
   for(const cls of Object.keys(CLASSES)){
     const c=makeCharacter({class:cls,subclass:SUBCLASSES.find(s=>s.className===cls).name,stats:{str:14,dex:14,con:14,int:14,wis:14,cha:14},skills:['Arcana','History','Insight','Perception','Stealth']});

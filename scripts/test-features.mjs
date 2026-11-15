@@ -50,6 +50,14 @@ try{
   assert.equal((await options()).length,1);assert.deepEqual(await snapshot(),custom);
   await page.select('[data-catalog-scope="feat"]','all');await search('');
   assert.equal((await options()).length,FEATURE_CATALOG.length+1);
+  await page.select('[data-catalog-source="feat"]','Bigby Presents: Glory of the Giants');
+  assert.equal((await options()).length,9);assert.deepEqual(await snapshot(),custom);
+  await page.select('[data-catalog-group="feat"]','Earlier feats');await search('strike');
+  await page.select('[data-catalog-pick="feat"]',id('Strike of the Giants'));
+  assert.equal(await value('maxUses'),'2');assert.equal(await value('reset'),'long');
+  assert.match(await value('description'),/Cloud, Fire, Frost, Hill, Stone, or Storm/);
+  assert.match(await page.$eval('[data-catalog-preview="feat"]',n=>n.textContent),/Glory of the Giants/);
+  await page.select('[data-catalog-source="feat"]','All');
   await page.select('[data-catalog-group="feat"]','Class features');await search('second wind');
   await page.select('[data-catalog-pick="feat"]',id('Second Wind'));
   assert.equal(await value('maxUses'),'2');assert.equal(await value('rollFormula'),'1d10+3');
@@ -97,6 +105,32 @@ try{
   await page.click(`${row} [data-action="feature-use"][data-used="0"]`);
   assert.equal(active(await state()).features.at(-1).used,0);
   console.log('PASS 100-point pools round-trip and spend/restore through compact controls');
+  // The compendium exposes the same complete catalog with category and source filters.
+  await page.$eval('[data-route="wiki"]',button=>button.click());
+  await page.select('[data-reference-kind]','Feats');
+  const references=()=>page.$$eval('[data-reference-entry] option',nodes=>nodes.map(n=>n.value));
+  assert.equal((await references()).length,270);
+  await page.select('[data-reference-feature-source]','Bigby Presents: Glory of the Giants');
+  assert.equal((await references()).length,9);
+  await page.$eval('[data-reference-search]',node=>{node.value='strike';node.dispatchEvent(new Event('input',{bubbles:true}));});
+  assert.equal((await references()).length,8,'search also finds the six feats that require Strike of the Giants');
+  await page.select('[data-reference-entry]',id('Strike of the Giants'));
+  assert.match(await page.$eval('[data-reference-preview]',n=>n.textContent),/Glory of the Giants/);
+  assert.equal(await page.$eval('[data-reference-preview] a',n=>n.href),'https://dnd5e.wikidot.com/feat:strike-of-the-giants');
+  await page.waitForFunction(()=>!document.querySelector('#toasts')?.children.length);
+  for(const width of [390,320]){
+    await page.setViewport({width,height:844});
+    assert.ok(await page.$eval('.catalog-browser',n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&n.scrollWidth<=n.clientWidth;}));
+    await page.screenshot({path:resolve(root,`.tmp/feat-compendium-${width}.png`),fullPage:true});
+  }
+  await page.$eval('[data-reference-search]',node=>{node.value='';node.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.select('[data-reference-feature-source]','Ravenloft: The Horrors Within');
+  await page.select('[data-reference-feature-group]','Dark gift feats');
+  assert.equal((await references()).length,10);
+  await page.select('[data-reference-kind]','Origin feats');
+  assert.equal((await references()).length,3,'supplemental origin feats are browsable');
+  await page.$eval('[data-route="sheet"]',button=>button.click());
+  console.log('PASS compendium feat/source/category search, supplemental origins, individual links and phone layouts');
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});
   await page.click('[data-action="feature"]:not([data-id])');
@@ -107,4 +141,9 @@ try{
   assert.equal(await value('maxUses'),'0');assert.match(await value('description'),/shared Superiority Dice/);
   assert.deepEqual(errors,[]);
   console.log('PASS full catalog reloads offline and shared-pool options have no duplicate charges; no browser errors');
+  await page.select('[data-catalog-group="feat"]','Earlier feats');
+  await page.select('[data-catalog-source="feat"]','Bigby Presents: Glory of the Giants');await search('strike');
+  await page.select('[data-catalog-pick="feat"]',id('Strike of the Giants'));
+  assert.equal(await value('maxUses'),'2');
+  console.log('PASS published feat module, source filtering and Strike of the Giants defaults load offline');
 }finally{await browser?.close();server?.kill();}

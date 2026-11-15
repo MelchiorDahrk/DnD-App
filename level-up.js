@@ -1,5 +1,5 @@
 import {levelUp,uid,mod,SKILLS,ABILITIES,wikiURL,subclassURL,parseBackup,SAVE_VERSION} from './model.js';
-import {FEATURE_CATALOG,featureFields,featureMatchesCharacter} from './feature-catalog.js';
+import {FEATURE_CATALOG,featureFields,featureMatchesCharacter,isFeat} from './feature-catalog.js';
 import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
 import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
@@ -12,6 +12,17 @@ const spellByName=name=>SPELL_CATALOG.find(s=>s.id===spellKey(name));
 const has=(c,name)=>c.features.some(f=>normalized(f.name)===normalized(name)||normalized(f.name)===normalized(`${name} (Origin feat)`));
 export const FEAT_ABILITIES={Actor:['cha'],Athlete:['str','dex'],Charger:['str','dex'],Chef:['con','wis'],'Crossbow Expert':['dex'],Crusher:['str','con'],'Defensive Duelist':['dex'],'Dual Wielder':['str','dex'],Durable:['con'],'Elemental Adept':['int','wis','cha'],'Fey-Touched':['int','wis','cha'],Grappler:['str','dex'],'Great Weapon Master':['str'],'Heavily Armored':['con','str'],'Heavy Armor Master':['con','str'],'Inspiring Leader':['wis','cha'],'Keen Mind':['int'],'Lightly Armored':['str','dex'],'Mage Slayer':['str','dex'],'Martial Weapon Training':['str','dex'],'Medium Armor Master':['str','dex'],'Moderately Armored':['str','dex'],'Mounted Combatant':['str','dex','wis'],Observant:['int','wis'],Piercer:['str','dex'],Poisoner:['dex','int'],'Polearm Master':['str','dex'],Resilient:Object.keys(ABILITIES),'Ritual Caster':['int','wis','cha'],Sentinel:['str','dex'],'Shadow-Touched':['int','wis','cha'],Sharpshooter:['dex'],'Shield Master':['str'], 'Skill Expert':Object.keys(ABILITIES),Skulker:['dex'],Slasher:['str','dex'],Speedy:['dex','con'],'Spell Sniper':['int','wis','cha'],Telekinetic:['int','wis','cha'],Telepathic:['int','wis','cha'],'War Caster':['int','wis','cha'],'Weapon Master':['str','dex']};
 Object.assign(FEAT_ABILITIES,{Linguist:['int'],Gunner:['dex'],'Dragon Fear':['str','con','cha'],'Dragon Hide':['str','con','cha'],'Dwarven Fortitude':['con'],'Elven Accuracy':['dex','int','wis','cha'],'Fade Away':['dex','int'],'Fey Teleportation':['int','cha'],'Flames of Phlegethos':['int','cha'],'Infernal Constitution':['con'],'Orcish Fury':['str','con'],'Second Chance':['dex','con','cha'],'Squat Nimbleness':['str','dex']});
+export const featAbilityChoices=entry=>entry?.abilities??(entry?.group==='Epic boons'?Object.keys(ABILITIES):FEAT_ABILITIES[entry?.name]||[]);
+const featureById=new Map(FEATURE_CATALOG.map(e=>[e.id,e]));
+const hasFeat=(c,name)=>{
+  const expected=normalized(name);
+  return c.features.some(f=>{
+    if(normalized(f.name.replace(/\s*\(.*\)$/,''))!==expected)return false;
+    const preset=f.catalogId&&featureById.get(f.catalogId);
+    return !preset||isFeat(preset);
+  });
+};
+const dragonmarkNames=FEATURE_CATALOG.filter(e=>e.group==='Dragonmark feats').map(e=>e.name);
 const asiLevels=cls=>cls==='Fighter'?[4,6,8,12,14,16,19]:cls==='Rogue'?[4,8,10,12,16,19]:[4,8,12,16,19];
 const spellList=names=>new Set(names.split('|').map(spellKey));
 const artificerSpells=spellList('Acid Splash|Guidance|Light|Mage Hand|Mending|Message|Poison Spray|Prestidigitation|Ray of Frost|Resistance|Shocking Grasp|Spare the Dying|Thorn Whip|Alarm|Cure Wounds|Detect Magic|Disguise Self|Expeditious Retreat|Faerie Fire|False Life|Feather Fall|Grease|Identify|Jump|Longstrider|Purify Food and Drink|Sanctuary|Aid|Alter Self|Arcane Lock|Blur|Continual Flame|Darkvision|Enhance Ability|Enlarge/Reduce|Heat Metal|Invisibility|Lesser Restoration|Levitate|Magic Mouth|Magic Weapon|Protection from Poison|Rope Trick|See Invisibility|Spider Climb|Web|Blink|Catnap|Create Food and Water|Dispel Magic|Elemental Weapon|Flame Arrows|Fly|Glyph of Warding|Haste|Protection from Energy|Revivify|Tiny Servant|Water Breathing|Water Walk|Arcane Eye|Elemental Bane|Fabricate|Freedom of Movement|Leomund’s Secret Chest|Mordenkainen’s Faithful Hound|Mordenkainen’s Private Sanctum|Otiluke’s Resilient Sphere|Stone Shape|Stoneskin|Animate Objects|Bigby’s Hand|Creation|Greater Restoration|Skill Empowerment|Transmute Rock|Wall of Stone');
@@ -48,12 +59,25 @@ function classEntries(c,level){
   });
 }
 function eligibleFeat(f,c){
-  if(!['General feats','Origin feats','Epic boons','Earlier feats'].includes(f.group)||f.level>c.level||!featureMatchesCharacter(f,c))return false;
-  if(has(c,f.name)&&f.name!=='Ability Score Improvement')return false;
+  if(!isFeat(f)||f.group==='Fighting styles'||f.campaignGift||f.level>c.level||!featureMatchesCharacter(f,c))return false;
+  if((f.published?hasFeat(c,f.name):has(c,f.name))&&f.name!=='Ability Score Improvement'&&!f.repeatable)return false;
+  if(f.name.startsWith('Boon of Siberys')&&hasFeat(c,'Boon of Siberys'))return false;
+  if(f.requiresFeat&&!hasFeat(c,f.requiresFeat))return false;
+  if(f.requiresCasting&&!classProgression(c).prepared)return false;
+  if(f.requiredAbilities&&!f.requiredAbilities.some(a=>c.stats[a]>=13))return false;
+  if(f.requiresDragonmark&&!dragonmarkNames.some(name=>hasFeat(c,name)))return false;
+  if(['Dragonmark feats','Planar pact feats'].includes(f.group)&&FEATURE_CATALOG.some(e=>e.group===f.group&&hasFeat(c,e.name)))return false;
+  if(f.requiresWeaponMastery&&!has(c,'Weapon Mastery')&&!classProgression(c).features.includes('Weapon Mastery')&&!['Barbarian','Fighter','Paladin','Ranger','Rogue'].includes(c.class))return false;
   if(['War Caster','Elemental Adept','Spell Sniper','Eldritch Adept','Metamagic Adept'].includes(f.name)&&!classProgression(c).prepared)return false;
   if(f.name==='Grappler'&&c.stats.str<13&&c.stats.dex<13)return false;
   if(f.name==='Ritual Caster'&&!['int','wis','cha'].some(a=>c.stats[a]>=13))return false;
   const base=CLASS_OPTIONS.find(option=>option.name===c.class),armor=c.armorProficiencies||base.armor,weapons=c.weaponProficiencies||base.weapons;
+  if(f.name==='Strike of the Giants'&&!/martial/i.test(weapons)&&normalized(c.background)!=='giantfoundling')return false;
+  if(f.name==='Rune Shaper'&&!classProgression(c).prepared&&normalized(c.background)!=='runecarver')return false;
+  if(f.name==='Initiate of High Sorcery'&&!['Sorcerer','Wizard'].includes(c.class)&&normalized(c.background)!=='mageofhighsorcery')return false;
+  if(f.name==='Squire of Solamnia'&&!['Fighter','Paladin'].includes(c.class)&&normalized(c.background)!=='knightofsolamnia')return false;
+  if(f.name==='Purple Dragon Commandant'&&!hasFeat(c,'Purple Dragon Rook')&&!/martial/i.test(weapons))return false;
+  if(f.name==='Spellfire Adept'&&!hasFeat(c,'Spellfire Spark')&&!classProgression(c).prepared)return false;
   if(f.name==='Fighting Initiate'&&!/martial/i.test(weapons))return false;
   // PHB 2024 prerequisites differ from the abilities a feat can increase.
   const abilityPrereqs={Actor:['cha'],Athlete:['str','dex'],Charger:['str','dex'],'Crossbow Expert':['dex'],'Defensive Duelist':['dex'],'Dual Wielder':['str','dex'],'Great Weapon Master':['str'],'Inspiring Leader':['wis','cha'],'Keen Mind':['int'],Observant:['int','wis'],'Polearm Master':['str','dex'],Sentinel:['str','dex'],Sharpshooter:['dex'],Skulker:['dex'],Speedy:['dex','con']};
@@ -234,7 +258,11 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
     warnings:[...(!LEVEL_SUBCLASSES.some(s=>s.name===c.subclass&&s.className===c.class)&&level>=3?['This subclass has no bundled progression. Add its unlocks below using your book.']:[]),...(!species.length&&!LEGACY_LINEAGE_SPELLS[c.race]?['This species has no bundled progression. Add its unlocks below using your book.']:[])]};
 }
 function addFeature(c,entry){
-  if(c.features.some(f=>normalized(f.name)===normalized(entry.name)))return;
+  if(!entry.repeatable&&c.features.some(f=>{
+    if(normalized(f.name)!==normalized(entry.name))return false;
+    const previous=f.catalogId&&featureById.get(f.catalogId);
+    return !previous||isFeat(previous)===isFeat(entry);
+  }))return;
   c.features.push({id:uid(),used:0,...featureFields(entry,c),catalogId:entry.id});
 }
 export function applyLevelUp(character,selection={}){
@@ -258,7 +286,7 @@ export function applyLevelUp(character,selection={}){
   if(!feat&&points)throw new Error('No ability increase is available at this level.');
   if(feat&&feat.label!=='Ability Score Improvement'&&points>1)throw new Error('Review the feat’s ability increase; choose at most one point.');
   if(feat&&feat.label!=='Ability Score Improvement'){
-    const allowed=feat.entry.group==='Epic boons'?Object.keys(ABILITIES):FEAT_ABILITIES[feat.label]||[];
+    const allowed=featAbilityChoices(feat.entry);
     if(points!==(allowed.length?1:0)||Object.entries(abilityIncreases).some(([a,n])=>n&&!allowed.includes(a)))throw new Error(allowed.length?'Choose the +1 ability increase allowed by this feat.':'This Origin feat does not grant an ability increase.');
     if(feat.label==='Resilient'&&abilityIncreases[chosen.resilient?.[0]]!==1)throw new Error('Resilient must increase the ability for its selected saving throw.');
   }

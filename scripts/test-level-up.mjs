@@ -39,7 +39,12 @@ try{
     assert.equal(geometry.caption,false,'No floating chapter caption covers the portrait');assert.equal(geometry.floatingStar,false,'No duplicate star overlays the portrait');assert.equal(geometry.paths,1);
   };
   let before=await state();await open();await page.click('#modal [data-action="close"]');assert.deepEqual(await state(),before);
-  await open();const asi=FEATURE_CATALOG.find(f=>f.name==='Ability Score Improvement'&&f.group==='General feats');
+  await open();
+  const featGroups=await page.$$eval('[name="choice-feat"] optgroup',nodes=>nodes.map(n=>n.label));
+  for(const group of ['Origin feats','General feats','Earlier feats','Dragonmark feats','Planar pact feats'])assert.ok(featGroups.includes(group),group);
+  const giant=FEATURE_CATALOG.find(f=>f.name==='Strike of the Giants');
+  assert.match(await page.$eval(`[name="choice-feat"] option[value="${giant.id}"]`,n=>n.textContent),/Glory of the Giants/);
+  const asi=FEATURE_CATALOG.find(f=>f.name==='Ability Score Improvement'&&f.group==='General feats');
   await set('choice-feat',asi.id);assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.href),'https://dnd2024.wikidot.com/feat:ability-score-improvement');
   await set('ability-con',2);await set('ability-str',2);assert.equal(await page.$eval('[name="ability-str"]',n=>n.value),'0');
   await set('ability-con',1);await set('ability-dex',1);assert.match(await page.$eval('[data-level-ability-remaining]',n=>n.textContent),/^0 of 2/);
@@ -75,7 +80,7 @@ try{
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
   console.log('PASS new spell tier, selectable class spell, lineage magic, mobile review/celebration layouts, single inspiration star, reduced motion');
   await load(makeCharacter({class:'Fighter',subclass:'Champion',race:'Drow',level:3,stats:{str:20,dex:19,con:14,int:10,wis:10,cha:10},skills:['Athletics','Perception']}));before=await state();await open();
-  const feats=()=>page.$$eval('[name="choice-feat"] option',nodes=>nodes.map(n=>n.textContent));
+  const feats=()=>page.$$eval('[name="choice-feat"] option',nodes=>nodes.map(n=>n.textContent.split(' · ')[0]));
   assert.ok((await feats()).includes('Drow High Magic'));assert.ok(!(await feats()).includes('Dwarven Fortitude'));assert.ok(!(await feats()).includes('War Caster'));
   await set('choice-feat',asi.id);await set('ability-str',2);assert.equal(await page.$eval('[name="ability-str"]',n=>n.value),'0');
   await set('ability-dex',2);assert.equal(await page.$eval('[name="ability-dex"]',n=>n.value),'1');await set('ability-con',1);
