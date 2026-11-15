@@ -20,6 +20,22 @@ test('chosen library icons override automatic names and safely fall back for unk
   }
 });
 
+test('linked actions follow their inventory item artwork, including changes back to Automatic',()=>{
+  const item={id:'weapon',name:'Moonblade',category:'Weapon',iconKey:'katana'};
+  const other={...item,id:'other-weapon',iconKey:'dwarvenaxe'};
+  const attack={name:item.name,itemId:item.id,weaponId:'rapier',iconKey:'dagger'};
+  const items=[other,item];
+  for(const iconKey of ['katana','','future-icon']) {
+    item.iconKey=iconKey;
+    assert.equal(attackIconMarkup(attack,'bow',items),itemIconMarkup(item));
+  }
+  item.name='Custom weapon';
+  assert.equal(attackIconMarkup(attack,'bow',items),itemIconMarkup(item),'custom names share the item category fallback');
+  assert.equal(attackIconMarkup({...attack,itemId:other.id},undefined,items),itemIconMarkup(other),'duplicate names resolve by item identity');
+  assert.equal(attackIconMarkup({...attack,itemId:'missing'},undefined,items),attackIconMarkup(attack),'missing links retain standalone artwork');
+  assert.equal(attackIconMarkup({name:'Unarmed Strike'},undefined,[{name:'Unarmed Strike',iconKey:'katana'}]),attackIconMarkup({name:'Unarmed Strike'}),'standalone attacks do not match unsaved items');
+});
+
 test('item icon selections survive backups while old items keep automatic artwork',()=>{
   const state=defaultPartyState();
   state.characters[0].items[0].iconKey='katana';

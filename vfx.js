@@ -172,7 +172,7 @@ function addStuds(burst,changes,x,y) {
   }
 }
 
-export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,ranged=false,critical=false,miss=false,pack=null,contents=[]}={}) {
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,items=[],ranged=false,critical=false,miss=false,pack=null,contents=[]}={}) {
   const theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
@@ -205,7 +205,7 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     }
     if(kind==='attack'&&weapon){
       const prop=document.createElement('div');prop.className=`vfx-weapon${ranged?' vfx-weapon-ranged':''}${miss?' vfx-weapon-miss':''}${critical?' vfx-weapon-critical':''}`;
-      prop.innerHTML=attackIconMarkup(weapon,ranged?'bow':'sword');
+      prop.innerHTML=attackIconMarkup(weapon,ranged?'bow':'sword',items);
       // The scene is brief; don't defer decoding its local LEGO thumbnail.
       const img=prop.querySelector('img');if(img)img.loading='eager';
       burst.append(prop);

@@ -9,8 +9,10 @@ export function itemIconMarkup(item, fallbackName) {
   return `<span class="equipment-icon">${fallback}<img src="${url}" alt="" width="160" height="160" loading="lazy" decoding="async"></span>`;
 }
 
-/** Use the same named/base-weapon artwork on sheets, dialogs and attack VFX. */
-export function attackIconMarkup(attack, fallbackName) {
+/** Linked actions use their item's current artwork on sheets, dialogs and VFX. */
+export function attackIconMarkup(attack, fallbackName, items = []) {
+  const item = attack.itemId && items.find(item => item.id === attack.itemId);
+  if (item) return itemIconMarkup(item);
   const artwork = validItemIconKey(attack.iconKey) ? attack : attackWeapon(attack) || attack;
   return itemIconMarkup({...artwork,category:'Weapon'},fallbackName || (artwork.family?.endsWith('ranged')?'bow':'sword'));
 }

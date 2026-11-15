@@ -21,7 +21,7 @@ try{
   const page=await browser.newPage(),errors=[];page.on('pageerror',error=>errors.push(error.message));
   await page.setViewport({width:1280,height:950});
   await page.goto(base,{waitUntil:'networkidle0'});
-  const c=makeCharacter({name:'Linked weapons',stats:{str:12,dex:18,con:14,int:10,wis:12,cha:10}}),legacy={...itemFromEquipment(findEquipment('rapier')),id:'legacy'};
+  const c=makeCharacter({name:'Linked weapons',stats:{str:12,dex:18,con:14,int:10,wis:12,cha:10}}),legacy={...itemFromEquipment(findEquipment('rapier')),id:'legacy',iconKey:'dwarvenaxe'};
   c.items=[legacy];c.attacks=[{id:'old-rapier',...attackFromWeapon(findEquipment('rapier'),c),bonus:3,damage:'1d8+7',notes:'Keep my custom settings'}];
   await page.evaluate(state=>localStorage.setItem('questlog.v2',JSON.stringify(state)),{version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}});
   await page.goto(base+'#inventory');await page.reload({waitUntil:'networkidle0'});
@@ -31,8 +31,25 @@ try{
   const set=values=>page.evaluate(values=>{for(const [key,value] of Object.entries(values)){const input=document.querySelector(`#modal [name="${key}"]`);if(input.type==='checkbox')input.checked=value;else input.value=value;}},values);
   const save=async()=>{await page.click('#modal button[type="submit"]');await page.waitForFunction(()=>!document.querySelector('#modal').open);};
   const add=async preset=>{await click('item');if(preset)await page.select('[data-catalog-pick="item"]',preset);};
+  const matchingIcons=async(itemId,attackId,key,roll=false)=>{
+    await page.goto(base+'#inventory');await page.waitForSelector(`[data-inventory-item="${itemId}"]`);
+    const source=await page.$eval(`[data-inventory-item="${itemId}"] .equipment-icon img`,node=>node.getAttribute('src'));
+    assert.equal(source,`./assets/equipment/${key}.webp`);
+    await page.goto(base+'#sheet');await page.waitForSelector(`[data-sheet-entry="${attackId}"]`);
+    assert.equal(await page.$eval(`[data-sheet-entry="${attackId}"] .equipment-icon img`,node=>node.getAttribute('src')),source,'sheet action matches inventory');
+    await click('attack-roll',attackId);
+    assert.equal(await page.$eval('.combat-icon img',node=>node.getAttribute('src')),source,'attack dialog matches inventory');
+    if(roll){
+      await page.click('[data-combat-action="roll"]');await page.waitForSelector('.vfx-weapon img',{timeout:20000});
+      assert.equal(await page.$eval('.vfx-weapon img',node=>node.getAttribute('src')),source,'attack animation matches inventory');
+      await page.waitForFunction(()=>!document.body.classList.contains('dice-pending'),{timeout:20000});
+    }
+    await page.click('[data-combat-action="close"]');
+    await page.goto(base+'#inventory');await page.waitForSelector('.inventory-list');
+  };
   let current=await saved();assert.equal(current.attacks[0].itemId,'legacy');assert.equal(current.attacks[0].bonus,3);
   await click('item','legacy');assert.equal(await value('damage'),'1d8+7');assert.equal(await value('notes'),'Keep my custom settings');await click('close');
+  await matchingIcons('legacy','old-rapier','dwarvenaxe');
 
   await add();assert.equal(await page.$eval('[data-item-attack-fields]',node=>node.hidden&&node.disabled),true);
   await page.select('[data-catalog-pick="item"]','longbow');
@@ -41,16 +58,23 @@ try{
   assert.equal(await value('weaponId'),'longbow');assert.match(await value('notes'),/Slow/);
   await set({damage:'bad'});await page.click('#modal button[type="submit"]');
   assert.match(await page.$eval('#form-error',node=>node.textContent),/damage dice/);assert.equal((await saved()).items.length,1);
-  await set({name:'Star bow',damage:'2d6+4',bonus:2,qty:2,mastery:'Slow',rollMode:'advantage',proficient:false,actionType:'bonus',notes:'Custom bow dice'});await save();
+  await set({name:'Star bow',damage:'2d6+4',bonus:2,qty:2,mastery:'Slow',rollMode:'advantage',proficient:false,actionType:'bonus',notes:'Custom bow dice'});
+  await page.click('.item-icon-picker summary');
+  await page.$eval('[data-item-icon-search]',node=>{node.value='katana';node.dispatchEvent(new Event('input',{bubbles:true}));});
+  await page.click('[data-item-icon-key="katana"]');await save();
   current=await saved();let bow=current.items.find(item=>item.name==='Star bow'),attack=current.attacks.find(a=>a.itemId===bow.id);
   assert.equal(attack.damage,'2d6+4');assert.equal(attack.mastery,'Slow');assert.equal(attack.rollMode,'advantage');assert.equal(attack.proficient,false);assert.equal(attack.actionType,'bonus');
   assert.equal(bow.catalogId,'longbow');const bowId=bow.id,attackId=attack.id;
+  await matchingIcons(bowId,attackId,'katana',true);
   await page.goto(base+'#sheet');await page.waitForSelector(`[data-action="attack"][data-id="${attackId}"]`);await click('attack',attackId);
   await set({name:'Starlight',damage:'1d10+5',bonus:4,actionType:'reaction',notes:'Edited from actions'});await save();
   current=await saved();assert.equal(current.items.find(i=>i.id===bowId).name,'Starlight');assert.equal(current.items.find(i=>i.id===bowId).actionType,'reaction');
   await page.goto(base+'#inventory');await page.waitForSelector('.inventory-list');await click('item',bowId);
   assert.equal(await value('damage'),'1d10+5');assert.equal(await value('bonus'),'4');assert.equal(await value('notes'),'Edited from actions');await save();
   await page.reload({waitUntil:'networkidle0'});assert.equal((await saved()).attacks.find(a=>a.itemId===bowId).id,attackId);
+  await matchingIcons(bowId,attackId,'katana');
+  await click('item',bowId);await page.click('.item-icon-picker summary');await page.click('.item-icon-auto');await save();
+  await matchingIcons(bowId,attackId,'longsword');
 
   await add('longbow');await set({name:'Starlight'});await save();
   current=await saved();const duplicate=current.items.find(i=>i.name==='Starlight'&&i.id!==bowId),duplicateAttack=current.attacks.find(a=>a.itemId===duplicate.id);
@@ -88,5 +112,5 @@ try{
   assert.match(await page.$eval('#modal',node=>node.textContent),/Clockwork launcher.*linked action/s);await click('close');
   assert.ok((await saved()).items.some(i=>i.id===custom.id),'canceling linked deletion keeps both entries');
   assert.deepEqual(errors,[]);
-  console.log('PASS linked weapon catalog/custom editors, legacy adoption, duplicate names, edits from either side, deletion, quantity, category, backup reload and mobile.');
+  console.log('PASS linked weapon catalog/custom editors, matching item/action/dialog/VFX icons, Automatic, legacy adoption, duplicate names, edits from either side, deletion, quantity, category, backup reload and mobile.');
 }finally{await browser?.close();server?.kill();}
