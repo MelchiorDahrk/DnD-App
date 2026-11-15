@@ -4,7 +4,8 @@ import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {pageContent,nodes,text} from './lib/wiki-html.mjs';
 import {MAGIC_ITEMS as current} from '../magic-item-data.js';
-import {WEAPONS,ARMOR} from '../catalog.js';
+import {WEAPONS,ARMOR,BASIC_EQUIPMENT} from '../catalog.js';
+import {magicItemWeight} from './lib/magic-item-weights.mjs';
 import {magicItemIcon} from './lib/magic-item-art.mjs';
 import {refreshMagicItemIconNames} from './lib/magic-item-icon-names.mjs';
 const root=resolve(import.meta.dirname,'..'),cache=resolve(root,'.tmp/legacy-magic');
@@ -57,16 +58,6 @@ const revisionAliases={
 };
 const srdAliases={quaalsfeathertoken:'feathertoken',hewardshandyhaversack:'handyhaversack',nolzursmarvelouspigments:'marvelouspigments',daernsinstantfortress:'instantfortress',apparatusofkwalish:'apparatusofthecrab',keoghtomsointment:'restorativeointment',quiverofehlonna:'efficientquiver',ironbandsofbilarro:'ironbandsofbinding',stoneofgoodluckluckstone:'stoneofgoodluck'};
 const groups={Armor:'Armor & shields',Weapon:'Weapons',Potion:'Potions',Ring:'Rings',Rod:'Rods',Scroll:'Scrolls',Staff:'Staves',Wand:'Wands','Wondrous Item':'Wondrous items'};
-// Explicit physical weights verified in each item's text; capacities and target
-// weight limits are not the item's own weight. Listed weights override base gear.
-const listedWeights={
-  'Heward\'s Hireling Armor':10,'Rod of the Vonindod':100,'Staff of Defense':3,"Gurt's Greataxe":325,
-  'Abracadabrus':25,'Alchemy Jug (Blue)':12,'Alchemy Jug (Orange)':12,'Cauldron of Plenty':50,
-  'Chest of Preserving':25,'Conch of Teleportation':20,"Constantori's Portrait":15,'Cracked Driftglobe':1,
-  'Devastation Orb':10,'Grimoire Infinitus':3,"Iggwilv's Cauldron":80,'Infernal Puzzle Box':3,'Mimir':5,
-  'Mirror of Reflected Pasts':25,'Mizzium Apparatus':8,'Orb of Gonging':5,'Orb of Skoraeus':8,
-  'Ornithopter of Flying':25,'Soul Coin':.33,'Witchlight Vane':3
-};
 function ruleBlocks(node){
   if(typeof node==='string'||node.tag==='table')return [];
   if(/^(p|li|h[1-6])$/.test(node.tag))return [text(node)];
@@ -92,12 +83,12 @@ for(const row of rows.values()){
   if(!rules)throw Error(`Missing original 2014 summary: ${row.path}`);
   const baseType=metadata.match(/^(?:armor|weapon)\s*\(([^)]+)\)/i)?.[1]||(/^Shield,/i.test(metadata)?'Shield':'');
   const baseItem=baseType&&[...WEAPONS,...ARMOR].find(item=>normal(item.name)===normal(baseType)||normal(item.name.replace(/ Armor$/i,''))===normal(baseType));
-  const weight=listedWeights[row.name]??baseItem?.weight??(row.itemType==='Potion'?.5:row.itemType==='Staff'?4:row.itemType==='Wand'?1:row.itemType==='Rod'?2:0);
-  const weightStatus=row.name in listedWeights?'Listed item weight'+(row.name==='Soul Coin'?' (1/3 lb., rounded)':''):baseItem?`2024 base ${baseItem.name} weight`:row.itemType==='Potion'?'Standard vial':/^(Staff|Wand|Rod)$/.test(row.itemType)?'Standard base item; review':'Unspecified; enter actual weight (currently excluded)';
+  const iconKey=magicItemIcon(row.name,row.itemType);
+  const weightFields=magicItemWeight({...row,typeDetails:metadata,iconKey},BASIC_EQUIPMENT);
   const drinkable=row.itemType==='Potion'&&!/^Oil\b/i.test(row.name);
   const details=[rules.replace(/\*\*|__/g,'').replace(/\r/g,'').trim(),baseItem?`Base equipment (2024): ${baseItem.name}. ${baseItem.details} Apply the item's magical overrides above.`:'',drinkable?'2024 potion use: Bonus Action to drink or administer; apply its effects at the table.':''].filter(Boolean).join('\n\n');
   const slug=row.path.slice('/wondrous-items:'.length).replace(/[^a-z0-9-]/g,'-');
-  items.push({id:'magic-2014-'+slug,name:row.name,group:'Magic · '+(groups[row.itemType]||row.itemType),category:row.itemType==='Armor'?'Armor':row.itemType==='Weapon'?'Weapon':/Potion|Scroll/.test(row.itemType)?'Consumable':'Gear',weight,weightStatus,cost:'Unlisted (2014 wiki)',details,wiki:base+row.path,magic:true,edition:'2014',itemType:row.itemType,rarities:[...new Set(row.rarities)],rarity:[...new Set(row.rarities)].join(' / '),attunement,source:sources.join('; '),typeDetails:metadata,iconKey:magicItemIcon(row.name,row.itemType),tables,...(drinkable?{actionType:'bonus'}:{}),rulesSource:match&&!summaries[row.path]?'SRD 5.1 (CC BY 4.0)':'Original wiki summary'});
+  items.push({id:'magic-2014-'+slug,name:row.name,group:'Magic · '+(groups[row.itemType]||row.itemType),category:row.itemType==='Armor'?'Armor':row.itemType==='Weapon'?'Weapon':/Potion|Scroll/.test(row.itemType)?'Consumable':'Gear',...weightFields,cost:'Unlisted (2014 wiki)',details,wiki:base+row.path,magic:true,edition:'2014',itemType:row.itemType,rarities:[...new Set(row.rarities)],rarity:[...new Set(row.rarities)].join(' / '),attunement,source:sources.join('; '),typeDetails:metadata,iconKey,tables,...(drinkable?{actionType:'bonus'}:{}),rulesSource:match&&!summaries[row.path]?'SRD 5.1 (CC BY 4.0)':'Original wiki summary'});
 }
 items.sort((a,b)=>a.group.localeCompare(b.group)||a.name.localeCompare(b.name));
 const audit={index:base+indexPath,snapshotDate:'2026-11-14',uniqueItems:rows.size,addedItems:items.length,presets:items.length,sharedItems:shared,sourcePaths:[...rows.keys()].sort()};

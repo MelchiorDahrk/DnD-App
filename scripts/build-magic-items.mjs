@@ -3,7 +3,8 @@
 import {mkdir,readFile,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import {pageContent,nodes,text} from './lib/wiki-html.mjs';
-import {WEAPONS,ARMOR} from '../catalog.js';
+import {WEAPONS,ARMOR,BASIC_EQUIPMENT} from '../catalog.js';
+import {magicItemWeight} from './lib/magic-item-weights.mjs';
 import {magicItemIcon} from './lib/magic-item-art.mjs';
 import {refreshMagicItemIconNames} from './lib/magic-item-icon-names.mjs';
 const root=resolve(import.meta.dirname,'..'),cache=resolve(root,'.tmp/rest-wiki');
@@ -38,7 +39,6 @@ if(process.argv.includes('--download')){
 const normal=s=>s.toLowerCase().replace(/[^a-z0-9]/g,'');
 const srd=JSON.parse(await readFile(srdFile,'utf8'));
 const groups={Armor:'Armor & shields',Weapon:'Weapons',Potion:'Potions',Ring:'Rings',Rod:'Rods',Scroll:'Scrolls',Staff:'Staves',Wand:'Wands','Wondrous Item':'Wondrous items'};
-const knownWeights={'bag-of-holding':5,'portable-hole':0,'heward-s-handy-haversack':5,'alchemy-jug':12,'decanter-of-endless-water':2,'chime-of-opening':1,'driftglobe':1,'folding-boat':4,'iron-bands-of-bilarro':1,'keoghtom-s-ointment':.5,'mirror-of-life-trapping':50};
 const items=[];
 // The community SRD JSON flattens some tables into joined words. Use the
 // equivalent licensed page paragraphs for those entries; tables stay structured.
@@ -60,11 +60,11 @@ for(const row of rows.values()){
   const slug=row.path.slice('/magic-item:'.length);
   const baseType=metadata.match(/^(?:Armor|Weapon)\s*\(([^)]+)\)/i)?.[1];
   const baseItem=baseType&&[...WEAPONS,...ARMOR].find(item=>normal(item.name)===normal(baseType)||normal(item.name.replace(/ Armor$/,''))===normal(baseType));
-  const weight=baseItem?.weight??(row.itemType==='Potion'?.5:knownWeights[slug]??(row.itemType==='Staff'?4:row.itemType==='Wand'?1:row.itemType==='Rod'?2:0));
-  const weightStatus=baseItem?`Base ${baseItem.name} weight`:row.itemType==='Potion'?'Standard vial':slug in knownWeights?'Listed item weight':/^(Staff|Wand|Rod)$/.test(row.itemType)?'Standard base item; review':'Unspecified; enter actual weight (currently excluded)';
+  const iconKey=magicItemIcon(row.name,row.itemType);
+  const weightFields=magicItemWeight({...row,typeDetails:metadata,iconKey},BASIC_EQUIPMENT);
   const drinkable=row.itemType==='Potion'&&!/^Oil\b/i.test(row.name);
   const details=[rules.replace(/\*\*|__/g,'').replace(/\r/g,'').trim(),baseItem?`Base equipment: ${baseItem.name}. ${baseItem.details}`:'',drinkable?'2024 potion use: Bonus Action to drink or administer; apply its listed effects.':''].filter(Boolean).join('\n\n');
-  items.push({id:slug==='potion-of-healing'?slug:'magic-'+slug,name:row.name,group:'Magic · '+(groups[row.itemType]||row.itemType),category:/Armor/.test(row.itemType)?'Armor':row.itemType==='Weapon'?'Weapon':/Potion|Scroll/.test(row.itemType)?'Consumable':'Gear',weight,weightStatus,cost:slug==='potion-of-healing'?'50 GP':row.cost||'Unlisted',details,wiki:base+row.path,magic:true,edition:'2024',itemType:row.itemType,rarities:row.rarities,rarity:row.rarities.join(' / '),attunement,source:sources.join('; '),typeDetails:metadata,iconKey:magicItemIcon(row.name,row.itemType),tables,...(drinkable?{actionType:'bonus'}:{}),rulesSource:match&&!summaries[row.path]?'SRD 5.2.1 (CC BY 4.0)':'Original wiki summary'});
+  items.push({id:slug==='potion-of-healing'?slug:'magic-'+slug,name:row.name,group:'Magic · '+(groups[row.itemType]||row.itemType),category:/Armor/.test(row.itemType)?'Armor':row.itemType==='Weapon'?'Weapon':/Potion|Scroll/.test(row.itemType)?'Consumable':'Gear',...weightFields,cost:slug==='potion-of-healing'?'50 GP':row.cost||'Unlisted',details,wiki:base+row.path,magic:true,edition:'2024',itemType:row.itemType,rarities:row.rarities,rarity:row.rarities.join(' / '),attunement,source:sources.join('; '),typeDetails:metadata,iconKey,tables,...(drinkable?{actionType:'bonus'}:{}),rulesSource:match&&!summaries[row.path]?'SRD 5.2.1 (CC BY 4.0)':'Original wiki summary'});
 }
 // Split frequently used potency choices into usable inventory presets. Their
 // shared page still retains every wiki table, including less common variants.
@@ -75,7 +75,7 @@ for(const [slug,type,rarities] of [['weapon-1-2-or-3','Weapon',['Uncommon','Rare
   const parent=items.find(i=>i.wiki===base+'/magic-item:'+slug);if(!parent)throw Error(`Missing potency family: ${slug}`);
   for(let bonus=1;bonus<=3;bonus++){
     const rarity=rarities[bonus-1],price={Uncommon:400,Rare:4000,'Very Rare':40000,Legendary:200000}[rarity];
-    const effect=type==='Armor'?`Gain +${bonus} AC in addition to the chosen base armor's normal AC. Keep its normal training, Strength, Stealth, and Dexterity rules.`:type==='Shield'?`Gain +${bonus} AC in addition to a Shield's normal +2 bonus (total +${bonus+2} AC).`:type==='Weapon'?`Gain +${bonus} to attack and damage rolls with the chosen base weapon. Keep its normal damage die, properties, and mastery.`:type==='Ammunition'?`Gain +${bonus} to attack and damage rolls. A piece loses its magic after hitting a target. Quantity counts individual pieces; enter the base ammunition's weight.`:`While holding this wand, gain +${bonus} to spell attack rolls and ignore Half Cover when making spell attacks.`;
+    const effect=type==='Armor'?`Gain +${bonus} AC in addition to the chosen base armor's normal AC. Keep its normal training, Strength, Stealth, and Dexterity rules.`:type==='Shield'?`Gain +${bonus} AC in addition to a Shield's normal +2 bonus (total +${bonus+2} AC).`:type==='Weapon'?`Gain +${bonus} to attack and damage rolls with the chosen base weapon. Keep its normal damage die, properties, and mastery.`:type==='Ammunition'?`Gain +${bonus} to attack and damage rolls. A piece loses its magic after hitting a target. Quantity counts individual pieces; default weight is one arrow, adjustable for other ammunition.`:`While holding this wand, gain +${bonus} to spell attack rolls and ignore Half Cover when making spell attacks.`;
     items.push({...parent,id:parent.id+'-'+bonus,name:`${type}, +${bonus}`,rarity,rarities:[rarity],typeDetails:`${type}, +${bonus} · ${rarity}${parent.attunement==='Not required'?'':` (${parent.attunement})`}`,cost:(type==='Ammunition'?price/2:price).toLocaleString('en-US')+' GP'+(/Weapon|Armor|Shield/.test(type)?' + base item cost':''),variantOf:parent.id,details:`Potency: +${bonus}. ${effect}`});
   }
 }

@@ -1,13 +1,39 @@
 import {SAVE_VERSION, makeCharacter, uid, wikiURL} from './model.js';
+import {EQUIPMENT} from './catalog.js';
 
 // The supplied paper sheets are character data, never executable instructions.
 // Use 2024 classes with the group's older origin/subclass choices where indicated.
-const item = (name,category='Gear',qty=1,description='',equipped=false) => ({id:uid(),name,category,qty,weight:0,equipped,description,wiki:''});
+const equipmentKey = name => name.toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]/g,'');
+const equipmentByName = new Map(EQUIPMENT.map(entry=>[equipmentKey(entry.name),entry]));
+const itemAliases = {
+  '1battleaxe':'Battleaxe',
+  magicspear:'Spear',handaxes:'Handaxe',javelins:'Javelin',daggers:'Dagger',
+  torches:'Torch',hempenrope:'Rope',jewelerskit:'Jeweler’s Tools',
+  poisonvial:'Poison, Basic',spellscrollofinvisibility:'Spell Scroll',
+  arrowofslaying:'Ammunition of Slaying',potionofstormgiantstrength:'Potion of Giant Strength',
+  potionofstonegiantstrength:'Potion of Giant Strength'
+};
+// The paper sheets count ammunition as individual pieces, unlike catalog bundles.
+const pieceWeights = {arrows:1/20,blowgunneedles:1/50,arrowofslaying:1/20};
+const paperItemWeights = {
+  hammer:{weight:3,weightStatus:'Standard hammer weight'},
+  pitons:{weight:.25,weightStatus:'Standard weight per piton'},
+  messkit:{weight:1,weightStatus:'Standard mess kit weight'},
+  coloredchalk:{weight:.01,weightStatus:'Estimated weight per chalk stick'},
+  emerald:{weight:.01,weightStatus:'Estimated small gem; adjust to actual stone'},
+  explorerspack:{weight:5,weightStatus:'Backpack only; contents counted in their separate entries'}
+};
+const item = (name,category='Gear',qty=1,description='',equipped=false) => {
+  const key=equipmentKey(name),preset=equipmentByName.get(equipmentKey(itemAliases[key]||name));
+  const data=paperItemWeights[key]||(Object.hasOwn(pieceWeights,key)?{weight:pieceWeights[key],weightStatus:'Weight per individual piece'}:preset);
+  if(!data)throw Error(`Missing starting-item weight: ${name}`);
+  return {id:uid(),name,category,qty,weight:data.weight,equipped,description:[description,`Weight: ${data.weight} lb. each.${data.weightStatus?' '+data.weightStatus+'.':''}`].filter(Boolean).join('\n\n'),wiki:''};
+};
 const feature = (name,description,values={}) => ({id:uid(),name,description,maxUses:0,used:0,reset:'manual',rollFormula:'',shortRestRecovery:0,wiki:'',...values});
 const attack = (name,ability,bonus,damage,type,notes='',values={}) => ({id:uid(),name,ability,bonus,damage,type,notes,proficient:true,range:'5 ft.',rollMode:'normal',...values});
 const spell = (name,level,school,range,duration,concentration,notes) => ({id:uid(),name,level,school,castingTime:'1 action',range,duration,concentration,prepared:true,notes,wiki:wikiURL(name,'spell')});
 const linkFeatures = (c,names,url) => c.features.filter(f=>names.includes(f.name)).forEach(f=>{f.wiki=url.endsWith('/feat:all')?wikiURL(f.name,'feat'):url;});
-const review = (source,body) => ({id:uid(),title:'2024 conversion & paper sheet notes',tag:'Personal',pinned:true,updated:new Date().toISOString(),body:`Source: ${source}.\n\n${body}\n\nThe recorded final ability scores and rolled maximum HP are retained. Background increases are already included; do not add species ability increases. Blank current HP starts at maximum; blank XP and temporary HP start at 0. Equipment weights were not written and start at 0. Special effects and situational modifiers are resolved manually unless a roll mode or resource explicitly tracks them.\n\n2024 rules and older-origin guidance: https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character#BackgroundsandSpeciesfromOlderBooks`});
+const review = (source,body) => ({id:uid(),title:'2024 conversion & paper sheet notes',tag:'Personal',pinned:true,updated:new Date().toISOString(),body:`Source: ${source}.\n\n${body}\n\nThe recorded final ability scores and rolled maximum HP are retained. Background increases are already included; do not add species ability increases. Blank current HP starts at maximum; blank XP and temporary HP start at 0. Equipment weights follow the catalog, with labeled estimates where rules omit a weight. Ammunition is counted per piece; the expanded Explorer’s pack counts only its backpack here. Special effects and situational modifiers are resolved manually unless a roll mode or resource explicitly tracks them.\n\n2024 rules and older-origin guidance: https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character#BackgroundsandSpeciesfromOlderBooks`});
 
 function melchior() {
   const c=makeCharacter({name:'Melchior',playerName:'Eric',race:'Drow',class:'Fighter',subclass:'Battle Master',background:'Criminal (Fence)',alignment:'Chaotic Neutral',campaign:'',level:3,

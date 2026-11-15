@@ -66,6 +66,7 @@ test('complete magic catalog round-trips in existing version 2 backups with inde
   assert.deepEqual(parseBackup(serialized),state);
   const parent=MAGIC_ITEMS.find(i=>i.name==='Bag of Holding');
   assert.notEqual(itemFromEquipment(parent).id,itemFromEquipment(parent).id);
-  const unknown=MAGIC_ITEMS.find(i=>i.name==='Cloak of Protection');
-  assert.match(equipmentDescription(unknown),/Unspecified; enter actual weight/);
+  const cloak=MAGIC_ITEMS.find(i=>i.name==='Cloak of Protection');
+  assert.equal(cloak.weight,3);
+  assert.match(equipmentDescription(cloak),/Estimated cloak; adjust to actual item/);
 });

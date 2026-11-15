@@ -4,6 +4,8 @@ The seven equipment packs use the 2024 contents from [the official equipment rul
 
 Unpack previews the contents, consumes one pack, and adds catalog items with their own weights, notes, and icons. Matching entries stack; customized notes, units, and counters remain separate. Entry limits are checked before changing anything. The animation uses local item art and respects reduced motion.
 
+All carried physical presets have weights; missing rules weights use labeled, editable estimates. Small items such as candles and paper contribute fractional pounds. Packs containing these items use the sum of their contents and note the original listed pack weight, so unpacking preserves the total. Listed negligible magical objects and nonphysical effects retain explicit zero-weight notes. Existing saved or custom weights are preserved.
+
 Zero-quantity entries are removed on quantity changes, use, edit, unpack, and load. Favorites remain at zero and can be replenished; removing the favorite also removes the empty entry.
 
 Healer’s Kit defaults to ten uses. Ammunition catalog entries retain their existing bundle units and track the pieces in the current bundle. Previously saved individual arrows stay individual. Single-use consumables spend quantity as before. Reusable tools have no invented limits.

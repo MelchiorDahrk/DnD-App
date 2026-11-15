@@ -22,10 +22,12 @@ test('every 2024 pack resolves to real catalog supplies with exact quantities',(
   assert.equal(Object.keys(PACK_CONTENTS).length,7);
   for(const [id,contents] of Object.entries(expected)) {
     const c=makeCharacter(),pack=item(id);c.items=[pack];
+    const packedWeight=pack.weight;
     const result=unpackItem(c,pack.id);
     assert.ok(result);
     assert.deepEqual(Object.fromEntries(c.items.map(i=>[i.name,i.qty])),contents);
     assert.ok(c.items.every(i=>i.id!==pack.id&&i.description&&i.wiki));
+    assert.ok(Math.abs(c.items.reduce((sum,item)=>sum+item.weight*item.qty,0)-packedWeight)<1e-9,`${id} retains its weight after unpacking`);
     assert.deepEqual(parseBackup(JSON.stringify(state(c))),state(c));
   }
 });

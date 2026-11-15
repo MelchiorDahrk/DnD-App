@@ -3,7 +3,7 @@
 import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
 import {MAGIC_ITEMS as CURRENT_MAGIC_ITEMS} from './magic-item-data.js';
 import {LEGACY_MAGIC_ITEMS} from './legacy-magic-item-data.js';
-import {defaultItemUses} from './inventory-rules.js';
+import {defaultItemUses,PACK_CONTENTS,equipmentName} from './inventory-rules.js';
 export const MAGIC_ITEMS = [...CURRENT_MAGIC_ITEMS,...LEGACY_MAGIC_ITEMS];
 
 const slug = value => value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -12,7 +12,17 @@ const equipmentURL=(name,group)=>{
   if(!named.endsWith('/equipment:all'))return named;
   return wikiURL(/Weapons/.test(group)?'weapons':/Armor/.test(group)?'armor':/Tools|instruments|Gaming/.test(group)?'tools':/vehicles|Mounts|Ships/.test(group)?'mounts':'adventuring-gear');
 };
-const equipment = (name,group,weight,cost,details,extra={}) => ({id:slug(name),name,group,category:'Gear',weight,cost,details,wiki:equipmentURL(name,group),...extra});
+// These entries have a dash (negligible weight) in the equipment tables. Small
+// editable estimates let stacks contribute to carrying weight in this journal.
+const smallItemWeights = {
+  Sling:.1,Antitoxin:.25,Bell:.1,Candle:.1,Ink:.1,'Ink Pen':.02,
+  'Magnifying Glass':.1,Map:.01,Paper:.01,Parchment:.01,Perfume:.25,
+  'Poison, Basic':.25,'Signal Whistle':.02,'Spell Scroll (Cantrip)':.01,
+  'Spell Scroll (Level 1)':.01,String:.01,Vial:.1,'Dice Set':.1,
+  'Dragonchess Set':1,'Playing Card Set':.1,'Three-Dragon Ante Set':.1,
+  'Sprig of Mistletoe (Druidic Focus)':.01,'Emblem (Holy Symbol)':.02
+};
+const equipment = (name,group,weight,cost,details,extra={}) => ({id:slug(name),name,group,category:'Gear',weight,cost,details,wiki:equipmentURL(name,group),...(weight===0&&Object.hasOwn(smallItemWeights,name)?{weight:smallItemWeights[name],weightStatus:'Estimated small-item weight; rules list negligible weight'}:{}),...extra});
 
 // name, damage, type, properties, mastery, weight (lb.), cost, family
 const weaponRows = [
@@ -123,6 +133,14 @@ const gearRows = [
 ];
 const consumables = new Set(['Acid','Alchemist’s Fire','Antitoxin','Candle','Holy Water','Oil','Poison, Basic','Potion of Healing','Rations','Spell Scroll (Cantrip)','Spell Scroll (Level 1)','Torch']);
 const gear = gearRows.map(([name,weight,cost,details])=>equipment(name,name.endsWith('Pack')?'Equipment packs':'Adventuring gear',weight,cost,details,{category:consumables.has(name)?'Consumable':'Gear'}));
+for(const pack of gear.filter(item=>item.group==='Equipment packs')) {
+  const contents=PACK_CONTENTS[equipmentName(pack.name)].map(([name,qty])=>({entry:gear.find(item=>equipmentName(item.name)===equipmentName(name)),qty}));
+  if(contents.some(({entry})=>entry.weightStatus)) {
+    const listedWeight=pack.weight;
+    pack.weight=Number(contents.reduce((total,{entry,qty})=>total+entry.weight*qty,0).toFixed(4));
+    pack.weightStatus=`Contents include estimated small items; listed pack weight ${listedWeight} lb.`;
+  }
+}
 
 const toolRows = [
   ['Alchemist’s Supplies',8,'50 GP','Intelligence','Identify a substance or start a fire (DC 15).'],["Brewer’s Supplies",9,'20 GP','Intelligence','Detect poisoned drink (DC 15); identify alcohol (DC 10).'],
