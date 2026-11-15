@@ -4,6 +4,7 @@ import {levelUpPlan,applyLevelUp,LEVEL_SUBCLASSES,canonicalSubclass,spellKey,fea
 import {FEAT_GROUPS,isFeat} from './feature-catalog.js';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const searchText=value=>String(value??'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const options=(items,value)=>{
   const option=o=>{const id=o.id??o.name,label=o.label??o.name;return `<option value="${esc(id)}" ${id===value?'selected':''}>${esc(label)}${o.entry?.book?` · ${esc(o.entry.book)}`:''}</option>`;};
   if(items.length&&items.every(o=>o.entry&&isFeat(o.entry)))return FEAT_GROUPS.map(group=>{
@@ -15,7 +16,7 @@ const options=(items,value)=>{
 const resourceLabels={maxUses:'Maximum uses / points',reset:'Refresh',shortRestRecovery:'Short Rest recovery',rollFormula:'Dice'};
 export function openLevelUp(character,{setModal,onComplete}){
   if(character.level>=20)return;
-  let draft={subclass:canonicalSubclass(character.subclass),race:character.race,land:character.circleLand||'Temperate',hpGain:Math.max(1,character.hitDie/2+1+mod(character.stats.con))},data=null,renderedFeatureIds=new Set();
+  let draft={subclass:canonicalSubclass(character.subclass),race:character.race,land:character.circleLand||'Temperate',hpGain:Math.max(1,character.hitDie/2+1+mod(character.stats.con))},data=null,renderedFeatureIds=new Set(),featQuery='';
   function collect(form){
     data=new FormData(form);draft.subclass=String(data.get('levelSubclass')||'');draft.race=String(data.get('levelRace')||character.race);draft.hpGain=Number(data.get('hpGain'));
     draft.choices=Object.fromEntries([...form.querySelectorAll('[data-level-choice]')].map(n=>[n.dataset.levelChoice,data.getAll(`choice-${n.dataset.levelChoice}`)]));
@@ -55,6 +56,25 @@ export function openLevelUp(character,{setModal,onComplete}){
       applyLevelUp(character,selection);onComplete();
     });
     const form=document.querySelector('#modal-form');
+    const featSelect=form.querySelector('[name="choice-feat"]');
+    if(featChoice&&featSelect){
+      featSelect.id='level-feat-choice';
+      const fieldset=featSelect.closest('fieldset');
+      fieldset.querySelector('legend').insertAdjacentHTML('afterend',`<label class="form-field">Find a feat<input type="search" data-level-feat-search aria-controls="level-feat-choice" placeholder="Name, category, or source…" autocomplete="off" value="${esc(featQuery)}"></label>`);
+      featSelect.closest('label').insertAdjacentHTML('afterend','<p class="form-help" data-level-feat-count aria-live="polite"></p>');
+      function filterFeats(){
+        const terms=searchText(featQuery).split(' ').filter(Boolean),selected=featSelect.value;
+        const matching=featChoice.options.filter(option=>{
+          const entry=option.entry,haystack=searchText([option.label,entry.group,entry.book,entry.source,entry.details,entry.prerequisites].join(' '));
+          return terms.every(term=>haystack.includes(term));
+        });
+        const chosen=featChoice.options.find(option=>option.id===selected),keepChosen=chosen&&!matching.includes(chosen);
+        featSelect.innerHTML='<option value="">Choose…</option>'+options(keepChosen?[...matching,chosen]:matching,selected);
+        form.querySelector('[data-level-feat-count]').textContent=(terms.length?(matching.length?`${matching.length} of ${featChoice.options.length} eligible feats match.`:'No eligible feats match. Try another name, category, or source.'):`${featChoice.options.length} eligible feats.`)+(keepChosen?' Your selected feat remains available.':'');
+      }
+      form.querySelector('[data-level-feat-search]').addEventListener('input',event=>{featQuery=event.target.value;filterFeats();});
+      filterFeats();
+    }
     if(feat){
       const featReference=referenceURL(feat.entry.wiki,feat.label,'feat');
       form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<div class="catalog-preview"><strong>${esc(feat.label)}</strong><p class="detail-paragraph" data-level-feat-description>${esc(feat.entry.details)}</p>${featReference?`<p class="level-feat-reference"><a href="${esc(featReference)}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read full rules ↗</a></p>`:''}</div>`);
