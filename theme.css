@@ -52,6 +52,7 @@
   --texture-ink: #6f512704;
   --overlay: #12221899;
   --bar-health: #527447;
+  --bar-temp-health: #3977ba;
   --bar-xp: #98773f;
   --bg: var(--surface-page);
   --paper: var(--surface-panel);
@@ -109,5 +110,6 @@
   --texture-ink: #d1b27b03;
   --overlay: #070e0acc;
   --bar-health: #98b57b;
+  --bar-temp-health: #75b6f0;
   --bar-xp: #c6a46b;
 }
