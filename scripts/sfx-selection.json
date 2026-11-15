@@ -4,6 +4,20 @@
   "catalogSha256": "7247b245bddc8ddc631fd92aad59b1ab4421568eee23d387dd5c07195c2beb3a",
   "sounds": [
     {
+      "id": "condition-apply",
+      "category": "status",
+      "catalogId": "oga-levelup-powerup_Downer01",
+      "author": "wobbleboxx (WobbleBoxx Workshop)",
+      "tags": ["condition", "status", "apply", "exhaustion"]
+    },
+    {
+      "id": "condition-clear",
+      "category": "status",
+      "catalogId": "oga-levelup-powerup_Rise01",
+      "author": "wobbleboxx (WobbleBoxx Workshop)",
+      "tags": ["condition", "status", "clear", "recovery"]
+    },
+    {
       "id": "die-1",
       "category": "dice",
       "catalogId": "casino-audio_die-throw-1",

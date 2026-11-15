@@ -1,6 +1,6 @@
 // Semantic gameplay events. Asset IDs and provenance live in the curated manifest.
 const event=(category,variants,gain=1,cooldown=100)=>({category,variants,gain,cooldown});
-export const SOUND_CATEGORIES={dice:'Dice & checks',combat:'Combat',magic:'Magic & healing',progression:'Progression & rests',inventory:'Inventory & books',interface:'Confirmations & errors',ambient:'Campfire ambience'};
+export const SOUND_CATEGORIES={dice:'Dice & checks',combat:'Combat',magic:'Magic & healing',status:'Status effects',progression:'Progression & rests',inventory:'Inventory & books',interface:'Confirmations & errors',ambient:'Campfire ambience'};
 export const SOUND_EVENTS={
   'dice.roll':event('dice',['die-1','die-2','die-3'],.8),
   'dice.multiple':event('dice',['dice-1','dice-2','dice-3','dice-shake'],.8),
@@ -19,6 +19,8 @@ export const SOUND_EVENTS={
   'combat.miss':event('combat',['swing-light','swing-sword'],.6),
   'combat.critical':event('combat',['metal-2'],.85,250),
   'combat.damage':event('combat',['punch-1','punch-2'],.8,150),
+  'condition.apply':event('status',['condition-apply'],.55,150),
+  'condition.clear':event('status',['condition-clear'],.5,150),
   'magic.cast':event('magic',['spell-cast-1','spell-cast-2'],.55,220),
   // Dedicated fire/dark recordings are a documented gap; use the neutral cast cue.
   'magic.fire':event('magic',['spell-cast-1'],.55,220),

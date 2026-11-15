@@ -33,7 +33,7 @@ function run(args,encoding='utf8'){
 const version=run(['-version']).stdout.split(/\r?\n/)[0];
 const assets=[];
 for(const chosen of selection.sounds){
-  if(!/^[a-z0-9-]+$/.test(chosen.id)||!['dice','combat','magic','progression','inventory','interface','ambient'].includes(chosen.category))throw Error('Unsafe asset ID/category');
+  if(!/^[a-z0-9-]+$/.test(chosen.id)||!['dice','combat','magic','status','progression','inventory','interface','ambient'].includes(chosen.category))throw Error('Unsafe asset ID/category');
   const entry=chosen.catalogId?catalog.sounds.find(s=>s.id===chosen.catalogId):chosen;
   const local=chosen.sourceType==='user-provided';
   if(!entry||(!local&&entry.license!=='CC0-1.0'))throw Error(`Only verified CC0 or explicitly user-provided assets are allowed: ${chosen.id}`);

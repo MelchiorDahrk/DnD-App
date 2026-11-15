@@ -73,6 +73,21 @@ test('disabled mode and autoplay lock allocate no audio and make no requests',as
   assert.deepEqual(f.stats(),{created:0,allocations:0,fetches:0,decodes:0});
   f.manager.unlock();f.manager.configure({enabled:false});assert.equal(await f.manager.play('dice.roll'),false);assert.equal(f.stats().allocations,0);
 });
+
+test('status cues respect category volume and default on for existing audio preferences',async()=>{
+  const f=fixture();f.manager.configure({enabled:true});f.manager.unlock();
+  assert.equal(await f.manager.play('condition.apply'),true);
+  assert.equal(await f.manager.play('condition.clear'),true);
+  f.manager.configure({categories:{status:0}});f.tick();
+  assert.equal(await f.manager.play('condition.apply'),false);
+  assert.equal(await f.manager.play('condition.clear'),false);
+  assert.equal(await f.manager.play('dice.roll'),true);
+  f.store.set(AUDIO_PREFERENCES_KEY,JSON.stringify({volume:.37,categories:{magic:.22}}));
+  const reloaded=createSoundManager({storage:f.storage});
+  assert.equal(reloaded.getPreferences().categories.status,1);
+  assert.equal(reloaded.getPreferences().volume,.37);
+  f.manager.stopAll();
+});
 test('unsupported, missing and invalid audio fail safely; MP3 is a local fallback',async()=>{
   const requested=[];const f=fixture({fetchAudio:async url=>{requested.push(url.href);return {ok:true,arrayBuffer:async()=>new ArrayBuffer(1)};}});
   f.context.decodeAudioData=async()=>{if(requested.at(-1).endsWith('.ogg'))throw Error('Unsupported Vorbis');return {duration:.4};};

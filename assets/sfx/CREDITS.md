@@ -1,9 +1,9 @@
 # Questlog audio credits
 
-The library includes 53 effects distributed under **CC0 1.0 Universal**:
+The library includes 55 effects distributed under **CC0 1.0 Universal**:
 <https://creativecommons.org/publicdomain/zero/1.0/>, plus five files supplied by the user for the actions listed below. No license or creator information was supplied for those five files; their manifest license fields are null. Credit for the CC0 effects is retained for provenance even though attribution is not required.
 
-48 effects were selected from [Open Game SFX Index](https://github.com/Mcamento8/open-game-sfx-index) at commit **34bbe8b525b5ceff3804915ea745532af11f6055**. Its [agent guide](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/docs/AGENT_GUIDE.md), catalog, source list and attribution record were reviewed. Only selected files were downloaded. The index metadata is MIT licensed; copyright (c) 2026 Mcamento8 (see [upstream LICENSE](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/LICENSE)).
+50 effects were selected from [Open Game SFX Index](https://github.com/Mcamento8/open-game-sfx-index) at commit **34bbe8b525b5ceff3804915ea745532af11f6055**. Its [agent guide](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/docs/AGENT_GUIDE.md), catalog, source list and attribution record were reviewed. Only selected files were downloaded. The index metadata is MIT licensed; copyright (c) 2026 Mcamento8 (see [upstream LICENSE](https://github.com/Mcamento8/open-game-sfx-index/blob/34bbe8b525b5ceff3804915ea745532af11f6055/LICENSE)).
 
 | Creator | Original pack / license evidence | Included assets |
 | --- | --- | --- |
@@ -14,12 +14,15 @@ The library includes 53 effects distributed under **CC0 1.0 Universal**:
 | artisticdude | [RPG Sound Pack](https://opengameart.org/content/rpg-sound-pack), CC0 | 2 casts, sword draw, 6 equipment handling effects, bottle, bubble |
 | Kenney | [Music Jingles](https://kenney.nl/assets/music-jingles), CC0 | 2 PIZZI acoustic string stingers (critical rolls and resource restoration) |
 | Kenney | [Interface Sounds](https://kenney.nl/assets/interface-sounds), CC0 | Confirmation and error |
+| wobbleboxx (WobbleBoxx Workshop) | [Level up, power up, Coin get (13 Sounds)](https://opengameart.org/content/level-up-power-up-coin-get-13-sounds), CC0 | `Downer01.wav` for conditions applied / Exhaustion increased; `Rise01.wav` for conditions cleared / Exhaustion reduced |
 | bart | [Ice spells](https://opengameart.org/content/ice-spells), CC0 | `coldsnap.wav` excerpt |
 | Augmentality (Brandon Morris), submitted by HaelDB | [Spell sounds](https://opengameart.org/content/spell-sounds), CC0 option selected | Healing and electric spell excerpts |
 | JaggedStone | [Magic Spell SFX](https://opengameart.org/content/magic-spell-sfx), CC0 | `magical_1_0.ogg` |
 | PagDev | [Fireplace Sound loop](https://opengameart.org/content/fireplace-sound-loop), CC0 | 10-second campfire excerpt |
 
 Five CC0 effects supplement gaps in the catalog. The Spell sounds page offers multiple licenses; these files are used under its explicit CC0 option. `license-evidence.json` records verification of their original source pages, CC0 declarations and HTML hashes, alongside pinned catalog evidence (checked November 13, 2026).
+
+The two status cues were added November 15, 2026 after checking the pinned catalog's tags, use cases and keywords. Their source page explicitly releases the pack under CC0; its HTML hash is recorded in `license-evidence.json`. Only the selected WAVs were downloaded, with their catalog SHA-256 hashes verified. The clips retain their full duration and ship as normalized OGG/MP3. The Status effects category controls both condition toggles and Exhaustion changes; the same pair is available in Sound preview for listening review.
 
 ## User-provided sounds
 

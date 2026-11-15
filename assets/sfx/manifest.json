@@ -14,6 +14,80 @@
   },
   "assets": [
     {
+      "id": "condition-apply",
+      "filename": "condition-apply.ogg",
+      "category": "status",
+      "files": {
+        "ogg": "assets/sfx/status/condition-apply.ogg",
+        "mp3": "assets/sfx/status/condition-apply.mp3"
+      },
+      "catalogId": "oga-levelup-powerup_Downer01",
+      "author": "wobbleboxx (WobbleBoxx Workshop)",
+      "pack": "oga-levelup-powerup",
+      "sourceURL": "https://opengameart.org/content/level-up-power-up-coin-get-13-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-levelup-powerup/Downer01.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "b869d54d0473b8e0bb481bb6b0e94d6b6f84979e61c55180b0edbed5ac991006",
+      "originalFormat": "wav",
+      "duration": 1.672,
+      "tags": [
+        "condition",
+        "status",
+        "apply",
+        "exhaustion"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 6.4
+      },
+      "sha256": {
+        "ogg": "b99834b1e34cee8743ffea8e4604972603df97d434678610f58eb62580f01630",
+        "mp3": "96b9a32959c7bef8f06938c934bc95ed87a28a92c9af0d0639ed0e3f1f6499ef"
+      },
+      "sizes": {
+        "ogg": 12162,
+        "mp3": 20376
+      }
+    },
+    {
+      "id": "condition-clear",
+      "filename": "condition-clear.ogg",
+      "category": "status",
+      "files": {
+        "ogg": "assets/sfx/status/condition-clear.ogg",
+        "mp3": "assets/sfx/status/condition-clear.mp3"
+      },
+      "catalogId": "oga-levelup-powerup_Rise01",
+      "author": "wobbleboxx (WobbleBoxx Workshop)",
+      "pack": "oga-levelup-powerup",
+      "sourceURL": "https://opengameart.org/content/level-up-power-up-coin-get-13-sounds",
+      "sourceFileURL": "https://raw.githubusercontent.com/Mcamento8/open-game-sfx-index/34bbe8b525b5ceff3804915ea745532af11f6055/audio/oga-levelup-powerup/Rise01.wav",
+      "license": "CC0-1.0",
+      "originalSha256": "02277d9b70d40e119b60473cce2842398463b4178ea407cf576273e12571748b",
+      "originalFormat": "wav",
+      "duration": 1.765,
+      "tags": [
+        "condition",
+        "status",
+        "clear",
+        "recovery"
+      ],
+      "edit": {
+        "start": 0,
+        "duration": null,
+        "normalizationDb": 4.1
+      },
+      "sha256": {
+        "ogg": "58a34121086559b86e78d02579850a8659200712485e11a2fb6ce6a9f213e366",
+        "mp3": "baf1383f45088da6f3d238a74837b8fbc7c099fb5414fc32b999b2edf5cc5411"
+      },
+      "sizes": {
+        "ogg": 12412,
+        "mp3": 21629
+      }
+    },
+    {
       "id": "die-1",
       "filename": "die-1.ogg",
       "category": "dice",

@@ -5,7 +5,7 @@ import {createHash} from 'node:crypto';
 import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
-import {makeCharacter,parseBackup} from '../model.js';
+import {makeCharacter,parseBackup,CONDITIONS} from '../model.js';
 import {initialState} from '../default-characters.js';
 import {WEAPONS,attackFromWeapon} from '../catalog.js';
 import {SOUND_FILES} from '../sound-assets.js';
@@ -94,6 +94,39 @@ try{
   assert.equal(decoded.length,SOUND_FILES.length);console.log(`PASS ${manifest.assets.length} effects × OGG/MP3 real decoding, non-silence and responsive onset`);
 
   await navigate('sheet');await clearAudio();
+  const savedState=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters[0]);
+  const verifyCondition=async(name,active,selector)=>{
+    await clearAudio();const after=await mark(),clipAfter=await page.evaluate(()=>window.audioMetrics.clips.length);
+    const event=active?'condition.apply':'condition.clear',asset=active?'condition-apply':'condition-clear';
+    await action(event,()=>page.click(selector));
+    assert.equal(await mark(),after+1,`${name}: one cue per toggle`);
+    assert.deepEqual(await page.evaluate(after=>window.audioMetrics.clips.slice(after),clipAfter),[decoded.find(clip=>clip.id===asset&&clip.format==='ogg').signature],`${name}: expected status recording starts`);
+    assert.equal((await savedState()).conditions.includes(name),active);
+  };
+  await page.click('.condition-more');
+  for(const name of CONDITIONS){
+    const selector=`#modal [data-action="condition"][data-condition="${name}"]`;
+    await verifyCondition(name,true,selector);await verifyCondition(name,false,selector);
+  }
+  const beforeDone=await mark();await submit();assert.equal(await mark(),beforeDone,'Unchanged Exhaustion is silent');
+  const shortcut=await page.$eval('.condition-tray [data-action="condition"]',n=>n.dataset.condition);
+  await verifyCondition(shortcut,true,`.condition-tray [data-condition="${shortcut}"]`);
+  await verifyCondition(shortcut,false,`.condition-tray [data-condition="${shortcut}"]`);
+  const setExhaustion=async level=>{
+    await page.click('.condition-more');await page.$eval('#modal [name="exhaustion"]',(n,level)=>n.value=String(level),level);await submit();
+  };
+  await action('condition.apply',()=>setExhaustion(2));assert.equal((await savedState()).exhaustion,2);
+  await action('condition.clear',()=>setExhaustion(1));assert.equal((await savedState()).exhaustion,1);
+  await action('condition.clear',()=>setExhaustion(0));assert.equal((await savedState()).exhaustion,0);
+  const beforeUnchanged=await mark();await setExhaustion(0);assert.equal(await mark(),beforeUnchanged,'Saving unchanged Exhaustion requests no cue');
+  await page.evaluate(()=>window.soundForTest.configure({categories:{status:0}}));
+  const mutedStarts=await page.evaluate(()=>window.audioMetrics.starts);
+  await page.click(`.condition-tray [data-condition="${shortcut}"]`);
+  await page.click(`.condition-tray [data-condition="${shortcut}"]`);
+  assert.equal(await page.evaluate(()=>window.audioMetrics.starts),mutedStarts,'Status category mute prevents playback');
+  await page.evaluate(()=>window.soundForTest.configure({categories:{status:1}}));
+  await clearAudio();console.log('PASS all 14 conditions, shortcuts, distinct applied/cleared recordings, Exhaustion changes/no-op and status category mute');
+
   const attack=(id,event,roll=12)=>action(event,async()=>{await page.click(`[data-action="attack-roll"][data-id="${id}"]`);await dice([roll]);await page.click('#modal [data-combat-action="roll"]');});
   const sword=c.attacks[0];await attack(sword.id,'combat.sword');
   assert.equal(await page.$('.combat-outcome'),null,'Unknown target AC needs hit confirmation');
@@ -175,10 +208,13 @@ try{
   if(firefox)assert.equal(await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true);
   else await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
   await damage(1);
+  await verifyCondition(shortcut,true,`.condition-tray [data-condition="${shortcut}"]`);
+  await verifyCondition(shortcut,false,`.condition-tray [data-condition="${shortcut}"]`);
   await page.setViewport({width:1280,height:1000});if(!firefox)await page.emulateMediaFeatures([]);
   console.log('PASS damage to HP, temporary HP, overflow, 0 HP, zero amount and reduced-motion mobile playback');
 
   await navigate('settings');
+  for(const event of ['condition.apply','condition.clear']){await page.select('#sound-preview-event',event);await action(event,()=>page.click('[data-action="sound-preview"]'));}
   await page.select('#sound-preview-event','combat.damage');await action('combat.damage',()=>page.click('[data-action="sound-preview"]'));
   await page.select('#sound-preview-event','dice.roll');
   await page.evaluate(()=>{document.querySelector('#toasts').replaceChildren();document.querySelector('.sound-settings details').open=true;});
@@ -195,10 +231,14 @@ try{
   await action('dice.roll',()=>page.click('[data-action="sound-preview"]'));
   await navigate('dice');await dice([12]);await action('dice.roll',()=>page.click('#dice-form button[type="submit"]'));
   await navigate('sheet');await action('combat.damage',()=>adjustHP(1));
+  await verifyCondition(shortcut,true,`.condition-tray [data-condition="${shortcut}"]`);
+  await verifyCondition(shortcut,false,`.condition-tray [data-condition="${shortcut}"]`);
   await navigate('settings');await page.click('[data-action="sound"]');
   assert.equal(await page.evaluate(()=>window.soundForTest.diagnostics().voices),0,'Mute stops active playback');
   const starts=await page.evaluate(()=>window.audioMetrics.starts);await navigate('dice');await page.click('#dice-form button[type="submit"]');
   await navigate('sheet');await adjustHP(1);
+  await page.click(`.condition-tray [data-condition="${shortcut}"]`);
+  await setExhaustion(1);
   assert.equal(await page.evaluate(()=>window.audioMetrics.starts),starts,'Muted offline gameplay stays silent');
   assert.deepEqual(errors,[]);assert.deepEqual(thirdPartyAudio,[]);
   console.log('PASS production build copies, /dist/ hosting, 320/390px settings, full offline cache/playback, mute and no external audio');
