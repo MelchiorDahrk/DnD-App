@@ -17,6 +17,14 @@ Palette values, text contrast measurements, exact dimensions, panel height ceili
 
 The equipment and photo-matching browser suites also accept `--visual` for their optional measurements. Set `QUESTLOG_VISUAL_CHECKS=1` when explicitly running an entire group with visual review enabled. Set `BROWSER_PATH` to a Chromium executable when the installed browser cannot be found automatically. The standalone portrait/photo scripts expect an already-running server; retain their existing URL environment variables.
 
+The dice suite fixes open-dice's throw vectors as well as the recorded dice values,
+so deployment does not depend on randomly chosen physics trajectories. It still
+runs the real prediction, animation, and landing-face checks. A separate stalled
+engine check verifies the production timeout preserves exactly one result. Set
+`DICE_TEST_CPU_RATE=4` to exercise slower rendering. Failures save the tray state,
+browser errors, console messages, and a screenshot in `.tmp/browser-diagnostics/dice/`
+for the workflow's existing artifact upload.
+
 To exercise the packaged production site, set `THEME_TEST_URL` to its served subdirectory and `THEME_TEST_PRODUCTION=1`. That mode also verifies the development workshop is excluded from production. No particular cache version string or exact document title is required; the test loads the app and images offline to verify the behavior directly.
 
 ## Image loading and diagnostics
