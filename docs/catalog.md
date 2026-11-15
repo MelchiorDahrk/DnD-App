@@ -8,6 +8,12 @@ Rules links prefer [the 2024 Wikidot wiki](https://dnd2024.wikidot.com/) and [th
 
 ## Coverage
 
+**Settings & backup → Content sources** controls new catalog and level-up choices and compendium results. Every book starts enabled; `settings.hiddenSources` optionally stores disabled source IDs in version 2 saves. Existing backups without this field retain all content. Character import keeps the receiving browser’s preferences.
+
+`content-sources.js` reconciles source-title punctuation, edition-specific core books, and entries published in multiple books. Shared entries remain visible if any listed source is enabled. Earlier character options with only edition metadata use **Other earlier character options**. Custom resources remain available. Filtering applies to choice presentation; full catalogs remain available for resolving saved items, feats, attacks, and progression resources. Saved character entries remain editable and usable regardless of their source setting.
+
+Run `npm run test:sources` for browser coverage of source toggles, persistence, search, compendium and level-up filters, existing entries, narrow layouts, and offline reloads.
+
 | Dropdown | Included data |
 | --- | --- |
 | Equipment | 1,229 presets: 503 current magic items, 502 earlier-only items, 18 potency choices, and basic equipment (sharing Potion of Healing). Basic coverage: 38 weapons; 13 armor/shields; adventuring supplies and spellbook; 7 equipment packs; 23 tools/kits; 10 instruments; 4 gaming sets; 5 ammunition bundles; 11 focuses; 9 tack/drawn-vehicle entries; 8 mounts; 7 ships/airships |

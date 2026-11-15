@@ -252,5 +252,6 @@ export function parseBackup(text) {
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
   requireThat(data.characters.length?data.characters.some(c=>c.id===data.activeId):data.activeId===null,'active character is missing.');
   requireThat(data.settings&&typeof data.settings.sound==='boolean','invalid settings.');
+  if(data.settings.hiddenSources!==undefined)requireThat(Array.isArray(data.settings.hiddenSources)&&data.settings.hiddenSources.length<=500&&data.settings.hiddenSources.every(source=>typeof source==='string'&&/^[a-z0-9]{1,200}$/.test(source)),'invalid content sources.');
   return data;
 }
