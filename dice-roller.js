@@ -141,7 +141,8 @@ export function presentDice(result,host) {
     });
     session.resize.observe(surface);
     stage.dataset.state='rolling';status.textContent='Rolling…';
-    const dice=plan.dice.map(die=>({...die,diceColor:0xffffff,backgroundColor:'#365f58',textColor:'#fff5d7'}));
+    const size=matchMedia('(max-width:760px)').matches?3:1;
+    const dice=plan.dice.map(die=>({...die,size,diceColor:0xffffff,backgroundColor:'#365f58',textColor:'#fff5d7'}));
     // roll() may stay pending after destroy; completion uses the callback and our own cancelable promise.
     session.engine.roll(dice).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));
   }).catch(()=>fallback('3D dice unavailable · your recorded result is shown below.'));

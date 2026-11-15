@@ -50,7 +50,7 @@ try {
       return {xPos:random(),yPos:random(),zPos:random(),rotAxis:[random(),random(),random()],rotAngle:random(),vel:[random(),random(),random()],angVel:[random(),random(),random()]};
     };
     const originalRoll=DiceRoller.prototype.roll;
-    DiceRoller.prototype.roll=function(dice){window.testThrowIndex=0;return originalRoll.call(this,dice);};
+    DiceRoller.prototype.roll=function(dice){window.testThrowIndex=0;window.testDiceRoller=this;return originalRoll.call(this,dice);};
   });
   await instrument();
   const waitForSettled=async(selector='.dice-stage')=>{
@@ -94,9 +94,16 @@ try {
       if(expression==='1d20'&&values[0]===20)assert.deepEqual(await page.evaluate(()=>window.criticalEvents),['settled'],'celebrate only after the actual throw settles');
     }
   };
+  const dieGeometry=()=>page.evaluate(()=>window.testDiceRoller.dice.map(({type,mesh,body})=>{
+    mesh.geometry.computeBoundingBox();
+    const {min,max}=mesh.geometry.boundingBox;
+    return {type,meshSize:max.clone().sub(min).length(),bodySize:body.boundingRadius};
+  }));
+  const desktopGeometry=new Map();
   for(const sides of [4,6,8,10,12,20,100]) {
     await roll(`1d${sides}`,[sides]);
     assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),String(sides));
+    desktopGeometry.set(`d${sides}`,(await dieGeometry())[0]);
     console.log(`d${sides}: actual canvas and landing face verified`);
   }
   await roll('2d6+3',[2,5]);assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'10');
@@ -162,7 +169,9 @@ try {
     await page.setViewport(viewport);
     await page.goto(base+'#dice',{waitUntil:'networkidle0'});
     await instrument();
-    for(const [expression,values] of [['1d6',[6]],['1d100',[42]]]) {
+    const mobileRolls=[['1d6',[6]],['1d100',[42]]];
+    if(viewport.width===390&&viewport.height===844)mobileRolls.push(['1d4',[4]],['1d8',[8]],['1d10',[10]],['1d12',[12]],['1d20',[16]],['4d6',[1,2,3,4]],['2d20',[3,17]]);
+    for(const [expression,values] of mobileRolls) {
       phase=`mobile ${viewport.width}×${viewport.height}: ${expression}`;
       await page.evaluate(({expression,values})=>{
         window.testDice=[...values];window.diceSettled=null;
@@ -177,16 +186,23 @@ try {
       await page.locator(submit).click();
       await waitForSettled();
       assert.ok(await page.$('.dice-stage canvas'),'mobile roll keeps the 3D dice');
-      assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),String(values[0]));
+      assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),String(values.reduce((sum,value)=>sum+value,0)));
+      for(const die of await dieGeometry()){
+        const baseline=desktopGeometry.get(die.type);
+        assert.ok(Math.abs(die.meshSize/baseline.meshSize-3)<0.00001,`${phase}: visible die is three times larger`);
+        assert.ok(Math.abs(die.bodySize/baseline.bodySize-3)<0.00001,`${phase}: collision shape matches the larger die`);
+      }
       const layout=await page.evaluate(()=>{
         const rect=selector=>document.querySelector(selector).getBoundingClientRect();
         const stage=rect('.dice-stage'),surface=rect('.dice-surface'),total=rect('#tray-die strong');
         const top=rect('.topbar').bottom,bottom=rect('.mobile-nav').top;
-        return {fits:stage.left>=0&&stage.right<=innerWidth,compact:surface.height<=innerHeight*.35,
+        return {fits:stage.left>=0&&stage.right<=innerWidth,compact:Math.abs(surface.height-Math.max(140,Math.min(innerHeight*.28,230)))<1,
           resultVisible:total.top>=top&&total.bottom<=bottom,totalTop:total.top,totalBottom:total.bottom,top,bottom};
       });
       assert.ok(layout.fits&&layout.compact,`${phase}: compact tray fits the phone: ${JSON.stringify(layout)}`);
       assert.ok(layout.resultVisible,`${phase}: total stays above mobile navigation: ${JSON.stringify(layout)}`);
+      if(viewport.width===390&&viewport.height===844)await page.$eval('.dice-stage',n=>n.scrollIntoView({block:'start',behavior:'instant'}));
+      if(viewport.width===390&&viewport.height===844)await page.screenshot({path:resolve(root,`.tmp/dice-mobile-${expression}.png`)});
     }
     if(viewport.width===390&&viewport.height===844)await page.screenshot({path:resolve(root,'.tmp/dice-mobile.png')});
   }
@@ -202,7 +218,7 @@ try {
   await roll('50d6',Array(50).fill(2),'normal',false);await page.waitForSelector('.dice-stage[data-state="static"]');
   assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'100');
   await roll('7',[],'normal',false);assert.equal(await page.$('.dice-stage'),null);
-  console.log('Mobile, reduced motion and fallback results verified');
+  console.log('Mobile dice are 3x larger with matching physics and unchanged trays; reduced motion and fallback results verified');
 
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
