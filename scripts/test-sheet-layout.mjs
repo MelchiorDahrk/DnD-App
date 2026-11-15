@@ -1,9 +1,10 @@
 import {visualChecks,waitForImages} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
+import {catalogSheetState} from '../tests/helpers/sheet-fixtures.mjs';
 import {checkSheetImprovements} from '../tests/helpers/sheet-improvements.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
-import {mkdir} from 'node:fs/promises';
+import {mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
@@ -11,14 +12,15 @@ import {parseBackup} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
 import {sheetItems} from '../sheet-actions.js';
 import {equipmentIconURL} from '../equipment-icons.js';
-import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
+import {EQUIPMENT} from '../catalog.js';
 
 const root=resolve(import.meta.dirname,'..');
 const port=process.env.SHEET_TEST_PORT || '4187';
 const base=process.env.SHEET_TEST_URL || `http://127.0.0.1:${port}/`;
 const executablePath=process.env.BROWSER_PATH || ['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files/Mozilla Firefox/firefox.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium'].find(existsSync);
 assert.ok(executablePath,'Set BROWSER_PATH to a browser.');
-let server,browser;
+let server,browser,page,phase='starting browser';
+const errors=[],consoleMessages=[];
 try {
   if (!process.env.SHEET_TEST_URL) {
     server=spawn(process.execPath,['scripts/serve.mjs'],{cwd:root,env:{...process.env,PORT:port},stdio:['ignore','pipe','pipe'],windowsHide:true});
@@ -31,9 +33,9 @@ try {
     });
   }
   browser=await puppeteer.launch({executablePath,browser:/firefox/i.test(executablePath)?'firefox':'chrome',headless:true,args:['--no-sandbox']});
-  const page=await browser.newPage();
-  const errors=[];
+  page=await browser.newPage();
   page.on('pageerror',error=>errors.push(error.message));
+  page.on('console',message=>{consoleMessages.push(`${message.type()}: ${message.text()}`);if(consoleMessages.length>50)consoleMessages.shift();});
   await page.setViewport({width:1440,height:1100});
   await page.goto(base,{waitUntil:'networkidle0'});
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
@@ -48,6 +50,8 @@ try {
   const visibleKeys=section=>page.$$eval(`${sectionSelector(section)} [data-sheet-entry]`,nodes=>nodes.filter(node=>node.getBoundingClientRect().height>0).map(node=>node.dataset.sheetEntry));
   const selected={};
   const original=await state();
+  phase='default party sheet and attack artwork';
+  console.log(`RUN ${phase}`);
 
   // Every shipped item must render through the sheet, including entries beyond
   // the compact pack preview. Favorites expose them without changing inventories.
@@ -69,9 +73,9 @@ try {
       assert.ok(equipmentIconURL(attack),`${c.name}: explicit artwork for ${attack.name}`);
       const selector=`${entrySelector('attacks',attack.id)} .equipment-icon img`;
       assert.ok(await page.$(selector),`${c.name}: sheet weapon icon for ${attack.name}`);
-      await page.$eval(selector,img=>{img.scrollIntoView({block:'center'});return img.decode();});
+      await waitForImages(page,selector);
       await page.click(`${entrySelector('attacks',attack.id)} [data-action="attack-roll"]`);
-      await page.$eval('#modal .combat-icon img',img=>img.decode());
+      await waitForImages(page,'#modal .combat-icon img');
       assert.equal(await page.$eval('#modal .combat-icon img',img=>img.getAttribute('src')),equipmentIconURL(attack));
       await page.click('#modal [data-combat-action="close"]');
     }
@@ -81,22 +85,20 @@ try {
   }
   // Exercise the entire catalog in the actual inventory, including lazy images
   // below the fold, plus safe artwork for custom items and renamed attacks.
-  const catalogState=structuredClone(original),catalogCharacter=catalogState.characters[0];
-  catalogCharacter.items=EQUIPMENT.map(itemFromEquipment);
-  catalogCharacter.items.push({...catalogCharacter.items[0],id:'custom-item',name:'Custom treasure',category:'Treasure'});
-  catalogCharacter.attacks.push({...catalogCharacter.attacks[0],id:'renamed-weapon',name:'Moonblade',weaponId:'rapier'});
+  phase='full catalog inventory and offline artwork';
+  console.log(`RUN ${phase}`);
+  const catalogState=catalogSheetState(original);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),catalogState);
   await page.goto(new URL('#inventory',base).href,{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
-  assert.equal(await page.$$eval('.inventory-list .equipment-icon img',imgs=>imgs.length),EQUIPMENT.length+1);
-  for(const img of await page.$$('.inventory-list .equipment-icon img')) {
-    await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
-    assert.ok(await img.evaluate(img=>img.naturalWidth>0),'Equipment image loads');
-  }
+  const catalogImages='.inventory-list .equipment-icon img';
+  assert.equal(await page.$$eval(catalogImages,imgs=>imgs.length),EQUIPMENT.length+1,'Every catalog item renders after loading a valid save');
+  await waitForImages(page,catalogImages);
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);
   await page.reload({waitUntil:'networkidle0'});
-  for(const img of await page.$$('.inventory-list .equipment-icon img'))await img.evaluate(async img=>{img.scrollIntoView({block:'center'});await img.decode();});
+  assert.equal(await page.$$eval(catalogImages,imgs=>imgs.length),EQUIPMENT.length+1,'Every catalog item also renders offline');
+  await waitForImages(page,catalogImages);
   await page.setOfflineMode(false);
   await page.setViewport({width:390,height:844});
   if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Full catalog inventory fits mobile');
@@ -111,6 +113,8 @@ try {
   await page.waitForFunction(selector=>!document.querySelector(`${selector} img`),{},renamed);
   assert.equal(await page.$eval(`${renamed} .equipment-icon .icon`,svg=>getComputedStyle(svg).visibility),'visible','Image failure reveals SVG');
   console.log(`PASS all ${EQUIPMENT.length} catalog items, custom entries, renamed weapons and offline artwork`);
+  phase='section favorites, interactions and persistence';
+  console.log(`RUN ${phase}`);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
   await page.reload({waitUntil:'networkidle0'});
   await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
@@ -234,8 +238,22 @@ try {
   }
   assert.deepEqual(errors,[]);
   console.log('PASS deleting favorites and collapsing empty sections with no browser errors');
+  phase='sheet improvements, mobile interactions and offline persistence';
+  console.log(`RUN ${phase}`);
   await checkSheetImprovements(page,{base,original,root});
   assert.deepEqual(errors,[]);
+} catch(error) {
+  const directory=resolve(root,'.tmp/browser-diagnostics/sheet');
+  try {
+    await mkdir(directory,{recursive:true});
+    await writeFile(resolve(directory,'failure.json'),JSON.stringify({phase,message:error.message,stack:error.stack,url:page?.url(),errors,consoleMessages},null,2));
+    if(page) {
+      await writeFile(resolve(directory,'failure.html'),await page.content());
+      await page.screenshot({path:resolve(directory,'failure.png')});
+    }
+    console.error(`Sheet test diagnostics: ${directory}`);
+  } catch(diagnosticError) {console.error('Could not capture sheet test diagnostics:',diagnosticError.message);}
+  throw error;
 } finally {
   await browser?.close();
   server?.kill();

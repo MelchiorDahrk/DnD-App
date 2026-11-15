@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {resolve} from 'node:path';
 import {CONDITIONS,SKILLS,parseBackup} from '../../model.js';
 import {CONDITION_USAGE_KEY,QUICK_CONDITION_LIMIT} from '../../condition-usage.js';
+import {waitForImages} from './browser-checks.mjs';
 
 export async function checkSheetImprovements(page,{base,original,root}) {
   const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);
@@ -80,7 +81,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('.condition-more');
   for(const name of CONDITIONS) {
     const selector=`#modal [data-condition="${name}"]`;
-    await page.$eval(`${selector} img`,img=>img.decode());
+    await waitForImages(page,`${selector} img`);
     assert.equal(await page.$eval(selector,node=>node.getAttribute('aria-label')),name);
     await page.click(selector);
     assert.equal(await page.$eval(selector,n=>n.getAttribute('aria-pressed')),'true');
@@ -124,9 +125,9 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.setOfflineMode(true);
   await page.reload({waitUntil:'networkidle0'});
   assert.ok(await page.$(entry('pack',gear.id)),'Inventory favorite reloads offline');
-  await page.$$eval('.condition-tray img',images=>Promise.all(images.map(img=>img.decode())));
+  await waitForImages(page,'.condition-tray img');
   await page.click('.condition-more');
-  await page.$$eval('#modal .condition-icon',images=>Promise.all(images.map(img=>img.decode())));
+  await waitForImages(page,'#modal .condition-icon');
   await page.click('#modal [data-action="close"]');
   assert.equal(await page.$$eval('.sheet-spell',n=>n.length),3);
   await page.setOfflineMode(false);

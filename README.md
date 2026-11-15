@@ -220,6 +220,11 @@ npm test
 npm run build
 ```
 
+Before pushing, run `npm run verify:deploy` for those checks plus all required
+production browser suites. Set `BROWSER_PATH` to Chrome/Chromium. To test an
+existing build, use `npm run test:deploy`; it starts a preview under `/dist/` and
+cleans up afterward. Pull requests run these same deployment gates before merging.
+
 The output is `dist/`. The same app can be previewed at `http://localhost:4173/dist/` after building, which also exercises repository-subpath hosting.
 
 Pages deployments cache the generated LDraw packs, portrait matching index and

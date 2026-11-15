@@ -2,6 +2,8 @@ name: Deploy Questlog to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,7 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # Accommodate a 35-minute cold build plus the bounded browser suites.
+    timeout-minutes: 80
+    permissions:
+      contents: read
     env:
       # Keep layout, palette and artwork measurements in the optional visual review.
       # Persistence, interactions, asset loading and offline tests remain required.
@@ -27,6 +32,14 @@ jobs:
           cache: npm
       - name: Install portrait maker dependencies
         run: npm ci
+      - name: Check source and deployment runner
+        timeout-minutes: 2
+        run: |
+          npm run check
+          node --check scripts/test-deploy.mjs
+      - name: Catch rules and browser fixture regressions before building
+        timeout-minutes: 2
+        run: npm test
       - uses: browser-actions/setup-chrome@v2
         id: chrome
         with:
@@ -58,9 +71,6 @@ jobs:
           # These files are tracked: never overlay a different committed version
           # with a prefix match. Include their content and restore exact hits only.
           key: equipment-${{ steps.portraits.outputs.cache-primary-key }}-${{ hashFiles('assets/equipment/**') }}
-      - name: Check source
-        timeout-minutes: 2
-        run: npm run check
       - name: Build static app
         # A genuinely cold reference render can take 20-30 minutes on SwiftShader.
         # Warm builds must report "references unchanged" and skip that work.
@@ -101,51 +111,14 @@ jobs:
           done
           cat /tmp/questlog-server.log
           exit 1
-      - name: Browser portrait and offline checks
-        # Several real WebGL editor sessions run serially on CPU SwiftShader.
-        # Keep room for the backup, mobile and offline checks after rendering.
-        timeout-minutes: 10
+      - name: Check production interactions, assets and offline behavior
+        # The shared runner preserves each suite's timeout and runs quick sheet
+        # checks before the serial SwiftShader portrait/editor sessions.
+        timeout-minutes: 36
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:portraits
-      - name: Browser photo matching and offline checks
-        timeout-minutes: 5
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          PORTRAIT_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:portrait-photos
-      - name: Browser sheet checks
-        timeout-minutes: 3
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          SHEET_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:sheet
-      - name: Browser equipment checks
-        timeout-minutes: 3
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          ITEM_ICON_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:item-icons
-      - name: Browser 3D dice and offline checks
-        timeout-minutes: 4
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          DICE_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:dice
-      - name: Browser appearance functionality and offline checks
-        timeout-minutes: 5
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          THEME_TEST_URL: http://127.0.0.1:4173/DnD-App/
-          THEME_TEST_PRODUCTION: '1'
-        run: npm run test:themes
-      - name: Browser magic item and offline checks
-        timeout-minutes: 3
-        env:
-          BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          MAGIC_ITEM_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:magic-items
+          DEPLOY_TEST_URL: http://127.0.0.1:4173/DnD-App/
+        run: npm run test:deploy
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
@@ -155,10 +128,12 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
       - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           path: dist
   deploy:
     needs: build
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
