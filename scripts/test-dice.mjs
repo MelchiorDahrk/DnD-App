@@ -60,7 +60,13 @@ try {
   };
   const roll=async(expression,values,mode='normal',settled=true)=>{
     phase=`${expression} (${mode})`;
-    await page.click(`[data-action="roll-mode"][data-mode="${mode}"]`);
+    const modeSelector=`[data-action="roll-mode"][data-mode="${mode}"]`;
+    await page.$eval(modeSelector,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+    await page.waitForFunction(selector=>{
+      const node=document.querySelector(selector),rect=node?.getBoundingClientRect();
+      return rect&&node.contains(document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2));
+    },{},modeSelector);
+    await page.locator(modeSelector).click();
     await page.evaluate(({expression,values})=>{
       window.testDice=[...values];window.diceSettled=null;window.criticalEvents=[];
       document.querySelector('#dice-expression').value=expression;
@@ -175,6 +181,7 @@ try {
   assert.ok(await page.$eval('.dice-stage',n=>{const r=n.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth;}));
   await page.screenshot({path:resolve(root,'.tmp/dice-mobile.png'),fullPage:true});
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  assert.ok(await page.$('.dice-stage[data-state="settled"] canvas'),'changing motion preference keeps an already stationary tray stable');
   await roll('1d20+2',[18],'normal',false);
   await page.waitForSelector('.dice-stage[data-state="static"]');
   assert.equal(await page.$('.dice-stage canvas'),null);

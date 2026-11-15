@@ -95,7 +95,9 @@ export function presentDice(result,host) {
   };
   session.observer=new MutationObserver(()=>{if(current===session&&!stage.isConnected)clearDice();});
   session.observer.observe(document.body,{childList:true,subtree:true});
-  session.onMotion=()=>{if(motion.matches)fallback('Reduced motion · see individual results below.');};
+  session.onMotion=()=>{
+    if(motion.matches&&['loading','rolling'].includes(stage.dataset.state))fallback('Reduced motion · see individual results below.');
+  };
   session.onVisibility=()=>{if(document.hidden&&current===session)clearDice();};
   motion.addEventListener('change',session.onMotion);
   document.addEventListener('visibilitychange',session.onVisibility);
