@@ -55,8 +55,9 @@ export function openLevelUp(character,{setModal,onComplete}){
       applyLevelUp(character,selection);onComplete();
     });
     const form=document.querySelector('#modal-form');
-    if(feat&&referenceURL(feat.entry.wiki,feat.label,'feat')){
-      form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<p class="form-help level-feat-reference"><strong>${esc(feat.label)}</strong> <a href="${esc(referenceURL(feat.entry.wiki,feat.label,'feat'))}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read feat ↗</a></p>`);
+    if(feat){
+      const featReference=referenceURL(feat.entry.wiki,feat.label,'feat');
+      form.querySelector('[data-level-choice="feat"]').insertAdjacentHTML('beforeend',`<div class="catalog-preview"><strong>${esc(feat.label)}</strong><p class="detail-paragraph" data-level-feat-description>${esc(feat.entry.details)}</p>${featReference?`<p class="level-feat-reference"><a href="${esc(featReference)}" target="_blank" rel="noopener noreferrer" data-level-feat-reference>Read full rules ↗</a></p>`:''}</div>`);
     }
     const abilityInputs=[...form.querySelectorAll('[name^="ability-"]')];
     if(abilityInputs.length){

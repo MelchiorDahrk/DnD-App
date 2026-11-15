@@ -64,6 +64,11 @@ dialog{border:1px solid var(--border-subtle);background:var(--paper);border-radi
 .catalog-table-scroll th,.catalog-table-scroll td{padding:8px 10px;border-bottom:1px solid var(--border-subtle);min-width:70px;vertical-align:top}
 .catalog-table-scroll th{background:var(--surface-raised);color:var(--text-primary)}
 .inventory-stats{white-space:pre-line;overflow-wrap:anywhere;font-size:11px;line-height:1.7;color:var(--text-secondary);margin:10px 0 0;max-width:620px}
+.inventory-description{margin-top:8px;max-width:620px;font-size:11px;line-height:1.7;color:var(--text-secondary);overflow-wrap:anywhere}
+.inventory-description>summary{cursor:pointer;color:var(--green)}
+.inventory-description-preview{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin-top:4px;color:var(--text-secondary)}
+.inventory-description[open] .inventory-description-preview{display:none}
+.inventory-description .inventory-stats{margin-top:6px}
 .item-uses{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px;color:var(--text-secondary);font-size:11px}
 .item-uses meter{width:75px;height:12px;accent-color:var(--status-success)}
 .item-use-settings{border:1px solid var(--border-subtle);border-radius:8px;padding:16px;margin:20px 0}
