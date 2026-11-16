@@ -376,6 +376,10 @@ function legMove(right: boolean, swing: number, spread: number): Pose3 {
 	return { at: sub(pivot, apply(m, pivot)), m };
 }
 
+// Most back attachments are already authored behind the torso (+Z in LDraw).
+// These models instead extend toward -Z and need a half-turn at the neck peg.
+const REVERSED_BACK_PARTS = new Set(['4498', '50231c03', '95348', '101658', 'u9661c01', 'u9661p01c01']);
+
 export function placements(fig: Figure, torso?: Part, head?: Part, legs?: Part): Placement[] {
 	const pose = { ...STANDING, ...fig.pose };
 	const list: Placement[] = [];
@@ -391,12 +395,10 @@ export function placements(fig: Figure, torso?: Part, head?: Part, legs?: Part):
 		const at: Vec = moulded ? [0, head!.moulded!, 0] : HEAD;
 		list.push(place(fig.headgear.id, fig.headgear.color, { at, m: turn }));
 	}
-	// Back-worn neck attachments are authored facing the opposite way to the
-	// torso. Turn them around the neck peg; front-worn beards, armour and the
-	// full-body ghost shroud retain their native orientation.
+	// Neck and back attachments stay fixed to the torso when the head turns.
 	if (fig.neck.id) list.push({ id: fig.neck.id, color: fig.neck.color });
 	if (fig.back.id) list.push({ id: fig.back.id, color: fig.back.color,
-		...(fig.back.id === '2588' ? {} : { m: rotY(180) }) });
+		...(REVERSED_BACK_PARTS.has(fig.back.id) ? { m: rotY(180) } : {}) });
 	if (fig.legs.id === STANDARD_LEGS) {
 		list.push(...standardLegs(fig.legs.hips, fig.legs.color, pose));
 	} else if (fig.legs.id && needsLegs(legs)) {
