@@ -423,7 +423,13 @@ dialog{background:var(--surface-panel);border:1px solid var(--accent-edge);borde
 .timing-reaction{color:var(--status-danger);background:var(--status-danger-bg)}
 .action-info .action-timing{display:table}.sheet-spell.concentrating{background:var(--status-warning-bg)}
 .action-info .spell-concentration{display:flex;align-items:center;gap:4px}.spell-concentration .icon{width:13px;height:13px;flex-shrink:0}
+.inspiration-control{flex-wrap:wrap;justify-content:flex-end;column-gap:8px;row-gap:4px}
+.inspiration-control>.inspiration{flex-wrap:wrap;justify-content:flex-end}
+.inspiration-count{font-variant-numeric:tabular-nums;white-space:nowrap}
+.inspiration-limit-setting{margin-top:12px;max-width:180px}
 .status-row{flex-wrap:nowrap}
+.status-row:has(.inspiration-control){flex-wrap:wrap}
+.status-row:has(.inspiration-control)>.condition-controls{order:3;flex-basis:100%}
 .status-row>.sheet-inline-entry[data-sheet-entry="conditions"]{flex:0 1 170px}
 .status-row>.sheet-inline-entry[data-sheet-entry="inspiration"]{margin-left:auto}
 .condition-summary{text-align:left;line-height:1.5;min-width:0}.condition-summary>.icon{flex-shrink:0}

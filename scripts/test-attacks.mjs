@@ -30,7 +30,8 @@ try{
   assert.ok(superiority.rollFormula);c.features.push(superiority);
   await page.evaluate(state=>localStorage.setItem('questlog.v2',JSON.stringify(state)),initial);await page.reload({waitUntil:'networkidle0'});
   // Deterministic real dice for browser assertions. No attack UI or rules are mocked.
-  await page.evaluate(()=>{window.attackTestDice=[];const original=crypto.getRandomValues.bind(crypto);crypto.getRandomValues=array=>{if(window.attackTestDice.length){array[0]=window.attackTestDice.shift()-1;return array;}return original(array);};});
+  const installTestDice=()=>{window.attackTestDice=[];const original=crypto.getRandomValues.bind(crypto);crypto.getRandomValues=array=>{if(window.attackTestDice.length){array[0]=window.attackTestDice.shift()-1;return array;}return original(array);};};
+  await page.evaluateOnNewDocument(installTestDice);await page.evaluate(installTestDice);
   const dice=values=>page.evaluate(values=>window.attackTestDice=[...values],values);
   const action=name=>`#modal [data-combat-action="${name}"]`;
   const click=async(name,suffix='')=>{
@@ -86,7 +87,7 @@ try{
   await click('hit');await page.click('.combat-accuracy summary');
   await dice([20]);await click('inspiration','[data-index="0"]');
   assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical/);
-  assert.equal((await active()).inspiration,false);
+  assert.equal((await active()).inspiration,0);
   await page.click('.combat-details summary');await dice([2,3,4,5]);
   await click('feature','[data-id="sneak"]');
   assert.match(await page.$eval('.combat-extra-result .roll-expression',n=>n.textContent),/4d6/);
@@ -119,6 +120,64 @@ try{
   await page.select('[name="mastery"]','');await page.click('#modal button[type="submit"]');
   assert.equal((await active()).attacks.find(a=>a.id===battleaxe.id).mastery,'');
   parseBackup(JSON.stringify(await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')))));
+
+  // Inspiration keeps the one-point default and supports a persistent table override.
+  await page.click('[data-action="inspiration"]');assert.equal((await active()).inspiration,1);
+  assert.equal(await page.$eval('.hero',n=>n.dataset.inspired),'true');
+  assert.equal(await page.$eval('[data-action="inspiration"]',n=>n.getAttribute('aria-pressed')),'true');
+  await page.click('[data-action="inspiration"]');assert.equal((await active()).inspiration,0);
+  await page.click('#sidebar [data-route="settings"]');
+  assert.equal(await page.$eval('#inspiration-limit',n=>n.value),'1');
+  const setLimit=async value=>page.$eval('#inspiration-limit',(n,value)=>{n.value=value;n.dispatchEvent(new Event('change',{bubbles:true}));},value);
+  for(const invalid of ['0','1.5','1000','']) {
+    await setLimit(invalid);
+    assert.equal(await page.$eval('#inspiration-limit',n=>n.validity.valid),false);
+    assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).settings.inspirationLimit),undefined);
+  }
+  await setLimit('3');
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal(await page.$eval('#inspiration-limit',n=>n.value),'3');
+  await page.click('#sidebar [data-route="sheet"]');
+  const gain='[data-action="inspiration"][data-change="gain"]',spend='[data-action="inspiration"][data-change="spend"]';
+  assert.equal(await page.$eval(spend,n=>n.disabled),true);
+  for(let points=1;points<=3;points++) {
+    await page.click(gain);assert.equal((await active()).inspiration,points);
+    assert.equal(await page.$eval('.inspiration-count',n=>n.textContent),`${points} / 3`);
+    assert.match(await page.$eval('.sheet-inspiration',n=>n.getAttribute('aria-label')),new RegExp(`${points} point`));
+  }
+  assert.equal(await page.$eval(gain,n=>n.disabled),true);
+  await page.click(spend);assert.equal((await active()).inspiration,2);
+  await page.click(gain);assert.equal((await active()).inspiration,3);
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal(await page.$eval('.inspiration-count',n=>n.textContent),'3 / 3');
+  for(const width of [390,320]) {
+    await page.setViewport({width,height:844});
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px inspiration controls fit`);
+    assert.ok(await page.$eval(gain,n=>n.getBoundingClientRect().width>=36),'Inspiration controls remain tappable');
+    await page.goto(base+'#settings',{waitUntil:'networkidle0'});
+    assert.equal(await page.$eval('#inspiration-limit',n=>n.value),'3');
+    assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px inspiration setting fits`);
+    await page.goto(base+'#sheet',{waitUntil:'networkidle0'});
+  }
+  await page.setViewport({width:1280,height:1000});
+  await page.click('#sidebar [data-route="settings"]');await setLimit('1');
+  await page.click('#sidebar [data-route="sheet"]');
+  assert.equal((await active()).inspiration,3,'Lowering the limit preserves saved points');
+  assert.equal(await page.$eval(gain,n=>n.disabled),true);
+  await page.click(spend);assert.equal((await active()).inspiration,2);
+  // Each guided reroll spends exactly one point, including above the new limit.
+  for(const remaining of [1,0]) {
+    await open('rapier',[3]);await click('roll');
+    assert.match(await page.$eval('.combat-inspiration',n=>n.textContent),new RegExp(`${remaining+1} remaining`));
+    await dice([4]);await click('inspiration','[data-index="0"]');
+    assert.equal((await active()).inspiration,remaining);
+    assert.equal(!!await page.$('.combat-inspiration'),remaining>0);
+    await close();
+  }
+  assert.equal(await page.$(gain),null,'At the default limit, the single-point toggle returns');
+  assert.equal(await page.$eval('.hero',n=>n.dataset.inspired),'false');
+  const inspirationBackup=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
+  assert.deepEqual(parseBackup(JSON.stringify(inspirationBackup)),inspirationBackup);
 
   // Guided mobile attacks progress from accuracy to damage without a large hit roll above it.
   await mkdir(resolve(root,'.tmp'),{recursive:true});

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {inspirationPoints,inspirationLimit,gainInspiration,spendInspiration} from '../model.js';
 import {SAVE_VERSION,RULES_URL,wikiURL,referenceURL,exhaustionPenalty,walkingSpeed,abilityCheckBonus,saveBonus,attackBonus,shortRest,COINS,SHEET_TEXT,initiative,passivePerception,rollFeature,validDiceFormula,demoCharacter,makeCharacter,parseBackup,rollDice,randomDie,mod,proficiency,skillBonus,changeHP,longRest,levelUp,safeURL,castingAbility} from '../model.js';
 const demoState = () => {const c=demoCharacter();return {version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}};};
 
@@ -91,6 +92,48 @@ test('empty journals require no active character, populated journals require a m
   const populated=demoState();
   for(const activeId of [null,'missing',undefined])assert.throws(()=>parseBackup(JSON.stringify({...populated,activeId})),/active character/);
   assert.throws(()=>parseBackup(JSON.stringify({...empty,characters:Array(101).fill(populated.characters[0])})),/0–100/);
+});
+
+test('inspiration defaults to one point and gains and spending respect the bounds',()=>{
+  const c=makeCharacter();
+  assert.equal(inspirationPoints(c),0);assert.equal(inspirationLimit({sound:false}),1);
+  assert.equal(spendInspiration(c),false);
+  assert.equal(gainInspiration(c),true);assert.equal(inspirationPoints(c),1);
+  assert.equal(gainInspiration(c),false);assert.equal(inspirationPoints(c),1);
+  const settings={sound:false,inspirationLimit:3};
+  assert.equal(gainInspiration(c,settings),true);assert.equal(gainInspiration(c,settings),true);
+  assert.equal(gainInspiration(c,settings),false);assert.equal(inspirationPoints(c),3);
+  assert.equal(spendInspiration(c),true);assert.equal(inspirationPoints(c),2);
+  settings.inspirationLimit=1;
+  assert.equal(gainInspiration(c,settings),false);assert.equal(inspirationPoints(c),2,'Lowering the limit preserves existing points');
+  assert.equal(spendInspiration(c),true);assert.equal(spendInspiration(c),true);
+  assert.equal(spendInspiration(c),false);assert.equal(inspirationPoints(c),0);
+  assert.equal(gainInspiration(c,settings),true);assert.equal(inspirationPoints(c),1);
+});
+
+test('inspiration counts, overrides, and legacy boolean saves round-trip',()=>{
+  for(const inspiration of [false,true,0,1,3,999]) {
+    const state=demoState();state.characters[0].inspiration=inspiration;
+    if(typeof inspiration==='number')state.settings.inspirationLimit=999;
+    const restored=parseBackup(JSON.stringify(state));
+    assert.deepEqual(restored,state);assert.equal(inspirationPoints(restored.characters[0]),Number(inspiration));
+  }
+  const state=demoState();state.characters[0].inspiration=3;
+  assert.equal(parseBackup(JSON.stringify(state)).characters[0].inspiration,3,'Importing above the local limit preserves points');
+  const c=makeCharacter({inspiration:true});
+  assert.equal(gainInspiration(c,{inspirationLimit:3}),true);assert.equal(c.inspiration,2);
+  assert.equal(spendInspiration(c),true);assert.equal(c.inspiration,1);
+});
+
+test('inspiration rejects invalid counts and limits in backups',()=>{
+  for(const value of [-1,1.5,1000,'2',null,{},[]]) {
+    const state=demoState();state.characters[0].inspiration=value;
+    assert.throws(()=>parseBackup(JSON.stringify(state)),/invalid inspiration/);
+  }
+  for(const value of [0,-1,1.5,1000,'2',true,null,{},[]]) {
+    const state=demoState();state.settings.inspirationLimit=value;
+    assert.throws(()=>parseBackup(JSON.stringify(state)),/invalid inspiration limit/);
+  }
 });
 
 test('reference links reject script and data URLs',()=>{

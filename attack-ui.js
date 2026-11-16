@@ -1,4 +1,4 @@
-import {mod,rollDice,signed,validDiceFormula,wikiURL} from './model.js';
+import {mod,rollDice,signed,validDiceFormula,wikiURL,inspirationPoints,spendInspiration} from './model.js';
 import {attackWeapon,attackMastery,attackContext,attackOutcome,damageFormula,rollAttackDamage,rerollAttackDie,toppleDC,hasWeaponProperty,attackDamageFeatures} from './attack-rules.js';
 import {attackIconMarkup} from './item-icons.js';
 import {icon} from './icons.js';
@@ -85,7 +85,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     const context=attackContext(c,a,options);
     const status=!outcome?`<p class="combat-question">Confirm the hit with your DM.</p><div class="combat-buttons">${button('hit','Hit')}${button('critical','Critical hit')}${button('miss','Miss')}</div>`:`<div class="combat-outcome ${outcome==='miss'?'combat-miss':''}" role="status">${outcome==='critical'?'✦ Critical hit':outcome==='hit'?'Hit':'Miss'}${options.ac!==''?` · AC ${Number(options.ac)+context.coverBonus}`:''}${roll?.natural===1?' · natural 1':roll?.natural===20?' · natural 20':''}</div>`;
     const modes=roll?`<p class="form-help">${esc([...context.advantages,...context.disadvantages].join(' · ')||'Normal roll')}${context.advantages.length&&context.disadvantages.length?' · Advantage and disadvantage cancel.':''}</p>`:'';
-    const inspiration=c.inspiration&&roll&&!damage&&!extras.length&&!save?`<div class="combat-inspiration"><p>Heroic Inspiration: reroll one die and keep its new value.</p>${roll.rolls.map((value,i)=>button('inspiration',`Reroll die ${i+1} (${value})`,`data-index="${i}"`)).join('')}</div>`:'';
+    const inspiration=c.inspiration&&roll&&!damage&&!extras.length&&!save?`<div class="combat-inspiration"><p>Heroic Inspiration: ${inspirationPoints(c)} remaining. Spend 1 to reroll one die and keep its new value.</p>${roll.rolls.map((value,i)=>button('inspiration',`Reroll die ${i+1} (${value})`,`data-index="${i}"`)).join('')}</div>`:'';
     const specialCritical=roll&&outcome&&roll.natural!==1&&roll.natural!==20&&!damage&&!extras.length&&!save?`<p class="form-help">${button(outcome==='critical'?'hit':'critical',outcome==='critical'?'Use a normal hit':'Feature / target effect: critical hit')}</p>`:'';
     const formula=damageFormula(c,a,{twoHanded:options.twoHanded,omitAbility:['Cleave','Light extra attack'].includes(extraKind),keepAbility:extraKind==='Light extra attack'&&options.keepAbility});
     const damagePanel=outcome&&outcome!=='miss'?`<section class="combat-followup combat-damage"><h3>${outcome==='critical'?'Critical damage':'Damage'}</h3>${!roll&&!damage?check('Critical hit','directCritical',outcome==='critical'):''}<p>${esc(formula)}${outcome==='critical'?' · double dice, keep bonuses':''} · ${esc(a.type)}</p>${damage?resultMarkup(damage,a.type+' damage'):button('damage','Roll damage','',true)}</section>`:'';
@@ -106,7 +106,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
       if(['hit','critical','miss'].includes(action)){outcome=action;render();const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase:'impact'});if(event)sound.play(event);return;}
       if(action==='inspiration'){
         if(!c.inspiration||!roll||damage||extras.length||save)return;
-        roll=rerollAttackDie(roll,Number(el.dataset.index));c.inspiration=false;onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
+        roll=rerollAttackDie(roll,Number(el.dataset.index));spendInspiration(c);onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
         outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);save=null;render();return;
       }
       if(action==='damage'){

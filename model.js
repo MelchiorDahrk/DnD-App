@@ -34,6 +34,19 @@ export const mod = n => Math.floor((Number(n) - 10) / 2);
 export const signed = n => `${n >= 0 ? '+' : ''}${n}`;
 export const proficiency = level => 2 + Math.floor((level - 1) / 4);
 export const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
+// Earlier version 2 saves store Inspiration as an on/off flag.
+export const inspirationPoints = c => Number(c.inspiration);
+export const inspirationLimit = (settings={}) => settings.inspirationLimit ?? 1;
+export function gainInspiration(c,settings={}) {
+  const points=inspirationPoints(c);
+  if(points>=inspirationLimit(settings))return false;
+  c.inspiration=points+1;return true;
+}
+export function spendInspiration(c) {
+  const points=inspirationPoints(c);
+  if(!points)return false;
+  c.inspiration=points-1;return true;
+}
 export const exhaustionPenalty = c => 2 * c.exhaustion;
 export const walkingSpeed = c => Math.max(0,c.speed - 5 * c.exhaustion);
 export const abilityCheckBonus = (c,ability) => mod(c.stats[ability]) - exhaustionPenalty(c);
@@ -62,7 +75,7 @@ export function makeCharacter(values = {}) {
   const maxHp = CLASSES[cls] + mod(stats.con);
   return {
     ...sheetDefaults(),id:uid(),name:'New adventurer',race:'Human',class:cls,subclass:'',background:'',alignment:'Neutral Good',campaign:'A new adventure',level:1,xp:0,
-    stats,hp:maxHp,maxHp,tempHp:0,ac:12,speed:30,gold:0,silver:0,copper:0,inspiration:false,initiativeAdvantage:false,
+    stats,hp:maxHp,maxHp,tempHp:0,ac:12,speed:30,gold:0,silver:0,copper:0,inspiration:0,initiativeAdvantage:false,
     hitDie:CLASSES[cls],hitDice:1,skills:[],expertise:[],saves:[],conditions:[],exhaustion:0,
     items:[],spells:[],slots:Array.from({length:9},()=>({max:0,used:0})),notes:[],features:[],attacks:[],
     concentration:'',spellAbility:'auto',deathSuccess:0,deathFailure:0,...values,class:cls
@@ -196,7 +209,7 @@ function validateCharacter(c) {
   requireThat(integerIn(c.maxHp,1,9999)&&integerIn(c.hp,0,c.maxHp)&&integerIn(c.tempHp,0,9999),'invalid hit points.');
   for (const key of ['ac','speed','gold','silver','copper']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
   requireThat([6,8,10,12].includes(c.hitDie)&&integerIn(c.hitDice,0,c.level),'invalid hit dice.');
-  requireThat(typeof c.inspiration==='boolean','invalid inspiration.');
+  requireThat(typeof c.inspiration==='boolean'||integerIn(c.inspiration,0,999),'invalid inspiration.');
   requireThat(typeof c.initiativeAdvantage==='boolean','invalid initiative advantage.');
   requireThat(c.spellAbility==='auto'||Object.hasOwn(ABILITIES,c.spellAbility),'invalid casting ability.');
   requireThat(c.pactMagic===undefined||typeof c.pactMagic==='boolean','invalid Pact Magic flag.');
@@ -252,6 +265,7 @@ export function parseBackup(text) {
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
   requireThat(data.characters.length?data.characters.some(c=>c.id===data.activeId):data.activeId===null,'active character is missing.');
   requireThat(data.settings&&typeof data.settings.sound==='boolean','invalid settings.');
+  if(data.settings.inspirationLimit!==undefined)requireThat(integerIn(data.settings.inspirationLimit,1,999),'invalid inspiration limit.');
   if(data.settings.hiddenSources!==undefined)requireThat(Array.isArray(data.settings.hiddenSources)&&data.settings.hiddenSources.length<=500&&data.settings.hiddenSources.every(source=>typeof source==='string'&&/^[a-z0-9]{1,200}$/.test(source)),'invalid content sources.');
   return data;
 }

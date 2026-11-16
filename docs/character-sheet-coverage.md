@@ -18,7 +18,7 @@ All three passive Perception totals now come from actual Perception proficiency,
 | --- | --- |
 | Character name, player name, class and level, background, species, alignment, XP | **Edit character details** on the hero card. Includes subclass and campaign. Set level and XP directly when copying a sheet; **Level up** reviews HP, features, skills, feats, spells, slots and resource scaling before advancing during play. |
 | Six ability scores and modifiers | **Abilities**. Edit total scores; modifiers update and can be rolled. |
-| Heroic Inspiration | Toggle in **Status**; spend it to reroll one die immediately after rolling it, keeping the new result. Rerolls are manual. |
+| Heroic Inspiration | Toggle in **Status**, or gain/spend points when **Settings & backup → Heroic Inspiration → Maximum points** is above 1. Spend 1 to reroll one die immediately after rolling it, keeping the new result. Guided attacks apply the reroll; other rerolls are manual. |
 | Proficiency bonus | Calculated from level in **Skills & saving throws**. |
 | Six saving throws and proficiency circles | Toggle proficiency and roll each saving throw. |
 | All 18 skills and proficiency circles | Toggle untrained/proficient/expertise and roll each skill. Switch between all skills and proficient skills; this preference is saved per character. Saving throws remain visible. |
