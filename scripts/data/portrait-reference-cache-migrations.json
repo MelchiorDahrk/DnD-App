@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "description": "Legacy renderer hashes derived from trusted Git snapshots. Reuse also requires identical scoped renderer inputs and per-part geometry.",
+  "entries": [
+    {
+      "inputFingerprint": "a63a3ece8dafc11ae8cf2a528dbd8e58daf27c3d746cae0b20a41ee9b899c298",
+      "commits": [
+        "0cf94160011ad81f4d1e44f8b4d606be4c7a8c24",
+        "5abfc80d049a350e03e839106bce9d5561f4ca57",
+        "ccaece0f6e971eaa3360cca25ad723153d4a77b2"
+      ],
+      "legacyRendererHashes": [
+        "0ae71b018133e0203b6db98d1b7f016913136ae8a227b4208c026bec0d471b88",
+        "2ec021cc0753290b9fe9a005041f06aeb913ab8b14998fc10c743f5659ca2d97",
+        "40c9c86d2f8430b7337b7fe1d3c8670c5720bee878576b08be54067243938c4a",
+        "762d9785117666270fde3cb35408c7b5b1c94a1cd5bde2757c9e1dc4284144ff",
+        "7a48aafa6b20ab0444d855cd713dcde127b8c60db706c1608f3b0610f68335b2",
+        "7bbff5d030a9f836a08eb5b163ebbec51fb4cb1b6d6c237c6a386681f88aa99c",
+        "7d88e58709bf824a0d759142410f000865c2b43d9a61003cb9bb7ab52a2d222b",
+        "8783f2c46057de499a5b5e1ee949b35cf3d304d2b04e34fe703a1e7f5c5a6faa",
+        "b13e671f6e4948824b557a228380440b2e9c2c9d673c24acc941bb00e3140d79",
+        "b5754afffe03d9424032afa2105874b02007673715728bf18fcb066bb41480ea",
+        "cfca8103d5aa59190893fd3322f2f9f812809883e85ffd5881a34dd3226efb6a",
+        "e35b303527b920160d578a40cf66283bd9b66d2154eb259702bd6700faa1d18a"
+      ]
+    },
+    {
+      "inputFingerprint": "bf995f18acc3cca0b158b5c46a6578d9bdf2f46c13abacc819ad2d578ecec729",
+      "commits": [
+        "9de3c4c49907bbc0ab3518899c30a5c380aed560"
+      ],
+      "legacyRendererHashes": [
+        "0bf803d38ecfe8de506774fc414d2b0b0e1bc219d7fa0db69f08912ecb06f6c1",
+        "493137969b6b988276ce33381ad722813bea0e5429fa28d8244e5c7082aed3a7",
+        "bf295a6ac675f152c748433b77965044346c5c4173adb662be5a859283e06fb2",
+        "e0d508893af178a7fb509be5266f12b975da9a80a431db8fc38c018115acbbdc"
+      ]
+    }
+  ]
+}

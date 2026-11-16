@@ -55,6 +55,9 @@ jobs:
         with:
           chrome-version: stable
           install-dependencies: true
+      - name: Fingerprint portrait rendering dependencies
+        id: portrait-inputs
+        run: node scripts/portrait-cache-key.mjs >> "$GITHUB_OUTPUT"
       - name: Restore generated portrait assets
         uses: actions/cache/restore@v4
         id: portraits
@@ -66,10 +69,12 @@ jobs:
             vendor/bricktrait/static/thumbs
             vendor/bricktrait/static/portrait-match-index.json
             .cache/portrait-references
-          # Cover both renderers' fingerprints, their dependencies and the packer.
-          # Keep these paths stable so older caches can still seed a rebuild.
-          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'scripts/lib/portrait-themes.mjs', 'scripts/lib/geometry-fingerprint.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json', 'vendor/bricktrait/presets/legacy-parts.json', 'vendor/bricktrait/presets/legacy-ldraw/**') }}
+          # Only renderer/geometry sources and their resolved dependency graph.
+          # Firebase and unrelated lockfile edits keep this cache key unchanged.
+          # Keep paths and old prefixes so existing renders can be migrated safely.
+          key: bricktrait-ldraw-f333d939-v5-${{ steps.portrait-inputs.outputs.dependencies }}-${{ hashFiles('equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'scripts/portrait-cache-key.mjs', 'scripts/lib/portrait-cache.mjs', 'scripts/data/portrait-reference-cache-migrations.json', 'scripts/lib/portrait-themes.mjs', 'scripts/lib/geometry-fingerprint.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/scene.ts', 'vendor/bricktrait/src/lib/thumb-render.ts', 'vendor/bricktrait/src/lib/thumbs.ts', 'vendor/bricktrait/src/lib/ldraw.ts', 'vendor/bricktrait/src/lib/portrait-scene.ts', 'vendor/bricktrait/src/lib/portrait-glow.ts', 'vendor/bricktrait/src/lib/lighting.ts', 'vendor/bricktrait/src/lib/materials.ts', 'vendor/bricktrait/src/lib/equipment-render.ts', 'vendor/bricktrait/src/lib/fantasy-catalog.js', 'vendor/bricktrait/*catalog.json', 'vendor/bricktrait/presets/legacy-parts.json', 'vendor/bricktrait/presets/legacy-ldraw/**') }}
           restore-keys: |
+            bricktrait-ldraw-f333d939-v5-
             bricktrait-ldraw-f333d939-v4-
             bricktrait-ldraw-f333d939-v3-
             bricktrait-ldraw-f333d939-v2-
@@ -90,12 +95,6 @@ jobs:
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
           QUESTLOG_FIREBASE_CONFIG: ${{ vars.QUESTLOG_FIREBASE_CONFIG }}
-      - name: Verify Firebase accounts, rules, offline replay and live parties
-        timeout-minutes: 8
-        run: npm run test:firebase
-        env:
-          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
-          QUESTLOG_TEST_BUILD: dist
       # Save before tests: a later assertion or deploy failure must not discard
       # successful incremental part renders. Exact hits are immutable and need no save.
       - name: Save generated portrait assets
@@ -116,6 +115,12 @@ jobs:
         with:
           path: assets/equipment
           key: ${{ steps.equipment.outputs.cache-primary-key }}
+      - name: Verify Firebase accounts, rules, offline replay and live parties
+        timeout-minutes: 8
+        run: npm run test:firebase
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          QUESTLOG_TEST_BUILD: dist
       - name: Run tests including generated matching assets
         timeout-minutes: 5
         run: npm test
