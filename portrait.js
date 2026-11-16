@@ -1,4 +1,11 @@
 // Compact, portable portrait saves. The 3D editor itself is Bricktrait's vendored code.
+import {defaultPortraitId} from './portrait-defaults.js';
+import {DEFAULT_PORTRAITS} from './portrait-default-data.js';
+
+export function defaultPortrait(character) {
+  const preset=DEFAULT_PORTRAITS[defaultPortraitId(character)];
+  return preset?structuredClone(preset):null;
+}
 const object=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
 const number=(value,min,max)=>typeof value==='number'&&Number.isFinite(value)&&value>=min&&value<=max;
 const partId=value=>value===null||(typeof value==='string'&&/^(?:unf\/)?[a-zA-Z0-9_-]{1,100}$/.test(value));
@@ -22,6 +29,7 @@ export function validPortrait(value) {
 }
 
 export function portraitMarkup(character) {
-  const src=validPortrait(character.portrait)?character.portrait.image:'./assets/portrait-adventurer.webp';
+  const preset=DEFAULT_PORTRAITS[defaultPortraitId(character)];
+  const src=validPortrait(character.portrait)?character.portrait.image:preset?`./portrait-maker/${preset.thumbnail}`:'./assets/portrait-adventurer.webp';
   return `<img class="character-portrait" src="${src}" alt="" width="256" height="256">`;
 }

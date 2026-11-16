@@ -3,6 +3,25 @@ import assert from 'node:assert/strict';
 import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshStandardMaterial, NoBlending, Vector3 } from 'three';
 import { preparePortraitModel, disposePortraitModel, emissionBox, emissionColor } from '../vendor/bricktrait/src/lib/materials.ts';
 import { portraitGlowMaterial } from '../vendor/bricktrait/src/lib/portrait-glow.ts';
+import { placements } from '../vendor/bricktrait/src/lib/ldraw.ts';
+import { emptyFigure } from '../vendor/bricktrait/src/lib/presets.js';
+
+test('back attachments turn behind the torso while beards, armour and ghost faces stay forward',()=>{
+  for(const id of ['4498','4524','99464c01','50231c02','88290','u9661c01']) {
+    const f=emptyFigure();f.back.id=id;f.pose.head=60;
+    const part=placements(f).find(p=>p.id===id);
+    const transform=([x,y,z])=>[part.m[0]*x+part.m[1]*y+part.m[2]*z,part.m[3]*x+part.m[4]*y+part.m[5]*z,part.m[6]*x+part.m[7]*y+part.m[8]*z];
+    const point=transform([0,0,-10]);
+    assert.ok(Math.abs(point[0])<1e-10&&point[1]===0&&point[2]===10,`${id} faces the back independently of the head pose`);
+    assert.deepEqual(part.at??[0,0,0],[0,0,0],'the neck attachment point stays fixed');
+  }
+  for(const id of ['6132','10052','60749','10065','2587']) {
+    const f=emptyFigure();f.neck.id=id;
+    assert.equal(placements(f).find(p=>p.id===id).m,undefined);
+  }
+  const ghost=emptyFigure();ghost.back.id='2588';
+  assert.equal(placements(ghost).find(p=>p.id==='2588').m,undefined);
+});
 
 const piece = (id, material, geometry = new BoxGeometry()) => {
   const group = new Group();group.name = `${id}.dat`;

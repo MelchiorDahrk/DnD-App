@@ -165,6 +165,10 @@
 				design.style = transparentStyle(design.style);
 				Object.assign(portrait, design);
 			}
+			if (event.data.type === 'questlog:portrait-init' && !event.data.design && event.data.figure) {
+				portrait.figure = structuredClone(event.data.figure);
+				portrait.view = { yaw: -18, pitch: 8, zoom: 1 };
+			}
 			if (event.data.type === 'questlog:portrait-request-save') void saveToCharacter();
 			if (event.data.type === 'questlog:portrait-preview-selections' && ready && webglAvailable()) void previewSelections(event.data.selections, event.data.revision);
 			if (event.data.type === 'questlog:portrait-apply-selections' && ready && webglAvailable()) {

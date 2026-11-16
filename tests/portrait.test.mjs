@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {validPortrait,portraitMarkup} from '../portrait.js';
+import {validPortrait,portraitMarkup,defaultPortrait} from '../portrait.js';
+import {CLASS_PORTRAITS,RACE_PORTRAITS,DEFAULT_PORTRAIT_IDS,defaultPortraitId} from '../portrait-defaults.js';
+import {DEFAULT_PORTRAITS} from '../portrait-default-data.js';
+import catalog from '../vendor/bricktrait/preset-catalog.json' with {type:'json'};
 import {makeCharacter,parseBackup,SAVE_VERSION} from '../model.js';
 import {defaultStyle,transparentStyle} from '../vendor/bricktrait/src/lib/compose.ts';
 
@@ -36,7 +39,46 @@ test('new defaults and reopened legacy designs use alpha without mutating saved 
 test('existing version 2 characters need no migration or new portrait field',()=>{
   const c=makeCharacter();assert.equal(Object.hasOwn(c,'portrait'),false);
   assert.equal(parseBackup(JSON.stringify(state(c))).characters[0].portrait,undefined);
-  assert.match(portraitMarkup(c),/portrait-adventurer.webp/);
+  assert.match(portraitMarkup(c),/original-greenwood-scout.webp/);
+});
+
+test('automatic figures cover classes, exact subclasses and species lineages with stable fallbacks',()=>{
+  for(const [cls,[name,subclasses]] of Object.entries(CLASS_PORTRAITS)) {
+    assert.equal(defaultPortraitId({class:cls}),`original-${name}`);
+    for(const [subclass,preset] of Object.entries(subclasses))assert.equal(defaultPortraitId({race:'Human',class:cls,subclass}),`original-${preset}`);
+    assert.equal(defaultPortraitId({class:cls,subclass:'Custom subclass'}),`original-${name}`);
+  }
+  for(const [race,[name,classes]] of Object.entries(RACE_PORTRAITS)) {
+    assert.equal(defaultPortraitId({race,class:'Custom class'}),`original-${name}`);
+    for(const [cls,preset] of Object.entries(classes))assert.equal(defaultPortraitId({race,class:cls}),`original-${preset}`);
+  }
+  assert.equal(defaultPortraitId({race:'  WoOd   eLF ',class:'rOgUe',subclass:'Assassin'}),'original-forest-duelist');
+  assert.equal(defaultPortraitId({race:'Hill Dwarf',class:'Barbarian',subclass:'Path of the Beast'}),'original-mountain-shieldbearer');
+  assert.equal(defaultPortraitId({race:'Drow',class:'Fighter'}),'original-silver-mail-sentinel');
+  assert.equal(defaultPortraitId({race:'Infernal Tiefling',class:'Warlock'}),'original-ember-invoker');
+  assert.equal(defaultPortraitId({race:'Custom species',class:'Wizard'}),'original-star-robed-sage');
+  assert.equal(defaultPortraitId({race:'Custom species',class:'Custom class'}),null);
+  assert.equal(defaultPortrait({}),null);
+  assert.match(portraitMarkup({}),/portrait-adventurer.webp/);
+});
+
+test('default images and editable figures use the same catalog entry, without changing character saves',()=>{
+  assert.deepEqual(Object.keys(DEFAULT_PORTRAITS).sort(),[...DEFAULT_PORTRAIT_IDS].sort());
+  for(const id of DEFAULT_PORTRAIT_IDS) {
+    const preset=catalog.presets.find(p=>p.id===id);
+    assert.ok(preset,id);
+    assert.deepEqual(DEFAULT_PORTRAITS[id],{thumbnail:preset.thumbnail,figure:preset.figure});
+  }
+  const c=makeCharacter({race:'Human',class:'Wizard'}),before=structuredClone(c);
+  const preset=defaultPortrait(c);
+  assert.match(portraitMarkup(c),new RegExp(preset.thumbnail));
+  preset.figure.head.id=null;
+  assert.ok(defaultPortrait(c).figure.head.id,'editing a working figure cannot change future defaults');
+  assert.deepEqual(c,before);
+  c.portrait=portrait();
+  assert.match(portraitMarkup(c),/data:image\/webp;base64/);
+  c.race='Dwarf';c.class='Barbarian';
+  assert.match(portraitMarkup(c),/data:image\/webp;base64/,'changing character choices preserves a saved custom image');
 });
 
 test('backup validation rejects unsafe images, excessive data, invalid parts and malformed designs',()=>{

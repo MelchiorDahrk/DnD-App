@@ -11,18 +11,20 @@ backups retain their existing behavior.
 
 ## Included snapshot
 
-The checked-in catalog contains **290 unique configurations**:
+The checked-in catalog contains **244 unique configurations**:
 
 | Origin | Presets |
 | --- | ---: |
-| Official figure reconstructions from credited LDraw OMR assemblies | 152 |
+| Official figure reconstructions from credited LDraw OMR assemblies | 106 |
 | Original Questlog fantasy combinations | 138 |
-| Complete | 179 |
-| Partial, with disclosed omissions or source limitations | 111 |
+| Complete | 169 |
+| Partial, with disclosed omissions or source limitations | 75 |
 
-There are **seven official theme categories**, plus **Original Fantasy**:
-Adventurers, Castle, Indiana Jones, Lord of the Rings, Pharaoh's Quest, Pirates,
-and Western. Castle factions come from OMR's theme hierarchy. Original recipes
+There are **four official theme categories**, plus **Original Fantasy**:
+Castle, Indiana Jones, Lord of the Rings, and Pirates. Western, Adventurers,
+and Pharaoh's Quest are excluded before preset deduplication; their source
+snapshots and selectable pieces remain available. Castle factions come from
+OMR's theme hierarchy. Original recipes
 cover 41 professions/archetypes and human, elf, dwarf, halfling, orc, goblin,
 undead and demon characters. Outfits, equipment and anatomy vary; the generator
 does not multiply arbitrary recolors. The number of catalog entries is a result
@@ -30,15 +32,29 @@ of source coverage and validation, not a fixed cap.
 
 The import inspected the public OMR set index, selected 75 relevant set records
 using Questlog's reviewed theme associations plus adventure-related source
-themes, and retained 74 licensed MPD/LDraw models. Generation withholds 33
-unavailable assemblies and merges 28 duplicate assemblies, retaining alternate
+themes, and retained 74 licensed MPD/LDraw models. Generation excludes 69 source
+assemblies in the removed themes, withholds 17 unavailable assemblies and
+merges 21 duplicate assemblies, retaining alternate
 names, original source identities, theme memberships, part references and
 attribution. Counts are recorded in `vendor/bricktrait/presets/compatibility-report.json`.
 
-All 290 previews are transparent 192×192 WebPs, about **1.1 MB total**. Minified
-runtime metadata is about 444 KB before transport compression (about 29 KB gzipped). Presets reuse
+All 244 previews are transparent 192×192 WebPs. Presets reuse
 existing LDraw packs; no complete-figure geometry files are produced. The
 collection's existing part packs total about 13 MB.
+
+Characters without a saved portrait use curated species/class/subclass defaults
+from this catalog. `portrait-defaults.js` defines exact choices and lineage
+aliases; species anatomy takes priority, then an exact class/subclass match,
+then the class outfit. Unmatched custom choices keep the generic adventurer.
+The sheet, character picker and portrait editor use the same figure. Changing
+character choices updates an automatic portrait; saved custom portraits keep
+priority. Defaults remain derived, so backups need no extra character fields.
+`build:presets` generates `portrait-default-data.js`, and the service worker
+precaches all default images for offline sheets.
+
+Back-worn neck attachments (capes, quivers and scabbards) turn 180 degrees about
+the neck peg in both the editor and previews. Front-worn beards, armor and the
+ghost shroud retain their original orientation.
 
 ## Sources, accuracy and licensing
 

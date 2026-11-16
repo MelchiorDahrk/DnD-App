@@ -1,4 +1,4 @@
-import {validPortrait} from './portrait.js';
+import {validPortrait,defaultPortrait} from './portrait.js';
 import {mountPortraitPhotos} from './portrait-photo-ui.js';
 
 export function openPortraitMaker({character,onSave}) {
@@ -29,7 +29,7 @@ export function openPortraitMaker({character,onSave}) {
     switch(event.data.type) {
       case 'questlog:portrait-ready':
         clearTimeout(timeout);status.textContent='Loading portrait parts…';
-        frame.contentWindow.postMessage({type:'questlog:portrait-init',session,design:character.portrait?.design,theme:theme()},location.origin);
+        frame.contentWindow.postMessage({type:'questlog:portrait-init',session,design:validPortrait(character.portrait)?character.portrait.design:undefined,figure:defaultPortrait(character)?.figure,theme:theme()},location.origin);
         break;
       case 'questlog:portrait-loaded':
         status.hidden=event.data.webgl;

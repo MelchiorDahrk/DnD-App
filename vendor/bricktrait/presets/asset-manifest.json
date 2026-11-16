@@ -87,19 +87,6 @@
       "year": 2024
     },
     {
-      "id": "15",
-      "name": "Hips and Legs with Integral Legs",
-      "cat": "legs",
-      "year": 2024
-    },
-    {
-      "id": "17",
-      "name": "Torso with Integral Arms",
-      "cat": "torso",
-      "year": 2011,
-      "arms": false
-    },
-    {
       "id": "17349",
       "name": "Hat Wizard without Brim",
       "cat": "headgear",
@@ -220,58 +207,6 @@
       "year": 2022
     },
     {
-      "id": "30114c01",
-      "name": "Hair Long with Headband and Feathers (Complete)",
-      "cat": "headgear",
-      "kind": "Hair",
-      "theme": "Western",
-      "year": 2025
-    },
-    {
-      "id": "30132",
-      "name": "Gun Revolver",
-      "cat": "hand",
-      "kind": "Weapon",
-      "theme": "Western",
-      "year": 2017
-    },
-    {
-      "id": "30133",
-      "name": "Bandana",
-      "cat": "neck",
-      "kind": "Neckwear",
-      "year": 2025
-    },
-    {
-      "id": "30135",
-      "name": "Hat Kepi",
-      "cat": "headgear",
-      "kind": "Hat",
-      "year": 2012
-    },
-    {
-      "id": "30138p01",
-      "name": "Headdress American Indian Warbonnet with Coloured Feathers Pattern",
-      "cat": "headgear",
-      "kind": "Headdress",
-      "theme": "Western",
-      "year": 2024
-    },
-    {
-      "id": "30167",
-      "name": "Hat Wide Brim Flat",
-      "cat": "headgear",
-      "kind": "Hat",
-      "year": 2025
-    },
-    {
-      "id": "30172",
-      "name": "Hat Pith Helmet",
-      "cat": "headgear",
-      "kind": "Helmet",
-      "year": 2012
-    },
-    {
       "id": "30173a",
       "name": "Sword Katana Type  1 (Octagonal Guard)",
       "cat": "hand",
@@ -345,13 +280,6 @@
       "year": 2025
     },
     {
-      "id": "3625",
-      "name": "Hair Female with Pigtails",
-      "cat": "headgear",
-      "kind": "Hair",
-      "year": 2012
-    },
-    {
       "id": "3626a",
       "name": "Head with Solid Stud",
       "cat": "head",
@@ -382,13 +310,6 @@
       "year": 2024
     },
     {
-      "id": "3626bp39",
-      "name": "Head with Grin, Dark Grey Beard and Eyebrows Pattern",
-      "cat": "head",
-      "theme": "Pirates",
-      "year": 2024
-    },
-    {
       "id": "3626bp40",
       "name": "Head Female with Red Lips and Black Messy Hair Pattern",
       "cat": "head",
@@ -396,20 +317,8 @@
       "year": 2023
     },
     {
-      "id": "3626bp42",
-      "name": "Head with Dark Orange Moustache, Beard and Messy Hair Pattern",
-      "cat": "head",
-      "year": 2024
-    },
-    {
       "id": "3626bp43",
       "name": "Head with Red Moustache, Beard and Messy Hair Pattern",
-      "cat": "head",
-      "year": 2024
-    },
-    {
-      "id": "3626bp44",
-      "name": "Head with Black Moustache, Beard and Messy Hair Pattern",
       "cat": "head",
       "year": 2024
     },
@@ -426,13 +335,6 @@
       "year": 2024
     },
     {
-      "id": "3626bp62",
-      "name": "Head with Ice Planet Messy White Hair Pattern",
-      "cat": "head",
-      "theme": "Space",
-      "year": 2022
-    },
-    {
       "id": "3626bp81",
       "name": "Head with Lefty Mouth and Stubble Pattern",
       "cat": "head",
@@ -443,13 +345,6 @@
       "name": "Head with Smirk, Black Hair and Goatee Pattern",
       "cat": "head",
       "year": 2012
-    },
-    {
-      "id": "3626bpa1",
-      "name": "Head with Glasses and White Muttonchops Pattern",
-      "cat": "head",
-      "theme": "City",
-      "year": 2018
     },
     {
       "id": "3626bpa3",
@@ -477,69 +372,6 @@
       "name": "Head with LOTR Uruk-Hai Lurtz Scowl and White Hand 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
-      "year": 2024
-    },
-    {
-      "id": "3626bpq0",
-      "name": "Head Mummy with Wrapped Face with 2 Eyes / 1 Eye 2-Sided Pattern",
-      "cat": "head",
-      "theme": "Adventurers",
-      "year": 2024
-    },
-    {
-      "id": "3626bpq1",
-      "name": "Head Mummy with 2 Eyes / Gold Death Mask 2-Sided Pattern",
-      "cat": "head",
-      "theme": "Adventurers",
-      "year": 2024
-    },
-    {
-      "id": "3626bpq2",
-      "name": "Head with Sideburns, Goatee, Beard Stubble, Scar Pattern",
-      "cat": "head",
-      "theme": "Adventurers",
-      "year": 2024
-    },
-    {
-      "id": "3626bpq4",
-      "name": "Head with Glasses, Brown Sideburns and Moustache Pattern",
-      "cat": "head",
-      "theme": "Adventurers",
-      "year": 2024
-    },
-    {
-      "id": "3626bpw0",
-      "name": "Head with Angry Moustache, White Teeth and Gold Tooth Pattern",
-      "cat": "head",
-      "theme": "Western",
-      "year": 2017
-    },
-    {
-      "id": "3626bpw1",
-      "name": "Head with Thick Angry Moustache, Stubble and Long Hair Pattern",
-      "cat": "head",
-      "theme": "Western",
-      "year": 2024
-    },
-    {
-      "id": "3626bpw2",
-      "name": "Head with Angry Moustache and Teeth Pattern",
-      "cat": "head",
-      "theme": "Western",
-      "year": 2024
-    },
-    {
-      "id": "3626bpw4",
-      "name": "Head with Orange Painted Face Pattern",
-      "cat": "head",
-      "theme": "Western",
-      "year": 2024
-    },
-    {
-      "id": "3626bpw5",
-      "name": "Head with Painted Triangles Pattern",
-      "cat": "head",
-      "theme": "Western",
       "year": 2024
     },
     {
@@ -617,29 +449,6 @@
       "year": 2013
     },
     {
-      "id": "3626cpq0",
-      "name": "Head with Beard Stubble, Eyebrows, Smile, Scar Pattern",
-      "cat": "head",
-      "theme": "Castle",
-      "year": 2013
-    },
-    {
-      "id": "3629",
-      "name": "Hat Cowboy",
-      "cat": "headgear",
-      "kind": "Hat",
-      "theme": "Western",
-      "year": 2025
-    },
-    {
-      "id": "3629pw2",
-      "name": "Hat Cowboy with Silver Star Pattern",
-      "cat": "headgear",
-      "kind": "Hat",
-      "theme": "Western",
-      "year": 2025
-    },
-    {
       "id": "3837",
       "name": "Shovel",
       "cat": "hand",
@@ -692,13 +501,6 @@
       "kind": "Weapon",
       "theme": "Castle",
       "year": 2003
-    },
-    {
-      "id": "3878",
-      "name": "Top Hat",
-      "cat": "headgear",
-      "kind": "Hat",
-      "year": 2024
     },
     {
       "id": "3896",
@@ -935,13 +737,6 @@
       "year": 2025
     },
     {
-      "id": "62810",
-      "name": "Hair Short, Tousled with Side Parting",
-      "cat": "headgear",
-      "kind": "Hair",
-      "year": 2012
-    },
-    {
       "id": "68495",
       "name": "Cup Stein with Handle",
       "cat": "hand",
@@ -968,34 +763,6 @@
       "name": "Hips and Legs with LOTR Scale Armour Pattern",
       "cat": "legs",
       "theme": "Lord of the Rings",
-      "year": 2023
-    },
-    {
-      "id": "73200bpq0",
-      "name": "Hips and Legs with Dark Blue Loincloth Pattern",
-      "cat": "legs",
-      "theme": "Adventurers",
-      "year": 2023
-    },
-    {
-      "id": "73200bpq1",
-      "name": "Hips and Legs with Dark Blue and Decorated Gold Loincloth Pattern",
-      "cat": "legs",
-      "theme": "Adventurers",
-      "year": 2023
-    },
-    {
-      "id": "73200bpw2",
-      "name": "Hips and Legs with Blue/White Triangles, Fringe Pattern",
-      "cat": "legs",
-      "theme": "Western",
-      "year": 2023
-    },
-    {
-      "id": "73200bpw3",
-      "name": "Hips and Legs with Dark Turquoise/White Triangles, White Fringe Pattern",
-      "cat": "legs",
-      "theme": "Western",
       "year": 2023
     },
     {
@@ -1041,14 +808,6 @@
       "kind": "Weapon",
       "theme": "Adventurers",
       "year": 2011
-    },
-    {
-      "id": "93249pq0",
-      "name": "Headdress Horus with Eye Pattern",
-      "cat": "headgear",
-      "kind": "Headdress",
-      "theme": "Adventurers",
-      "year": 2012
     },
     {
       "id": "95049",
@@ -1453,22 +1212,6 @@
       "arms": false
     },
     {
-      "id": "973pa1",
-      "name": "Torso with Suspenders and Red Bowtie Pattern",
-      "cat": "torso",
-      "theme": "City",
-      "year": 2018,
-      "arms": false
-    },
-    {
-      "id": "973pa3",
-      "name": "Torso with Safari Shirt, Gun, Red Bandana & Yellow Chest Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2016,
-      "arms": false
-    },
-    {
       "id": "973pa9",
       "name": "Torso with Leather Jacket and Light Grey Shirt Pattern",
       "cat": "torso",
@@ -1783,54 +1526,6 @@
       "arms": false
     },
     {
-      "id": "973pq0",
-      "name": "Torso with Bandage and Gold Necklace Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2011,
-      "arms": false
-    },
-    {
-      "id": "973pq1",
-      "name": "Torso with Bandage, Gold Necklace and Gold Belt Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2011,
-      "arms": false
-    },
-    {
-      "id": "973pq3",
-      "name": "Torso with Waistcoat, White Shirt and Bandolier Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2012,
-      "arms": false
-    },
-    {
-      "id": "973pq4",
-      "name": "Torso with Tank Top, Braces & Yellow Skin Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2012,
-      "arms": false
-    },
-    {
-      "id": "973pq5",
-      "name": "Torso with Aviator Jacket with Eagle and \"SMH\" on Back Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2024,
-      "arms": false
-    },
-    {
-      "id": "973pq7",
-      "name": "Torso with Safari Shirt, Tan Bandana & Compass Pattern",
-      "cat": "torso",
-      "theme": "Adventurers",
-      "year": 2013,
-      "arms": false
-    },
-    {
       "id": "973pr1",
       "name": "Torso with SW Robe, Sash and Silver Neck Clasp Pattern",
       "cat": "torso",
@@ -1868,78 +1563,6 @@
       "cat": "torso",
       "unofficial": true,
       "theme": "Ninjago",
-      "arms": false
-    },
-    {
-      "id": "973pw2",
-      "name": "Torso with US Cavalry Officer Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2010,
-      "arms": false
-    },
-    {
-      "id": "973pw3",
-      "name": "Torso with US Cavalry Soldier Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2010,
-      "arms": false
-    },
-    {
-      "id": "973pw4",
-      "name": "Torso with Sheriff Pattern",
-      "cat": "torso",
-      "theme": "City",
-      "year": 2025,
-      "arms": false
-    },
-    {
-      "id": "973pw5",
-      "name": "Torso with Jacket over Blue Undershirt with Green Bow and Gun in Belt Pattern",
-      "cat": "torso",
-      "theme": "City",
-      "year": 2025,
-      "arms": false
-    },
-    {
-      "id": "973pw6",
-      "name": "Torso with White Braces and Cartridge Belt Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2025,
-      "arms": false
-    },
-    {
-      "id": "973pw7",
-      "name": "Torso with Red Undershirt and Fringe Pattern",
-      "cat": "torso",
-      "theme": "City",
-      "year": 2025,
-      "arms": false
-    },
-    {
-      "id": "973pw8",
-      "name": "Torso with Card, Suit, Vest, and Gold Fob Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2009,
-      "arms": false
-    },
-    {
-      "id": "973pwb",
-      "name": "Torso with White/Blue Triangles, Red/White Amulet Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2024,
-      "arms": false
-    },
-    {
-      "id": "973pwe",
-      "name": "Torso with Buckskin Tunic, American Indian Necklace and Dark Turquoise Squares Pattern",
-      "cat": "torso",
-      "theme": "Western",
-      "year": 2024,
       "arms": false
     },
     {

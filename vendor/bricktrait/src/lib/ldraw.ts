@@ -387,8 +387,12 @@ export function placements(fig: Figure, torso?: Part, head?: Part, legs?: Part):
 		const at: Vec = moulded ? [0, head!.moulded!, 0] : HEAD;
 		list.push(place(fig.headgear.id, fig.headgear.color, { at, m: turn }));
 	}
-	for (const slot of [fig.neck, fig.back])
-		if (slot.id) list.push({ id: slot.id, color: slot.color });
+	// Back-worn neck attachments are authored facing the opposite way to the
+	// torso. Turn them around the neck peg; front-worn beards, armour and the
+	// full-body ghost shroud retain their native orientation.
+	if (fig.neck.id) list.push({ id: fig.neck.id, color: fig.neck.color });
+	if (fig.back.id) list.push({ id: fig.back.id, color: fig.back.color,
+		...(fig.back.id === '2588' ? {} : { m: rotY(180) }) });
 	if (fig.legs.id === STANDARD_LEGS) {
 		list.push(...standardLegs(fig.legs.hips, fig.legs.color, pose));
 	} else if (fig.legs.id && needsLegs(legs)) {
