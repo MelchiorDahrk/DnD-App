@@ -88,8 +88,8 @@ export function demoCharacter() {
     languages:'Common, Elvish, Dwarvish, Sylvan, Goblin',armorProficiencies:'Light and Medium armor; Shields',weaponProficiencies:'Simple and Martial weapons',toolProficiencies:'Gaming set (dice)',senses:'Darkvision 60 ft.; Fey Ancestry; Trance',personalityTraits:'A former army scout, happiest under an open sky.',defenses:'Leather armor: 11 + 4 Dexterity = AC 15. Ability scores use rolled starting values and Soldier background increases.'});
   c.items = [
     {id:uid(),name:'Longbow',category:'Weapon',qty:1,weight:2,equipped:true,description:'1d8 piercing; range 150/600 ft.; ammunition, heavy, two-handed. Mastery: Slow. Heavy ranged weapons require Dexterity 13 to avoid disadvantage.',wiki:wikiURL('weapons')},
-    {id:uid(),name:'Shortsword',category:'Weapon',qty:2,weight:2,equipped:true,description:'1d6 piercing; finesse, light. Mastery: Vex.',wiki:wikiURL('weapons')},
-    {id:uid(),name:'Leather armor',category:'Armor',qty:1,weight:10,equipped:true,description:'AC 11 + Dexterity modifier. Armor class is tracked manually on your sheet.',wiki:wikiURL('armor')},
+    {id:uid(),name:'Shortsword',category:'Weapon',qty:2,weight:2,equipped:false,description:'1d6 piercing; finesse, light. Mastery: Vex.',wiki:wikiURL('weapons')},
+    {id:uid(),name:'Leather armor',category:'Armor',qty:1,weight:10,equipped:true,description:'AC 11 + Dexterity modifier. Armor class updates automatically while equipped.',wiki:wikiURL('armor')},
     {id:uid(),name:'Potion of healing',category:'Consumable',qty:2,weight:0.5,equipped:false,description:'As a Bonus Action, drink it or administer it to a creature within 5 ft. Restores 2d4 + 2 HP; using it here heals this character.',wiki:wikiURL('Potion of healing','equipment')},
     {id:uid(),name:'Arrows',category:'Gear',qty:20,weight:0.05,equipped:false,description:'A quiver of goose-feather arrows.',wiki:wikiURL('weapons')},
     {id:uid(),name:"Explorer’s pack",category:'Gear',qty:1,weight:55,equipped:false,description:'Backpack, bedroll, 2 flasks of oil, 10 days of rations, rope, tinderbox, 10 torches, and waterskin. Adjust weight as supplies change.',wiki:wikiURL('adventuring-gear')},
@@ -212,6 +212,8 @@ function validateCharacter(c) {
   requireThat(typeof c.inspiration==='boolean'||integerIn(c.inspiration,0,999),'invalid inspiration.');
   requireThat(typeof c.initiativeAdvantage==='boolean','invalid initiative advantage.');
   requireThat(c.spellAbility==='auto'||Object.hasOwn(ABILITIES,c.spellAbility),'invalid casting ability.');
+  requireThat(c.acBonus===undefined||integerIn(c.acBonus,-99,99),'invalid AC adjustment.');
+  requireThat(c.acOverride===undefined||integerIn(c.acOverride,0,99),'invalid AC override.');
   requireThat(c.pactMagic===undefined||typeof c.pactMagic==='boolean','invalid Pact Magic flag.');
   requireThat(c.circleLand===undefined||['Arid','Polar','Temperate','Tropical'].includes(c.circleLand),'invalid Circle of the Land terrain.');
   requireThat(c.genieKind===undefined||['Dao','Djinni','Efreeti','Marid'].includes(c.genieKind),'invalid Genie kind.');
@@ -227,6 +229,12 @@ function validateCharacter(c) {
   c.items.forEach(v=>requireThat(v.iconKey===undefined||(string(v.iconKey,100)&&/^[a-z0-9-]*$/.test(v.iconKey)),'invalid item icon.'));
   c.items.forEach(v=>requireThat(v.catalogId===undefined||(string(v.catalogId,200)&&/^[a-z0-9-]*$/.test(v.catalogId)),'invalid item catalog reference.'));
   c.items.forEach(v=>{
+    requireThat(v.acBonus===undefined||integerIn(v.acBonus,-99,99),'invalid item AC bonus.');
+    requireThat(v.armorId===undefined||(string(v.armorId,100)&&/^[a-z0-9-]*$/.test(v.armorId)),'invalid item armor reference.');
+    requireThat(v.weaponId===undefined||(string(v.weaponId,100)&&/^[a-z0-9-]*$/.test(v.weaponId)),'invalid item weapon reference.');
+    requireThat(v.acCondition===undefined||['Always','Without armor or shield'].includes(v.acCondition),'invalid item AC condition.');
+    requireThat(v.wielding===undefined||['Automatic','One hand','Two hands','Dual wield (2 from stack)'].includes(v.wielding),'invalid item wielding mode.');
+    for(const key of ['requiresAttunement','attuned'])requireThat(v[key]===undefined||typeof v[key]==='boolean','invalid item attunement.');
     requireThat(v.maxUses===undefined||integerIn(v.maxUses,0,99999),'invalid item use limit.');
     requireThat(v.usesLeft===undefined||integerIn(v.usesLeft,0,itemUses(v).maxUses),'invalid remaining item uses.');
     requireThat(v.consumeOnEmpty===undefined||typeof v.consumeOnEmpty==='boolean','invalid item depletion rule.');

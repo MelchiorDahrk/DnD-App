@@ -131,7 +131,7 @@ function teyla() {
     saves:['dex','int'],skills:['Acrobatics','Animal Handling','Athletics','Investigation','Stealth','Survival','Perception'],expertise:['Athletics','Stealth'],
     personalityTraits:'Confident in myself and the potential of others.',ideals:'Freedom fighter!',bonds:'Family! Even though I don’t know where they are.',flaws:'Things would be better if I were in charge. (Tyrant at heart.)',
     languages:'Common, Elvish, Dwarvish; Abyssal (Rogue); Thieves’ Cant',armorProficiencies:'Light armor',weaponProficiencies:'Simple weapons; Martial weapons with the Finesse or Light property',toolProficiencies:'Disguise kit; Poisoner’s kit; Thieves’ tools; Woodcarver’s tools and land vehicles (Folk Hero)',
-    senses:'Darkvision: 60 ft.',defenses:'Written AC 17. Studded leather armor is listed; equipment does not recalculate AC.'});
+    senses:'Darkvision: 60 ft.',defenses:'Studded leather 12 + Dexterity 5 = AC 17; equipment updates AC automatically.'});
   c.attacks=[
     attack('Shortsword','dex',0,'1d6+5','Piercing','Finesse, Light. Mastery: Vex. Qualifies for Sneak Attack when its conditions are met.'),attack('Shortbow','dex',0,'1d6+5','Piercing','Mastery: Vex. Qualifies for Sneak Attack when its conditions are met.',{range:'80 / 320 ft.'}),
     attack('Longsword','str',0,'1d8+1','Slashing','No proficiency: 2024 Rogue and Wood Elf do not grant this weapon. Uses Strength; versatile 1d10+1. No Sneak Attack because it lacks Finesse and is not ranged.',{proficient:false})

@@ -43,7 +43,7 @@ export function packContents(item) {
   })||[];
 }
 
-const stackFields=['category','weight','description','wiki','iconKey','actionType','maxUses','usesLeft','consumeOnEmpty'];
+const stackFields=['category','weight','description','wiki','iconKey','actionType','maxUses','usesLeft','consumeOnEmpty','armorId','weaponId','acBonus','acCondition','wielding','requiresAttunement','attuned'];
 function sameStack(a,b) {
   return equipmentName(a.name)===equipmentName(b.name)&&stackFields.every(key=>(a[key]??'')===(b[key]??''));
 }

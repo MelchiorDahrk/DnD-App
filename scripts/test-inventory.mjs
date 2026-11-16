@@ -54,6 +54,7 @@ try {
   await page.screenshot({path:resolve(root,'.tmp/inventory-unpack-desktop.png')});
   let current=await saved();assert.equal(current.items.find(i=>i.id==='pack').qty,1);assert.equal(current.items.find(i=>i.id==='torch').qty,13);
   await page.setViewport({width:390,height:844});
+  await page.$eval(button('unpack-item','pack'),node=>node.scrollIntoView({block:'center',behavior:'instant'}));
   await page.click(button('unpack-item','pack'));
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
   await page.screenshot({path:resolve(root,'.tmp/inventory-unpack-preview-mobile.png')});

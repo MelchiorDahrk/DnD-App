@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer-core';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {MAGIC_ITEMS} from '../catalog.js';
 import {parseBackup} from '../model.js';
+import {armorClass} from '../armor-class.js';
 import {waitForImages} from '../tests/helpers/browser-checks.mjs';
 const root=resolve(import.meta.dirname,'..'),port=process.env.MAGIC_ITEM_TEST_PORT||'4196';
 const base=process.env.MAGIC_ITEM_TEST_URL||`http://127.0.0.1:${port}/${process.env.MAGIC_ITEM_TEST_PATH||''}`;
@@ -40,7 +41,7 @@ try{
   await page.reload({waitUntil:'networkidle0'});
   const state=await saved(),cloak=state.characters[0].items.find(i=>i.name==='Cloak of Protection');
   assert.equal(cloak.iconKey,'cloak');assert.equal(cloak.weight,2);assert.match(cloak.description,/My emerald cloak/);
-  assert.equal(state.characters[0].ac,original.characters[0].ac,'magic bonuses remain explicit');
+  assert.equal(armorClass(state.characters[0]),armorClass(original.characters[0]),'unequipped magic items do not affect AC');
   assert.equal(parseBackup(JSON.stringify(state)).characters[0].items.at(-1).iconKey,'cloak');
   await waitForImages(page,'.inventory-list .equipment-icon img');
   await page.click('[data-action="item"]:not([data-id])');await select('Bag of Holding');
