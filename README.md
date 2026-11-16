@@ -227,12 +227,17 @@ Before pushing, run `npm run verify:deploy` for those checks plus all required
 production browser suites. Set `BROWSER_PATH` to Chrome/Chromium. To test an
 existing build, use `npm run test:deploy`; it starts a preview under `/dist/` and
 cleans up afterward. Pull requests run these same deployment gates before merging.
+CI builds once, then runs five browser groups on separate runners against the same
+artifact. Every group must pass before Pages publication. Use
+`npm run test:deploy -- --group portraits` to run an individual group locally.
+The [deployment time audit](docs/deployment-checks.md#deployment-time-audit--november-16-2026)
+records measured bottlenecks, cache behavior and check frequency.
 
 The output is `dist/`. The same app can be previewed at `http://localhost:4173/dist/` after building, which also exercises repository-subpath hosting.
 
 Pages deployments cache the generated LDraw packs, portrait matching index and
-thumbnails. A cold build renders all 1,634 references and can take 20–30 minutes
-on a GitHub runner; unchanged references should log `references unchanged` on
+thumbnails. A full cache miss rendered 4,830 references in about 73 minutes
+on a GitHub runner in the November 16 audit; unchanged references should log `references unchanged` on
 later builds. The cache key covers the renderer sources, catalogs and dependency
 lockfile. Successful builds save their generated assets **before** running tests,
 so a later test or deployment failure does not force another full render.

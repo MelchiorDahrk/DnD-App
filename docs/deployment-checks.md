@@ -4,6 +4,68 @@ Pages deployment is gated on working functionality: source syntax, a successful 
 
 Palette values, text contrast measurements, exact dimensions, panel height ceilings, label overlap measurements, artwork centering/camera angles, compact swatch layout, and image byte budgets are optional design review checks. Changing a font, color, spacing value, thumbnail resolution, or decorative treatment should not block publication. These checks remain available for design work; the deployment job explicitly sets `QUESTLOG_VISUAL_CHECKS=0`.
 
+## Deployment time audit — November 16, 2026
+
+[Successful run 43880912984](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43880912984)
+took **16m59s** from creation to completion. Its build used the portrait cache;
+the bottleneck was the **13m48s of serial browser suites**, not uploading Pages.
+
+| Work | Measured time | Required frequency and purpose |
+| --- | ---: | --- |
+| Portrait browser suite | 4m09s | Every deployment: creation, editing, save/reopen, custom colours, asset fallback and offline reconstruction |
+| Sheet browser suite | 2m25s | Every deployment: real sheet interactions, attacks, navigation, persistence and online/offline images |
+| Dice browser suite | 2m24s | Every deployment: real landing faces, resource use, mobile controls, failure fallback and offline loading |
+| Photo-matching browser suite | 2m19s | Every deployment: upload, matching, mobile part selection and offline matching |
+| Preset browser suite | 2m07s | Every deployment: previews, filters, selection, customization and offline collection |
+| Item, magic-item and appearance browser suites combined | 25s | Every deployment: inexpensive functional coverage |
+| Source and generated-asset unit tests combined | About 58s | Every deployment: fail early on rules/save/fixture regressions, then validate newly generated data |
+| Cached production build | 37s | Every deployment: package the current commit, validate asset fingerprints, remove obsolete files |
+| Portrait/equipment cache restoration | About 6s | Every build: avoid regenerating unchanged rendering assets |
+| Pages publication | About 40s | Every production deployment, after validation |
+
+The workflow now runs five browser groups on **separate GitHub runners** after a
+single build. The sheet group also runs the three inexpensive suites; dice,
+portraits, photos and presets each have a dedicated runner. At the measured times,
+the browser critical path falls from 13m48s to about 4m09s, plus parallel runner
+setup and artifact transfer. **Roughly 7–9 minutes for a warm deployment is an
+estimate**, pending the first Actions run; queueing and slower runners can add time.
+Total runner usage can increase because each group installs its test dependencies.
+
+Every group downloads the same `production-app` artifact, including generated
+portrait defaults and the preset catalog used by the tests. Browser jobs never
+rebuild. Pages downloads and publishes that artifact only after the build and
+**all five groups** succeed. The matrix comes from the same suite registry as the
+local runner, so a required suite cannot disappear through a second hand-maintained
+CI list. The existing `build` check aggregates packaging and all browser groups,
+preserving its meaning for branch protection. Each group records per-suite durations in the Actions job summary and
+`.tmp/browser-diagnostics/deploy/timings.json`; failures retain their original logs
+and upload diagnostics with a distinct group name.
+
+### Work that should not repeat on every deployment
+
+| Work | Policy |
+| --- | --- |
+| Rendering portrait references and equipment thumbnails | Reuse cached results when renderer, geometry and dependency fingerprints match; render new/changed inputs only. This produces app assets rather than performing a test, so stale or missing required assets still need rebuilding. |
+| Downloading updated LDraw libraries or importing upstream catalogs | Explicit maintenance when updating the library/catalog. Ordinary builds reuse the successful local snapshot; a completely absent cache still needs an initial download/build. |
+| Palette, precise layout, contrast, framing and byte-budget reviews | Optional design review commands, already outside the publication gate. |
+| Exhaustively decoding previews, rendering CMF presets and downloading the full offline collection in several suites | Candidates for a future scheduled/manual audit with representative deployment coverage. They still gate every deployment in this change: parallel runners remove most of their elapsed-time cost without removing regression coverage. |
+
+[Cold-cache run 43810509046](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43810509046)
+took 94m46s. No portrait cache was available: the production build took 75m36s,
+including about **73 minutes rendering 4,830 references**. This is a separate
+bottleneck, and browser parallelism does not fix a full cache miss. Prefix restore
+keys continue to seed incremental rebuilds, and successful renders are saved before
+tests. The cache key now also includes the geometry-fingerprint helper and bundled
+legacy geometry so their changes can produce a new saved cache rather than repeatedly
+repairing an immutable exact hit. Cache eviction or a genuine renderer change can
+still require an expensive rebuild; increasing a timeout is not a speed improvement.
+
+Local validation passed: source syntax checks, the production build, all 267 unit
+tests, actionlint, and all eight production browser suites run through the five
+groups against an isolated checkout without generated rendering caches. The runner
+regression also verifies that a browser failure exits unsuccessfully and retains
+its logs and failed timing result.
+
 ## Commands
 
 Run `npm run verify:deploy` before pushing. It runs syntax and unit checks,
@@ -13,12 +75,18 @@ required browser suites under `/dist/`. Set `BROWSER_PATH` to a Chromium executa
 build and starts/stops its own preview server. To check an already-running preview,
 set `DEPLOY_TEST_URL` to its subdirectory URL, including the final `/`.
 
-Pull requests to `main` run the same checks as production pushes, without uploading
-a Pages artifact or deploying. Source and fixture unit checks run before the expensive
+Pull requests to `main` run the same checks as production pushes, without publishing
+to Pages. Source and fixture unit checks run before the expensive
 portrait build; generated-asset tests still run after it. The shared browser runner
-checks the sheet first, retains the individual suite time limits, and records each
+checks the sheet first locally, retains the individual suite time limits, and records each
 suite's output under `.tmp/browser-diagnostics/deploy/`. Functional failures still
 stop publication; checks are not retried or ignored.
+
+Use `npm run test:deploy -- --group portraits` (or `sheet`, `dice`,
+`portrait-photos`, `presets`) to run one CI group locally against an existing build.
+Omitting `--group` still runs every required suite serially. CI uses
+`node scripts/test-deploy.mjs --matrix` to obtain all required groups without
+starting a preview or browser.
 
 | Command | Purpose |
 | --- | --- |
@@ -55,7 +123,7 @@ Exact die scale and tray-height measurements require `--visual`; mobile result
 visibility, real landing faces, resource use and fallback behavior stay mandatory.
 Failures save the tray state,
 browser errors, console messages, and a screenshot in `.tmp/browser-diagnostics/dice/`
-for the workflow's existing artifact upload.
+for the workflow's artifact upload.
 
 To exercise the packaged production site, set `THEME_TEST_URL` to its served subdirectory and `THEME_TEST_PRODUCTION=1`. That mode also verifies the development workshop is excluded from production. No particular cache version string or exact document title is required; the test loads the app and images offline to verify the behavior directly.
 
@@ -82,7 +150,7 @@ The shared browser helper now makes the test targets eager, waits at most 15 sec
 
 Opening a part palette schedules a native `details` toggle that rebuilds its buttons. Photo tests wait for that initial render, use locators that reacquire replaced controls, and verify the chosen part and enabled color control after clicking. Both 320px and 390px fresh-palette paths remain functional deployment checks. Set `PORTRAIT_PHOTO_CPU_RATE=4` when running `test:portrait-photos` to stress those mobile interactions under slower rendering.
 
-On failure, the photo suite records a screenshot and control geometry/state under `.tmp/browser-diagnostics/`. The deployment workflow uploads those diagnostics as `browser-failure-diagnostics`, while preserving the original test failure.
+On failure, the photo suite records a screenshot and control geometry/state under `.tmp/browser-diagnostics/`. The deployment workflow uploads those diagnostics as `browser-failure-diagnostics-<group>`, while preserving the original test failure.
 
 Photo-test startup waits for the service worker to activate before checking control.
 If the initial navigation raced activation, it reloads once under the active worker.
@@ -99,9 +167,10 @@ animation scheduler with delayed callbacks. That simulation now runs as a unit
 regression with a controlled clock. The browser cleanup check uses normal playback,
 timer-based polling and a bounded 15-second wait, retaining real cleanup coverage.
 
-The workflow allows 45 minutes for browser suites (their individual limits total
-40) and 95 minutes for the build job, including the cold-build allowance and cache
-overhead. Static packaging clears `dist/` first, so removed files cannot linger
+The workflow retains all eight per-suite limits (38 minutes in total), with each
+parallel browser job allowing 20 minutes including setup. The packaging job allows
+110 minutes, including a 100-minute cold-build limit and install/cache overhead.
+Static packaging clears `dist/` first, so removed files cannot linger
 and hide a packaging defect during repeated local verification.
 
 ## Critical-hit sheet regression

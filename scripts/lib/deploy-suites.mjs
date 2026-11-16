@@ -1,0 +1,18 @@
+// Keep the local runner and CI matrix on the same complete suite list.
+// Each rendering-heavy group gets its own runner instead of competing for CPU.
+export const deploymentGroups={
+  sheet:[['sheet-layout',3],['item-icons',3],['magic-items',3],['themes',5]],
+  dice:[['dice',4]],
+  portraits:[['portraits',10]],
+  'portrait-photos':[['portrait-photos',5]],
+  presets:[['presets',5]]
+};
+
+export function deploymentOptions(args=[]) {
+  if(args.length===1&&args[0]==='--matrix')return {matrix:{group:Object.keys(deploymentGroups)}};
+  if(args.length===0)return {group:'all',suites:Object.values(deploymentGroups).flat()};
+  if(args.length===2&&args[0]==='--group'&&Object.hasOwn(deploymentGroups,args[1])) {
+    return {group:args[1],suites:deploymentGroups[args[1]]};
+  }
+  throw new Error(`Usage: test-deploy.mjs [--matrix | --group ${Object.keys(deploymentGroups).join('|')}]`);
+}

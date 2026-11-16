@@ -7,13 +7,14 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  pages: write
-  id-token: write
 jobs:
-  build:
+  package:
+    name: Package production app
     runs-on: ubuntu-latest
-    # Accommodate a 35-minute cold build, browser suites and install/cache overhead.
-    timeout-minutes: 150
+    # A full cache miss rendered 4,830 references in 73 minutes on SwiftShader.
+    timeout-minutes: 110
+    outputs:
+      browser-matrix: ${{ steps.browser-matrix.outputs.matrix }}
     permissions:
       contents: read
     env:
@@ -37,6 +38,10 @@ jobs:
         run: |
           npm run check
           node --check scripts/test-deploy.mjs
+          node --check scripts/lib/deploy-suites.mjs
+      - name: Plan required browser groups
+        id: browser-matrix
+        run: node scripts/test-deploy.mjs --matrix >> "$GITHUB_OUTPUT"
       - name: Catch rules and browser fixture regressions before building
         timeout-minutes: 2
         run: npm test
@@ -58,7 +63,7 @@ jobs:
             .cache/portrait-references
           # Cover both renderers' fingerprints, their dependencies and the packer.
           # Keep these paths stable so older caches can still seed a rebuild.
-          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'scripts/lib/portrait-themes.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json') }}
+          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'scripts/lib/portrait-themes.mjs', 'scripts/lib/geometry-fingerprint.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json', 'vendor/bricktrait/presets/legacy-parts.json', 'vendor/bricktrait/presets/legacy-ldraw/**') }}
           restore-keys: |
             bricktrait-ldraw-f333d939-v4-
             bricktrait-ldraw-f333d939-v3-
@@ -73,7 +78,7 @@ jobs:
           # with a prefix match. Include their content and restore exact hits only.
           key: equipment-${{ steps.portraits.outputs.cache-primary-key }}-${{ hashFiles('assets/equipment/**') }}
       - name: Build static app
-        # A genuinely cold reference render can take 20-30 minutes on SwiftShader.
+        # A full cache miss took 73 minutes for reference rendering on SwiftShader.
         # Warm builds must report "references unchanged" and skip that work.
         timeout-minutes: 100
         run: npm run build
@@ -102,6 +107,47 @@ jobs:
       - name: Run tests including generated matching assets
         timeout-minutes: 2
         run: npm test
+      - name: Share the production build and generated browser fixtures
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-app
+          # Keep the workspace-relative layout, including generated test inputs.
+          path: |
+            dist/
+            portrait-default-data.js
+            vendor/bricktrait/preset-catalog.json
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 1
+  browser:
+    name: Browser checks (${{ matrix.group }})
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.package.outputs.browser-matrix) }}
+    env:
+      QUESTLOG_VISUAL_CHECKS: '0'
+    concurrency:
+      group: pages-browser-${{ github.ref }}-${{ matrix.group }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install test dependencies
+        run: npm ci
+      - uses: browser-actions/setup-chrome@v2
+        id: chrome
+        with:
+          chrome-version: stable
+          install-dependencies: true
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-app
       - name: Serve production app under Pages subpath
         timeout-minutes: 1
         run: |
@@ -114,31 +160,45 @@ jobs:
           cat /tmp/questlog-server.log
           exit 1
       - name: Check production interactions, assets and offline behavior
-        # The shared runner preserves each suite's timeout and runs quick sheet
-        # checks before the serial SwiftShader portrait/editor sessions.
-        # Eight per-suite limits total 40 minutes; allow runner/diagnostic overhead.
-        timeout-minutes: 45
+        # Full suites run against the same build on independent machines, keeping
+        # SwiftShader sessions from competing for the runner's CPU and memory.
+        timeout-minutes: 15
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           DEPLOY_TEST_URL: http://127.0.0.1:4173/DnD-App/
-        run: npm run test:deploy
+        run: npm run test:deploy -- --group "${{ matrix.group }}"
       - name: Upload browser failure diagnostics
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: browser-failure-diagnostics
+          name: browser-failure-diagnostics-${{ matrix.group }}
           path: .tmp/browser-diagnostics/
           if-no-files-found: ignore
           retention-days: 7
-      - uses: actions/upload-pages-artifact@v4
-        if: github.event_name != 'pull_request'
-        with:
-          path: dist
+  build:
+    # Preserve the existing required check: success still means every gate passed.
+    needs: [package, browser]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Require the production build and every browser group
+        env:
+          PACKAGE_RESULT: ${{ needs.package.result }}
+          BROWSER_RESULT: ${{ needs.browser.result }}
+        run: |
+          test "$PACKAGE_RESULT" = success
+          test "$BROWSER_RESULT" = success
   deploy:
+    # A failure in any required group prevents publication of the shared build.
     needs: build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -146,6 +206,12 @@ jobs:
       group: pages
       cancel-in-progress: false
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-app
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist
       - uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
