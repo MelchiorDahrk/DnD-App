@@ -69,13 +69,14 @@ function setModal(title,body,onSubmit=null) {
   modal.scrollTop=0;
   modal.querySelector('[autofocus], input:not([type="checkbox"]), textarea, select, button')?.focus({preventScroll:true});
 }
-const actions = (label='Save changes',extra='') => `<div class="modal-actions">${extra}${btn('close','Cancel','btn btn-ghost')}<button class="btn btn-primary" type="submit">${icon('check')}${esc(label)}</button></div>`;
+const actions = (label='Save changes',extra='',cancelAction='close') => `<div class="modal-actions">${extra}${btn(cancelAction,'Cancel','btn btn-ghost')}<button class="btn btn-primary" type="submit">${icon('check')}${esc(label)}</button></div>`;
 function field(label,name,value='',type='text',extra='') { return `<label class="form-field ${extra.includes('data-full')?'full':''}">${label}<input name="${name}" type="${type}" value="${esc(value)}" ${extra}></label>`; }
 function select(label,name,values,value,extra='') { return `<label class="form-field">${label}<select name="${name}" ${extra}>${values.map(v=>`<option value="${esc(v)}" ${v===value?'selected':''}>${esc(v)}</option>`).join('')}</select></label>`; }
 const textarea = (label,name,value,rows=5,maxlength=20000) => `<label class="form-field full">${label}<textarea name="${name}" rows="${rows}" maxlength="${maxlength}">${esc(value)}</textarea></label>`;
 const num = (data,key) => Number(data.get(key));
 const textValue = (data,key) => String(data.get(key)||'').trim();
 const sheetEntry = (key,label) => `data-sheet-entry="${esc(key)}" data-sheet-label="${esc(label)}"`;
+const BACKGROUND_KEYS = ['personalityTraits','ideals','bonds','flaws'];
 function timingBadge(entry,kind) {
   const timing=actionTiming(entry,kind);
   return timing?`<span class="action-timing timing-${timing}">${ACTION_TYPES[timing]}</span>`:'';
@@ -174,7 +175,7 @@ function showDefaults() {
 }
 function slotDots(slot,level,small=false) {return `<div class="slot-dots">${Array.from({length:slot.max},(_,i)=>btn('slot','',`slot-dot${i<slot.used?' used':''}`,`aria-pressed="${i<slot.used}" data-level="${level}" data-used="${i<slot.used?i:i+1}" aria-label="${i<slot.used?'Restore':'Use'} level ${level+1} spell slot ${i+1}" title="${i<slot.used?'Restore':'Use'} a spell slot"`)).join('')}</div>`;}
 function renderHero(c) {
-  return `<section class="hero" data-inspired="${!!c.inspiration}" data-concentrating="${!!c.concentration}" aria-label="${esc(c.name)}"><div class="hero-art">${landscape()}</div>${btn('edit-character',icon('edit'),'icon-btn hero-edit','aria-label="Edit character details"')}<div class="hero-content"><button type="button" class="avatar-frame portrait-button" data-action="portrait" aria-label="Make or edit character portrait" title="Make or edit portrait">${portraitMarkup(c)}<span class="portrait-edit-hint">${icon('edit')}</span><span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></button><div class="hero-info"><h2>${esc(c.name)}</h2><div class="hero-meta"><span>${esc(c.race)}</span><span class="meta-dot">/</span>${ext(wikiURL(c.class),esc(c.class))}${c.subclass?`<span class="meta-dot">/</span><span>${esc(c.subclass)}</span>`:''}</div>${c.playerName?`<div class="hero-player">Played by ${esc(c.playerName)}</div>`:''}<div class="hero-tags"><span class="hero-tag">${esc(c.background)}</span><span class="hero-tag">${esc(c.alignment)}</span></div></div></div></section>`;
+  return `<section class="hero" data-inspired="${!!c.inspiration}" data-concentrating="${!!c.concentration}" aria-label="${esc(c.name)}"><div class="hero-art">${landscape()}</div>${btn('edit-character',icon('edit'),'icon-btn hero-edit','aria-label="Edit character details"')}<div class="hero-content"><button type="button" class="avatar-frame portrait-button" data-action="portrait" aria-label="Make or edit character portrait" title="Make or edit portrait">${portraitMarkup(c)}<span class="portrait-edit-hint">${icon('edit')}</span><span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></button><div class="hero-info"><h2>${esc(c.name)}</h2><div class="hero-meta"><span>${esc(c.race)}</span><span class="meta-dot">/</span>${ext(wikiURL(c.class),esc(c.class))}${c.subclass?`<span class="meta-dot">/</span><span>${esc(c.subclass)}</span>`:''}</div>${c.playerName?`<div class="hero-player">Played by ${esc(c.playerName)}</div>`:''}<div class="hero-tags"><span class="hero-tag">${esc(c.background)}</span><span class="hero-tag">${esc(c.alignment)}</span></div>${btn('background',icon('journal')+'Background','btn hero-background','aria-haspopup="dialog"')}</div></div></section>`;
 }
 function renderSheetHeader(c) {
   const effects=[...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])];
@@ -209,10 +210,14 @@ function renderTextPanel(c,title,symbol,action,keys) {
   return `<section class="panel" data-sheet-section="${action}"><div class="panel-heading"><h2>${icon(symbol)}${title}</h2>${btn(action,icon('edit'),'icon-btn',`aria-label="Edit ${title.toLowerCase()}"`)}</div><div class="panel-body"><dl class="sheet-copy">${keys.map(key=>`<div ${sheetEntry(key,SHEET_TEXT[key])}><dt>${SHEET_TEXT[key]}</dt><dd class="${c[key]?'':'unset'}">${c[key]?esc(c[key]):'Not recorded yet.'}</dd></div>`).join('')}</dl></div></section>`;
 }
 function renderSheetDetails(c) {
-  return renderTextPanel(c,'Personality & backstory','journal','personality',['personalityTraits','ideals','bonds','flaws'])+renderTextPanel(c,'Proficiencies & languages','book','proficiencies',['languages','armorProficiencies','weaponProficiencies','toolProficiencies']);
+  return renderTextPanel(c,'Proficiencies & languages','book','proficiencies',['languages','armorProficiencies','weaponProficiencies','toolProficiencies']);
 }
-function editSheetText(title,keys) {
-  const c=character();setModal(title,`<div class="form-grid">${keys.map(key=>textarea(SHEET_TEXT[key],key,c[key],3)).join('')}</div>${actions()}`,data=>{for(const key of keys)c[key]=textValue(data,key);modal.close();commit('Character sheet updated.');});
+function showBackground() {
+  const c=character();
+  setModal('Background',`<p class="modal-intro">Personality & backstory</p><dl class="sheet-copy">${BACKGROUND_KEYS.map(key=>`<div><dt>${SHEET_TEXT[key]}</dt><dd class="${c[key]?'':'unset'}">${c[key]?esc(c[key]):'Not recorded yet.'}</dd></div>`).join('')}</dl><div class="modal-actions">${btn('close','Done','btn')}${btn('personality',icon('edit')+'Edit background','btn btn-primary')}</div>`);
+}
+function editSheetText(title,keys,{afterSave,cancelAction='close'}={}) {
+  const c=character();setModal(title,`<div class="form-grid">${keys.map(key=>textarea(SHEET_TEXT[key],key,c[key],3)).join('')}</div>${actions('Save changes','',cancelAction)}`,data=>{for(const key of keys)c[key]=textValue(data,key);modal.close();commit('Character sheet updated.');afterSave?.();});
 }
 function editEssentials() {
   const c=character();setModal('Keep your eyes open.',`<div class="form-grid">${textarea(SHEET_TEXT.senses,'senses',c.senses,4)}${field('Passive Perception bonus','passivePerceptionBonus',c.passivePerceptionBonus,'number','required min="-99" max="99" step="1" data-full')}</div><p class="form-help">Passive Perception = 10 + Perception skill bonus + this adjustment. Current total: ${passivePerception(c)}. Record superior darkvision and other senses above.</p>${actions()}`,data=>{c.senses=textValue(data,'senses');c.passivePerceptionBonus=num(data,'passivePerceptionBonus');modal.close();commit('Senses updated.');});
@@ -585,7 +590,8 @@ document.addEventListener('click',event=>{
       }
       case 'abilities':editAbilities();break;
       case 'combat-edit':editCombat();break;
-      case 'personality':editSheetText('Your character, beyond the numbers.',['personalityTraits','ideals','bonds','flaws']);break;
+      case 'background':showBackground();break;
+      case 'personality':editSheetText('Edit background',BACKGROUND_KEYS,{afterSave:showBackground,cancelAction:'background'});break;
       case 'proficiencies':editSheetText('The things you know.',['languages','armorProficiencies','weaponProficiencies','toolProficiencies']);break;
       case 'essentials':editEssentials();break;
       case 'ability-roll':performRoll(`1d20${signed(abilityCheckBonus(c,el.dataset.key))}`,ABILITIES[el.dataset.key]+' check');break;

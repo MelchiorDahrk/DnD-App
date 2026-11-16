@@ -1,7 +1,7 @@
 import {visualChecks,waitForImages,waitForRollResult} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {catalogSheetState} from '../tests/helpers/sheet-fixtures.mjs';
-import {checkSheetImprovements,checkSheetNavigation,checkSheetPopups} from '../tests/helpers/sheet-improvements.mjs';
+import {checkCharacterBackground,checkSheetImprovements,checkSheetNavigation,checkSheetPopups} from '../tests/helpers/sheet-improvements.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir,writeFile} from 'node:fs/promises';
@@ -113,6 +113,10 @@ try {
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
   await page.reload({waitUntil:'load'});
   assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null);
+  await mkdir(resolve(root,'.tmp'),{recursive:true});
+  phase='character background notes';
+  console.log(`RUN ${phase}`);
+  await checkCharacterBackground(page,{original,root});
   console.log('PASS removed previews stay absent and default attacks show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
 
   for (const width of [390,320]) {
@@ -128,7 +132,6 @@ try {
       assert.deepEqual(labelOverlaps,[],`${width}px ability names must not overlap favorite buttons`);
     }
   }
-  await mkdir(resolve(root,'.tmp'),{recursive:true});
   await page.$eval('.ability-section',node=>node.scrollIntoView());
   await page.screenshot({path:resolve(root,'.tmp/sheet-expanded-320.png')});
   await page.setViewport({width:1440,height:1100});

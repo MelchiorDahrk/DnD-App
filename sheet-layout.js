@@ -1,8 +1,8 @@
 import {icon} from './icons.js';
 
-export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials','personality','proficiencies'];
+export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials','proficiencies'];
 // Keep older layouts valid, including favorites still used by the inventory page.
-const SAVED_SECTIONS = [...SHEET_SECTIONS,'journal','pack'];
+const SAVED_SECTIONS = [...SHEET_SECTIONS,'personality','journal','pack'];
 const sheetScrolls = new WeakMap();
 
 export function validSheetLayout(layout) {
@@ -92,7 +92,7 @@ export function mountSheetLayout(root,c,activeSection='') {
 function mountSheetNavigation(root,activeSection) {
   const header=root.querySelector('.sheet-header'),nav=header?.querySelector('.sheet-section-nav');
   if(!nav)return ()=>{};
-  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',skills:'Skills',features:'Features',essentials:'Senses',personality:'Story',proficiencies:'Training'};
+  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',skills:'Skills',features:'Features',essentials:'Senses',proficiencies:'Training'};
   const sections=[...root.querySelectorAll('[data-sheet-section]')];
   for(const section of sections) {
     const key=section.dataset.sheetSection,toggle=section.querySelector('.sheet-section-toggle');

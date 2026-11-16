@@ -5,6 +5,63 @@ import {CONDITION_USAGE_KEY,QUICK_CONDITION_LIMIT} from '../../condition-usage.j
 import {waitForImages} from './browser-checks.mjs';
 import {SHEET_SECTIONS} from '../../sheet-layout.js';
 
+export async function checkCharacterBackground(page,{original,root}) {
+  const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);
+  const keys=['personalityTraits','ideals','bonds','flaws'];
+  const initial=['A storyteller.\nKeeps <secrets> & promises.','Freedom','Old friends','Too curious'];
+  keys.forEach((key,index)=>c[key]=initial[index]);
+  c.sheetLayout={collapsed:['personality'],favorites:{personality:['ideals']}};
+  const readNotes=()=>page.$$eval('#modal .sheet-copy dd',nodes=>nodes.map(node=>node.textContent));
+  const saved=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$('[data-sheet-section="personality"], .sheet-section-link[data-section="personality"]'),null,'Story is absent from the scrolling sheet and navigation');
+  assert.doesNotMatch(await page.$eval('#main',node=>node.textContent),/Keeps <secrets>/,'Notes appear only in the dialog');
+  for(const width of [1440,390,320]) {
+    await page.setViewport({width,height:844});
+    await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+    assert.ok(await page.$eval('.hero [data-action="background"]',node=>{
+      const button=node.getBoundingClientRect(),card=node.closest('.hero').getBoundingClientRect();
+      return button.width>0&&button.left>=card.left&&button.right<=card.right&&button.bottom<=card.bottom;
+    }),`${width}px Background button fits in the character card`);
+    await page.screenshot({path:resolve(root,`.tmp/background-card-${width}.png`)});
+    await page.focus('.hero [data-action="background"]');
+    await page.keyboard.press('Enter');
+    assert.equal(await page.$eval('#modal-title',node=>node.textContent),'Background');
+    assert.deepEqual(await readNotes(),initial,'Multiline notes and literal markup are preserved');
+    assert.equal(await page.$('#modal .sheet-copy secrets'),null,'Notes are escaped');
+    await page.keyboard.press('Escape');
+  }
+  await page.click('.hero [data-action="background"]');
+  await page.click('#modal [data-action="personality"]');
+  assert.deepEqual(await page.$$eval('#modal textarea',nodes=>nodes.map(node=>node.value)),initial);
+  await page.$eval('#modal [name="ideals"]',node=>node.value='Unsaved edit');
+  await page.click('#modal .modal-actions [data-action="background"]');
+  assert.deepEqual(await readNotes(),initial,'Cancel returns to the saved notes');
+  assert.equal((await saved()).characters.find(character=>character.id===c.id).ideals,'Freedom');
+  await page.click('#modal [data-action="personality"]');
+  const updated=['A new chapter.\nA friend of <dragons> & elves.','Kindness','My party',''];
+  await page.$$eval('#modal textarea',(nodes,values)=>nodes.forEach((node,index)=>node.value=values[index]),updated);
+  await page.click('#modal button[type="submit"]');
+  assert.deepEqual(await readNotes(),[...updated.slice(0,3),'Not recorded yet.'],'Saving returns to the updated Background dialog');
+  const result=await saved(),changed=result.characters.find(character=>character.id===c.id);
+  assert.deepEqual(keys.map(key=>changed[key]),updated,'Every field persists, including cleared notes');
+  assert.deepEqual(result.characters.filter(character=>character.id!==c.id),original.characters.filter(character=>character.id!==c.id),'Editing only changes the active character');
+  await page.screenshot({path:resolve(root,'.tmp/background-dialog-320.png')});
+  await page.click('#modal .modal-actions [data-action="close"]');
+  await page.setOfflineMode(true);
+  try {
+    await page.reload({waitUntil:'load'});
+    await page.click('.hero [data-action="background"]');
+    assert.deepEqual(await readNotes(),[...updated.slice(0,3),'Not recorded yet.'],'Background notes survive offline reload');
+    await page.keyboard.press('Escape');
+  } finally {await page.setOfflineMode(false);}
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
+  await page.setViewport({width:1440,height:1100});
+  await page.reload({waitUntil:'load'});
+  console.log('PASS character-card Background dialog, mobile layout, keyboard access, editing, cancel, clearing notes, per-character persistence and offline reload');
+}
+
 export async function checkSheetNavigation(page,{original,root}) {
   const previousTheme=await page.evaluate(()=>window.QuestlogTheme.preference);
   await page.evaluate(()=>window.QuestlogTheme.set('light'));

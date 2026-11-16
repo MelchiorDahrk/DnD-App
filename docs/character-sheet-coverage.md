@@ -33,7 +33,7 @@ All three passive Perception totals now come from actual Perception proficiency,
 | Equipment, arrows, rations, packs, tools, potions, magic items | The dedicated **Inventory** page stores quantity, category, equipped state, weight, item notes, and reference link. Star an item to find it in the Favorites filter. Use consumables directly, or open equipped gear's notes, reference, and matching weapon attack. |
 | Readied spells and concentration | **Attacks & actions** includes readied spells with casting controls and Action, Bonus Action, or Reaction labels. Active concentration is shown and can be ended here. Spell slots and concentration use the same state as Spellbook. |
 | Conditions | **Status** has an icon button for each condition, plus an Exhaustion control. Click a condition to apply or clear it. |
-| Personality traits, ideals, bonds, flaws | Four dedicated fields in **Personality & backstory**, with multiline text visible on the sheet. |
+| Personality traits, ideals, bonds, flaws | **Background** on the top character card opens the four multiline fields. Use **Edit background** to update them. |
 | Features and traits, including species traits and fighting style | **Features & resources** stores full text, optional reference, uses, and short/long/manual refresh. |
 
 ## Handwritten feature examples
