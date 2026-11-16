@@ -1,5 +1,5 @@
 import {mod,rollDice,signed,validDiceFormula,wikiURL,inspirationPoints,spendInspiration} from './model.js';
-import {attackWeapon,attackMastery,attackContext,attackOutcome,damageFormula,rollAttackDamage,rerollAttackDie,toppleDC,hasWeaponProperty,attackDamageFeatures} from './attack-rules.js';
+import {attackWeapon,attackMastery,attackContext,attackModeSummary,attackOutcome,damageFormula,rollAttackDamage,rerollAttackDie,toppleDC,hasWeaponProperty,attackDamageFeatures} from './attack-rules.js';
 import {attackIconMarkup} from './item-icons.js';
 import {icon} from './icons.js';
 import {playAttackEffect} from './vfx.js';
@@ -22,24 +22,52 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
   function reset(next,kind='') {
     a=next;extraKind=kind;roll=null;outcome=null;damage=null;save=null;extras=[];usedFeatures=new Set();
     mastery=attackMastery(c,a);
-    options={kind:attackWeapon(a)?.family.endsWith('ranged')?'ranged':'melee',ac:'',distance:'',cover:'none',advantage:false,disadvantage:false,closeEnemy:false,fearVisible:false,twoHanded:false,override:false,keepAbility:c.features.some(f=>/two.weapon fighting/i.test(f.name))};
+    options={kind:attackWeapon(a)?.family.endsWith('ranged')?'ranged':'melee',ac:'',distance:'',cover:'none',advantage:false,disadvantage:false,closeEnemy:false,fearVisible:false,twoHanded:false,spellAttack:false,disabledSources:[],keepAbility:c.features.some(f=>/two.weapon fighting/i.test(f.name))};
     if(damageOnly){outcome='hit';damageOnly=false;render();}else setup();
   }
   const header=()=>`<div class="combat-weapon"><span class="combat-icon">${attackIconMarkup(a,options.kind==='ranged'?'bow':'sword',c.items)}</span><div><strong>${esc(a.name)}</strong><small>${esc(a.type)} · ${esc(a.range)}${mastery?' · '+mastery:''}${extraKind?' · '+esc(extraKind):''}</small></div></div>`;
   function setup() {
     const w=attackWeapon(a),thrown=w?.properties.includes('Thrown');
-    setModal('Make your attack.',`${header()}<div class="form-grid combat-setup">${input('Target AC (optional)','ac',options.ac,'type="number" min="0" max="99" step="1"')}${select('Target cover','cover',[['none','None'],['half','Half (+2 AC)'],['three-quarters','Three-quarters (+5 AC)'],['total','Total (cannot target)']],options.cover)}${input('Distance in feet (optional)','distance',options.distance,'type="number" min="0" max="99999" step="1"')}${thrown||!w?select('Attack type','kind',[['melee','Melee'],['ranged','Ranged / thrown']],options.kind):''}</div>${check('Situational advantage (Vex, Help, unseen attacker, etc.)','advantage',options.advantage)}${check('Situational disadvantage (unseen target, target Prone at distance, etc.)','disadvantage',options.disadvantage)}${check('Ranged: visible, non-Incapacitated enemy within 5 ft.','closeEnemy',options.closeEnemy)}${w?.properties.includes('Versatile')?check('Use two hands for Versatile melee damage','twoHanded',options.twoHanded):''}${extraKind==='Light extra attack'?check('Keep ability damage (Two-Weapon Fighting or a specific feature)','keepAbility',options.keepAbility):''}${c.features.some(f=>/^Tactical Master\b/i.test(f.name))&&mastery?select('Tactical Master: mastery for this attack','mastery',[[mastery,mastery],...['Push','Sap','Slow'].filter(m=>m!==mastery).map(m=>[m,m])],mastery):''}<details class="combat-details"><summary>Exceptions & rules</summary>${check('Feature / DM exception: use only the situational boxes','override',options.override)}<p>Both advantage and disadvantage cancel, regardless of how many sources apply. Saved roll mode, Heavy, your tracked conditions, range, and nearby enemies are checked. Resolve visibility, target conditions, underwater combat, and special features with your DM.</p><p>Each roll is one attack. Extra Attack, actions, Reactions, and once-per-turn limits are tracked at the table.</p>${a.notes?`<p>${esc(a.notes)}</p>`:''}</details><div class="modal-actions">${button('close','Cancel')}${button('roll',icon('dice')+'Roll to hit','',true)}</div>`);
+    const confirmations=attackContext(c,a,{...options,kind:'ranged'}).featureConfirmations;
+    setModal('Make your attack.',`${header()}<div class="form-grid combat-setup">${input('Target AC (optional)','ac',options.ac,'type="number" min="0" max="99" step="1"')}${select('Target cover','cover',[['none','None'],['half','Half (+2 AC)'],['three-quarters','Three-quarters (+5 AC)'],['total','Total (cannot target)']],options.cover)}${input('Distance in feet (optional)','distance',options.distance,'type="number" min="0" max="99999" step="1"')}${thrown||!w?select('Attack type','kind',[['melee','Melee'],['ranged','Ranged / thrown']],options.kind):''}</div>${check('Situational advantage (Help, Vex, features, visibility)','advantage',options.advantage)}${check('Situational disadvantage (target conditions, visibility, DM ruling)','disadvantage',options.disadvantage)}<div data-combat-nearby>${check('Enemy within 5 ft. can see you and is not Incapacitated','closeEnemy',options.closeEnemy)}</div>${w?.properties.includes('Versatile')?`<div data-combat-two-hands>${check('Use two hands for Versatile melee damage','twoHanded',options.twoHanded)}</div>`:''}${extraKind==='Light extra attack'?check('Keep ability damage (Two-Weapon Fighting or a specific feature)','keepAbility',options.keepAbility):''}${c.features.some(f=>/^Tactical Master\b/i.test(f.name))&&mastery?select('Tactical Master: mastery for this attack','mastery',[[mastery,mastery],...['Push','Sap','Slow'].filter(m=>m!==mastery).map(m=>[m,m])],mastery):''}<details class="combat-details combat-advanced"><summary>Advanced: Advantage &amp; Disadvantage</summary><div data-feature-confirmations>${confirmations.map(f=>check(esc(f.label),f.id,options[f.id])).join('')}</div><div data-automatic-sources></div>${button('defaults','Restore automatic defaults')}</details><p class="form-help combat-mode" role="status" aria-live="polite"></p><div class="modal-actions">${button('close','Cancel')}${button('roll',icon('dice')+'Roll to hit','',true)}</div>`);
     if(c.conditions.includes('Frightened'))modal.querySelector('.combat-setup').insertAdjacentHTML('afterend',check('Frightened: the source of fear is in line of sight','fearVisible',options.fearVisible));
+    updateSetup();
   }
-  function readOptions() {
+  function readOptions(validate=true) {
     const form=modal.querySelector('form');
-    if(!form.reportValidity())return false;
+    if(validate&&!form.reportValidity())return false;
     const data=new FormData(form);
     for(const name of ['ac','cover','distance','kind'])if(data.has(name))options[name]=data.get(name);
-    for(const name of ['advantage','disadvantage','closeEnemy','fearVisible','twoHanded','override','keepAbility'])options[name]=data.has(name);
+    for(const name of ['advantage','disadvantage','closeEnemy','fearVisible','twoHanded','spellAttack','keepAbility'])options[name]=data.has(name);
+    const disabled=new Set(options.disabledSources);
+    for(const node of modal.querySelectorAll('[data-automatic-source]')){
+      if(node.checked)disabled.delete(node.value);else disabled.add(node.value);
+    }
+    options.disabledSources=[...disabled];
     if(options.kind==='ranged')options.twoHanded=false;
     if(data.has('mastery'))mastery=data.get('mastery');
     return true;
+  }
+  function updateSetup() {
+    // Update only the dynamic rules region, so typing never loses input focus.
+    const context=attackContext(c,a,options),advanced=modal.querySelector('.combat-advanced');
+    modal.querySelector('[data-combat-nearby]').hidden=!context.closeEnemyRelevant;
+    const hands=modal.querySelector('[data-combat-two-hands]');
+    if(hands){hands.hidden=context.ranged;if(context.ranged)hands.querySelector('input').checked=false;}
+    modal.querySelector('[data-feature-confirmations]').hidden=!context.featureConfirmations.length;
+    advanced.hidden=!context.sources.length&&!context.ignoredSources.length&&!context.featureConfirmations.length;
+    const region=modal.querySelector('[data-automatic-sources]');
+    const markup=`${context.sources.length?'<p class="form-help">Automatic sources · uncheck to ignore for this attack.</p>':''}${context.sources.map(s=>`<label class="check-field"><input type="checkbox" data-automatic-source name="automaticSource" value="${esc(s.id)}" ${s.enabled?'checked':''}>${esc(s.label)} — ${s.mode==='advantage'?'Advantage':'Disadvantage'}</label>`).join('')}${context.ignoredSources.map(s=>`<p class="form-help">${esc(s.label)} ignored · ${esc(s.feature)}</p>`).join('')}`;
+    // Preserve focus on source checkboxes when only their checked state changes.
+    if(region.dataset.markup!==markup){
+      const focused=document.activeElement?.matches('[data-automatic-source]')?document.activeElement.value:null;
+      region.innerHTML=markup;
+      region.dataset.markup=markup;
+      if(focused)[...region.querySelectorAll('[data-automatic-source]')].find(n=>n.value===focused)?.focus({preventScroll:true});
+    }
+    advanced.querySelector('[data-combat-action="defaults"]').disabled=!options.disabledSources.length;
+    const summary=modal.querySelector('.combat-mode');
+    summary.textContent=attackModeSummary(context);summary.hidden=!summary.textContent;
   }
   function animate(result,phase,damageLabel=a.type) {
     if(phase==='damage'){
@@ -84,7 +112,8 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
   function render() {
     const context=attackContext(c,a,options);
     const status=!outcome?`<p class="combat-question">Confirm the hit with your DM.</p><div class="combat-buttons">${button('hit','Hit')}${button('critical','Critical hit')}${button('miss','Miss')}</div>`:`<div class="combat-outcome ${outcome==='miss'?'combat-miss':''}" role="status">${outcome==='critical'?'✦ Critical hit':outcome==='hit'?'Hit':'Miss'}${options.ac!==''?` · AC ${Number(options.ac)+context.coverBonus}`:''}${roll?.natural===1?' · natural 1':roll?.natural===20?' · natural 20':''}</div>`;
-    const modes=roll?`<p class="form-help">${esc([...context.advantages,...context.disadvantages].join(' · ')||'Normal roll')}${context.advantages.length&&context.disadvantages.length?' · Advantage and disadvantage cancel.':''}</p>`:'';
+    const sourceDetails=context.sources.map(s=>`<p>${esc(s.label)} — ${s.mode==='advantage'?'Advantage':'Disadvantage'}${s.enabled?'':' (disabled for this attack)'}</p>`).join('')+context.ignoredSources.map(s=>`<p>${esc(s.label)} ignored · ${esc(s.feature)}</p>`).join('')+(options.advantage?'<p>Situational advantage — Advantage (manual)</p>':'')+(options.disadvantage?'<p>Situational disadvantage — Disadvantage (manual)</p>':'');
+    const modes=roll?`<p class="form-help combat-mode">${esc(attackModeSummary(context)||'Normal roll')}</p>${sourceDetails?`<details class="combat-details"><summary>Advantage &amp; Disadvantage sources</summary>${sourceDetails}</details>`:''}`:'';
     const inspiration=c.inspiration&&roll&&!damage&&!extras.length&&!save?`<div class="combat-inspiration"><p>Heroic Inspiration: ${inspirationPoints(c)} remaining. Spend 1 to reroll one die and keep its new value.</p>${roll.rolls.map((value,i)=>button('inspiration',`Reroll die ${i+1} (${value})`,`data-index="${i}"`)).join('')}</div>`:'';
     const specialCritical=roll&&outcome&&roll.natural!==1&&roll.natural!==20&&!damage&&!extras.length&&!save?`<p class="form-help">${button(outcome==='critical'?'hit':'critical',outcome==='critical'?'Use a normal hit':'Feature / target effect: critical hit')}</p>`:'';
     const formula=damageFormula(c,a,{twoHanded:options.twoHanded,omitAbility:['Cleave','Light extra attack'].includes(extraKind),keepAbility:extraKind==='Light extra attack'&&options.keepAbility});
@@ -96,12 +125,20 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     if(damage||extras.length)reminders.push('Apply resistance, vulnerability, and immunity by damage type. A concentrating target checks a Constitution save after taking damage: DC 10 or half the damage taken (round down), whichever is higher, capped at DC 30.');
     setModal(esc(a.name)+(extraKind?' · '+esc(extraKind):''),`${header()}${hitPanel}${damagePanel}${extras.map(({label,result})=>`<div class="combat-extra-result">${esc(label)}${resultMarkup(result,'Extra damage')}</div>`).join('')}${accuracy}${masteryMarkup()}${lightMarkup()}${claws}${extraMarkup()}${reminders.length?`<details class="combat-details"><summary>Weapon reminders & notes</summary>${reminders.map(n=>`<p>${esc(n)}</p>`).join('')}</details>`:''}<p class="form-help"><a href="${wikiURL('weapons')}" target="_blank" rel="noopener noreferrer">2024 weapon rules</a> · Apply damage and conditions to the target at the table.</p><div class="modal-actions">${button('close','Done')}${button('again','Another attack')}</div>`);
   }
+  modal.addEventListener('input',()=>{
+    if(!modal.querySelector('.combat-setup'))return;
+    readOptions(false);
+    try{updateSetup();}catch(error){
+      const summary=modal.querySelector('.combat-mode');summary.textContent=error.message;summary.hidden=false;
+    }
+  },{signal});
   modal.addEventListener('click',event=>{
     const el=event.target.closest('[data-combat-action]');if(!el||el.disabled)return;
     try{
       const action=el.dataset.combatAction;
       if(action==='close'){modal.close();return;}
       if(action==='roll'){doRoll();return;}
+      if(action==='defaults'){options.disabledSources=[];updateSetup();return;}
       if(action==='again'){reset(a);return;}
       if(['hit','critical','miss'].includes(action)){outcome=action;render();const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase:'impact'});if(event)sound.play(event);return;}
       if(action==='inspiration'){

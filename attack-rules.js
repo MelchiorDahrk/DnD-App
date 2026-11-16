@@ -23,18 +23,42 @@ export const toppleDC=(c,a)=>8+mod(c.stats[a.ability])+proficiency(c.level);
 export function resolveRollMode(advantage,disadvantage) {
   return advantage===disadvantage?'normal':advantage?'advantage':'disadvantage';
 }
+// Catalog references are authoritative. Older sheets can record the exact feat
+// name without a reference; never infer a grant from class, level, or prose.
+function hasAttackFeat(c,name) {
+  const id='general-feats-feat-'+name.toLowerCase().replaceAll(' ','-');
+  return c.features.some(f=>f.catalogId?f.catalogId===id:
+    !/dnd5e\.wikidot\.com|2014/i.test(f.wiki||'')&&
+    f.name.trim().replace(/\s*\((?:2024|general feat|feat|2024 feat)\)$/i,'').toLowerCase()===name.toLowerCase());
+}
+export function attackModeSummary(context) {
+  if(context.advantages.length&&context.disadvantages.length)return 'Normal: Advantage and disadvantage cancel';
+  if(context.advantages.length)return 'Advantage: '+context.advantages.join(', ');
+  if(context.disadvantages.length)return 'Disadvantage: '+context.disadvantages.join(', ');
+  return context.sources.some(s=>!s.enabled)?'Normal: automatic sources disabled':'';
+}
 export function attackContext(c,a,options={}) {
   const weapon=attackWeapon(a),ranged=options.kind==='ranged'||(!options.kind&&weapon?.family.endsWith('ranged'));
-  const advantages=[],disadvantages=[],warnings=[];
-  if(!options.override&&a.rollMode==='advantage')advantages.push('Saved attack advantage');
-  if(!options.override&&a.rollMode==='disadvantage')disadvantages.push('Saved attack disadvantage');
-  if(options.advantage)advantages.push('Situational advantage');
-  if(options.disadvantage)disadvantages.push('Situational disadvantage');
-  if(!options.override){
-    if(weapon?.properties.includes('Heavy')&&c.stats[weapon.family.endsWith('ranged')?'dex':'str']<13)disadvantages.push('Heavy: ability score below 13');
-    for(const condition of ['Blinded','Poisoned','Prone','Restrained'])if(c.conditions.includes(condition))disadvantages.push(condition);
-    if(c.conditions.includes('Frightened')&&options.fearVisible)disadvantages.push('Frightened: source in line of sight');
-    if(ranged&&options.closeEnemy)disadvantages.push('Enemy within 5 ft.');
+  const sources=[],ignoredSources=[],warnings=[],featureConfirmations=[];
+  const disabled=new Set(options.disabledSources||[]);
+  const add=(id,label,mode)=>sources.push({id,label,mode,enabled:!disabled.has(id)});
+  const ignore=(id,label,feature)=>ignoredSources.push({id,label,feature});
+  const sharpshooter=hasAttackFeat(c,'Sharpshooter');
+  const rangedWeapon=weapon?.family.endsWith('ranged');
+  const crossbowExpert=hasAttackFeat(c,'Crossbow Expert')&&['hand-crossbow','heavy-crossbow','light-crossbow'].includes(weapon?.id);
+  // Custom attacks have no saved spell/weapon classification. Ask only when a
+  // recorded feat needs it; possession alone never makes a custom attack a spell.
+  const canConfirmSpell=ranged&&!weapon&&hasAttackFeat(c,'Spell Sniper');
+  if(canConfirmSpell)featureConfirmations.push({id:'spellAttack',label:'Spell Sniper: this attack is with a spell'});
+  const spellSniper=canConfirmSpell&&options.spellAttack;
+  const closeRangeFeature=ranged&&(sharpshooter&&rangedWeapon?'Sharpshooter':crossbowExpert?'Crossbow Expert':spellSniper?'Spell Sniper':'');
+  if(['advantage','disadvantage'].includes(a.rollMode))add('saved-mode','Saved attack mode',a.rollMode);
+  if(weapon?.properties.includes('Heavy')&&c.stats[rangedWeapon?'dex':'str']<13)add('heavy','Heavy: ability score below 13','disadvantage');
+  for(const condition of ['Blinded','Poisoned','Prone','Restrained'])if(c.conditions.includes(condition))add('condition-'+condition.toLowerCase(),condition,'disadvantage');
+  if(c.conditions.includes('Frightened')&&options.fearVisible)add('condition-frightened','Frightened: source in line of sight','disadvantage');
+  if(ranged&&options.closeEnemy){
+    if(closeRangeFeature)ignore('nearby-enemy','Enemy within 5 ft.',closeRangeFeature);
+    else add('nearby-enemy','Enemy within 5 ft.','disadvantage');
   }
   const range=a.range.match(/(\d+)\s*\/\s*(\d+)/)||weapon?.properties.match(/(\d+)\s*\/\s*(\d+)/);
   const singleRange=a.range.match(/^\s*(\d+)\s*ft/i)?.[1];
@@ -45,20 +69,26 @@ export function attackContext(c,a,options={}) {
     if(!Number.isFinite(distance)||distance<0)throw new Error('Enter a nonnegative distance.');
     if(ranged&&range){
       if(distance>Number(range[2]))blocked='Target is beyond the weapon’s long range.';
-      else if(distance>Number(range[1])&&!options.override)disadvantages.push('Long range');
+      else if(distance>Number(range[1])){
+        if(sharpshooter&&rangedWeapon)ignore('long-range','Long range','Sharpshooter');
+        else add('long-range','Long range','disadvantage');
+      }
     }else if(ranged&&singleRange&&distance>Number(singleRange))blocked='Target is beyond this attack’s range.';
     else if(!ranged&&distance>reach)blocked='Target is beyond this attack’s reach.';
   }
   if(options.cover==='total')blocked='Total cover prevents targeting directly.';
   const unable=c.conditions.find(v=>['Incapacitated','Paralyzed','Petrified','Stunned','Unconscious'].includes(v));
   if(unable)blocked=`${unable}: you cannot make attacks.`;
-  if(options.override)warnings.push('Feature / DM exception: only the selected situational advantage / disadvantage applies.');
-  if(weapon?.properties.includes('Ammunition'))warnings.push('Check ammunition and a free loading hand; expend one piece per attack. Inventory quantities may be bundles.');
-  if(weapon?.properties.includes('Loading'))warnings.push('Loading: one shot per action, Bonus Action, or Reaction, even with Extra Attack.');
+  if(weapon?.properties.includes('Ammunition'))warnings.push(crossbowExpert?'Expend one piece of ammunition per attack. Crossbow Expert allows loading without a free hand. Inventory quantities may be bundles.':'Check ammunition and a free loading hand; expend one piece per attack. Inventory quantities may be bundles.');
+  if(weapon?.properties.includes('Loading')&&!crossbowExpert)warnings.push('Loading: one shot per action, Bonus Action, or Reaction, even with Extra Attack.');
   if(weapon?.properties.includes('Two-Handed')||options.twoHanded)warnings.push('Check both hands are free; a wielded shield can conflict. Lance: mounted exception applies.');
   if(weapon?.properties.includes('Finesse'))warnings.push('Finesse uses the same ability for accuracy and damage; check your saved damage modifier.');
   if(c.conditions.includes('Frightened'))warnings.push('Frightened attack disadvantage applies only while the source of fear is in line of sight.');
-  return {weapon,ranged,advantages,disadvantages,warnings,blocked,mode:resolveRollMode(advantages.length>0,disadvantages.length>0),bonus:attackBonus(c,a),coverBonus:options.cover==='half'?2:options.cover==='three-quarters'?5:0};
+  const advantages=sources.filter(s=>s.enabled&&s.mode==='advantage').map(s=>s.label);
+  const disadvantages=sources.filter(s=>s.enabled&&s.mode==='disadvantage').map(s=>s.label);
+  if(options.advantage)advantages.push('Situational advantage');
+  if(options.disadvantage)disadvantages.push('Situational disadvantage');
+  return {weapon,ranged,sources,ignoredSources,featureConfirmations,closeEnemyRelevant:ranged&&!closeRangeFeature,advantages,disadvantages,warnings,blocked,mode:resolveRollMode(advantages.length>0,disadvantages.length>0),bonus:attackBonus(c,a),coverBonus:options.cover==='half'?2:options.cover==='three-quarters'?5:0};
 }
 export function attackOutcome(result,ac,coverBonus=0) {
   if(result.natural===1)return 'miss';

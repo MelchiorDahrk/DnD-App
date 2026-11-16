@@ -39,7 +39,11 @@ try{
     await page.click(action(name)+suffix);
     await page.waitForFunction(()=>!document.body.classList.contains('dice-pending'),{timeout:20000});
   };
-  const open=async(id,values=[12])=>{await page.click(`[data-action="attack-roll"][data-id="${id}"]`);await dice(values);};
+  const open=async(id,values=[12])=>{
+    const selector=`[data-action="attack-roll"][data-id="${id}"]`;
+    await page.$eval(selector,n=>n.scrollIntoView({block:'center'}));
+    await page.click(selector);await page.waitForSelector('#modal .combat-setup');await dice(values);
+  };
   const close=async()=>{await click('close');await page.waitForFunction(()=>!document.querySelector('#modal').open);};
   const active=()=>page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));return s.characters.find(c=>c.id===s.activeId);});
   const axe=c.attacks.find(a=>a.name==='Greataxe'),battleaxe=c.attacks.find(a=>a.name==='+1 Battleaxe');
@@ -109,6 +113,90 @@ try{
   assert.match(await page.$eval('.form-help',n=>n.textContent),/cancel/);await close();
   await open('longbow');await page.$eval('[name="distance"]',n=>n.value='601');await click('roll');
   assert.match(await page.$eval('#form-error',n=>n.textContent),/long range/);await close();
+
+  // Live source controls are per attack, independent of the manual boxes and saves.
+  const beforeSources=await page.evaluate(()=>localStorage.getItem('questlog.v2'));
+  const source=id=>`[data-automatic-source][value="${id}"]`;
+  const summary=()=>page.$eval('.combat-mode',n=>n.textContent);
+  const field=async(name,value)=>page.$eval(`[name="${name}"]`,(n,value)=>{n.value=value;n.dispatchEvent(new Event('input',{bubbles:true}));},value);
+  const loadCase=async({conditions=[],features=[],savedMode='normal',spell=false}={})=>{
+    const state=JSON.parse(beforeSources),character=state.characters.find(v=>v.id===state.activeId);
+    character.stats.dex=14;character.conditions=conditions;
+    character.features=features.map((name,i)=>({...c.features[0],id:'attack-test-'+i,name,catalogId:undefined}));
+    character.attacks.forEach(a=>a.rollMode=a.id==='longbow'?savedMode:'normal');
+    if(features.includes('Crossbow Expert'))character.attacks.push({id:'hand-crossbow',...attackFromWeapon(WEAPONS.find(w=>w.id==='hand-crossbow'),character)});
+    if(spell)character.attacks.push({...character.attacks.find(a=>a.id==='longbow'),id:'custom-spell',name:'Custom ray',weaponId:'',range:'120 ft.',mastery:''});
+    await page.evaluate(state=>localStorage.setItem('questlog.v2',JSON.stringify(state)),state);await page.reload({waitUntil:'networkidle0'});
+  };
+  await loadCase({conditions:['Poisoned','Prone'],savedMode:'advantage'});
+  await open('longbow',[4,17]);
+  assert.equal(await page.$('[name="override"]'),null);
+  assert.equal(await page.$eval('.combat-advanced',n=>n.open),false);
+  assert.match(await summary(),/Normal: Advantage and disadvantage cancel/);
+  await field('distance','200');await page.click('[name="advantage"]');
+  await page.click('.combat-advanced summary');
+  assert.ok(await page.$(source('long-range')));
+  for(const id of ['condition-poisoned','condition-prone','long-range'])await page.click(source(id));
+  assert.match(await summary(),/^Advantage: Saved attack mode, Situational advantage$/);
+  assert.equal(await page.$eval(source('saved-mode'),n=>n.checked),true);
+  await page.click('[name="disadvantage"]');assert.match(await summary(),/cancel/);
+  await click('defaults');
+  assert.equal(await page.$eval(source('condition-poisoned'),n=>n.checked),true);
+  assert.equal(await page.$eval('[name="disadvantage"]',n=>n.checked),true,'restore preserves situational choices');
+  assert.equal(await page.$eval('[name="distance"]',n=>n.value),'200');
+  assert.equal(await page.$eval(action('defaults'),n=>n.disabled),true);
+  for(const id of ['condition-poisoned','condition-prone','long-range'])await page.click(source(id));
+  await page.click('[name="disadvantage"]');
+  for(const width of [390,320]){
+    await page.setViewport({width,height:844});
+    assert.ok(await page.$eval('#modal',n=>n.scrollWidth<=n.clientWidth),`${width}px advanced sources fit`);
+    assert.ok(await page.$eval(source('long-range'),n=>n.closest('label').getBoundingClientRect().height>=36),'source labels are tappable');
+  }
+  await mkdir(resolve(root,'.tmp'),{recursive:true});await page.screenshot({path:resolve(root,'.tmp/attack-advanced-320.png')});
+  await page.setViewport({width:1280,height:1000});
+  await click('roll');
+  assert.match(await page.$eval('#modal .roll-expression',n=>n.textContent),/advantage/);
+  assert.match(await summary(),/^Advantage/);
+  assert.match(await page.$eval('#modal',n=>n.textContent),/Poisoned — Disadvantage \(disabled for this attack\)/);
+  assert.equal((await active()).attacks.find(a=>a.id==='longbow').disabledSources,undefined,'overrides never enter saves');
+  await click('again');await page.click('.combat-advanced summary');
+  assert.equal(await page.$eval(source('condition-poisoned'),n=>n.checked),true,'another attack restores automatic sources');
+  assert.equal(await page.$eval('[name="advantage"]',n=>n.checked),false);await close();
+
+  await loadCase();await open('spear');
+  assert.equal(await page.$eval('.combat-advanced',n=>n.hidden),true,'no automatic effects keeps Advanced hidden');
+  assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),true,'nearby enemies are irrelevant in melee');
+  await page.select('[name="kind"]','ranged');await field('distance','30');
+  assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),false);
+  assert.match(await summary(),/Disadvantage: Long range/);
+  await page.click('[name="closeEnemy"]');
+  assert.match(await summary(),/Enemy within 5 ft., Long range/);
+  await page.select('[name="kind"]','melee');await field('distance','5');
+  assert.equal(await page.$eval('.combat-advanced',n=>n.hidden),true,'ranged sources disappear on melee attacks');await close();
+
+  await loadCase({features:['Sharpshooter'],conditions:['Poisoned']});await open('longbow');await field('distance','200');
+  assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),true,'Sharpshooter negates the nearby-enemy rule');
+  assert.equal(await page.$(source('long-range')),null,'negated rules have no override checkbox');
+  assert.match(await summary(),/^Disadvantage: Poisoned$/);
+  await page.click('.combat-advanced summary');
+  assert.match(await page.$eval('[data-automatic-sources]',n=>n.textContent),/Long range ignored · Sharpshooter/);await close();
+
+  await loadCase({features:['Crossbow Expert']});
+  const crossbow=(await active()).attacks.find(a=>/Hand Crossbow/i.test(a.name));assert.ok(crossbow);
+  await open(crossbow.id);
+  assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),true);
+  await field('distance','40');assert.match(await summary(),/Disadvantage: Long range/);await close();
+  await open('longbow');assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),false,'Crossbow Expert does not exempt bows');await close();
+
+  await loadCase({features:['Spell Sniper'],spell:true});await open('custom-spell');
+  await page.select('[name="kind"]','ranged');await page.click('[name="closeEnemy"]');
+  assert.match(await summary(),/Disadvantage: Enemy within 5 ft./);
+  await page.click('.combat-advanced summary');await page.click('[name="spellAttack"]');
+  assert.equal(await page.$(source('nearby-enemy')),null);
+  assert.equal(await page.$eval('[data-combat-nearby]',n=>n.hidden),true);
+  await page.click('[name="disadvantage"]');assert.match(await summary(),/^Disadvantage: Situational disadvantage$/);
+  await page.click('[name="spellAttack"]');assert.match(await summary(),/Enemy within 5 ft./);await close();
+  await page.evaluate(saved=>localStorage.setItem('questlog.v2',saved),beforeSources);await page.reload({waitUntil:'networkidle0'});
 
   await open('rapier',[19]);await page.$eval('[name="ac"]',n=>n.value='99');await click('roll');
   await click('critical');assert.match(await page.$eval('.combat-outcome',n=>n.textContent),/Critical hit/);await close();
@@ -230,5 +318,5 @@ try{
   await calmPage.click(`[data-action="attack-roll"][data-id="${axe.id}"]`);await calmPage.click(action('roll'));
   assert.ok(await calmPage.$('.vfx-calm'));assert.equal(await calmPage.$('.vfx-weapon'),null,'reduced motion creates no moving weapon');
   assert.deepEqual(errors,[]);
-  console.log('Attack browser checks passed: damage-first results, all masteries, criticals, extra damage, resources, Inspiration, cover, range, editing, backup, mobile, reduced motion, and offline.');
+  console.log('Attack browser checks passed: live summaries, individual overrides and reset, feat exceptions, damage-first results, all masteries, criticals, extra damage, resources, Inspiration, cover, range, editing, backup, mobile, reduced motion, and offline.');
 }finally{await calmBrowser?.close();await browser?.close();server?.kill();}
