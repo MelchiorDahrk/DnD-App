@@ -118,3 +118,21 @@ a normal roll, and a natural 20 from a collapsed favorite attack, and verifies
 the corresponding miss, hit confirmation, and damage controls. Actual clicks,
 rules, dice rendering and feature-use checks remain in place. Set
 `SHEET_TEST_CPU_RATE=4` with `npm run test:sheet` to stress slower browser execution.
+
+## Automatic portrait thumbnail regression
+
+[Run 43781269178](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43781269178)
+built successfully and passed the sheet, item, dice and appearance suites, then
+timed out checking a missing editor thumbnail. The automatic Drow figure uses a
+custom skin colour, so visible head thumbnails are replaced with live renders.
+After they finish, the first remaining static image can be below the picker's
+viewport. The test broke that image and waited for a live render even though the
+editor intentionally defers offscreen thumbnails. Waiting for the visible custom
+colour renders before running the old check reproduces the timeout locally.
+
+The fallback check now selects the Head slot and bundled thumbnail colour,
+scrolls its target into view, and waits for a loaded static image before breaking
+it. It still requires a loaded WebGL replacement; custom colour rendering is
+also checked during the subsequent edit/save/reopen flow. Portrait failures now
+save the active check, selected slot/colour, thumbnail state, browser messages,
+page/editor HTML and a screenshot under `.tmp/browser-diagnostics/portraits/`.

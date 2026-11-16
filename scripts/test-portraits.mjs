@@ -23,7 +23,10 @@ const page=await browser.newPage();
 await page.setViewport({width:1440,height:1100});
 const errors=[];
 const externalRequests=[];
+const consoleMessages=[];
+let frame;
 page.on('pageerror',e=>errors.push(e.message));
+page.on('console',message=>{consoleMessages.push(`${message.type()}: ${message.text()}`);if(consoleMessages.length>50)consoleMessages.shift();});
 page.on('request',request=>{if(/^https?:/.test(request.url())&&new URL(request.url()).origin!==new URL(base).origin)externalRequests.push(request.url());});
 const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
 async function readyFrame() {
@@ -93,7 +96,7 @@ try {
   assert.deepEqual((await imagePixels(new URL('assets/portrait-adventurer.webp',base).href)).corners,[0,0,0,0],'Bundled starter portrait must be transparent');
   pass();
   startCheck('embedded portrait editor loads');
-  let frame=await open();
+  frame=await open();
   pass();
   startCheck('portrait studio follows site appearance and redraws lighting without changing the design');
   const preference=await page.evaluate(()=>window.QuestlogTheme.preference);
@@ -118,15 +121,25 @@ try {
   await frame.waitForFunction(theme=>document.documentElement.dataset.theme===theme,{},resolvedTheme);
   pass();
   startCheck('bundled editor thumbnails and missing-asset WebGL fallback');
-  const thumbnail=await frame.waitForSelector('.picker .pick[aria-pressed="false"] .thumb img[src*="/thumbs/"]');
-  await thumbnail.evaluate(img=>img.decode());
-  const thumbContainer=await thumbnail.evaluateHandle(img=>img.parentElement);
-  await thumbnail.evaluate(img=>{img.src='./thumbs/missing-test.webp';});
+  // Automatic figures may use a custom skin colour. Once the visible parts
+  // finish rendering, the first remaining static image can be offscreen.
+  // Use the bundled head colour and bring the target into view before breaking
+  // its image, so this checks missing-asset recovery independently of that queue.
+  await frame.click('.slots .pick[aria-label^="Head:"]');
+  await frame.click('.swatch[title$="(14)"]');
+  await frame.waitForFunction(()=>document.querySelector('.swatch[title$="(14)"]')?.getAttribute('aria-pressed')==='true');
+  const thumbContainer=await frame.waitForSelector('.picker .pick[aria-pressed="false"] .thumb');
+  await thumbContainer.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
+  await frame.waitForFunction(el=>{
+    const img=el.querySelector('img');
+    return img?.src.includes('/thumbs/')&&!img.classList.contains('stale')&&img.complete&&img.naturalWidth>0;
+  },{timeout:15000,polling:100},thumbContainer);
+  await thumbContainer.evaluate(el=>{el.querySelector('img').src='./thumbs/missing-test.webp';});
   await frame.waitForFunction(el=>{
     const img=el.querySelector('img');
     return img?.src.startsWith('blob:')&&img.complete&&img.naturalWidth>0;
   },{timeout:60000},thumbContainer);
-  await thumbContainer.dispose();await thumbnail.dispose();
+  await thumbContainer.dispose();
   pass();
   startCheck('render and save a real portrait');
   await save(frame);
@@ -146,6 +159,7 @@ try {
 
   startCheck('edit, reopen, and cancel without changing saved design');
   frame=await open();
+  await frame.click('.slots .pick[aria-label^="Head:"]');
   const nextHead=await frame.$eval('.picker .pick[aria-pressed="false"]',el=>el.querySelector('.id').textContent);
   await frame.click('.picker .pick[aria-pressed="false"]');
   await frame.click('.swatch[title$="(78)"]');
@@ -352,5 +366,23 @@ try {
   console.log(`All portrait browser checks passed (${seconds(started)}s total).`);
 } catch(error) {
   console.error(`FAIL ${checkName} after ${seconds(checkStarted)}s (${seconds(started)}s total)`);
+  const directory=resolve('.tmp/browser-diagnostics/portraits');
+  try {
+    await fs.mkdir(directory,{recursive:true});
+    const editor=frame&&!frame.detached?await frame.evaluate(()=>({
+      activeSlot:document.querySelector('.slots .pick[aria-pressed="true"]')?.getAttribute('aria-label'),
+      color:document.querySelector('.bar .current')?.textContent.trim(),
+      picker:document.querySelector('.picker .scroll')?.getBoundingClientRect().toJSON(),
+      thumbnails:[...document.querySelectorAll('.picker .thumb')].map(el=>{
+        const img=el.querySelector('img'),rect=el.getBoundingClientRect();
+        return {part:el.closest('.pick')?.title,src:img?.src,complete:img?.complete,width:img?.naturalWidth,failed:!!el.querySelector('.err'),rect:rect.toJSON()};
+      })
+    })):null;
+    await fs.writeFile(resolve(directory,'failure.json'),JSON.stringify({phase:checkName,message:error.message,stack:error.stack,url:page.url(),errors,consoleMessages,editor},null,2));
+    await fs.writeFile(resolve(directory,'failure.html'),await page.content());
+    if(frame&&!frame.detached)await fs.writeFile(resolve(directory,'editor.html'),await frame.content());
+    await page.screenshot({path:resolve(directory,'failure.png')});
+    console.error(`Portrait test diagnostics: ${directory}`);
+  } catch(diagnosticError) {console.error('Could not capture portrait test diagnostics:',diagnosticError.message);}
   throw error;
 } finally { await browser.close(); }
