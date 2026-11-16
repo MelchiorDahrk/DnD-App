@@ -1,3 +1,5 @@
+import {WEAPON_ROWS,TOOL_ROWS} from './training-data.js';
+import {hasWeaponTraining} from './training-rules.js';
 // Rules summaries adapted from the CC BY 4.0 SRD 5.2.1. See README.md for attribution.
 // Core-book options outside the SRD have short reference summaries, not full rules text.
 import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
@@ -25,47 +27,8 @@ const smallItemWeights = {
 const equipment = (name,group,weight,cost,details,extra={}) => ({id:slug(name),name,group,category:'Gear',weight,cost,details,wiki:equipmentURL(name,group),...(weight===0&&Object.hasOwn(smallItemWeights,name)?{weight:smallItemWeights[name],weightStatus:'Estimated small-item weight; rules list negligible weight'}:{}),...extra});
 
 // name, damage, type, properties, mastery, weight (lb.), cost, family
-const weaponRows = [
-  ['Club','1d4','Bludgeoning','Light','Slow',2,'1 SP','Simple melee'],
-  ['Dagger','1d4','Piercing','Finesse, Light, Thrown (20/60 ft.)','Nick',1,'2 GP','Simple melee'],
-  ['Greatclub','1d8','Bludgeoning','Two-Handed','Push',10,'2 SP','Simple melee'],
-  ['Handaxe','1d6','Slashing','Light, Thrown (20/60 ft.)','Vex',2,'5 GP','Simple melee'],
-  ['Javelin','1d6','Piercing','Thrown (30/120 ft.)','Slow',2,'5 SP','Simple melee'],
-  ['Light Hammer','1d4','Bludgeoning','Light, Thrown (20/60 ft.)','Nick',2,'2 GP','Simple melee'],
-  ['Mace','1d6','Bludgeoning','None','Sap',4,'5 GP','Simple melee'],
-  ['Quarterstaff','1d6','Bludgeoning','Versatile (1d8)','Topple',4,'2 SP','Simple melee'],
-  ['Sickle','1d4','Slashing','Light','Nick',2,'1 GP','Simple melee'],
-  ['Spear','1d6','Piercing','Thrown (20/60 ft.), Versatile (1d8)','Sap',3,'1 GP','Simple melee'],
-  ['Dart','1d4','Piercing','Finesse, Thrown (20/60 ft.)','Vex',0.25,'5 CP','Simple ranged'],
-  ['Light Crossbow','1d8','Piercing','Ammunition (80/320 ft.; bolts), Loading, Two-Handed','Slow',5,'25 GP','Simple ranged'],
-  ['Shortbow','1d6','Piercing','Ammunition (80/320 ft.; arrows), Two-Handed','Vex',2,'25 GP','Simple ranged'],
-  ['Sling','1d4','Bludgeoning','Ammunition (30/120 ft.; sling bullets)','Slow',0,'1 SP','Simple ranged'],
-  ['Battleaxe','1d8','Slashing','Versatile (1d10)','Topple',4,'10 GP','Martial melee'],
-  ['Flail','1d8','Bludgeoning','None','Sap',2,'10 GP','Martial melee'],
-  ['Glaive','1d10','Slashing','Heavy, Reach, Two-Handed','Graze',6,'20 GP','Martial melee'],
-  ['Greataxe','1d12','Slashing','Heavy, Two-Handed','Cleave',7,'30 GP','Martial melee'],
-  ['Greatsword','2d6','Slashing','Heavy, Two-Handed','Graze',6,'50 GP','Martial melee'],
-  ['Halberd','1d10','Slashing','Heavy, Reach, Two-Handed','Cleave',6,'20 GP','Martial melee'],
-  ['Lance','1d10','Piercing','Heavy, Reach, Two-Handed (unless mounted)','Topple',6,'10 GP','Martial melee'],
-  ['Longsword','1d8','Slashing','Versatile (1d10)','Sap',3,'15 GP','Martial melee'],
-  ['Maul','2d6','Bludgeoning','Heavy, Two-Handed','Topple',10,'10 GP','Martial melee'],
-  ['Morningstar','1d8','Piercing','None','Sap',4,'15 GP','Martial melee'],
-  ['Pike','1d10','Piercing','Heavy, Reach, Two-Handed','Push',18,'5 GP','Martial melee'],
-  ['Rapier','1d8','Piercing','Finesse','Vex',2,'25 GP','Martial melee'],
-  ['Scimitar','1d6','Slashing','Finesse, Light','Nick',3,'25 GP','Martial melee'],
-  ['Shortsword','1d6','Piercing','Finesse, Light','Vex',2,'10 GP','Martial melee'],
-  ['Trident','1d8','Piercing','Thrown (20/60 ft.), Versatile (1d10)','Topple',4,'5 GP','Martial melee'],
-  ['Warhammer','1d8','Bludgeoning','Versatile (1d10)','Push',5,'15 GP','Martial melee'],
-  ['War Pick','1d8','Piercing','Versatile (1d10)','Sap',2,'5 GP','Martial melee'],
-  ['Whip','1d4','Slashing','Finesse, Reach','Slow',3,'2 GP','Martial melee'],
-  ['Blowgun','1','Piercing','Ammunition (25/100 ft.; needles), Loading','Vex',1,'10 GP','Martial ranged'],
-  ['Hand Crossbow','1d6','Piercing','Ammunition (30/120 ft.; bolts), Light, Loading','Vex',3,'75 GP','Martial ranged'],
-  ['Heavy Crossbow','1d10','Piercing','Ammunition (100/400 ft.; bolts), Heavy, Loading, Two-Handed','Push',18,'50 GP','Martial ranged'],
-  ['Longbow','1d8','Piercing','Ammunition (150/600 ft.; arrows), Heavy, Two-Handed','Slow',2,'50 GP','Martial ranged'],
-  ['Musket','1d12','Piercing','Ammunition (40/120 ft.; firearm bullets), Loading, Two-Handed','Slow',10,'500 GP','Martial ranged'],
-  ['Pistol','1d10','Piercing','Ammunition (30/90 ft.; firearm bullets), Loading','Vex',3,'250 GP','Martial ranged']
-];
-export const WEAPONS = weaponRows.map(([name,damage,type,properties,mastery,weight,cost,family]) => equipment(name,'Weapons',weight,cost,`${family}. ${damage} ${type.toLowerCase()}. ${properties}. Mastery: ${mastery}.`,{category:'Weapon',damage,type,properties,mastery,family}));
+
+export const WEAPONS = WEAPON_ROWS.map(([name,damage,type,properties,mastery,weight,cost,family]) => equipment(name,'Weapons',weight,cost,`${family}. ${damage} ${type.toLowerCase()}. ${properties}. Mastery: ${mastery}.`,{category:'Weapon',damage,type,properties,mastery,family}));
 
 const armorRows = [
   ['Padded Armor',8,'5 GP',11,'Light',0,true],['Leather Armor',10,'10 GP',11,'Light',0,false],['Studded Leather Armor',13,'45 GP',12,'Light',0,false],
@@ -142,18 +105,10 @@ for(const pack of gear.filter(item=>item.group==='Equipment packs')) {
   }
 }
 
-const toolRows = [
-  ['Alchemist’s Supplies',8,'50 GP','Intelligence','Identify a substance or start a fire (DC 15).'],["Brewer’s Supplies",9,'20 GP','Intelligence','Detect poisoned drink (DC 15); identify alcohol (DC 10).'],
-  ["Calligrapher’s Supplies",5,'10 GP','Dexterity','Write forgery-resistant flourishes (DC 15).'],["Carpenter’s Tools",6,'8 GP','Strength','Seal or pry open a door or container (DC 20).'],["Cartographer’s Tools",6,'15 GP','Wisdom','Draft a map of a small area (DC 15).'],
-  ["Cobbler’s Tools",5,'5 GP','Dexterity','Modify footwear for advantage on the wearer’s next Acrobatics check (DC 10).'],["Cook’s Utensils",8,'1 GP','Wisdom','Improve flavor (DC 10); detect spoiled or poisoned food (DC 15).'],
-  ["Glassblower’s Tools",5,'30 GP','Intelligence','Discern a glass container’s contents in the past 24 hours (DC 15).'],["Jeweler’s Tools",2,'25 GP','Intelligence','Discern a gem’s value (DC 15).'],["Leatherworker’s Tools",5,'5 GP','Dexterity','Add a leather design (DC 10).'],
-  ["Mason’s Tools",8,'10 GP','Strength','Chisel a symbol or hole in stone (DC 10).'],["Painter’s Supplies",5,'10 GP','Wisdom','Paint a recognizable image (DC 10).'],["Potter’s Tools",3,'10 GP','Intelligence','Discern a ceramic container’s contents in the past 24 hours (DC 15).'],
-  ["Smith’s Tools",8,'20 GP','Strength','Pry open a door or container (DC 20).'],["Tinker’s Tools",10,'50 GP','Dexterity','Build a Tiny scrap item that lasts 1 minute (DC 20).'],["Weaver’s Tools",5,'1 GP','Dexterity','Mend clothing or sew a Tiny design (DC 10).'],["Woodcarver’s Tools",5,'1 GP','Dexterity','Carve a pattern in wood (DC 10).'],
-  ['Disguise Kit',3,'25 GP','Charisma','Apply makeup (DC 10).'],['Forgery Kit',5,'15 GP','Dexterity','Mimic up to 10 words (DC 15); duplicate a wax seal (DC 20).'],['Herbalism Kit',3,'5 GP','Intelligence','Identify a plant (DC 10). Craft antitoxin, candles, healer’s kits, or healing potions.'],["Navigator’s Tools",2,'25 GP','Wisdom','Plot a course (DC 10); determine position by stars (DC 15).'],["Poisoner’s Kit",2,'50 GP','Intelligence','Detect poison on an object (DC 10).'],["Thieves’ Tools",1,'25 GP','Dexterity','Pick a lock or disarm a trap (DC 15).']
-];
-const tools = toolRows.map(([name,weight,cost,ability,details])=>equipment(name,'Tools',weight,cost,`${ability} checks. Utilize: ${details} Add proficiency if trained; also gain advantage if a proficient skill applies.`));
-const instruments = [['Bagpipes',6,30],['Drum',3,6],['Dulcimer',10,25],['Flute',1,2],['Horn',2,3],['Lute',2,35],['Lyre',2,30],['Pan Flute',2,12],['Shawm',1,2],['Viol',1,30]].map(([name,weight,gp])=>equipment(name,'Musical instruments',weight,`${gp} GP`,'Charisma checks. Play a known tune (DC 10) or improvise a song (DC 15). Each instrument has its own proficiency.'));
-const gaming = [['Dice Set','1 SP'],['Dragonchess Set','1 GP'],['Playing Card Set','5 SP'],['Three-Dragon Ante Set','1 GP']].map(([name,cost])=>equipment(name,'Gaming sets',0,cost,'Wisdom checks. Detect cheating (DC 10) or win the game (DC 20). Each set has its own proficiency.'));
+
+const tools = TOOL_ROWS.map(([name,weight,cost,ability,details])=>equipment(name,'Tools',weight,cost,`${ability} checks. Utilize: ${details} Add proficiency if trained; also gain advantage if a proficient skill applies.`,{toolAbility:{Strength:'str',Dexterity:'dex',Intelligence:'int',Wisdom:'wis',Charisma:'cha'}[ability]}));
+const instruments = [['Bagpipes',6,30],['Drum',3,6],['Dulcimer',10,25],['Flute',1,2],['Horn',2,3],['Lute',2,35],['Lyre',2,30],['Pan Flute',2,12],['Shawm',1,2],['Viol',1,30]].map(([name,weight,gp])=>equipment(name,'Musical instruments',weight,`${gp} GP`,'Charisma checks. Play a known tune (DC 10) or improvise a song (DC 15). Each instrument has its own proficiency.',{toolAbility:'cha'}));
+const gaming = [['Dice Set','1 SP'],['Dragonchess Set','1 GP'],['Playing Card Set','5 SP'],['Three-Dragon Ante Set','1 GP']].map(([name,cost])=>equipment(name,'Gaming sets',0,cost,'Wisdom checks. Detect cheating (DC 10) or win the game (DC 20). Each set has its own proficiency.',{toolAbility:'wis'}));
 const ammunition = [['Arrows',20,1,'1 GP'],['Bolts',20,1.5,'1 GP'],['Bullets, Firearm',10,2,'3 GP'],['Bullets, Sling',20,1.5,'4 CP'],['Needles',50,1,'1 GP']].map(([name,amount,weight,cost])=>equipment(name,'Ammunition',weight,cost,`${amount} pieces per bundle. Quantity counts bundles; weight and price are per bundle. Storage sold separately.`));
 const focuses = [
   ['Crystal (Arcane Focus)',1,'10 GP','Sorcerer, Warlock, or Wizard spellcasting focus.'],['Orb (Arcane Focus)',3,'20 GP','Sorcerer, Warlock, or Wizard spellcasting focus.'],['Rod (Arcane Focus)',2,'10 GP','Sorcerer, Warlock, or Wizard spellcasting focus.'],['Staff (Arcane Focus)',4,'5 GP','Sorcerer, Warlock, or Wizard focus; also functions as a Quarterstaff.'],['Wand (Arcane Focus)',1,'10 GP','Sorcerer, Warlock, or Wizard spellcasting focus.'],
@@ -179,9 +134,7 @@ export const itemFromEquipment = item => ({id:uid(),qty:1,equipped:false,...equi
 export function attackFromWeapon(weapon,character) {
   const ability=weapon.properties.includes('Finesse')?(character.stats.dex>character.stats.str?'dex':'str'):weapon.family.endsWith('ranged')?'dex':'str';
   const modifier=mod(character.stats[ability]);
-  const training=(character.weaponProficiencies||CLASS_OPTIONS.find(option=>option.name===character.class)?.weapons||'').toLowerCase();
-  const restricted=training.includes('with finesse or light')?weapon.properties.includes('Finesse')||weapon.properties.includes('Light'):training.includes('with light')?weapon.properties.includes('Light'):true;
-  const proficient=training.includes(weapon.name.toLowerCase())||training.includes('all weapons')||(weapon.family.startsWith('Simple')?training.includes('simple'):training.includes('martial')&&restricted);
+  const proficient=hasWeaponTraining(character,weapon);
   const heavyDisadvantage=weapon.properties.includes('Heavy')&&character.stats[weapon.family.endsWith('ranged')?'dex':'str']<13;
   const distance=weapon.properties.match(/\d+\/\d+ ft\./)?.[0],reach=weapon.properties.includes('Reach')?'10 ft.':'5 ft.';
   const range=weapon.family.endsWith('melee')?reach+(distance?`; thrown ${distance}`:''):distance||reach;

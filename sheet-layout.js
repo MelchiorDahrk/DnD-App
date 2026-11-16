@@ -1,8 +1,8 @@
 import {icon} from './icons.js';
 
-export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials','proficiencies'];
+export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials'];
 // Keep older layouts valid, including favorites still used by the inventory page.
-const SAVED_SECTIONS = [...SHEET_SECTIONS,'personality','journal','pack'];
+const SAVED_SECTIONS = [...SHEET_SECTIONS,'proficiencies','personality','journal','pack'];
 const sheetScrolls = new WeakMap();
 
 export function validSheetLayout(layout) {
@@ -10,6 +10,7 @@ export function validSheetLayout(layout) {
   const uniqueList = (value,max,valid) => Array.isArray(value) && value.length <= max && new Set(value).size === value.length && value.every(valid);
   return record(layout)
     && (layout.skillsProficientOnly===undefined || typeof layout.skillsProficientOnly==='boolean')
+    && (layout.skillsTab===undefined || ['skills','proficiencies','languages','tools','saves'].includes(layout.skillsTab))
     && uniqueList(layout.collapsed,SAVED_SECTIONS.length,key=>SAVED_SECTIONS.includes(key))
     && record(layout.favorites)
     && Object.entries(layout.favorites).every(([section,keys])=>SAVED_SECTIONS.includes(section)
@@ -228,6 +229,10 @@ export function refreshSheetLayout(root,c) {
       button.title=favorite?'Remove from favorites':'Favorite: keep visible when collapsed';
     }
     for (const extra of section.querySelectorAll('[data-sheet-extra]')) extra.hidden=collapsed;
+    if(key==='skills'){
+      for(const extra of section.querySelectorAll('.training-tabs,.training-notes,.skill-controls'))extra.hidden=collapsed;
+      for(const panel of section.querySelectorAll('.training-tab-panel'))panel.hidden=collapsed?!panel.querySelector('[data-sheet-entry]:not([hidden])'):panel.id!==`skills-panel-${c.sheetLayout?.skillsTab||'skills'}`;
+    }
     for (const group of section.querySelectorAll('[data-sheet-group]')) group.hidden=collapsed && !group.querySelector('[data-sheet-entry]:not([hidden])');
     section.classList.toggle('is-collapsed',collapsed);
     section.querySelector('.sheet-section-body').hidden=collapsed && !favorites;

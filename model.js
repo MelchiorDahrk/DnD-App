@@ -3,6 +3,7 @@ import {validSheetLayout} from './sheet-layout.js';
 import {ACTION_TYPES} from './sheet-actions.js';
 import {itemUses,removeEmptyItems} from './inventory-rules.js';
 import {wikiURL} from './reference-links.js';
+import {attackIsProficient,validTraining} from './training-rules.js';
 export {RULES_URL,wikiURL,subclassURL,referenceURL,safeURL} from './reference-links.js';
 
 export const SAVE_VERSION = 2;
@@ -51,7 +52,7 @@ export const exhaustionPenalty = c => 2 * c.exhaustion;
 export const walkingSpeed = c => Math.max(0,c.speed - 5 * c.exhaustion);
 export const abilityCheckBonus = (c,ability) => mod(c.stats[ability]) - exhaustionPenalty(c);
 export const saveBonus = (c,ability) => abilityCheckBonus(c,ability) + (c.saves.includes(ability) ? proficiency(c.level) : 0);
-export const attackBonus = (c,a) => abilityCheckBonus(c,a.ability) + a.bonus + (a.proficient ? proficiency(c.level) : 0);
+export const attackBonus = (c,a) => abilityCheckBonus(c,a.ability) + a.bonus + (attackIsProficient(c,a) ? proficiency(c.level) : 0);
 export function skillBonus(c, skill) { return abilityCheckBonus(c,SKILLS[skill]) + (c.expertise.includes(skill) ? 2 : c.skills.includes(skill) ? 1 : 0) * proficiency(c.level); }
 export const initiative = c => abilityCheckBonus(c,'dex') + c.initiativeBonus;
 export const passivePerception = c => 10 + skillBonus(c,'Perception') + c.passivePerceptionBonus;
@@ -199,6 +200,7 @@ function validateCharacter(c) {
   requireThat(string(c.playerName,120),'invalid player name.');
   requireThat(c.portrait===undefined||validPortrait(c.portrait),'invalid character portrait.');
   requireThat(c.sheetLayout===undefined||validSheetLayout(c.sheetLayout),'invalid character sheet layout.');
+  requireThat(c.training===undefined||validTraining(c.training),'invalid training selections.');
   for (const key of Object.keys(SHEET_TEXT)) requireThat(string(c[key]),`invalid ${key}.`);
   for (const key of ['electrum','platinum']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
   for (const key of ['initiativeBonus','passivePerceptionBonus']) requireThat(integerIn(c[key],-99,99),`invalid ${key}.`);
@@ -251,6 +253,7 @@ function validateCharacter(c) {
     requireThat(string(v.name,200)&&v.name.trim()&&Object.hasOwn(ABILITIES,v.ability)&&integerIn(v.bonus,-99,99)&&typeof v.proficient==='boolean'&&string(v.damage,30)&&string(v.type,100)&&string(v.range,100),'invalid attack.');
     requireThat(string(v.notes),'invalid attack notes.');
     requireThat(['normal','advantage','disadvantage'].includes(v.rollMode),'invalid attack roll mode.');
+    requireThat(v.proficiencyMode===undefined||['auto','proficient','untrained'].includes(v.proficiencyMode),'invalid attack proficiency mode.');
     requireThat(validDiceFormula(v.damage),'invalid attack damage.');
     requireThat(v.weaponId===undefined||(string(v.weaponId,100)&&/^[a-z0-9-]*$/.test(v.weaponId)),'invalid attack weapon reference.');
     requireThat(v.mastery===undefined||['','Cleave','Graze','Nick','Push','Sap','Slow','Topple','Vex'].includes(v.mastery),'invalid attack mastery.');

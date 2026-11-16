@@ -2,6 +2,7 @@ import {levelUp,uid,mod,SKILLS,ABILITIES,wikiURL,subclassURL,parseBackup,SAVE_VE
 import {FEATURE_CATALOG,featureFields,featureMatchesCharacter,isFeat} from './feature-catalog.js';
 import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
+import {trainingFor,ensureTraining,trainingKey} from './training-rules.js';
 import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
 
 export const normalized=s=>String(s||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]/g,'');
@@ -71,7 +72,7 @@ function eligibleFeat(f,c){
   if(['War Caster','Elemental Adept','Spell Sniper','Eldritch Adept','Metamagic Adept'].includes(f.name)&&!classProgression(c).prepared)return false;
   if(f.name==='Grappler'&&c.stats.str<13&&c.stats.dex<13)return false;
   if(f.name==='Ritual Caster'&&!['int','wis','cha'].some(a=>c.stats[a]>=13))return false;
-  const base=CLASS_OPTIONS.find(option=>option.name===c.class),armor=c.armorProficiencies||base.armor,weapons=c.weaponProficiencies||base.weapons;
+  const training=trainingFor(c),armor=training.armor.join(' '),weapons=WEAPONS.some(w=>w.family.startsWith('Martial')&&training.weapons.includes(w.id))?'martial':'';
   if(f.name==='Strike of the Giants'&&!/martial/i.test(weapons)&&normalized(c.background)!=='giantfoundling')return false;
   if(f.name==='Rune Shaper'&&!classProgression(c).prepared&&normalized(c.background)!=='runecarver')return false;
   if(f.name==='Initiate of High Sorcery'&&!['Sorcerer','Wizard'].includes(c.class)&&normalized(c.background)!=='mageofhighsorcery')return false;
@@ -116,7 +117,7 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   const choices=[];
   const add=(id,label,count,options,kind='feature')=>{if(count>0)choices.push({id,label,count,kind,options:options.map(o=>typeof o==='string'?{id:o,label:o}:o)});};
   const skillOptions=(allowed=Object.keys(SKILLS))=>(Array.isArray(allowed)?allowed:/^Any/.test(allowed)?Object.keys(SKILLS):String(allowed).split(',').map(s=>s.trim())).filter(s=>Object.hasOwn(SKILLS,s)&&!c.skills.includes(s));
-  const toolOptions=EQUIPMENT.filter(e=>['Tools','Musical instruments','Gaming sets'].includes(e.group)&&!normalized(c.toolProficiencies).includes(normalized(e.name))).map(e=>({id:e.name,label:e.name}));
+  const toolOptions=EQUIPMENT.filter(e=>e.toolAbility&&!trainingFor(c).tools.includes(e.id)).map(e=>({id:e.name,label:e.name}));
   const artisanNames=new Set(EQUIPMENT.filter(e=>e.group==='Tools').slice(0,17).map(e=>e.name));
   const baseSkills=CLASS_OPTIONS.find(o=>o.name===c.class);
   if(c.skills.length<baseSkills.skillCount)add('classSkills','Earlier class skill proficiencies',baseSkills.skillCount-c.skills.length,skillOptions(baseSkills.skills),'skills');
@@ -313,7 +314,7 @@ export function applyLevelUp(character,selection={}){
   for(const {choice,option} of picked){
     if(choice.kind==='skills')c.skills.push(option.id);
     else if(choice.kind==='training'&&Object.hasOwn(SKILLS,option.id))c.skills.push(option.id);
-    else if(choice.kind==='tool'||choice.kind==='training')c.toolProficiencies=[c.toolProficiencies,option.id].filter(Boolean).join('; ');
+    else if(choice.kind==='tool'||choice.kind==='training'){const tools=ensureTraining(c).tools,id=trainingKey(option.id);if(!tools.includes(id))tools.push(id);c.toolProficiencies=[c.toolProficiencies,option.id].filter(Boolean).join('; ');}
     else if(choice.kind==='knowledge'){c.skills.push(option.id);c.expertise.push(option.id);}
     else if(choice.kind==='save')c.saves.push(option.id);
     else if(choice.kind==='expertise')c.expertise.push(option.id);

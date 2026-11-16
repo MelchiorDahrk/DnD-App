@@ -1,10 +1,23 @@
-import {ARMOR,EQUIPMENT,WEAPONS,CLASS_OPTIONS,findEquipment} from './catalog.js';
+import {ARMOR,EQUIPMENT,WEAPONS,findEquipment} from './catalog.js';
 import {equipmentName} from './inventory-rules.js';
 import {mod} from './model.js';
+import {hasArmorTraining} from './training-rules.js';
+
+export function armorTrainingEffects(character) {
+  const worn=character.items.filter(equipped).map(item=>({item,...itemDefense(item)})).filter(p=>p.armor&&p.armor.family!=='Shield');
+  const untrained=worn.filter(p=>!trainedWithArmor(character,p));
+  return {untrained,blocksCasting:untrained.length>0,disadvantage:untrained.length>0,stealth:worn.some(p=>p.armor.stealth)};
+}
+export function armorCheckMode(c,ability,advantage=false,disadvantage=false,skill='') {
+  const effects=armorTrainingEffects(c);
+  disadvantage ||= effects.disadvantage&&['str','dex'].includes(ability)||skill==='Stealth'&&effects.stealth;
+  return advantage===disadvantage?'normal':advantage?'advantage':'disadvantage';
+}
 
 const armorName = name => equipmentName(name).replace(/\+\s*[123]/g,'').replace(/[,()]/g,'').replace(/\barmor\b/g,'').replace(/\s+/g,' ').trim();
 const equipped = item => item.equipped && item.qty>0;
 const itemEntry = item => findEquipment(item.catalogId)||EQUIPMENT.find(entry=>equipmentName(entry.name)===equipmentName(item.name));
+const trainedWithArmor=(character,profile)=>hasArmorTraining(character,profile.armor.family)||profile.entry?.id==='magic-elven-chain'||equipmentName(profile.item.name)==='elven chain';
 
 // Resolve catalog data on demand so older, name-only inventory entries work too.
 // Free-form descriptions aren't interpreted as executable rules.
@@ -63,12 +76,12 @@ export function armorClassDetails(character) {
   const armor=active.filter(profile=>profile.armor&&profile.armor.family!=='Shield')
     .sort((a,b)=>armorValue(b)-armorValue(a))[0];
   const hands=active.reduce((sum,profile)=>sum+profile.hands,0);
-  const training=character.armorProficiencies||CLASS_OPTIONS.find(option=>option.name===character.class)?.armor||'';
   const shields=active.filter(profile=>profile.armor?.family==='Shield');
   const usingShield=hands<=1&&shields.length>0;
-  const shield=hands<=1&&/shield/i.test(training)?shields.sort((a,b)=>bonus(b)-bonus(a))[0]:null;
+  const shield=hands<=1&&hasArmorTraining(character,'Shield')?shields.sort((a,b)=>bonus(b)-bonus(a))[0]:null;
   if(shields.length&&!shield)warnings.push(hands>1?'Shield inactive: both hands are occupied.':'Shield inactive: shield training is required.');
   if(hands>2)warnings.push('More than two hands are equipped; put away unused weapons.');
+  if(armor&&!trainedWithArmor(character,armor))warnings.push('No '+armor.armor.family.toLowerCase()+' armor training: disadvantage on Strength/Dexterity D20 Tests; cannot cast spells.');
   for(const profile of active) {
     if(profile.item.category==='Armor'&&!profile.armor)warnings.push(`Choose a base armor for ${profile.item.name}.`);
     if(profile.requiresAttunement&&!profile.item.attuned&&profile.bonus)warnings.push(`${profile.item.name}: attunement needed for its AC bonus.`);

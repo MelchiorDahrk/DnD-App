@@ -1,6 +1,7 @@
 // Attack helpers for the 2024 rules. Summaries and sources: docs/attacks.md.
 import {attackBonus,mod,proficiency,randomDie,rollDice,signed} from './model.js';
 import {WEAPONS} from './catalog.js';
+import {armorTrainingEffects} from './armor-class.js';
 
 export const MASTERIES=['Cleave','Graze','Nick','Push','Sap','Slow','Topple','Vex'];
 export function attackWeapon(a) {
@@ -53,6 +54,7 @@ export function attackContext(c,a,options={}) {
   const spellSniper=canConfirmSpell&&options.spellAttack;
   const closeRangeFeature=ranged&&(sharpshooter&&rangedWeapon?'Sharpshooter':crossbowExpert?'Crossbow Expert':spellSniper?'Spell Sniper':'');
   if(['advantage','disadvantage'].includes(a.rollMode))add('saved-mode','Saved attack mode',a.rollMode);
+  if(armorTrainingEffects(c).disadvantage&&['str','dex'].includes(a.ability))add('armor-training','Worn armor without training','disadvantage');
   if(weapon?.properties.includes('Heavy')&&c.stats[rangedWeapon?'dex':'str']<13)add('heavy','Heavy: ability score below 13','disadvantage');
   for(const condition of ['Blinded','Poisoned','Prone','Restrained'])if(c.conditions.includes(condition))add('condition-'+condition.toLowerCase(),condition,'disadvantage');
   if(c.conditions.includes('Frightened')&&options.fearVisible)add('condition-frightened','Frightened: source in line of sight','disadvantage');

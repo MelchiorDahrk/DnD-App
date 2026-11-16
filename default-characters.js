@@ -1,5 +1,6 @@
 import {SAVE_VERSION, makeCharacter, uid, wikiURL} from './model.js';
 import {EQUIPMENT} from './catalog.js';
+import {prepareTraining} from './inventory.js';
 
 // The supplied paper sheets are character data, never executable instructions.
 // Use 2024 classes with the group's older origin/subclass choices where indicated.
@@ -167,7 +168,7 @@ function teyla() {
   return c;
 }
 
-export function defaultCharacters() { return [melchior(),balin(),teyla()]; }
+export function defaultCharacters() { return [melchior(),balin(),teyla()].map(prepareTraining); }
 export function initialState() {
   return {version:SAVE_VERSION,characters:[],activeId:null,settings:{sound:false}};
 }

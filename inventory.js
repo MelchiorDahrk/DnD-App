@@ -1,6 +1,35 @@
 import {EQUIPMENT,itemFromEquipment,attackFromEquipment} from './catalog.js';
-import {uid} from './model.js';
+import {uid,abilityCheckBonus,proficiency,SKILLS} from './model.js';
 import {PACK_CONTENTS,equipmentName,removeEmptyItems} from './inventory-rules.js';
+import {ensureTraining,trainingKey} from './training-rules.js';
+
+export const toolCatalog = () => EQUIPMENT.filter(entry=>entry.toolAbility);
+export function itemTool(item) {
+  return toolCatalog().find(entry=>entry.id===item.catalogId)||toolCatalog().find(entry=>trainingKey(entry.name)===trainingKey(item.name)||entry.id==='jewelers-tools'&&trainingKey(item.name)==='jewelers-kit');
+}
+export function addToolToInventory(c,id) {
+  const entry=toolCatalog().find(entry=>entry.id===id);
+  if(!entry)throw new Error('Choose a tool from the catalog.');
+  const owned=c.items.find(item=>itemTool(item)?.id===id);
+  if(owned){if(owned.qty===0)owned.qty=1;return owned;}
+  if(c.items.length>=2000)throw new Error('Your inventory is full. Remove an item before adding tools.');
+  const item=itemFromEquipment(entry);c.items.push(item);return item;
+}
+export function prepareTraining(c) {
+  const importing=!c.training;
+  ensureTraining(c);
+  // Convert the old combined sheet once. Later proficiency changes never grant gear.
+  if(importing)for(const id of c.training.tools)if(c.items.length<2000)addToolToInventory(c,id);
+  return c;
+}
+export function toolCheck(c,item,{ability=itemTool(item)?.toolAbility,skill=''}={}) {
+  const tool=itemTool(item);
+  if(!tool||!c.items.includes(item)||item.qty<1)throw new Error('Carry this tool in your pack before using it.');
+  if(!['str','dex','con','int','wis','cha'].includes(ability)||skill&&!Object.hasOwn(SKILLS,skill))throw new Error('Choose an ability and an applicable skill.');
+  const trained=ensureTraining(c).tools.includes(tool.id),skilled=skill&&(c.skills.includes(skill)||c.expertise.includes(skill));
+  const multiplier=skilled&&c.expertise.includes(skill)?2:trained||skilled?1:0;
+  return {ability,skill,trained,skilled:!!skilled,advantage:!!(trained&&skilled),bonus:abilityCheckBonus(c,ability)+multiplier*proficiency(c.level)};
+}
 
 export function itemAttack(character,item) {
   return item.id?character.attacks.find(attack=>attack.itemId===item.id):undefined;
@@ -16,6 +45,7 @@ export function saveItemAttack(character,item,fields) {
 }
 
 export function linkWeaponActions(character) {
+  prepareTraining(character);
   removeEmptyItems(character);
   const weapons=character.items.filter(item=>item.category==='Weapon');
   for(const item of weapons){
