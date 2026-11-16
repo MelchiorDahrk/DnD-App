@@ -5,6 +5,15 @@ const out=resolve(root,'dist');
 // Always package from source so removed files cannot survive a local rebuild.
 await rm(out,{recursive:true,force:true});
 await mkdir(out,{recursive:true});
+for(const file of ['firebase-config.js','firebase-client.js','cloud-model.js','cloud-store.js','cloud-sync.js','cloud-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
+await cp(resolve(root,'firebase-sdk'),resolve(out,'firebase-sdk'),{recursive:true});
+// The JSON setting contains public Firebase web identifiers only. An empty value
+// keeps the checked-in public project; "null" produces a guest-only build.
+if(process.env.QUESTLOG_FIREBASE_CONFIG?.trim()){
+  const {writeFile}=await import('node:fs/promises');
+  const config=JSON.parse(process.env.QUESTLOG_FIREBASE_CONFIG);
+  await writeFile(resolve(out,'firebase-config.js'),`export const firebaseConfig=${JSON.stringify(config)};\nexport function configuration(scope=globalThis){return Object.hasOwn(scope,'QUESTLOG_FIREBASE_CONFIG')?scope.QUESTLOG_FIREBASE_CONFIG:firebaseConfig;}\n`);
+}
 for(const file of ['dice-roller.js','dice-roller.css'])await copyFile(resolve(root,file),resolve(out,file));
 await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});

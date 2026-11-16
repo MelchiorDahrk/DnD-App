@@ -46,6 +46,10 @@ jobs:
         # The full rules suite takes over two minutes on GitHub's shared runners.
         timeout-minutes: 5
         run: npm test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
       - uses: browser-actions/setup-chrome@v2
         id: chrome
         with:
@@ -85,6 +89,13 @@ jobs:
         run: npm run build
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          QUESTLOG_FIREBASE_CONFIG: ${{ vars.QUESTLOG_FIREBASE_CONFIG }}
+      - name: Verify Firebase accounts, rules, offline replay and live parties
+        timeout-minutes: 8
+        run: npm run test:firebase
+        env:
+          CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
+          QUESTLOG_TEST_BUILD: dist
       # Save before tests: a later assertion or deploy failure must not discard
       # successful incremental part renders. Exact hits are immutable and need no save.
       - name: Save generated portrait assets
