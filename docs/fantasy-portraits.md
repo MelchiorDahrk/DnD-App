@@ -93,8 +93,7 @@ interruption; fingerprints include transitive shared geometry.
 
 The host dialog has four stages: upload, crop/regions, review, preview/apply.
 All photograph processing runs locally. There is no portrait inference endpoint,
-OpenAI configuration or runtime external reference source. The sheet scanner
-retains its separate endpoint and configuration.
+OpenAI configuration or runtime external reference source.
 
 ### Reference generation
 

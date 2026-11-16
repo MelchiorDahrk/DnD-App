@@ -12,8 +12,6 @@ The defaults use **2024 class rules** with the group's existing older options re
 
 All three passive Perception totals now come from actual Perception proficiency, with zero manual passive adjustment. The selected Origin feats and unrecorded language/tool/maneuver choices are editable and documented. Inventory quantities and all five coin denominations are included; item weights follow the catalog with labeled estimates where needed. Paper ammunition quantities count individual pieces. Teyla’s expanded Explorer’s pack counts only its backpack, with contents weighed separately. Existing saved weights remain editable and are preserved on load. Magic item effects, poison, situational saves, Primal Knowledge while raging, and house rules are managed at the table. Choosing an attack roll mode or initiative advantage controls those rolls automatically.
 
-**Scan a sheet**, available from the character switcher and Settings, separately transcribes photos through an optional online scan service and opens an editable review before creating a new character. Scanning preserves the submitted sheet rather than automatically converting its rules. Ambiguous handwriting is flagged; original photos can be expanded for comparison. See [scanning setup](../README.md#sheet-scanning-setup).
-
 | Paper sheet | App location and behavior |
 | --- | --- |
 | Character name, player name, class and level, background, species, alignment, XP | **Edit character details** on the hero card. Includes subclass and campaign. Set level and XP directly when copying a sheet; **Level up** reviews HP, features, skills, feats, spells, slots and resource scaling before advancing during play. |

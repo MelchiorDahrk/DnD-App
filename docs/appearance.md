@@ -31,9 +31,9 @@ The audit covered the vanilla HTML/JavaScript shell, the original root palette a
 | Journal | Parchment/dark note cards, search/filter, long note reader and editor |
 | Dice | Shared tray, die display, roll modes, history and result dialogs |
 | Compendium and Settings | Catalog previews, forms, sound controls, backup and install screens |
-| Dialogs and overlays | Creation/editing, deletion/confirmation, level-up, rests, combat, scanning, toasts, portrait editor surrounding UI |
+| Dialogs and overlays | Creation/editing, deletion/confirmation, level-up, rests, combat, toasts, portrait editor surrounding UI |
 
-Specialized dialog producers in `attack-ui.js`, `level-up-ui.js`, `catalog-ui.js`, `sheet-scan-ui.js`, and `portrait-ui.js` retain their controls and mechanics. `portrait.js`, `item-icons.js`, `equipment-icons.js`, the Bricktrait iframe, and its LDraw asset pipeline continue to own imagery. Original scenery, sound, passive VFX, and lazy portrait/offline handling are retained.
+Specialized dialog producers in `attack-ui.js`, `level-up-ui.js`, `catalog-ui.js`, and `portrait-ui.js` retain their controls and mechanics. `portrait.js`, `item-icons.js`, `equipment-icons.js`, the Bricktrait iframe, and its LDraw asset pipeline continue to own imagery. Original scenery, sound, passive VFX, and lazy portrait/offline handling are retained.
 
 ## Components and accessibility
 
