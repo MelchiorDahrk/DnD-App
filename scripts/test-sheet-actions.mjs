@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
-import {checkSheetImprovements} from '../tests/helpers/sheet-improvements.mjs';
+import {checkSheetImprovements,checkSheetPopups} from '../tests/helpers/sheet-improvements.mjs';
 
 const root=resolve(import.meta.dirname,'..'),port=process.env.SHEET_ACTIONS_TEST_PORT||'4196';
 const base=process.env.SHEET_ACTIONS_TEST_URL||`http://127.0.0.1:${port}/`;
@@ -29,6 +29,7 @@ try {
   await mkdir(resolve(root,'.tmp'),{recursive:true});
   await page.goto(base,{waitUntil:'networkidle0'});
   await checkSheetImprovements(page,{base,original:defaultPartyState(),root});
+  await checkSheetPopups(page);
   assert.deepEqual(errors,[]);
 } finally {
   await browser?.close();

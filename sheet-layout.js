@@ -1,15 +1,17 @@
 import {icon} from './icons.js';
 
-export const SHEET_SECTIONS = ['abilities','combat','attacks','journal','pack','skills','features','essentials','personality','proficiencies'];
+export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials','personality','proficiencies'];
+// Keep older layouts valid, including favorites still used by the inventory page.
+const SAVED_SECTIONS = [...SHEET_SECTIONS,'journal','pack'];
 
 export function validSheetLayout(layout) {
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const uniqueList = (value,max,valid) => Array.isArray(value) && value.length <= max && new Set(value).size === value.length && value.every(valid);
   return record(layout)
     && (layout.skillsProficientOnly===undefined || typeof layout.skillsProficientOnly==='boolean')
-    && uniqueList(layout.collapsed,SHEET_SECTIONS.length,key=>SHEET_SECTIONS.includes(key))
+    && uniqueList(layout.collapsed,SAVED_SECTIONS.length,key=>SAVED_SECTIONS.includes(key))
     && record(layout.favorites)
-    && Object.entries(layout.favorites).every(([section,keys])=>SHEET_SECTIONS.includes(section)
+    && Object.entries(layout.favorites).every(([section,keys])=>SAVED_SECTIONS.includes(section)
       && uniqueList(keys,section==='attacks'?4001:2001,key=>typeof key === 'string' && key.length > 0 && key.length <= 120));
 }
 
@@ -26,7 +28,7 @@ export function toggleSheetSection(c,section) {
 }
 
 export function toggleSheetFavorite(c,section,key) {
-  if (!SHEET_SECTIONS.includes(section) || typeof key !== 'string' || !key || key.length > 120) return;
+  if (!SAVED_SECTIONS.includes(section) || typeof key !== 'string' || !key || key.length > 120) return;
   const layout=layoutFor(c),keys=layout.favorites[section] || [];
   layout.favorites[section]=keys.includes(key)?keys.filter(value=>value!==key):[...keys,key];
 }
@@ -89,7 +91,7 @@ export function mountSheetLayout(root,c,activeSection='') {
 function mountSheetNavigation(root,activeSection) {
   const header=root.querySelector('.sheet-header'),nav=header?.querySelector('.sheet-section-nav');
   if(!nav)return ()=>{};
-  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',journal:'Journal',pack:'Pack',skills:'Skills',features:'Features',essentials:'Senses',personality:'Story',proficiencies:'Training'};
+  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',skills:'Skills',features:'Features',essentials:'Senses',personality:'Story',proficiencies:'Training'};
   const sections=[...root.querySelectorAll('[data-sheet-section]')];
   for(const section of sections) {
     const key=section.dataset.sheetSection,toggle=section.querySelector('.sheet-section-toggle');

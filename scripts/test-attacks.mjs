@@ -143,7 +143,7 @@ try{
   for(let points=1;points<=3;points++) {
     await page.click(gain);assert.equal((await active()).inspiration,points);
     assert.equal(await page.$eval('.inspiration-count',n=>n.textContent),`${points} / 3`);
-    assert.match(await page.$eval('.sheet-inspiration',n=>n.getAttribute('aria-label')),new RegExp(`${points} point`));
+    assert.equal(await page.$('.sheet-header .sheet-inspiration'),null,'Sticky header has no inspiration shortcut');
   }
   assert.equal(await page.$eval(gain,n=>n.disabled),true);
   await page.click(spend);assert.equal((await active()).inspiration,2);

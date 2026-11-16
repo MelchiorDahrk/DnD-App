@@ -19,8 +19,14 @@ export async function checkSheetNavigation(page,{original,root}) {
   assert.ok(await page.$$eval('.sheet-section-link',nodes=>nodes.every(n=>document.getElementById(n.getAttribute('aria-controls')))));
   assert.match(await page.$eval('.sheet-health',n=>n.getAttribute('aria-label')),/5 of .*plus 7 temporary hit points/);
   assert.match(await page.$eval('.sheet-status .has-conditions',n=>n.getAttribute('aria-label')),/Poisoned, Prone, Exhaustion 2/);
-  assert.equal(await page.$eval('.sheet-concentration.is-active',n=>n.title),'Concentrating on Bless <Ward>');
-  assert.ok(await page.$('.sheet-inspiration.is-active'));
+  assert.equal(await page.$('.sheet-concentration, .sheet-inspiration, .sheet-status [data-action="combat-edit"]'),null);
+  await page.click('.sheet-status-stat[aria-label^="Armor class"]');
+  assert.equal(await page.$('#modal[open]'),null,'Armor class is read-only in the sticky header');
+  for(const key of ['hp-current','hp-temp']) {
+    const width=await page.$eval(`.sheet-health-track>.${key}`,n=>n.style.width);
+    assert.equal(width,await page.$eval(`.hp-track>.${key}`,n=>n.style.width),'Both HP bars use the same scale');
+  }
+  assert.equal(await page.$eval('.sheet-health-track>.hp-temp',n=>getComputedStyle(n).backgroundColor),await page.$eval('.hp-track>.hp-temp',n=>getComputedStyle(n).backgroundColor));
   for(const width of [1440,390,320]) {
     await page.setViewport({width,height:width===1440?1100:844});
     await page.evaluate(()=>scrollTo(0,400));
@@ -64,10 +70,19 @@ export async function checkSheetNavigation(page,{original,root}) {
   await page.click('#mobile-nav [data-route="inventory"]');
   assert.equal(await page.$('.sheet-header'),null,'Other pages do not show sheet navigation');
   await page.click('#mobile-nav [data-route="sheet"]');
-  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),10,'Returning mounts a single navigation');
+  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),SHEET_SECTIONS.length,'Returning mounts a single navigation');
+  for(const [hp,tempHp] of [[c.maxHp,c.maxHp],[0,7],[5,0]]) {
+    Object.assign(c,{hp,tempHp});
+    await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
+    await page.reload({waitUntil:'load'});
+    const scale=Math.max(c.maxHp,hp+tempHp);
+    assert.ok(Math.abs(await page.$eval('.sheet-health-track>.hp-current',n=>parseFloat(n.style.width))-hp/scale*100)<.001);
+    assert.equal(await page.$('.sheet-health-track>.hp-temp')!==null,!!tempHp);
+    if(tempHp) assert.equal(await page.$eval('.sheet-health-track>.hp-temp',n=>n.style.width),await page.$eval('.hp-track>.hp-temp',n=>n.style.width));
+  }
   Object.assign(c,{hp:0,tempHp:0,deathSuccess:1,deathFailure:2});
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.match(await page.$eval('.sheet-health.is-down',n=>n.getAttribute('aria-label')),/Death saves: 1 successes, 2 failures/);
   assert.equal(await page.$eval('.sheet-death-summary',n=>n.textContent),'✓ 1✕ 2');
   await page.evaluate(()=>window.QuestlogTheme.set('dark'));
@@ -75,7 +90,7 @@ export async function checkSheetNavigation(page,{original,root}) {
   await page.screenshot({path:resolve(root,'.tmp/sheet-navigation-dark-320.png')});
   await page.setOfflineMode(true);
   await page.reload({waitUntil:'load'});
-  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),10,'Navigation reloads offline');
+  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),SHEET_SECTIONS.length,'Navigation reloads offline');
   await page.$eval(link('features'),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
   await page.click(link('features'));
   assert.equal(await page.$eval('[data-sheet-section="features"] .sheet-section-toggle',n=>n.getAttribute('aria-expanded')),'true');
@@ -85,6 +100,61 @@ export async function checkSheetNavigation(page,{original,root}) {
   await page.setViewport({width:1440,height:1100});
   await page.reload({waitUntil:'load'});
   console.log('PASS sticky section navigation, collapsed destinations, keyboard focus, live status, compact desktop/mobile layout, character switching and offline navigation');
+}
+
+export async function checkSheetPopups(page) {
+  const settle=()=>page.evaluate(()=>new Promise(resolve=>setTimeout(resolve,150)));
+  for(const width of [1440,390,320]) {
+    await page.setViewport({width,height:650});
+    for(const action of ['combat-edit','level-up']) {
+      console.log(`RUN ${width}px ${action} modal scrolling`);
+      await page.evaluate(()=>scrollTo(0,500));
+      // Open from a scrolled sheet without Puppeteer scrolling the trigger first.
+      await page.$eval(`#main [data-action="${action}"]`,n=>n.click());
+      await page.waitForSelector('#modal[open]');
+      const backgroundY=await page.evaluate(()=>scrollY);
+      await page.mouse.move(2,300);
+      await page.mouse.wheel({deltaY:400});
+      await settle();
+      assert.equal(await page.evaluate(()=>scrollY),backgroundY,`${width}px ${action}: backdrop scrolling stays locked`);
+      const box=await page.$eval('#modal',n=>{const r=n.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2};});
+      await page.$eval('#modal',n=>n.scrollTop=0);
+      await page.mouse.move(box.x,box.y);
+      await page.mouse.wheel({deltaY:500});
+      await page.waitForFunction(()=>document.querySelector('#modal').scrollTop>0);
+      await page.$eval('#modal',n=>n.scrollTop=n.scrollHeight);
+      await page.mouse.wheel({deltaY:500});
+      await settle();
+      assert.equal(await page.evaluate(()=>scrollY),backgroundY,`${width}px ${action}: dialog scroll cannot chain to the page`);
+      if(action==='combat-edit')await page.keyboard.press('Escape');
+      else await page.click('#modal [data-action="close"]');
+      await page.waitForFunction(()=>!document.querySelector('dialog:modal'));
+      assert.equal(await page.evaluate(()=>scrollY),backgroundY,'Closing preserves the page position');
+      await page.mouse.move(width/2,300);
+      await page.mouse.wheel({deltaY:-250});
+      await page.waitForFunction(y=>scrollY<y,{},backgroundY);
+    }
+  }
+  await page.setViewport({width:1440,height:900});
+  await page.$eval('[data-action="edit-character"]',n=>n.click());
+  await page.click('#modal [data-action="portrait"]');
+  await page.waitForSelector('.portrait-dialog[open]');
+  assert.equal(await page.$$eval('dialog:modal',nodes=>nodes.length),1,'Portrait editor replaces the shared dialog');
+  const backgroundY=await page.evaluate(()=>scrollY);
+  await page.mouse.move(2,300);
+  await page.mouse.wheel({deltaY:400});
+  await settle();
+  assert.equal(await page.evaluate(()=>scrollY),backgroundY,'The separate portrait dialog locks background scrolling');
+  await page.click('[data-portrait-close]');
+  await page.waitForSelector('.portrait-dialog',{hidden:true});
+  await page.waitForFunction(()=>!document.querySelector('dialog:modal'));
+  for(const route of ['sheet','inventory','spells','journal','dice','wiki','settings']) {
+    await page.$eval(`#sidebar [data-route="${route}"]`,n=>n.click());
+    assert.doesNotMatch(await page.$eval('body',n=>n.textContent),/A little less bookkeeping|A little more adventure/i);
+  }
+  await page.click('#sidebar [data-route="sheet"]');
+  await page.setViewport({width:1440,height:1100});
+  console.log('PASS status and level-up dialogs scroll independently, page scrolling resumes on close, portrait dialog locks the page, and all pages omit the slogan');
 }
 
 export async function checkSheetImprovements(page,{base,original,root}) {
@@ -105,8 +175,8 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   const entry=(section,id)=>`[data-sheet-section="${section}"] [data-sheet-entry="${id}"]`;
   await page.setViewport({width:1440,height:1100});
   await page.evaluate((s,key)=>{localStorage.setItem('questlog.v2',JSON.stringify(s));localStorage.removeItem(key);},fixture,CONDITION_USAGE_KEY);
-  await page.goto(new URL('#inventory',base).href,{waitUntil:'networkidle0'});
-  await page.reload({waitUntil:'networkidle0'});
+  await page.goto(new URL('#inventory',base).href,{waitUntil:'load'});
+  await page.reload({waitUntil:'load'});
   const favorite='[data-action="sheet-favorite"][data-entry="sheet-favorite-item"]';
   await page.click(favorite);
   assert.equal(await page.$eval(favorite,n=>n.getAttribute('aria-pressed')),'true');
@@ -114,31 +184,31 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('.filter-tabs [data-filter="Favorites"]');
   assert.equal(await page.$$eval('.inventory-list .action-row',n=>n.length),1);
   await page.click('.desktop-nav [data-route="sheet"]');
-  for(const id of ['sheet-favorite-item','sheet-equipped-item','sheet-potion','sheet-weapon']) assert.ok(await page.$(entry('pack',id)),`${id} appears on sheet`);
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null,'Inventory and journal previews are absent');
   assert.equal(await page.$eval('.heading-actions [data-action="rest"]',n=>n.textContent.trim()),'Rest');
   await page.click('.heading-actions [data-action="rest"]');
   for(const kind of ['long','short']) assert.ok(await page.$(`#modal [data-action="rest"][data-kind="${kind}"]`));
   await page.click('#modal [data-action="rest"][data-kind="short"]');
   assert.ok(await page.$('#modal [name="dice"]'),'Rest offers Short Rest Hit Dice');
   await page.click('#modal [data-action="close"]');
-  for(const [section,title] of [['abilities','Abilities'],['combat','Status'],['journal','Journal'],['pack','Inventory']]) assert.equal(await page.$eval(`[data-sheet-section="${section}"] .sheet-section-toggle`,n=>n.dataset.label),title);
-  await page.click('[data-sheet-section="pack"] .sheet-section-toggle');
-  assert.equal(await page.$eval(entry('pack',gear.id),n=>n.hidden),false,'Inventory favorite survives collapse');
-  await page.click('[data-sheet-section="pack"] .sheet-section-toggle');
-  await page.click(`${entry('pack','sheet-equipped-item')} [data-action="use-item"]`);
+  for(const [section,title] of [['abilities','Abilities'],['combat','Status']]) assert.equal(await page.$eval(`[data-sheet-section="${section}"] .sheet-section-toggle`,n=>n.dataset.label),title);
+  await page.click('.desktop-nav [data-route="inventory"]');
+  const inventoryItem=id=>`[data-inventory-item="${id}"]`;
+  await page.click(`${inventoryItem('sheet-equipped-item')} [data-action="use-item"]`);
   assert.match(await page.$eval('#modal',n=>n.textContent),/A useful keepsake/);
   await page.click('#modal [data-action="close"]');
   assert.equal(active(await state()).items.find(i=>i.id==='sheet-equipped-item').qty,1);
-  await page.click(`${entry('pack','sheet-weapon')} [data-action="use-item"]`);
+  await page.click(`${inventoryItem('sheet-weapon')} [data-action="use-item"]`);
   await page.click('#modal [data-action="attack-roll"]');
   assert.ok(await page.$('#modal [data-combat-action="roll"]'),'Equipped weapon opens guided attack');
   await page.click('#modal [data-combat-action="close"]');
-  await page.click(`${entry('pack','sheet-potion')} [data-action="use-item"]`);
+  await page.click(`${inventoryItem('sheet-potion')} [data-action="use-item"]`);
   await page.click('#modal [data-action="confirm-use-item"]');
   assert.equal(active(await state()).items.find(i=>i.id==='sheet-potion'),undefined);
-  assert.ok(active(await state()).hp>c.hp,'Potion heals from sheet');
+  assert.ok(active(await state()).hp>c.hp,'Potion heals from inventory');
   await page.click('#modal [data-action="close"]');
-  assert.equal(await page.$(entry('pack','sheet-potion')),null);
+  assert.equal(await page.$(inventoryItem('sheet-potion')),null);
+  await page.click('.desktop-nav [data-route="sheet"]');
 
   for(const [id,label] of [['sheet-action-spell','Action'],['sheet-bonus-spell','Bonus Action'],['sheet-reaction-spell','Reaction']]) assert.equal(await page.$eval(`${entry('attacks',id)} .action-timing`,n=>n.textContent),label);
   assert.equal(await page.$(entry('attacks','sheet-unready-spell')),null);
@@ -147,7 +217,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   assert.equal(active(await state()).slots[0].used,1);
   assert.equal(active(await state()).concentration,'Sheet bonus spell');
   assert.equal(await page.$eval(`${entry('attacks','sheet-bonus-spell')} .spell-concentration`,n=>n.textContent),'Concentrating');
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.match(await page.$eval('[data-sheet-section="attacks"] .concentration-banner',n=>n.textContent),/Sheet bonus spell/);
   await page.click('[data-action="end-concentration"]');
   assert.equal(active(await state()).concentration,'');
@@ -173,7 +243,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   assert.deepEqual(active(await state()).conditions,CONDITIONS);
   await page.click('#modal button[type="submit"]');
   assert.ok(await page.$('.condition-more .condition-overflow-dot'),'Overflow indicates hidden active conditions');
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   await page.click('.condition-more');
   await page.click('#modal [data-condition="Blinded"]');
   assert.ok(!active(await state()).conditions.includes('Blinded'));
@@ -186,7 +256,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   const proficient=[...new Set([...c.skills,...c.expertise])].sort();
   assert.deepEqual(await page.$$eval('[data-action="skill-prof"]',n=>n.map(n=>n.dataset.skill).sort()),proficient);
   assert.equal(await page.$$eval('[data-action="save-roll"]',n=>n.length),6);
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.equal(await page.$eval('[data-action="skills-filter"]',n=>n.getAttribute('aria-pressed')),'true');
   assert.equal(await page.$eval(`${entry('attacks',c.attacks[0].id)} .action-timing`,n=>n.textContent),'Bonus Action');
   await page.click('[data-action="characters"]');
@@ -206,8 +276,9 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   }
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);
-  await page.reload({waitUntil:'networkidle0'});
-  assert.ok(await page.$(entry('pack',gear.id)),'Inventory favorite reloads offline');
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null,'Removed previews stay absent offline');
+  assert.ok(active(await state()).sheetLayout.favorites.pack.includes(gear.id),'Inventory favorites persist offline');
   await waitForImages(page,'.condition-tray img');
   await page.click('.condition-more');
   await waitForImages(page,'#modal .condition-icon');
@@ -219,9 +290,9 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click(favorite);
   assert.equal(await page.$eval(favorite,n=>n.getAttribute('aria-pressed')),'false');
   await page.click('.desktop-nav [data-route="sheet"]');
-  assert.equal(await page.$(entry('pack',gear.id)),null,'Removing inventory favorite removes the extra sheet item');
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
   await page.setViewport({width:1440,height:1100});
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   console.log('PASS inventory favorites, equipped item use, action timing, readied spells and concentration, all condition icons, saved skill filter, mobile and offline behavior');
 }

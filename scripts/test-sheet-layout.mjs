@@ -1,7 +1,7 @@
 import {visualChecks,waitForImages,waitForRollResult} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {catalogSheetState} from '../tests/helpers/sheet-fixtures.mjs';
-import {checkSheetImprovements,checkSheetNavigation} from '../tests/helpers/sheet-improvements.mjs';
+import {checkSheetImprovements,checkSheetNavigation,checkSheetPopups} from '../tests/helpers/sheet-improvements.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir,writeFile} from 'node:fs/promises';
@@ -10,7 +10,6 @@ import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {parseBackup} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
-import {sheetItems} from '../sheet-actions.js';
 import {equipmentIconURL} from '../equipment-icons.js';
 import {EQUIPMENT} from '../catalog.js';
 
@@ -39,9 +38,9 @@ try {
   page.on('pageerror',error=>errors.push(error.message));
   page.on('console',message=>{consoleMessages.push(`${message.type()}: ${message.text()}`);if(consoleMessages.length>50)consoleMessages.shift();});
   await page.setViewport({width:1440,height:1100});
-  await page.goto(base,{waitUntil:'networkidle0'});
+  await page.goto(base,{waitUntil:'load'});
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),defaultPartyState());
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   await page.waitForSelector('[data-sheet-section]');
   assert.equal(await page.$$eval('[data-sheet-section]',nodes=>nodes.length),SHEET_SECTIONS.length);
   assert.equal(await page.$$eval('[data-sheet-entry] button button',nodes=>nodes.length),0);
@@ -55,22 +54,15 @@ try {
   phase='default party sheet and attack artwork';
   console.log(`RUN ${phase}`);
 
-  // Every shipped item must render through the sheet, including entries beyond
-  // the compact pack preview. Favorites expose them without changing inventories.
+  // Existing saved pack favorites must not restore inventory on the sheet.
   const coverage=structuredClone(original);
   for(const c of coverage.characters)c.sheetLayout={collapsed:[],favorites:{pack:c.items.map(item=>item.id)}};
   for(const c of coverage.characters) {
     coverage.activeId=c.id;
     await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),coverage);
-    await page.reload({waitUntil:'networkidle0'});
+    await page.reload({waitUntil:'load'});
     assert.equal(await page.$('canvas'),null,'Sheet icons must not initialize WebGL');
-    for(const item of c.items) {
-      const selector=`${entrySelector('pack',item.id)} .equipment-icon img`;
-      assert.ok(await page.$(selector),`${c.name}: sheet icon for ${item.name}`);
-      await waitForImages(page,selector);
-      if(visualChecks)assert.ok(await page.$eval(selector,img=>img.naturalWidth===160&&img.naturalHeight===160),`${c.name}: thumbnail size for ${item.name}`);
-      assert.equal(await page.$eval(selector,img=>img.getAttribute('src')),equipmentIconURL(item));
-    }
+    assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null,`${c.name}: removed previews stay absent`);
     for(const attack of c.attacks) {
       assert.ok(equipmentIconURL(attack),`${c.name}: explicit artwork for ${attack.name}`);
       const selector=`${entrySelector('attacks',attack.id)} .equipment-icon img`;
@@ -92,21 +84,21 @@ try {
   console.log(`RUN ${phase}`);
   const catalogState=catalogSheetState(original);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),catalogState);
-  await page.goto(new URL('#inventory',base).href,{waitUntil:'networkidle0'});
-  await page.reload({waitUntil:'networkidle0'});
+  await page.goto(new URL('#inventory',base).href,{waitUntil:'load'});
+  await page.reload({waitUntil:'load'});
   const catalogImages='.inventory-list .equipment-icon img';
   assert.equal(await page.$$eval(catalogImages,imgs=>imgs.length),EQUIPMENT.length+1,'Every catalog item renders after loading a valid save');
   await waitForImages(page,catalogImages);
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.equal(await page.$$eval(catalogImages,imgs=>imgs.length),EQUIPMENT.length+1,'Every catalog item also renders offline');
   await waitForImages(page,catalogImages);
   await page.setOfflineMode(false);
   await page.setViewport({width:390,height:844});
   if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'Full catalog inventory fits mobile');
   await page.setViewport({width:1440,height:1100});
-  await page.goto(new URL('#sheet',base).href,{waitUntil:'networkidle0'});
+  await page.goto(new URL('#sheet',base).href,{waitUntil:'load'});
   const renamed=entrySelector('attacks','renamed-weapon');
   assert.match(await page.$eval(`${renamed} img`,img=>img.getAttribute('src')),/\/rapier.webp/);
   await page.click(`${renamed} [data-action="attack-roll"]`);
@@ -119,11 +111,9 @@ try {
   phase='section favorites, interactions and persistence';
   console.log(`RUN ${phase}`);
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
-  await page.reload({waitUntil:'networkidle0'});
-  await page.$eval('[data-sheet-section="pack"]',node=>node.scrollIntoView());
-  await waitForImages(page,'[data-sheet-section="pack"] .equipment-icon img');
-  assert.ok(await page.$$eval('[data-sheet-section="pack"] .equipment-icon img',(imgs,count)=>imgs.length===count&&imgs.every(img=>img.complete&&img.naturalWidth>0),sheetItems(active(original)).length),'Sheet inventory preview and equipped items show LEGO icons');
-  console.log('PASS all 63 default inventory entries and every default attack show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null);
+  console.log('PASS removed previews stay absent and default attacks show loaded LEGO icons on desktop/mobile sheets and dialogs without WebGL');
 
   for (const width of [390,320]) {
     await page.setViewport({width,height:844});
@@ -154,7 +144,7 @@ try {
     assert.equal(await page.$eval(`${selector} .sheet-section-toggle`,node=>node.getAttribute('aria-expanded')),'false');
     assert.equal(await page.$eval(`${entrySelector(section,key)} .sheet-favorite`,node=>node.getAttribute('aria-pressed')),'true');
   }
-  console.log('PASS all ten sections collapse by keyboard and retain only favorite entries');
+  console.log(`PASS all ${SHEET_SECTIONS.length} sections collapse by keyboard and retain only favorite entries`);
 
   phase='collapsed favorite ability roll';
   await page.locator(`${entrySelector('abilities',selected.abilities)} [data-action="ability-roll"]`).click();
@@ -197,14 +187,14 @@ try {
 
   phase='favorite persistence and character switching';
   const layout=active(await state()).sheetLayout;
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.deepEqual(active(await state()).sheetLayout,layout);
   for (const section of SHEET_SECTIONS) assert.deepEqual(await visibleKeys(section),[selected[section]]);
   const restored=parseBackup(JSON.stringify(await state()));
   assert.deepEqual(active(restored).sheetLayout,layout);
   await page.click('[data-action="characters"]');
   await page.click('[data-action="switch-character"]:not(.active)');
-  assert.equal(await page.$$eval('.sheet-section-toggle[aria-expanded="true"]',nodes=>nodes.length),10);
+  assert.equal(await page.$$eval('.sheet-section-toggle[aria-expanded="true"]',nodes=>nodes.length),SHEET_SECTIONS.length);
   await page.click('[data-action="characters"]');
   await page.click(`[data-action="switch-character"][data-id="${original.activeId}"]`);
   assert.deepEqual(active(await state()).sheetLayout,layout);
@@ -229,25 +219,26 @@ try {
   assert.equal((await visibleKeys('skills')).length,24);
   console.log('PASS mobile layouts at 390px and 320px, removing the last favorite, and expanding restores all rows');
 
-  // A note remains a favorite when another note becomes the journal preview.
+  // Changing inventory and notes does not restore the removed previews.
   const saved=await state(),c=active(saved);
   c.notes.unshift({...c.notes[0],id:'new-preview',title:'A different pinned note',pinned:true});
-  const packFavorite=c.items.find(item=>item.id===selected.pack);
-  c.items.unshift(...[1,2,3].map(i=>({...packFavorite,id:`new-consumable-${i}`})));
+  c.items.unshift(...[1,2,3].map(i=>({...c.items[0],id:`new-consumable-${i}`})));
   await page.evaluate(saved=>localStorage.setItem('questlog.v2',JSON.stringify(saved)),saved);
-  await page.reload({waitUntil:'networkidle0'});
-  assert.deepEqual(await visibleKeys('journal'),[selected.journal]);
-  assert.deepEqual(await visibleKeys('pack'),[selected.pack]);
-  console.log('PASS favorite journal notes and items survive changes to the usual previews');
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null);
+  console.log('PASS journal and inventory changes leave the sheet focused on character stats');
 
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);
-  await page.reload({waitUntil:'networkidle0'});
-  assert.deepEqual(await visibleKeys('pack'),[selected.pack]);
+  await page.reload({waitUntil:'load'});
+  assert.deepEqual(await visibleKeys('abilities'),[selected.abilities]);
+  assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null);
   await page.setOfflineMode(false);
   console.log('PASS the sheet and favorites reload offline from the updated service-worker cache');
 
-  await page.click(`${entrySelector('attacks',selected.attacks)} [data-action="attack"]`);
+  const editFavoriteAttack=`${entrySelector('attacks',selected.attacks)} [data-action="attack"]`;
+  await page.$eval(editFavoriteAttack,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
+  await page.locator(editFavoriteAttack).click();
   await page.click('#modal [data-action="delete-entry"]');
   await page.click('#modal [data-action="confirm-delete"]');
   assert.deepEqual(await visibleKeys('attacks'),[]);
@@ -258,7 +249,7 @@ try {
   emptyCharacter.slots.forEach(slot=>{slot.max=0;slot.used=0;});
   emptyCharacter.sheetLayout={collapsed:[...SHEET_SECTIONS],favorites:{}};
   await page.evaluate(saved=>localStorage.setItem('questlog.v2',JSON.stringify(saved)),empty);
-  await page.reload({waitUntil:'networkidle0'});
+  await page.reload({waitUntil:'load'});
   assert.equal(await page.$$eval('.sheet-section-body:not([hidden])',nodes=>nodes.length),0);
   for (const section of SHEET_SECTIONS) {
     if(visualChecks)assert.ok(await page.$eval(sectionSelector(section),node=>node.getBoundingClientRect().height<100),'Sections without favorites should shrink to their headings');
@@ -271,6 +262,9 @@ try {
   phase='sticky section navigation and compact status summary';
   console.log(`RUN ${phase}`);
   await checkSheetNavigation(page,{original,root});
+  phase='modal scrolling and shared page footer';
+  console.log(`RUN ${phase}`);
+  await checkSheetPopups(page);
   assert.deepEqual(errors,[]);
 } catch(error) {
   const directory=resolve(root,'.tmp/browser-diagnostics/sheet');
