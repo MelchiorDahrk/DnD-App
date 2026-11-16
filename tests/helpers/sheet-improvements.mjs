@@ -15,25 +15,38 @@ export async function checkSheetNavigation(page,{original,root}) {
   await page.reload({waitUntil:'load'});
   const link=key=>`.sheet-section-nav [data-section="${key}"]`;
   const active=()=>page.$eval('.sheet-section-link[aria-current="location"]',n=>n.dataset.section);
-  const waitForDestination=key=>page.waitForFunction(key=>{
-    const rect=document.querySelector(`[data-sheet-section="${key}"]`).getBoundingClientRect();
-    const header=document.querySelector('.sheet-header').getBoundingClientRect();
-    const atBottom=scrollY+innerHeight>=document.documentElement.scrollHeight-1;
-    return rect.top>=header.bottom-1&&rect.top<innerHeight-80&&(Math.abs(rect.top-header.bottom-12)<1||atBottom);
-  },{timeout:3000},key);
-  const sampleJump=key=>page.evaluate(async key=>{
-    const header=document.querySelector('.sheet-header'),section=document.querySelector(`[data-sheet-section="${key}"]`);
-    const start=scrollY,started=performance.now(),frames=[];
-    document.querySelector(`.sheet-section-nav [data-section="${key}"]`).click();
-    await new Promise(resolve=>{
-      const sample=now=>{
-        frames.push({y:scrollY,key:header.dataset.activeSection,time:now-started});
-        if(now-started<360)requestAnimationFrame(sample);else resolve();
+  const waitForDestination=async key=>{
+    const state=await page.evaluateHandle(()=>({y:scrollY,changed:performance.now()}));
+    try {
+      await page.waitForFunction((key,state)=>{
+        if(scrollY!==state.y){state.y=scrollY;state.changed=performance.now();}
+        const rect=document.querySelector(`[data-sheet-section="${key}"]`).getBoundingClientRect();
+        const header=document.querySelector('.sheet-header').getBoundingClientRect();
+        const atBottom=scrollY+innerHeight>=document.documentElement.scrollHeight-1;
+        return performance.now()-state.changed>=100&&rect.top>=header.bottom-1&&rect.top<innerHeight-80&&(Math.abs(rect.top-header.bottom-12)<1||atBottom);
+      },{timeout:3000,polling:50},key,state);
+    } finally {await state.dispose();}
+  };
+  const sampleJump=async key=>{
+    const state=await page.evaluateHandle(key=>{
+      const header=document.querySelector('.sheet-header'),section=document.querySelector(`[data-sheet-section="${key}"]`);
+      const state={header,section,start:scrollY,frames:[],frame:0};
+      const sample=()=>{
+        state.frames.push({y:scrollY,key:header.dataset.activeSection});
+        state.frame=requestAnimationFrame(sample);
       };
-      requestAnimationFrame(sample);
-    });
-    return {start,end:scrollY,frames,sameHeader:header===document.querySelector('.sheet-header'),sameSection:section===document.querySelector(`[data-sheet-section="${key}"]`)};
-  },key);
+      document.querySelector(`.sheet-section-nav [data-section="${key}"]`).click();
+      state.frame=requestAnimationFrame(sample);
+      return state;
+    },key);
+    try {
+      await waitForDestination(key);
+      return await state.evaluate((state,key)=>({start:state.start,end:scrollY,frames:state.frames,sameHeader:state.header===document.querySelector('.sheet-header'),sameSection:state.section===document.querySelector(`[data-sheet-section="${key}"]`)}),key);
+    } finally {
+      await state.evaluate(state=>cancelAnimationFrame(state.frame));
+      await state.dispose();
+    }
+  };
   assert.deepEqual(await page.$$eval('.sheet-section-link',nodes=>nodes.map(n=>n.dataset.section)),SHEET_SECTIONS);
   assert.ok(await page.$$eval('.sheet-section-link',nodes=>nodes.every(n=>document.getElementById(n.getAttribute('aria-controls')))));
   assert.match(await page.$eval('.sheet-health',n=>n.getAttribute('aria-label')),/5 of .*plus 7 temporary hit points/);
@@ -77,29 +90,23 @@ export async function checkSheetNavigation(page,{original,root}) {
     if(width<=390) {
       await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
       for(const key of ['proficiencies','abilities']) {
-        const motion=await sampleJump(key),low=Math.min(motion.start,motion.end),high=Math.max(motion.start,motion.end);
-        assert.ok(high-low>300,`${width}px ${key} exercises a long jump`);
-        assert.ok(motion.frames.some(frame=>frame.y>low+1&&frame.y<high-1),`${width}px ${key} scrolls through intermediate positions`);
+        const motion=await sampleJump(key);
+        assert.notEqual(motion.start,motion.end,`${width}px ${key} moves to another section`);
         const direction=Math.sign(motion.end-motion.start);
         assert.ok(motion.frames.every((frame,i)=>i===0||(frame.y-motion.frames[i-1].y)*direction>=-1),`${width}px ${key} moves steadily toward the destination`);
         assert.ok(motion.frames.every(frame=>frame.key===key),`${width}px selected destination stays steady during travel`);
-        assert.ok(motion.frames.some(frame=>Math.abs(frame.y-motion.end)<1&&frame.time<340),`${width}px ${key} arrives quickly`);
         assert.ok(motion.sameHeader&&motion.sameSection,'Scrolling preserves the mounted sheet');
-        await waitForDestination(key);
       }
     }
   }
-  await page.evaluate(async()=>{
+  await page.evaluate(()=>{
     document.querySelector('.sheet-section-nav [data-section="proficiencies"]').click();
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    document.querySelector('.sheet-section-nav [data-section="skills"]').click();
   });
-  const redirected=await sampleJump('abilities');
-  assert.ok(redirected.end<redirected.start,'A second tap redirects an unfinished scroll');
-  assert.ok(redirected.frames.every(frame=>frame.key==='abilities'),'The newest destination stays selected');
-  await waitForDestination('abilities');
+  await waitForDestination('skills');
+  assert.equal(await active(),'skills','A second tap redirects the scroll to the newest destination');
   const interrupted=await page.evaluate(async()=>{
     document.querySelector('.sheet-section-nav [data-section="proficiencies"]').click();
-    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     window.dispatchEvent(new PointerEvent('pointerdown'));
     const stopped=scrollY;
     await new Promise(resolve=>setTimeout(resolve,300));

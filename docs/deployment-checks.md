@@ -119,6 +119,19 @@ the corresponding miss, hit confirmation, and damage controls. Actual clicks,
 rules, dice rendering and feature-use checks remain in place. Set
 `SHEET_TEST_CPU_RATE=4` with `npm run test:sheet` to stress slower browser execution.
 
+## Section navigation timing regression
+
+[Run 43877503661](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43877503661)
+built successfully but failed the new `390px abilities arrives quickly` assertion.
+That browser check required a painted final frame before 340 ms, so a delayed
+animation frame could block publication even though the scroll reached its target.
+
+The 240 ms easing, intermediate positions, sparse frames, retargeting and reduced
+motion are now checked with a controlled clock in `tests/sheet-navigation.test.mjs`.
+Browser checks wait for the correct destination and a stable scroll position with
+a three-second bound, and still verify selection, focus, interruption, persistence
+and offline behavior. They do not impose a frame-rate or painting-speed requirement.
+
 ## Automatic portrait thumbnail regression
 
 [Run 43781269178](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43781269178)
