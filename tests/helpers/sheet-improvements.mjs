@@ -3,6 +3,89 @@ import {resolve} from 'node:path';
 import {CONDITIONS,SKILLS,parseBackup} from '../../model.js';
 import {CONDITION_USAGE_KEY,QUICK_CONDITION_LIMIT} from '../../condition-usage.js';
 import {waitForImages} from './browser-checks.mjs';
+import {SHEET_SECTIONS} from '../../sheet-layout.js';
+
+export async function checkSheetNavigation(page,{original,root}) {
+  const previousTheme=await page.evaluate(()=>window.QuestlogTheme.preference);
+  await page.evaluate(()=>window.QuestlogTheme.set('light'));
+  const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);
+  c.sheetLayout={collapsed:[...SHEET_SECTIONS],favorites:{abilities:['str']}};
+  Object.assign(c,{hp:5,tempHp:7,conditions:['Poisoned','Prone'],exhaustion:2,inspiration:true,concentration:'Bless <Ward>'});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
+  await page.reload({waitUntil:'load'});
+  const link=key=>`.sheet-section-nav [data-section="${key}"]`;
+  const active=()=>page.$eval('.sheet-section-link[aria-current="location"]',n=>n.dataset.section);
+  assert.deepEqual(await page.$$eval('.sheet-section-link',nodes=>nodes.map(n=>n.dataset.section)),SHEET_SECTIONS);
+  assert.ok(await page.$$eval('.sheet-section-link',nodes=>nodes.every(n=>document.getElementById(n.getAttribute('aria-controls')))));
+  assert.match(await page.$eval('.sheet-health',n=>n.getAttribute('aria-label')),/5 of .*plus 7 temporary hit points/);
+  assert.match(await page.$eval('.sheet-status .has-conditions',n=>n.getAttribute('aria-label')),/Poisoned, Prone, Exhaustion 2/);
+  assert.equal(await page.$eval('.sheet-concentration.is-active',n=>n.title),'Concentrating on Bless <Ward>');
+  assert.ok(await page.$('.sheet-inspiration.is-active'));
+  for(const width of [1440,390,320]) {
+    await page.setViewport({width,height:width===1440?1100:844});
+    await page.evaluate(()=>scrollTo(0,400));
+    await page.waitForFunction(()=>document.querySelector('.sheet-header').getBoundingClientRect().top===(innerWidth<=760?65:0));
+    const dimensions=await page.$eval('.sheet-header',n=>({height:n.offsetHeight,width:n.offsetWidth,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth}));
+    assert.ok(dimensions.height<=96,`${width}px header stays compact`);
+    assert.ok(dimensions.scrollWidth<=dimensions.viewport,`${width}px header fits the screen`);
+    for(const key of SHEET_SECTIONS) {
+      await page.$eval(link(key),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
+      await page.click(link(key));
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      await page.waitForFunction(key=>document.activeElement?.dataset.section===key,{},key);
+      assert.equal(await page.$eval(`[data-sheet-section="${key}"] .sheet-section-toggle`,n=>n.getAttribute('aria-expanded')),'true',`${key} opens on jump`);
+      await page.waitForFunction(key=>document.querySelector('.sheet-header').dataset.activeSection===key,{timeout:3000},key);
+      assert.equal(await active(),key,`${width}px ${key} is selected`);
+      const visible=await page.$eval(`[data-sheet-section="${key}"]`,n=>{
+        const rect=n.getBoundingClientRect(),header=document.querySelector('.sheet-header').getBoundingClientRect();
+        return rect.top>=header.bottom-1&&rect.top<innerHeight-80;
+      });
+      assert.ok(visible,`${width}px ${key} heading stays visible below the header`);
+    }
+    await page.$eval(link('skills'),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
+    await page.click(link('skills'));
+    await page.evaluate(()=>scrollBy(0,100));
+    await page.waitForFunction(()=>document.querySelector('.sheet-header').dataset.activeSection==='skills');
+    await page.evaluate(()=>{document.activeElement?.blur();document.querySelectorAll('.toast').forEach(n=>n.remove());});
+    await page.screenshot({path:resolve(root,`.tmp/sheet-navigation-${width}.png`)});
+  }
+  const layout=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters.find(c=>c.id===JSON.parse(localStorage.getItem('questlog.v2')).activeId).sheetLayout);
+  assert.deepEqual(layout.favorites,{abilities:['str']},'Jumping preserves favorites');
+  assert.deepEqual(layout.collapsed,[],'Expanded destinations are saved');
+  await page.click('.sheet-status [data-action="conditions"]');
+  await page.$eval('#modal [name="exhaustion"]',n=>n.value='1');
+  await page.click('#modal button[type="submit"]');
+  assert.equal(await page.$eval('.sheet-exhaustion',n=>n.textContent),'E1','Status summary updates after edits');
+  await page.click('[data-action="characters"]');
+  await page.click('[data-action="switch-character"]:not(.active)');
+  const next=await page.evaluate(()=>{const s=JSON.parse(localStorage.getItem('questlog.v2'));return s.characters.find(c=>c.id===s.activeId);});
+  assert.match(await page.$eval('.sheet-status',n=>n.getAttribute('aria-label')),new RegExp(next.name));
+  assert.equal(await page.$eval('.sheet-health-value>strong',n=>Number(n.textContent)),next.hp);
+  await page.click('#mobile-nav [data-route="inventory"]');
+  assert.equal(await page.$('.sheet-header'),null,'Other pages do not show sheet navigation');
+  await page.click('#mobile-nav [data-route="sheet"]');
+  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),10,'Returning mounts a single navigation');
+  Object.assign(c,{hp:0,tempHp:0,deathSuccess:1,deathFailure:2});
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
+  await page.reload({waitUntil:'networkidle0'});
+  assert.match(await page.$eval('.sheet-health.is-down',n=>n.getAttribute('aria-label')),/Death saves: 1 successes, 2 failures/);
+  assert.equal(await page.$eval('.sheet-death-summary',n=>n.textContent),'✓ 1✕ 2');
+  await page.evaluate(()=>window.QuestlogTheme.set('dark'));
+  await page.evaluate(()=>scrollTo(0,800));
+  await page.screenshot({path:resolve(root,'.tmp/sheet-navigation-dark-320.png')});
+  await page.setOfflineMode(true);
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$$eval('.sheet-section-link',n=>n.length),10,'Navigation reloads offline');
+  await page.$eval(link('features'),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
+  await page.click(link('features'));
+  assert.equal(await page.$eval('[data-sheet-section="features"] .sheet-section-toggle',n=>n.getAttribute('aria-expanded')),'true');
+  await page.setOfflineMode(false);
+  await page.evaluate(theme=>window.QuestlogTheme.set(theme),previousTheme);
+  await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),original);
+  await page.setViewport({width:1440,height:1100});
+  await page.reload({waitUntil:'load'});
+  console.log('PASS sticky section navigation, collapsed destinations, keyboard focus, live status, compact desktop/mobile layout, character switching and offline navigation');
+}
 
 export async function checkSheetImprovements(page,{base,original,root}) {
   const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);

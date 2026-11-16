@@ -1,7 +1,7 @@
 import {visualChecks,waitForImages,waitForRollResult} from '../tests/helpers/browser-checks.mjs';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {catalogSheetState} from '../tests/helpers/sheet-fixtures.mjs';
-import {checkSheetImprovements} from '../tests/helpers/sheet-improvements.mjs';
+import {checkSheetImprovements,checkSheetNavigation} from '../tests/helpers/sheet-improvements.mjs';
 import assert from 'node:assert/strict';
 import {existsSync} from 'node:fs';
 import {mkdir,writeFile} from 'node:fs/promises';
@@ -76,6 +76,7 @@ try {
       const selector=`${entrySelector('attacks',attack.id)} .equipment-icon img`;
       assert.ok(await page.$(selector),`${c.name}: sheet weapon icon for ${attack.name}`);
       await waitForImages(page,selector);
+      await page.$eval(`${entrySelector('attacks',attack.id)} [data-action="attack-roll"]`,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
       await page.click(`${entrySelector('attacks',attack.id)} [data-action="attack-roll"]`);
       await waitForImages(page,'#modal .combat-icon img');
       assert.equal(await page.$eval('#modal .combat-icon img',img=>img.getAttribute('src')),equipmentIconURL(attack));
@@ -267,6 +268,9 @@ try {
   phase='sheet improvements, mobile interactions and offline persistence';
   console.log(`RUN ${phase}`);
   await checkSheetImprovements(page,{base,original,root});
+  phase='sticky section navigation and compact status summary';
+  console.log(`RUN ${phase}`);
+  await checkSheetNavigation(page,{original,root});
   assert.deepEqual(errors,[]);
 } catch(error) {
   const directory=resolve(root,'.tmp/browser-diagnostics/sheet');

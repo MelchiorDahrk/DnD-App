@@ -4,7 +4,7 @@ import {icon,conditionIcon} from './icons.js';
 import {createConditionUsage} from './condition-usage.js';
 import {ACTION_TYPES,actionTiming,sheetItems,sheetSpells} from './sheet-actions.js';
 import {itemIconMarkup,attackIconMarkup,installItemIconFallbacks,itemIconPicker,updateItemIconPicker} from './item-icons.js';
-import {isSheetFavorite,mountSheetLayout,refreshSheetLayout,toggleSheetSection,toggleSheetFavorite} from './sheet-layout.js';
+import {isSheetFavorite,mountSheetLayout,refreshSheetLayout,toggleSheetSection,toggleSheetFavorite,jumpToSheetSection} from './sheet-layout.js';
 import {landscape,campArt} from './art.js';
 import {portraitMarkup} from './portrait.js';
 import {openPortraitMaker} from './portrait-ui.js';
@@ -42,6 +42,7 @@ sound.configure({enabled:state.settings.sound});
 let route = Object.hasOwn(routes,location.hash.slice(1))?location.hash.slice(1):'sheet';
 let filter='All',query='',rollMode='normal',diceExpression='1d20',rollHistory=[],lastRoll=null;
 let modalSubmit=null,installPrompt=null;
+let cleanupSheetNavigation=()=>{};
 const conditionUsage=createConditionUsage();
 const character = () => state.characters.find(c=>c.id===state.activeId) || state.characters[0];
 const modal = $('#modal');
@@ -140,6 +141,9 @@ function renderChrome() {
   $('#mobile-nav').innerHTML=mobile.map(([key,sym,label])=>btn(key==='more'?'more':'navigate',icon(sym)+`<span>${label}</span>`,`${route===key||(key==='more'&&['wiki','settings'].includes(route))?'active':''}`,`data-route="${key}" ${route===key?'aria-current="page"':''}`)).join('');
 }
 function render() {
+  const previousSection=$('.sheet-header')?.dataset.activeSection;
+  cleanupSheetNavigation();
+  cleanupSheetNavigation=()=>{};
   const hasCharacter=!!character();
   document.body.classList.toggle('no-character',!hasCharacter);
   for(const id of ['sidebar','topbar','mobile-nav'])$('#'+id).hidden=!hasCharacter;
@@ -153,7 +157,7 @@ function render() {
   renderChrome();
   const views={sheet:renderSheet,inventory:renderInventory,spells:renderSpells,journal:renderJournal,dice:renderDice,wiki:renderWiki,settings:renderSettings};
   $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)} ${btn('export','Export current sheet','btn btn-sm')}</div>`:'')+views[route]();
-  if(route==='sheet')mountSheetLayout($('#main'),character());
+  if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
   document.title=`${routes[route][0]} · Questlog`;
 }
@@ -171,9 +175,23 @@ function slotDots(slot,level,small=false) {return `<div class="slot-dots">${Arra
 function renderHero(c) {
   return `<section class="hero" data-inspired="${c.inspiration}" data-concentrating="${!!c.concentration}" aria-label="${esc(c.name)}"><div class="hero-art">${landscape()}</div>${btn('edit-character',icon('edit'),'icon-btn hero-edit','aria-label="Edit character details"')}<div class="hero-content"><button type="button" class="avatar-frame portrait-button" data-action="portrait" aria-label="Make or edit character portrait" title="Make or edit portrait">${portraitMarkup(c)}<span class="portrait-edit-hint">${icon('edit')}</span><span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></button><div class="hero-info"><h2>${esc(c.name)}</h2><div class="hero-meta"><span>${esc(c.race)}</span><span class="meta-dot">/</span>${ext(wikiURL(c.class),esc(c.class))}${c.subclass?`<span class="meta-dot">/</span><span>${esc(c.subclass)}</span>`:''}</div>${c.playerName?`<div class="hero-player">Played by ${esc(c.playerName)}</div>`:''}<div class="hero-tags"><span class="hero-tag">${esc(c.background)}</span><span class="hero-tag">${esc(c.alignment)}</span></div></div></div></section>`;
 }
+function renderSheetHeader(c) {
+  const effects=[...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])];
+  const health=`${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}${c.hp===0?`. Death saves: ${c.deathSuccess} successes, ${c.deathFailure} failures`:''}`;
+  const concentration=c.concentration?`Concentrating on ${c.concentration}`:'No concentration';
+  const inspiration=`Heroic Inspiration ${c.inspiration?'ready':'not available'}`;
+  return `<div class="sheet-header" role="region" aria-label="Character sheet quick access"><div class="sheet-status" role="group" aria-label="${esc(c.name)} status">
+    ${btn('hp',`<span class="sheet-health-value">${icon('heart')}<strong>${c.hp}</strong><span>/ ${c.maxHp}</span>${c.tempHp?`<span class="sheet-temp-hp">+${c.tempHp}</span>`:''}</span>${c.hp===0?`<span class="sheet-death-summary" aria-hidden="true"><span>✓ ${c.deathSuccess}</span><span>✕ ${c.deathFailure}</span></span>`:`<span class="sheet-health-track" aria-hidden="true"><span style="width:${clamp(c.hp/c.maxHp*100,0,100)}%"></span></span>`}`,`sheet-health${c.hp===0?' is-down':c.hp/c.maxHp<.3?' is-low':''}`,`data-kind="damage" aria-label="${health}. Manage hit points" title="${health}" aria-haspopup="dialog"`)}
+    ${btn('combat-edit',icon('shield')+`<span><small>AC</small><strong>${c.ac}</strong></span>`,'sheet-status-stat',`aria-label="Armor class ${c.ac}. Edit combat stats" title="Armor class ${c.ac}" aria-haspopup="dialog"`)}
+    ${btn('sheet-jump',icon('boot')+`<span><small>Speed</small><strong>${walkingSpeed(c)}<small> ft</small></strong></span>`,'sheet-status-stat sheet-status-speed',`data-section="combat" aria-label="Walking speed ${walkingSpeed(c)} feet. Go to Status" title="Walking speed ${walkingSpeed(c)} feet"`)}
+    <div class="sheet-status-effects">${btn('conditions',icon(effects.length?'flag':'check')+`<span>${effects.length||'OK'}</span>${c.exhaustion?`<span class="sheet-exhaustion">E${c.exhaustion}</span>`:''}`,`sheet-status-effect${effects.length?' has-conditions':''}`,`aria-label="${esc(effects.join(', ')||'No conditions')}. Manage status effects" title="${esc(effects.join(', ')||'No conditions')}" aria-haspopup="dialog"`)}
+    ${btn('sheet-jump',icon('spark')+`<span class="sheet-concentration-name">${esc(c.concentration||'No concentration')}</span>`,`sheet-status-effect sheet-concentration${c.concentration?' is-active':''}`,`data-section="attacks" aria-label="${esc(concentration)}. Go to Actions" title="${esc(concentration)}"`)}
+    ${btn('sheet-jump',icon('star'),`sheet-status-effect sheet-inspiration${c.inspiration?' is-active':''}`,`data-section="combat" aria-label="${inspiration}. Go to Status" title="${inspiration}"`)}</div>
+    </div><nav class="sheet-section-nav" aria-label="Character sheet sections"></nav></div>`;
+}
 function renderSheet() {
   const c=character(),next=XP[c.level+1],pct=next?clamp((c.xp-XP[c.level])/(next-XP[c.level])*100,0,100):100;
-  return pageHeading('Character Sheet',btn('rest',icon('camp')+'Rest','btn','data-kind="long"')+btn('level-up',icon('spark')+'Level up','btn btn-primary',''+(c.level>=20?'disabled':'')))+
+  return renderSheetHeader(c)+pageHeading('Character Sheet',btn('rest',icon('camp')+'Rest','btn','data-kind="long"')+btn('level-up',icon('spark')+'Level up','btn btn-primary',''+(c.level>=20?'disabled':'')))+
     renderHero(c)+`<div class="xp-strip"><span class="xp-label">${icon('spark')}EXPERIENCE</span><div class="xp-progress" role="progressbar" aria-label="Progress to next level" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}"><div class="xp-fill" style="width:${pct}%"></div></div><span class="xp-value"><strong>${fmt(c.xp)}</strong> / ${next?fmt(next)+' XP':'MAX LEVEL'}</span>${btn('xp',icon('plus')+'Add XP','xp-add')}</div>`+
     `<p class="sheet-layout-help">${icon('star')}Star favorites to keep them visible when a section is collapsed. Tap a section title to collapse it.</p><section class="ability-section" data-sheet-section="abilities"><div class="section-heading"><h2>${icon('dice')}Abilities</h2><div style="display:flex;align-items:center;gap:12px"><span class="hint">Tap a modifier to roll${c.exhaustion?' · Exhaustion −'+exhaustionPenalty(c):''}</span>${btn('abilities',icon('edit'),'icon-btn','aria-label="Edit ability scores"')}</div></div><div class="ability-grid" data-sheet-group>${Object.entries(ABILITIES).map(([key,label])=>btn('ability-roll',`<div class="ability-label">${label}</div>${icon('dice','roll-hint')}<div class="ability-mod">${signed(mod(c.stats[key]))}</div><span class="ability-score">${c.stats[key]}</span>`,'ability-card',`${sheetEntry(key,label)} data-key="${key}" aria-label="Roll a ${label} check, ${signed(abilityCheckBonus(c,key))}"`)).join('')}</div></section>`+
     `<div class="dashboard-grid"><div class="column"><section class="panel" data-sheet-section="combat"><div class="panel-heading"><h2>${icon('heart')}Status</h2>${btn('combat-edit','Edit stats','text-btn')}</div>${renderCombat(c)}</section><section class="panel" data-sheet-section="attacks"><div class="panel-heading"><h2>${icon('sword')}Attacks & actions</h2>${btn('attack',icon('plus'),'icon-btn','aria-label="Add an attack"')}</div>${renderSheetActions(c)}</section></div><div class="column">${renderJournalPeek(c)}${renderPackPeek(c)}</div></div>`+
@@ -550,6 +568,10 @@ document.addEventListener('click',event=>{
       case 'portrait':editPortrait();break;
       case 'delete-character':deleteCharacter(id);break;
       case 'sheet-collapse':toggleSheetSection(c,el.dataset.section);persist();renderChrome();refreshSheetLayout($('#main'),c);break;
+      case 'sheet-jump':{
+        if(c.sheetLayout?.collapsed.includes(el.dataset.section)){toggleSheetSection(c,el.dataset.section);persist();renderChrome();refreshSheetLayout($('#main'),c);}
+        jumpToSheetSection($('#main'),el.dataset.section);break;
+      }
       case 'sheet-favorite':{
         toggleSheetFavorite(c,el.dataset.section,el.dataset.entry);const removed=removeEmptyItems(c);persist();if(removed){render();$('#main').focus({preventScroll:true});break;}if(route!=='sheet'){const key=el.dataset.entry;render();$(`#main [data-action="sheet-favorite"][data-entry="${key}"]`)?.focus({preventScroll:true});break;}renderChrome();refreshSheetLayout($('#main'),c);
         if(el.closest('[data-sheet-entry]')?.hidden)$('#main').querySelector(`[data-sheet-section="${el.dataset.section}"] .sheet-section-toggle`)?.focus({preventScroll:true});

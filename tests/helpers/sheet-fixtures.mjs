@@ -8,6 +8,7 @@ export function catalogSheetState(original) {
   // Browser startup links actions to inventory IDs. This fixture replaces that
   // inventory, so retain the action fields without links to removed weapons.
   for(const attack of character.attacks)delete attack.itemId;
-  character.attacks.push({...character.attacks[0],id:'renamed-weapon',name:'Moonblade',weaponId:'rapier'});
+  // Use a custom name so startup cannot link this to the catalog's Moonblade.
+  character.attacks.push({...character.attacks[0],id:'renamed-weapon',name:'Renamed rapier',weaponId:'rapier',iconKey:''});
   return parseBackup(JSON.stringify(state));
 }

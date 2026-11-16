@@ -16,9 +16,10 @@ test('catalog browser fixture survives replacing a persisted, linked inventory',
   assert.equal(character.items.length,EQUIPMENT.length+1);
   assert.ok(character.attacks.every(attack=>!attack.itemId));
   const renamed=character.attacks.find(attack=>attack.id==='renamed-weapon');
-  assert.equal(renamed.name,'Moonblade');
+  assert.equal(renamed.name,'Renamed rapier');
   assert.equal(renamed.weaponId,'rapier');
   fixture.characters.forEach(linkWeaponActions);
+  assert.ok(!renamed.itemId,'a custom renamed attack must not link to a catalog weapon');
   assert.ok(character.attacks.some(attack=>attack.itemId),'real catalog weapons still get linked');
   assert.deepEqual(parseBackup(JSON.stringify(fixture)),fixture,'fixture also survives app startup and a second reload');
 });

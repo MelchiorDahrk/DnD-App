@@ -32,7 +32,7 @@ export function toggleSheetFavorite(c,section,key) {
 }
 
 // Enhance the existing sheet in place so toggles preserve keyboard focus and scroll position.
-export function mountSheetLayout(root,c) {
+export function mountSheetLayout(root,c,activeSection='') {
   for (const section of root.querySelectorAll('[data-sheet-section]')) {
     const key=section.dataset.sheetSection;
     const heading=section.querySelector('.panel-heading, .section-heading');
@@ -81,6 +81,92 @@ export function mountSheetLayout(root,c) {
     for (const extra of body.querySelectorAll('.empty-state, .skill-description, .nav-divider, .data-caption')) extra.dataset.sheetExtra='';
   }
   refreshSheetLayout(root,c);
+  return mountSheetNavigation(root,activeSection);
+}
+
+// Keep the compact navigation in sync with the visible headings, including the
+// two-column desktop layout. Tear it down whenever the app replaces the sheet.
+function mountSheetNavigation(root,activeSection) {
+  const header=root.querySelector('.sheet-header'),nav=header?.querySelector('.sheet-section-nav');
+  if(!nav)return ()=>{};
+  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',journal:'Journal',pack:'Pack',skills:'Skills',features:'Features',essentials:'Senses',personality:'Story',proficiencies:'Training'};
+  const sections=[...root.querySelectorAll('[data-sheet-section]')];
+  for(const section of sections) {
+    const key=section.dataset.sheetSection,toggle=section.querySelector('.sheet-section-toggle');
+    section.id=`sheet-anchor-${key}`;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='sheet-section-link';
+    button.dataset.action='sheet-jump';
+    button.dataset.section=key;
+    button.setAttribute('aria-controls',section.id);
+    button.setAttribute('aria-label',`Go to ${toggle.dataset.label}`);
+    button.title=toggle.dataset.label;
+    const symbol=toggle.querySelector('.icon:not(.sheet-chevron)');
+    if(symbol)button.append(symbol.cloneNode(true));
+    const label=document.createElement('span');
+    label.textContent=labels[key]||toggle.dataset.label;
+    button.append(label);
+    nav.append(button);
+  }
+  header.dataset.activeSection=activeSection||'';
+  let frame=0;
+  const update=()=>{
+    frame=0;
+    const top=parseFloat(getComputedStyle(header).top)||0;
+    const offset=top+header.getBoundingClientRect().height+12;
+    const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
+    root.style.setProperty('--sheet-scroll-offset',`${Math.max(0,offset-scrollPadding)}px`);
+    const positions=sections.map(section=>({key:section.dataset.sheetSection,rect:section.getBoundingClientRect()}));
+    const current=positions.find(({key})=>key===header.dataset.activeSection);
+    // Short or collapsed sheets can reach the page bottom before a destination
+    // reaches the header. Keep that visible destination selected after a jump.
+    if(scrollY+innerHeight>=document.documentElement.scrollHeight-2&&current?.rect.top>=offset-1&&current.rect.top<innerHeight-80) {
+      setActiveSheetSection(header,current.key);return;
+    }
+    const passed=positions.filter(({rect})=>rect.top<=offset+1);
+    const nearest=passed.length?Math.max(...passed.map(({rect})=>rect.top)):positions[0].rect.top;
+    const candidates=positions.filter(({rect})=>Math.abs(rect.top-nearest)<2);
+    const key=candidates.find(({key})=>key===header.dataset.activeSection)?.key||candidates[0].key;
+    setActiveSheetSection(header,key);
+  };
+  const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
+  const observer=new ResizeObserver(schedule);
+  observer.observe(header);
+  for(const section of sections)observer.observe(section);
+  window.addEventListener('scroll',schedule,{passive:true});
+  window.addEventListener('resize',schedule);
+  update();
+  return ()=>{
+    observer.disconnect();
+    window.removeEventListener('scroll',schedule);
+    window.removeEventListener('resize',schedule);
+    cancelAnimationFrame(frame);
+    root.style.removeProperty('--sheet-scroll-offset');
+  };
+}
+
+function setActiveSheetSection(header,key) {
+  header.dataset.activeSection=key;
+  for(const button of header.querySelectorAll('.sheet-section-link')) {
+    const active=button.dataset.section===key,changed=button.classList.contains('active')!==active;
+    button.classList.toggle('active',active);
+    if(active)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current');
+    if(active&&changed) {
+      const nav=button.parentElement,rect=button.getBoundingClientRect(),bounds=nav.getBoundingClientRect();
+      if(rect.left<bounds.left)nav.scrollLeft+=rect.left-bounds.left-4;
+      else if(rect.right>bounds.right)nav.scrollLeft+=rect.right-bounds.right+4;
+    }
+  }
+}
+
+export function jumpToSheetSection(root,key) {
+  if(!SHEET_SECTIONS.includes(key))return;
+  const section=root.querySelector(`[data-sheet-section="${key}"]`),header=root.querySelector('.sheet-header');
+  if(!section||!header)return;
+  setActiveSheetSection(header,key);
+  section.querySelector('.sheet-section-toggle').focus({preventScroll:true});
+  section.scrollIntoView({block:'start',behavior:'instant'});
 }
 
 export function refreshSheetLayout(root,c) {

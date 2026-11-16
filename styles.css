@@ -351,6 +351,70 @@ dialog{background:var(--surface-panel);border:1px solid var(--accent-edge);borde
 .death-counter{gap:10px}.death-counter button{position:relative;width:18px;height:18px;border-color:var(--border-control)}.death-counter button:before{content:'';position:absolute;inset:-4px}.death-counter button.active:after{content:'✓';display:block;font-size:11px;line-height:16px;color:var(--surface-panel)}
 .death-counter button.active{background:var(--status-danger);border-color:var(--status-danger)}
 @media(max-width:760px){.ability-entry .ability-card{padding-top:32px}.ability-entry .ability-label{font-size:9px;letter-spacing:.2px;padding-right:0;text-align:center}.ability-entry>.sheet-favorite{width:26px;height:26px;min-width:26px;min-height:26px}.ability-card .roll-hint{display:none}}
+
+/* Compact sheet navigation stays available without covering section headings. */
+.sheet-header{
+  position:sticky;top:0;z-index:14;margin:-30px 0 24px;
+  background:var(--surface-page);border-bottom:1px solid var(--accent-edge);
+  box-shadow:0 4px 8px -6px var(--shadow-deep);padding:4px 0 0;
+}
+.storage-warning+.sheet-header{margin-top:0}
+.sheet-status{display:flex;align-items:center;gap:12px;min-width:0;height:42px;overflow-x:auto;scrollbar-width:none}
+.sheet-status button{border:1px solid transparent;border-radius:var(--radius-button);color:var(--text-primary);min-height:34px;padding:4px 7px}
+.sheet-status button:hover{background:var(--surface-hover);border-color:var(--border-subtle)}
+.sheet-status button:focus-visible,.sheet-section-link:focus-visible{outline-offset:-2px}
+.sheet-status .icon{width:16px;height:16px;flex-shrink:0}
+.sheet-health{min-width:125px;flex-shrink:0;text-align:left}
+.sheet-health-value{display:flex;align-items:center;gap:5px;font-size:11px;line-height:18px;white-space:nowrap}
+.sheet-health-value>.icon{color:var(--status-danger)}
+.sheet-health-value>strong{font:600 16px/18px var(--mono)}
+.sheet-health-value>span{color:var(--text-secondary)}
+.sheet-health-value>.sheet-temp-hp{color:var(--bar-temp-health);font-size:10px;font-weight:700}
+.sheet-health-track{display:block;height:3px;background:var(--surface-recessed);border-radius:2px;overflow:hidden;margin-top:4px}
+.sheet-health-track>span{display:block;height:100%;background:var(--status-success)}
+.sheet-health.is-low .sheet-health-track>span{background:var(--status-danger)}
+.sheet-health.is-down .sheet-health-value>strong{color:var(--status-danger)}
+.sheet-death-summary{display:flex;gap:12px;font:700 9px/9px var(--mono);margin-top:3px}
+.sheet-death-summary>span:first-child{color:var(--status-success)}
+.sheet-death-summary>span:last-child{color:var(--status-danger)}
+.sheet-status-stat{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.sheet-status-stat>span{display:flex;align-items:baseline;gap:5px}
+.sheet-status-stat small{font-size:9px;color:var(--text-secondary)}
+.sheet-status-stat strong{font:600 14px/18px var(--mono)}
+.sheet-status-effects{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-left:auto;flex-shrink:0}
+.sheet-status-effect{display:flex;align-items:center;gap:5px;font-size:10px;white-space:nowrap}
+.sheet-status .sheet-status-effect{color:var(--text-secondary)}
+.sheet-status .has-conditions{color:var(--status-danger);background:var(--status-danger-bg)}
+.sheet-exhaustion{font:700 9px/16px var(--mono);border-left:1px solid currentColor;padding-left:5px}
+.sheet-status .sheet-concentration.is-active{color:var(--status-magic);background:var(--status-magic-bg)}
+.sheet-concentration-name{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.sheet-status .sheet-inspiration.is-active{color:var(--status-warning);background:var(--status-warning-bg)}
+.sheet-inspiration.is-active>.icon{fill:currentColor}
+.sheet-section-nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border-control) transparent;padding:3px 0 5px}
+.sheet-section-link{display:flex;align-items:center;justify-content:center;gap:6px;flex:1 0 auto;white-space:nowrap;padding:8px 10px;min-height:36px;border:1px solid transparent;border-radius:var(--radius-button);font-size:11px;color:var(--text-secondary)}
+.sheet-section-link>.icon{width:14px;height:14px;flex-shrink:0}
+.sheet-section-link:hover{background:var(--surface-hover)}
+.sheet-section-link.active{background:var(--nav-active);color:var(--nav-text);border-color:var(--accent-edge);box-shadow:inset 0 -2px var(--hero-brass)}
+[data-sheet-section]{scroll-margin-top:var(--sheet-scroll-offset,112px)}
+@media(max-width:1000px){.sheet-concentration-name{max-width:90px}.sheet-status{gap:6px}}
+@media(max-width:760px){
+  .sheet-header{top:65px;margin:-24px -16px 20px;padding:2px 10px 0}
+  .sheet-status{height:39px;gap:4px}
+  .sheet-health{min-width:108px}
+  .sheet-status button{padding:4px 5px}
+  .sheet-health-value{gap:4px;font-size:10px}
+  .sheet-health-value>strong{font-size:15px}
+  .sheet-status-stat{gap:4px}
+  .sheet-status-stat>span{gap:3px}
+  .sheet-status-effects{gap:3px}
+  .sheet-concentration-name{display:none}
+  .sheet-section-nav{padding-top:2px;gap:3px}
+  .sheet-section-link{flex-grow:0;min-height:36px;font-size:10px;padding:7px 9px;gap:5px}
+}
+@media(max-width:480px){.sheet-status-speed{display:none}}
+@media(max-width:370px){.sheet-header{margin-left:-12px;margin-right:-12px;padding-left:8px;padding-right:8px}.sheet-status-effects{gap:1px}}
+@media(forced-colors:active){.sheet-header{border-color:CanvasText}.sheet-section-link.active{border-color:Highlight}.sheet-health-track>span{background:Highlight}}
+@media print{.sheet-header{display:none}}
 @media(max-width:760px){[data-sheet-section="skills"]>.panel-heading{flex-wrap:wrap;gap:6px}[data-sheet-section="skills"]>.panel-heading h2{flex-basis:100%}.is-collapsed .panel-heading>.badge{display:none}}
 /* Reserve the persistent navigation edges when browsers scroll focused controls. */
 .action-timing{display:inline-flex;align-items:center;max-width:100%;margin:5px 0;padding:3px 7px;border:1px solid var(--border-control);border-radius:5px;font-family:var(--mono);font-size:9px;line-height:1.4;color:var(--text-secondary);background:var(--surface-raised)}
