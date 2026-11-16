@@ -43,7 +43,8 @@ jobs:
         id: browser-matrix
         run: node scripts/test-deploy.mjs --matrix >> "$GITHUB_OUTPUT"
       - name: Catch rules and browser fixture regressions before building
-        timeout-minutes: 2
+        # The full rules suite takes over two minutes on GitHub's shared runners.
+        timeout-minutes: 5
         run: npm test
       - uses: browser-actions/setup-chrome@v2
         id: chrome
@@ -105,7 +106,7 @@ jobs:
           path: assets/equipment
           key: ${{ steps.equipment.outputs.cache-primary-key }}
       - name: Run tests including generated matching assets
-        timeout-minutes: 2
+        timeout-minutes: 5
         run: npm test
       - name: Share the production build and generated browser fixtures
         uses: actions/upload-artifact@v4
@@ -123,7 +124,7 @@ jobs:
     name: Browser checks (${{ matrix.group }})
     needs: package
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.package.outputs.browser-matrix) }}
@@ -162,7 +163,7 @@ jobs:
       - name: Check production interactions, assets and offline behavior
         # Full suites run against the same build on independent machines, keeping
         # SwiftShader sessions from competing for the runner's CPU and memory.
-        timeout-minutes: 15
+        timeout-minutes: 20
         env:
           BROWSER_PATH: ${{ steps.chrome.outputs.chrome-path }}
           DEPLOY_TEST_URL: http://127.0.0.1:4173/DnD-App/

@@ -9,6 +9,7 @@ import {SPELL_CATALOG} from '../progression-data.js';
 import {LEGACY_SUBCLASSES} from '../progression-options.js';
 import {demoCharacter,parseBackup,SAVE_VERSION} from '../model.js';
 import {restReminders} from '../rest-rules.js';
+import {TREASURES} from '../treasure-data.js';
 
 const current='https://dnd2024.wikidot.com',earlier='https://dnd5e.wikidot.com';
 const indexed=url=>{
@@ -17,11 +18,20 @@ const indexed=url=>{
   assert.ok(paths.includes(u.pathname),`Not in wiki index: ${url}`);
 };
 test('built-in catalogs and progression use indexed wiki pages, with individual pages for every feat and spell',()=>{
-  for(const e of [...CLASS_OPTIONS,...SPECIES,...BACKGROUNDS,...SUBCLASSES,...ORIGIN_FEATS,...EQUIPMENT,...LEGACY_SUBCLASSES,...SPELL_CATALOG,...FEATURE_CATALOG.filter(e=>e.group!=='Custom resources')])indexed(e.wiki);
+  for(const e of [...CLASS_OPTIONS,...SPECIES,...BACKGROUNDS,...SUBCLASSES,...ORIGIN_FEATS,...EQUIPMENT.filter(e=>!TREASURES.includes(e)),...LEGACY_SUBCLASSES,...SPELL_CATALOG,...FEATURE_CATALOG.filter(e=>e.group!=='Custom resources')])indexed(e.wiki);
   for(const e of FEATURE_CATALOG.filter(e=>/feats|Fighting styles|Epic boons/.test(e.group)))assert.match(e.wiki,/\/feat:(?!all$).+/,e.name);
   for(const e of SPELL_CATALOG)assert.match(e.wiki,/\/spell:(?!all$).+/,e.name);
   for(const e of LEGACY_SUBCLASSES)assert.ok(e.wiki.startsWith(earlier+'/'),e.name);
   for(const e of CLASS_OPTIONS)assert.equal(e.wiki.startsWith(earlier+'/'),e.name==='Artificer',e.name);
+});
+
+test('treasure references use the licensed 2024 tables absent from the wiki and survive display resolution',()=>{
+  const sections={'Gemstones':'Gemstones','Art objects & jewelry':'Art Objects','Trade goods':'Trade Goods','Trade bars':'Trade Bars'};
+  for(const entry of TREASURES){
+    const expected=`https://roll20.net/compendium/dnd5e/Rules%3A${encodeURIComponent(sections[entry.group])}?expansion=33359`;
+    assert.equal(entry.wiki,expected);
+    assert.equal(referenceURL(entry.wiki,entry.name,'equipment'),expected);
+  }
 });
 test('references handle punctuation, SRD spell aliases, origin variants, styles, boons and earlier options',()=>{
   assert.equal(wikiURL('Hunter’s Mark','spell'),current+'/spell:hunter-s-mark');

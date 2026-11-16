@@ -15,7 +15,7 @@ async function checkDeployment({group,suites}) {
   const base=new URL(process.env.DEPLOY_TEST_URL||`http://127.0.0.1:${port}/dist/`);
   assert.ok(base.pathname.endsWith('/'),'DEPLOY_TEST_URL must end with / so Pages asset paths resolve correctly.');
   const env={...process.env,QUESTLOG_VISUAL_CHECKS:process.env.QUESTLOG_VISUAL_CHECKS||'0',THEME_TEST_PRODUCTION:'1'};
-  for(const key of ['PRESET_TEST_URL','PORTRAIT_TEST_URL','SHEET_TEST_URL','ITEM_ICON_TEST_URL','DICE_TEST_URL','THEME_TEST_URL','MAGIC_ITEM_TEST_URL'])env[key]=base.href;
+  for(const key of ['PRESET_TEST_URL','PORTRAIT_TEST_URL','SHEET_TEST_URL','ITEM_ICON_TEST_URL','DICE_TEST_URL','THEME_TEST_URL','MAGIC_ITEM_TEST_URL','TREASURE_TEST_URL'])env[key]=base.href;
   const diagnostics=resolve(process.env.DEPLOY_TEST_DIAGNOSTICS_DIR||resolve(root,'.tmp/browser-diagnostics/deploy'));
   await mkdir(diagnostics,{recursive:true});
   let server,serverError,serverLog='';

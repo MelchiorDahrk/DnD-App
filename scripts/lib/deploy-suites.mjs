@@ -1,7 +1,7 @@
 // Keep the local runner and CI matrix on the same complete suite list.
 // Each rendering-heavy group gets its own runner instead of competing for CPU.
 export const deploymentGroups={
-  sheet:[['sheet-layout',3],['item-icons',3],['magic-items',3],['themes',5]],
+  sheet:[['sheet-layout',3],['item-icons',3],['magic-items',3],['treasure',2],['themes',5]],
   dice:[['dice',4]],
   portraits:[['portraits',10]],
   'portrait-photos':[['portrait-photos',5]],

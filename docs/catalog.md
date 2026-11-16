@@ -16,7 +16,7 @@ Run `npm run test:sources` for browser coverage of source toggles, persistence, 
 
 | Dropdown | Included data |
 | --- | --- |
-| Equipment | 1,229 presets: 503 current magic items, 502 earlier-only items, 18 potency choices, and basic equipment (sharing Potion of Healing). Basic coverage: 38 weapons; 13 armor/shields; adventuring supplies and spellbook; 7 equipment packs; 23 tools/kits; 10 instruments; 4 gaming sets; 5 ammunition bundles; 11 focuses; 9 tack/drawn-vehicle entries; 8 mounts; 7 ships/airships |
+| Equipment | 1,357 presets: 503 current magic items, 502 earlier-only items, 18 potency choices, and basic equipment (sharing Potion of Healing). Basic coverage: 38 weapons; 13 armor/shields; adventuring supplies and spellbook; 7 equipment packs; 23 tools/kits; 10 instruments; 4 gaming sets; 5 ammunition bundles; 11 focuses; 9 tack/drawn-vehicle entries; 8 mounts; 7 ships/airships; 52 gemstones; 50 art objects; 23 trade goods; 3 trade bars |
 | Class | 12 core classes and supplemental Artificer; hit die, primary abilities, saves, armor/weapon training, skill choices, level 1 feature summary |
 | Species/race | 10 core species plus Elf, Gnome, and Tiefling lineage variants; size, speed, senses, trait summary |
 | Background | All 16 core backgrounds; ability choices, skill/tool proficiencies, Origin feat |
@@ -27,6 +27,10 @@ Run `npm run test:sources` for browser coverage of source toggles, persistence, 
 The equipment editor has a type dropdown, text search, and grouped item dropdown. The attack editor has a searchable weapon dropdown. The feature editor has a searchable, categorized feature/resource catalog. The compendium also exposes the full feature catalog.
 
 See [magic-item coverage, rules stats, artwork, and regeneration](magic-items.md) for both wiki catalogs and the 2024 revision precedence rules.
+
+The **Gemstones**, **Art objects & jewelry**, **Trade goods**, and **Trade bars** groups include all 128 standard nonmagical treasure entries from the 2024 Dungeon Master’s Guide: 52 gems across all six value tiers, 50 art objects across all five value tiers, 23 trade goods, and 3 trade bars. Emerald is a 1,000 GP gemstone. Art-object names are shortened summaries of the table entries. References link to the licensed [gemstone](https://roll20.net/compendium/dnd5e/Rules%3AGemstones?expansion=33359), [art object](https://roll20.net/compendium/dnd5e/Rules%3AArt%20Objects?expansion=33359), [trade good](https://roll20.net/compendium/dnd5e/Rules%3ATrade%20Goods?expansion=33359), and [trade bar](https://roll20.net/compendium/dnd5e/Rules%3ATrade%20Bars?expansion=33359) tables. These entries follow the **Dungeon Master’s Guide (2024)** source toggle.
+
+Treasure presets use the **Treasure** inventory category and explicit LEGO icons, including colored stones, pearls, jewelry, art, metal bars, and livestock. Icons remain selected when quest loot is renamed. Listed values are per stone, object/set, bar, or named trade unit; a spell component or quest reward can have a different value, so edit its notes to match your loot. Gem and art weights are labeled estimates; fabric sold by area also uses estimated weights. Livestock is excluded from carrying weight. Adding treasure preserves your coin purse and existing items; track ordinary coins in the coin purse. Both the catalog and artwork work offline. Run `npm run test:treasure` for search, selection, editing, inventory persistence, compendium, mobile, and offline checks.
 
 ## Feature and resource selection
 

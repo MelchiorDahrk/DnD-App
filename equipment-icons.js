@@ -289,7 +289,30 @@ export const EXTRA_ITEM_ICONS = {
   fryingpan:{part:'97790',color:0,label:'Frying pan',group:'Food & drink',keywords:'cook utensils skillet'}
 };
 
-export const LDRAW_ICONS = {...EQUIPMENT_ICONS,...EXTRA_ITEM_ICONS,...ACTION_ICONS,...CURRENCY_ICONS};
+// Color and physical-form variants for nonmagical loot, using the same LDraw
+// parts, lighting, thumbnails and attribution pipeline as the rest of the app.
+export const TREASURE_ICONS = {
+  ...Object.fromEntries([
+    ['blue',33],['light-blue',43],['purple',22],['red',36],['orange',57],
+    ['yellow',46],['pink',45],['black',0],['white',15],['brown',6],['olive',330]
+  ].map(([name,color])=>[`gem-${name}`,{part:'30153',color,label:`${name.replace('-',' ')} gemstone`,group:'Magic & treasure',keywords:'gem jewel stone treasure'}])),
+  'black-pearl':{part:'32474',color:0,label:'Black pearl',group:'Magic & treasure',keywords:'pearl jewel gem treasure'},
+  ...Object.fromEntries([['gold',297],['silver',71],['copper',70]].map(([metal,color])=>[`${metal}-bar`,{part:'3069b',color,label:`${metal} trade bar`,group:'Magic & treasure',keywords:'ingot bullion metal treasure',view:{yaw:-25,pitch:25}}])),
+  'treasure-bracelet':{part:'11010',color:297,label:'Gold bracelet',group:'Magic & treasure',keywords:'jewelry anklet bangle treasure',view:{pitch:70}},
+  'treasure-mask':{part:'98130',color:297,label:'Ceremonial mask',group:'Magic & treasure',keywords:'art velvet war mask treasure'},
+  'treasure-fabric':{part:'3032',color:19,label:'Fine fabric',group:'Magic & treasure',keywords:'cloth silk linen cotton canvas handkerchief treasure',view:{yaw:-20,pitch:65}},
+  'treasure-comb':{part:'30112b',color:297,label:'Gold comb',group:'Magic & treasure',keywords:'art jewelry treasure',view:{pitch:65}},
+  'treasure-skull':{part:'3626bp4a',color:71,label:'Decorative skull',group:'Magic & treasure',keywords:'art electrum dragonborn treasure'},
+  'treasure-painting':{parts:[{id:'3032',color:297},{id:'3068bp40',color:19,at:[0,-8,0]}],label:'Framed artwork',group:'Magic & treasure',keywords:'painting portrait masterpiece treasure',view:{yaw:-15,pitch:70}},
+  'treasure-cage':{parts:[{id:'3068b',color:297},{id:'3068b',color:297,at:[0,-60,0]},...[[-16,-16],[-16,0],[-16,16],[0,-16],[0,16],[16,-16],[16,0],[16,16]].map(([x,z])=>({id:'87994',color:297,at:[x,-60,z]}))],label:'Gold birdcage',group:'Magic & treasure',keywords:'art cage filigree treasure',view:{yaw:-25,pitch:15}},
+  'treasure-chicken':{part:'95342',color:15,label:'Chicken',group:'Animals & travel',keywords:'livestock trade goods',view:{yaw:90,pitch:10}},
+  'treasure-goat':{part:'95341',color:19,label:'Goat',group:'Animals & travel',keywords:'livestock trade goods',view:{yaw:90,pitch:10}},
+  'treasure-sheep':{parts:[{id:'95341',color:0},{id:'1570',color:15}],label:'Sheep',group:'Animals & travel',keywords:'livestock trade goods',view:{yaw:90,pitch:10}},
+  'treasure-pig':{part:'87621',color:13,label:'Pig',group:'Animals & travel',keywords:'livestock trade goods',view:{yaw:90,pitch:10}},
+  'treasure-cow':{part:'64452',color:6,label:'Cow or ox',group:'Animals & travel',keywords:'livestock cattle trade goods',view:{yaw:90,pitch:10}}
+};
+
+export const LDRAW_ICONS = {...EQUIPMENT_ICONS,...EXTRA_ITEM_ICONS,...TREASURE_ICONS,...ACTION_ICONS,...CURRENCY_ICONS};
 
 // Even homebrew items and actions receive bundled artwork, with SVGs beneath
 // each image in case it cannot load. Values are keys in LDRAW_ICONS.

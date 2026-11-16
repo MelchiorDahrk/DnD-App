@@ -2,7 +2,7 @@
 
 The catalog covers all **503 distinct 2024 wiki item pages** and all **830 published 2014 wiki item pages**. **2024 stats and descriptions always take precedence** for a shared item or a reviewed renamed equivalent. The earlier index contributes **502 earlier-only items**; its other **328 entries** resolve to the current revisions. There are no duplicate older versions of shared items.
 
-The result is **1,007 distinct magic items**, plus 18 convenient potency presets: Greater/Superior/Supreme Healing and +1/+2/+3 armor, weapons, shields, ammunition, and Wands of the War Mage. This gives **1,023 magic-item presets** and **1,229 total inventory presets**, with ordinary equipment and Potion of Healing counted once.
+The result is **1,007 distinct magic items**, plus 18 convenient potency presets: Greater/Superior/Supreme Healing and +1/+2/+3 armor, weapons, shields, ammunition, and Wands of the War Mage. This gives **1,023 magic-item presets** and **1,357 total inventory presets**, with ordinary equipment and Potion of Healing counted once.
 
 Every item includes its individual wiki link, listed source, rules edition, item type, rarity choices, attunement requirements, price where listed, effects, relevant stat tables, and a representative bundled LEGO icon. Supplemental and wiki-specific items keep their listed source. Complicated artifacts have concise reference summaries and links to their complete rules. Variant tables retain their individual stats even when they share an inventory preset.
 

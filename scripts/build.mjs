@@ -15,6 +15,7 @@ await copyFile(resolve(root,'published-feat-data.js'),resolve(out,'published-fea
 for(const file of ['inventory-rules.js','inventory.js','armor-class.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['training-data.js','training-rules.js','training-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
 await copyFile(resolve(root,'magic-item-data.js'),resolve(out,'magic-item-data.js'));
+await copyFile(resolve(root,'treasure-data.js'),resolve(out,'treasure-data.js'));
 for(const file of ['legacy-magic-item-data.js','magic-item-icon-names.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['reference-links.js','reference-pages.js','attack-rules.js','attack-ui.js','level-up.js','level-up-ui.js','progression-data.js','progression-options.js','rest-rules.js','rest-reference-data.js','portrait-scan.js','portrait-photo-ui.js','portrait-image-analysis.js','portrait-match.js','portrait-match-worker.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['index.html','theme.js','theme.css','styles.css','app.js','sound.js','sound-events.js','sound-assets.js','vfx.js','vfx.css','model.js','sheet-layout.js','portrait.js','portrait-ui.js','catalog.js','feature-catalog.js','catalog-ui.js','content-sources.js','default-characters.js','icons.js','equipment-icons.js','item-icons.js','art.js','sw.js','manifest.webmanifest','.nojekyll'])await copyFile(resolve(root,file),resolve(out,file));

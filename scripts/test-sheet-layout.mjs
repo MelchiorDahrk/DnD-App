@@ -8,7 +8,7 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
-import {parseBackup} from '../model.js';
+import {parseBackup,SKILLS} from '../model.js';
 import {SHEET_SECTIONS} from '../sheet-layout.js';
 import {equipmentIconURL} from '../equipment-icons.js';
 import {EQUIPMENT} from '../catalog.js';
@@ -219,7 +219,7 @@ try {
   assert.deepEqual(await visibleKeys('skills'),[]);
   assert.equal(await page.$eval(':focus',node=>node.dataset.action),'sheet-collapse');
   await page.keyboard.press('Enter');
-  assert.equal((await visibleKeys('skills')).length,24);
+  assert.equal((await visibleKeys('skills')).length,Object.keys(SKILLS).length);
   console.log('PASS mobile layouts at 390px and 320px, removing the last favorite, and expanding restores all rows');
 
   // Changing inventory and notes does not restore the removed previews.

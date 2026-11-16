@@ -9,7 +9,7 @@ import {promisify} from 'node:util';
 import {deploymentGroups,deploymentOptions} from '../scripts/lib/deploy-suites.mjs';
 
 const root=resolve(import.meta.dirname,'..');
-const required=['sheet-layout','item-icons','magic-items','dice','themes','portraits','portrait-photos','presets'];
+const required=['sheet-layout','item-icons','magic-items','treasure','dice','themes','portraits','portrait-photos','presets'];
 
 test('CI matrix partitions every required browser suite exactly once and keeps its timeout',()=>{
   const {matrix}=deploymentOptions(['--matrix']);
@@ -17,7 +17,7 @@ test('CI matrix partitions every required browser suite exactly once and keeps i
   assert.deepEqual(grouped,deploymentOptions().suites);
   assert.deepEqual(grouped.map(([name])=>name).sort(),required.toSorted());
   assert.equal(new Set(grouped.map(([name])=>name)).size,required.length);
-  assert.equal(grouped.reduce((sum,[,minutes])=>sum+minutes,0),38);
+  assert.equal(grouped.reduce((sum,[,minutes])=>sum+minutes,0),40);
   for(const [name,minutes] of grouped) {
     assert.ok(existsSync(resolve(root,`scripts/test-${name}.mjs`)),name);
     assert.ok(minutes>0,name);

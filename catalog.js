@@ -5,6 +5,7 @@ import {hasWeaponTraining} from './training-rules.js';
 import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
 import {MAGIC_ITEMS as CURRENT_MAGIC_ITEMS} from './magic-item-data.js';
 import {LEGACY_MAGIC_ITEMS} from './legacy-magic-item-data.js';
+import {TREASURES} from './treasure-data.js';
 import {defaultItemUses,PACK_CONTENTS,equipmentName} from './inventory-rules.js';
 export const MAGIC_ITEMS = [...CURRENT_MAGIC_ITEMS,...LEGACY_MAGIC_ITEMS];
 
@@ -123,7 +124,7 @@ const ships = [
 ].map(([name,speed,crew,passengers,cargo,ac,hp,threshold,cost])=>equipment(name,'Ships & airships',0,cost,`Speed ${speed}; crew ${crew}; passengers ${passengers}; cargo ${cargo} tons; AC ${ac}; HP ${hp}; damage threshold ${threshold||'none'}. Vehicles are not counted toward your carried weight.${name==='Rowboat'?' A carried Rowboat weighs 100 lb.; adjust its inventory weight if you carry it.':''}`,{carried:false}));
 const spellbook = equipment('Spellbook','Adventuring gear',3,'50 GP','A Wizard’s 100-page spellbook. Contains your recorded Wizard spells; record individual spells in your spellbook view.');
 
-export const BASIC_EQUIPMENT = [...WEAPONS,...ARMOR,...gear,spellbook,...tools,...instruments,...gaming,...ammunition,...focuses,...tack,...mounts,...ships];
+export const BASIC_EQUIPMENT = [...WEAPONS,...ARMOR,...gear,spellbook,...tools,...instruments,...gaming,...ammunition,...focuses,...tack,...mounts,...ships,...TREASURES];
 // Healing is both adventuring gear and a magic item; expose one shared preset.
 export const EQUIPMENT = [...BASIC_EQUIPMENT.filter(item=>!MAGIC_ITEMS.some(magic=>magic.id===item.id)),...MAGIC_ITEMS];
 export const EQUIPMENT_GROUPS = [...new Set(EQUIPMENT.map(item=>item.group))];
