@@ -11,36 +11,22 @@ backups retain their existing behavior.
 
 ## Included snapshot
 
-The checked-in catalog contains **244 unique configurations**:
+The expanded catalog contains 396 editable configurations: 258 official inventory
+reconstructions and 138 original Questlog combinations. It includes 106
+Rebrickable minifigure identities and 19 CMF presets, including recent entries.
+Discovery is unrestricted by theme. Previously excluded Western, Adventurers and
+Pharaoh's Quest assemblies are included when their components are supported.
 
-| Origin | Presets |
-| --- | ---: |
-| Official figure reconstructions from credited LDraw OMR assemblies | 106 |
-| Original Questlog fantasy combinations | 138 |
-| Complete | 169 |
-| Partial, with disclosed omissions or source limitations | 75 |
+The checked-in bulk snapshot preserves all 17,365 minifigure inventories, plus
+single-figure CMF parent-set inventories for accessory inspection. All twelve
+71047 Dungeons & Dragons inventories are present. Their printed anatomy and
+specialized components cannot currently be reconstructed exactly through verified
+mappings, so they remain in the coverage report rather than receiving guessed
+prints or anatomy. See [coverage](../reports/minifigure-coverage.md).
 
-There are **four official theme categories**, plus **Original Fantasy**:
-Castle, Indiana Jones, Lord of the Rings, and Pirates. Western, Adventurers,
-and Pharaoh's Quest are excluded before preset deduplication; their source
-snapshots and selectable pieces remain available. Castle factions come from
-OMR's theme hierarchy. Original recipes
-cover 41 professions/archetypes and human, elf, dwarf, halfling, orc, goblin,
-undead and demon characters. Outfits, equipment and anatomy vary; the generator
-does not multiply arbitrary recolors. The number of catalog entries is a result
-of source coverage and validation, not a fixed cap.
-
-The import inspected the public OMR set index, selected 75 relevant set records
-using Questlog's reviewed theme associations plus adventure-related source
-themes, and retained 74 licensed MPD/LDraw models. Generation excludes 69 source
-assemblies in the removed themes, withholds 17 unavailable assemblies and
-merges 21 duplicate assemblies, retaining alternate
-names, original source identities, theme memberships, part references and
-attribution. Counts are recorded in `vendor/bricktrait/presets/compatibility-report.json`.
-
-All 244 previews are transparent 192Ã—192 WebPs. Presets reuse
-existing LDraw packs; no complete-figure geometry files are produced. The
-collection's existing part packs total about 13 MB.
+Presets have transparent 192×192 WebP previews and reuse the existing per-part
+geometry packs. Official designs and original combinations retain separate origin
+labels. Partial reconstructions disclose unresolved components and assembly rules.
 
 Characters without a saved portrait use curated species/class/subclass defaults
 from this catalog. `portrait-defaults.js` defines exact choices and lineage
@@ -66,17 +52,16 @@ ghost shroud retain their original orientation.
   download URL and assembly filename remain attached to each preset. The
   normalized source snapshot includes original transforms. Extraction and
   conversion modify the source assembly into an editable standing portrait.
-* The existing fantasy, CMF and theme catalogs provide part descriptions,
-  editor eligibility and source-discovery associations. They are **part
-  collections**, not verified minifigure inventories; the generator does not
-  invent official identities from these associations.
-* [Rebrickable API v3](https://rebrickable.com/api/v3/docs/) is an optional
-  build-time inventory source. No API key was available for this implementation;
-  the public downloads page returned HTTP 403. No protection was bypassed and
-  no Rebrickable dataset is included in this snapshot. Review the current
-  [terms](https://rebrickable.com/terms/) before redistributing a refreshed API
-  snapshot. The importer uses authenticated API endpoints, not catalog HTML,
-  and retains source links. No official images are downloaded.
+* Fantasy, CMF and theme catalogs are optional browsing metadata, never selection
+  eligibility or verified figure inventories.
+* [Rebrickable bulk downloads](https://rebrickable.com/downloads/) supply catalog
+  and inventory snapshots, with source URLs, archive hashes and
+  [terms attribution](https://rebrickable.com/terms/). No official product images
+  are downloaded. Explicit LDraw Rebrickable keywords, identity alias chains and
+  reviewed mappings establish part identities. Exact normalized named colors
+  establish color mappings; matching numeric IDs alone are insufficient.
+  Ambiguous prints remain unresolved. The authenticated API importer supports
+  targeted lookups when `REBRICKABLE_API_KEY` is available.
 * Original combination definitions and their thumbnails are contributed under
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), attributed to
   Questlog. Their underlying geometry retains each LDraw file's license.
@@ -94,13 +79,24 @@ head, torso and supported lower body exist, with documented omissions. Unknown
 prints are never replaced with arbitrary prints. **Unavailable** means essential
 anatomy is missing, ambiguous or unsupported, and the browser does not expose it.
 
-OMR coverage is uneven. The inspected Harry Potter models omit isolated
-minifigures; some models contain no figures at all. No compatible isolated CMF,
-D&D, Kingdoms, Hobbit, Ninjago, Vikings, Atlantis, Prince of Persia, Caribbean,
-Avatar or Chima figure inventory was recovered by this snapshot. Their existing
-selectable parts remain useful for customization and original designs. The
-report lists inspected models with no extracted assembly, unavailable figures,
-and every partial preset's omissions. There are no empty advertised theme filters.
+Source inventories and geometry coverage differ. The coverage JSON distinguishes
+confirmed absent geometry, build exclusions, legacy hidden parts, unused selectable
+parts, undefined assemblies, and unverified identifier mappings. An unmapped ID
+is never reported as proven missing geometry. Each component retains its external
+ID, description, source figure, quantity, color and reason. Ranked opportunities
+highlight parts that block several figures. Parent-set CMF accessories are listed
+separately when they need reviewed placement.
+
+## Refresh
+
+Run `npm run refresh:portraits` to download both latest LDraw archives and the
+public Rebrickable datasets, rebuild geometry and optional metadata, regenerate
+verified mappings/presets/previews, and update coverage. Ordinary `npm run build`
+reuses checked-in inventories and cached assets without external runtime calls.
+`npm run import:preset-bulk -- --cached` rebuilds the source snapshot from locally
+cached CSV archives; `npm run build:portrait-coverage` regenerates the report.
+Set `CHROME_PATH` or `BROWSER_PATH` if Chromium is not found. A project-cached
+headless browser is detected automatically. New presets keep stable source IDs.
 
 ## Data layout
 
@@ -108,6 +104,8 @@ and every partial preset's omissions. There are no empty advertised theme filter
 | --- | --- |
 | `preset-catalog.json` | Generated, human-readable catalog |
 | `presets/sources/omr-inventories.json` | Generated normalized source inventories and provenance |
+| `presets/sources/rebrickable-bulk.json` | Bulk figure and single-CMF-set inventories |
+| `presets/rebrickable-mappings.json` | Generated mappings and evidence |
 | `presets/sources/rebrickable-inventories.json` | Optional API snapshot, absent until imported |
 | `presets/original-recipes.json` | Curated original outfits, equipment and species recipes |
 | `presets/mappings.json` | Reviewed external identifiers, colors, grips and leg assembly rules |
@@ -219,7 +217,7 @@ The editor and presets use relative, self-hosted paths and work below a GitHub
 Pages subpath. The existing service worker caches fetched assets. **Download
 collection for offline use** caches catalog, all previews and all required part
 packs with bounded concurrency, progress and retry. It downloads only missing
-files (about 15 MB for this snapshot). This makes even a previously unselected
+files, including transitive shared geometry. This makes even a previously unselected
 figure available offline; downloading requires an active Questlog service worker.
 There are no runtime external-source calls or duplicate full-figure meshes.
 

@@ -4,6 +4,7 @@
 // Uses the app's own rendering code through a small Vite page
 // (scripts/thumbs/) driven by a headless Chrome. Existing thumbnails are kept
 // unless the rendering code changed, so reruns only add what is missing.
+import {findChromium} from '../../../scripts/lib/chromium.mjs';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -16,19 +17,10 @@ const OUT = equipment ? path.resolve('../../assets/equipment') : path.resolve('s
 const BATCH = 40;
 // Files that change how a thumbnail looks (new parts are simply added).
 // Other changes that matter bump THUMB_VERSION in thumb-render.ts.
-const INPUTS = ['src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts', 'scripts/thumbs/main.ts'];
+const INPUTS = ['static/ldraw/.questlog-parts-complete', 'src/lib/scene.ts', 'src/lib/thumb-render.ts', 'src/lib/ldraw.ts', 'scripts/thumbs/main.ts'];
 if (equipment) INPUTS.push('../../equipment-icons.js', 'static/ldraw/catalog.json', 'src/lib/portrait-scene.ts', 'src/lib/portrait-glow.ts', 'src/lib/lighting.ts', 'src/lib/materials.ts', 'src/lib/equipment-render.ts');
 
-const CHROME =
-	process.env.CHROME_PATH ??
-	[
-		'C:/Program Files/Google/Chrome/Application/chrome.exe',
-		'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
-		'/usr/bin/google-chrome',
-		'/usr/bin/chromium',
-		'/usr/bin/chromium-browser',
-		'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
-	].find((p) => fs.existsSync(p));
+const CHROME=await findChromium();
 if (!fs.existsSync('static/ldraw/catalog.json')) throw new Error('Run `npm run build:portraits` from the Questlog root first');
 
 // Start over when the rendering changed

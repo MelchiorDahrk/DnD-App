@@ -11,25 +11,17 @@ import assets from '../vendor/bricktrait/presets/asset-manifest.json' with {type
 import mappings from '../vendor/bricktrait/presets/mappings.json' with {type:'json'};
 import {configurationKey,validatePreset,presetFigure,filterPresets,emptyFigure,readPresetPreferences} from '../vendor/bricktrait/src/lib/presets.js';
 import {assembleInventory,resolveExternalPart,resolveExternalColor,parseMPD,flattenModel,deduplicatePresets} from '../scripts/lib/minifigure-presets.mjs';
-import {buildPresets,applyPresetOverrides,excludedPresetTheme} from '../scripts/build-minifigure-presets.mjs';
+import {buildPresets,applyPresetOverrides} from '../scripts/build-minifigure-presets.mjs';
 import {validPortrait} from '../portrait.js';
 import {makeCharacter,parseBackup,SAVE_VERSION} from '../model.js';
 import {state} from './helpers/bricktrait-state.mjs';
 const vendor=resolve(import.meta.dirname,'../vendor/bricktrait');
 
-test('excluded preset themes stay out of browsing while their parts remain in the editor',async()=>{
-  for(const theme of ['Western','Adventurers',"Pharaoh's Quest"]){
-    assert.ok(excludedPresetTheme({theme}));
-    assert.ok(excludedPresetTheme({theme:'Other',category:`${theme} > Subtheme`}));
-    assert.ok(excludedPresetTheme({theme:'Other',themes:[theme]}));
-    assert.ok(!catalog.stats.themes.includes(theme));
-  }
-  assert.ok(catalog.presets.every(p=>!excludedPresetTheme(p)));
-  const sources=JSON.parse(await readFile(resolve(vendor,'presets/sources/omr-inventories.json'),'utf8'));
-  assert.ok(sources.assemblies.some(excludedPresetTheme),'source assemblies remain available for future curation');
-  const {isFantasyPart}=await import('../vendor/bricktrait/src/lib/fantasy-catalog.js');
-  for(const [id,cat] of [['3626bpw2','head'],['973pa5','torso'],['3626bpq1','head']])
-    assert.ok(isFantasyPart({id,cat}),`excluded-theme piece ${id} remains selectable`);
+test('preset discovery retains every theme and leaves parts accessible',async()=>{
+  assert.equal(catalog.stats.excluded,0);
+  for(const theme of ['Western','Adventurers',"Pharaoh's Quest",'Star Wars'])assert.ok(catalog.stats.themes.includes(theme),theme);
+  const {selectableCatalog}=await import('../vendor/bricktrait/src/lib/fantasy-catalog.js');
+  for(const [id,cat] of [['3626bpw2','head'],['973pa5','torso'],['3885','hand']])assert.equal(selectableCatalog([{id,cat}]).length,1);
 });
 
 test('the populated catalog validates every component and color and has no duplicate configurations or IDs',async()=>{

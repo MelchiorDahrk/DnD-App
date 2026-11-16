@@ -7,6 +7,7 @@ import {checkFantasyCatalog} from './check-fantasy-catalog.mjs';
 import {LDRAW_ICONS,equipmentIconParts} from '../equipment-icons.js';
 import {buildPortraitMatchIndex} from './build-portrait-match-index.mjs';
 import {buildPresets} from './build-minifigure-presets.mjs';
+import {buildPresetThumbnails} from './build-preset-thumbnails.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const vendor=resolve(root,'vendor/bricktrait');
@@ -18,11 +19,16 @@ function run(script, ...args) {
   if(result.status!==0)throw new Error(`Bricktrait ${script} failed (${result.status}).`);
 }
 
-export async function buildPortraitMaker() {
+export async function buildPortraitMaker({refresh=false}={}) {
   // Generated LDraw data is cached between builds; all runtime assets are self-hosted.
   const iconParts=[...new Set(Object.values(LDRAW_ICONS).flatMap(entry=>equipmentIconParts(entry).map(part=>part.id)))];
-  const partsKey=createHash('sha256').update(await readFile(resolve(vendor,'scripts/build-parts.mjs'))).digest('hex');
-  if(await readFile(resolve(vendor,'static/ldraw/.questlog-parts-complete'),'utf8').catch(()=>'')!==partsKey ||
+  const stamp=createHash('sha256');
+  for(const file of [resolve(vendor,'scripts/build-parts.mjs'),resolve(root,'equipment-icons.js'),resolve(root,'scripts/lib/portrait-themes.mjs'),resolve(vendor,'presets/legacy-parts.json'),resolve(vendor,'presets/legacy-ldraw/parts/3815bp01.dat'),resolve(vendor,'presets/legacy-ldraw/parts/s/3815bp01s01.dat'),resolve(env.LDRAW_DIR,'.questlog-complete'),resolve(env.LDRAW_UNOFFICIAL_DIR,'.questlog-complete')]) {
+    const data=await readFile(file).catch(()=>null);if(data)stamp.update(data);
+  }
+  const partsKey=stamp.digest('hex');
+  if(refresh)run('fetch-ldraw.mjs','--refresh');
+  if(refresh || await readFile(resolve(vendor,'static/ldraw/.questlog-parts-complete'),'utf8').catch(()=>'')!==partsKey ||
     !(await Promise.all(iconParts.map(id=>exists(resolve(vendor,'static/ldraw/p',`${id}.ldr`))))).every(Boolean)) {
     await mkdir(resolve(root,'.cache'),{recursive:true});
     run('fetch-ldraw.mjs');
@@ -31,6 +37,7 @@ export async function buildPortraitMaker() {
   checkFantasyCatalog();
   const {catalog:presets}=await buildPresets();
   await mkdir(resolve(vendor,'static/preset-thumbs'),{recursive:true});
+  if(refresh || !(await Promise.all(presets.presets.map(p=>exists(resolve(vendor,'presets/thumbnails',`${p.id}.webp`))))).every(Boolean))await buildPresetThumbnails();
   for(const preset of presets.presets) {
     const source=resolve(vendor,'presets/thumbnails',`${preset.id}.webp`);
     if(!await exists(source))throw new Error(`Missing preset preview ${preset.id}. Run npm run build:preset-thumbnails after updating the catalog.`);
@@ -50,4 +57,4 @@ export async function buildPortraitMaker() {
   }
 }
 
-if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await buildPortraitMaker();
+if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url))await buildPortraitMaker({refresh:process.argv.includes('--refresh')});

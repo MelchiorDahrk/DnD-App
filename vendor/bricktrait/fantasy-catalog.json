@@ -1,8 +1,8 @@
 {
   "_notes": [
-    "Questlog fantasy catalog: explicit LDraw IDs, grouped by Bricktrait slot. Values are review descriptions only.",
-    "No runtime theme or keyword rules. Add an ID here or in include; exclude always wins.",
-    "Full LDraw geometry remains available to existing saved designs. standard is Bricktraitâ€™s synthetic hips/legs."
+    "Optional Fantasy & Medieval browsing metadata, grouped by Bricktrait slot. Descriptions are review notes.",
+    "All technically supported minifigure parts remain selectable regardless of these associations. Historical exclude entries are retained as provenance and no longer deny access.",
+    "Full LDraw geometry remains available to existing saved designs. standard is Bricktrait’s synthetic hips/legs."
   ],
   "categories": {
     "head": {

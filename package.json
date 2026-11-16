@@ -47,7 +47,10 @@
     "test:dice": "node scripts/test-dice.mjs",
     "test:deploy": "node scripts/test-deploy.mjs",
     "verify:deploy": "npm run check && node --check scripts/test-deploy.mjs && npm test && npm run build && npm test && npm run test:deploy",
-    "check:presets": "node --check scripts/build-minifigure-presets.mjs && node --check scripts/build-preset-thumbnails.mjs && node --check scripts/import-preset-sources.mjs && node --check scripts/lib/minifigure-presets.mjs && node --check scripts/test-presets.mjs && node --check vendor/bricktrait/src/lib/presets.js"
+    "check:presets": "node --check scripts/build-minifigure-presets.mjs && node --check scripts/build-preset-thumbnails.mjs && node --check scripts/import-preset-sources.mjs && node --check scripts/lib/minifigure-presets.mjs && node --check scripts/test-presets.mjs && node --check vendor/bricktrait/src/lib/presets.js && node --check scripts/import-rebrickable-bulk.mjs && node --check scripts/build-rebrickable-mappings.mjs && node --check scripts/build-minifigure-coverage.mjs && node --check scripts/refresh-portrait-library.mjs && node --check scripts/lib/rebrickable-inventories.mjs && node --check scripts/lib/geometry-fingerprint.mjs",
+    "refresh:portraits": "node scripts/refresh-portrait-library.mjs",
+    "import:preset-bulk": "node scripts/import-rebrickable-bulk.mjs",
+    "build:portrait-coverage": "node scripts/build-minifigure-coverage.mjs"
   },
   "devDependencies": {
     "@fontsource-variable/archivo": "5.3.0",

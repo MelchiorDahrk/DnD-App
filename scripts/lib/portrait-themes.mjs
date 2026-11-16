@@ -1,6 +1,13 @@
 // Match LDraw descriptions and !KEYWORDS, never geometry, history or shop IDs.
 // Multiple memberships are intentional: shared moulds serve several themes.
 export const PORTRAIT_THEMES = [
+  ['Dungeons & Dragons', /\b(Dungeons.{0,5}Dragons|D&D|71047|Mind Flayer|Tiefling|Aarakocra|Szass Tam|Strahd|Tasha|Gith Warlock|Dragonborn|Lady of Pain)\b/i],
+  ['Collectible Minifigures', /\b(CMF|Collectible Minifigures|Collectable Minifigures|Minifigures Series|71047)\b/i],
+  ['Star Wars', /\b(Star Wars|Jedi|Sith|Mandalorian|Stormtrooper|Darth|Wookiee|Clone Trooper|Knights of Ren)\b/i],
+  ['Superheroes', /\b(Marvel|DC Comics|Super Heroes|Superheroes|Batman|Superman|Spider.?Man|Avengers|Iron Man|Captain America|Thor|Hulk|Joker|Wonder Woman|Black Panther|Wolverine|X-Men)\b/i],
+  ['City', /\b(City|Town|Police|Firefighter|Construction|Doctor|Nurse|Paramedic|Coast Guard|Chef|Farmer)\b/i],
+  ['Space', /\b(Space|Blacktron|Futuron|M-Tron|Ice Planet|Spyrius|Astronaut|Galaxy Squad|Alien Conquest)\b/i],
+  ['Disney', /\b(Disney|Mickey|Minnie|Frozen|Elsa|Moana|Pixar|Toy Story|Muppets)\b/i],
   ['Castle', /\b(Castle|Knights?|Kingdoms|Black Falcons?|Forest ?m[ae]n|Wolfpack|Crusaders?|Medieval|Jester|Dragon Masters|Royal Knights)\b/i],
   ['Pirates', /\b(Pirates?|Redbeard|Islanders?|Imperial Soldier|Imperial Guard|Buccaneer|Corsair|Flintlock|Cutlass|Tricorn)\b/i],
   ['Western', /\b(Western|Cowboy|Cowgirl|Sheriff|Bandit|Cavalry)\b/i],

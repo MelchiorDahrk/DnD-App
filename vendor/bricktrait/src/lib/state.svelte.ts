@@ -2,7 +2,7 @@ import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
 import { STANDARD_LEGS, STANDING, type Figure, type Part } from './ldraw';
 import type { View } from './scene';
 import { defaultStyle, type Style } from './compose';
-import { fantasyCatalog } from './fantasy-catalog.js';
+import { selectableCatalog } from './fantasy-catalog.js';
 
 export interface Portrait {
 	figure: Figure;
@@ -86,7 +86,7 @@ export function fromHash(hash: string): Portrait | null {
 const pick = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)];
 
 export function randomize(catalog: Part[]) {
-	catalog = fantasyCatalog(catalog);
+	catalog = selectableCatalog(catalog);
 	const of = (cat: string) => catalog.filter((p) => p.cat === cat);
 	// A broken configuration must not destroy the current figure.
 	if (!of('torso').length || !of('head').length) return;

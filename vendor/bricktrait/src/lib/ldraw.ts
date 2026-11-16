@@ -14,10 +14,14 @@ export interface Part {
 	arms?: boolean;
 	/** guessed from the name and LDraw keywords: Star Wars, Castle, City... */
 	theme?: string;
+	/** Optional, shared browsing associations. Never restrict selection. */
+	themes?: string[];
 	/** year the part was added to or last updated in the LDraw library */
 	year?: number;
 	/** still in review on the LDraw Parts Tracker */
 	unofficial?: boolean;
+	/** Requires a host attachment point; geometry is kept for legacy saves. */
+	attachmentOnly?: boolean;
 	/** head only: moulded head (origin at the neck), the value is its top (y) */
 	moulded?: number;
 }

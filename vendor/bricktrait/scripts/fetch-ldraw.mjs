@@ -1,48 +1,61 @@
-// Downloads the LDraw parts library into .ldraw/, and the parts still in
-// review on the Parts Tracker into .ldraw-unofficial/ (each skipped if already there).
-import fs from 'node:fs';
+// Explicit refresh replaces complete libraries, including removed upstream files.
+// Ordinary builds reuse the last successful, self-contained local snapshot.
+import fs from 'node:fs/promises';
 import path from 'node:path';
-import { unzipSync } from 'fflate';
+import {createHash} from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {unzipSync} from 'fflate';
 
-const LIBRARIES = [
-	{
-		url: 'https://library.ldraw.org/library/updates/complete.zip',
-		dest: path.resolve(process.env.LDRAW_DIR ?? '.ldraw')
-	},
-	{
-		url: 'https://library.ldraw.org/library/unofficial/ldrawunf.zip',
-		dest: path.resolve(process.env.LDRAW_UNOFFICIAL_DIR ?? '.ldraw-unofficial')
-	}
+export const LIBRARIES = [
+  {url:'https://library.ldraw.org/library/updates/complete.zip',dest:path.resolve(process.env.LDRAW_DIR ?? '.ldraw')},
+  {url:'https://library.ldraw.org/library/unofficial/ldrawunf.zip',dest:path.resolve(process.env.LDRAW_UNOFFICIAL_DIR ?? '.ldraw-unofficial')}
 ];
-
-for (const { url, dest } of LIBRARIES) {
-	if (fs.existsSync(path.join(dest, '.questlog-complete'))) {
-		console.log(`Already present in ${dest}`);
-		continue;
-	}
-	console.log(`Downloading ${url}...`);
-	const res = await fetch(url);
-	if (!res.ok) throw new Error(`Download failed: ${res.status}`);
-	const zip = new Uint8Array(await res.arrayBuffer());
-
-	console.log('Extracting...');
-	const files = unzipSync(zip);
-	// Bound concurrent writes: the large library otherwise extracts very slowly
-	// on Windows HDDs. Only LDraw source and license files are needed by the packer.
-	const entries = Object.entries(files).filter(([name]) => !name.endsWith('/') && /\.(dat|ldr|txt)$/i.test(name));
-	const directories = new Set(entries.map(([name]) => path.dirname(path.join(dest, name.replace(/^ldraw\//, '')))));
-	await Promise.all([...directories].map(dir => fs.promises.mkdir(dir, { recursive: true })));
-	let next = 0;
-	await Promise.all(Array.from({length:32}, async () => {
-		while (next < entries.length) {
-			const [name, data] = entries[next++];
-			const out = path.resolve(dest, name.replace(/^ldraw\//, ''));
-			if (!out.startsWith(path.resolve(dest) + path.sep)) throw new Error('Invalid archive path');
-			// Reuse complete files from an interrupted extraction.
-			const previous = await fs.promises.stat(out).catch(() => null);
-			if (previous?.size !== data.length) await fs.promises.writeFile(out, data);
-		}
-	}));
-	console.log(`Done: ${Object.keys(files).length} files in ${dest}`);
-	fs.writeFileSync(path.join(dest, '.questlog-complete'), url);
+export function archivePath(dest, name) {
+  const clean=name.replaceAll('\\','/').replace(/^ldraw\//i,'');
+  const out=path.resolve(dest,clean);
+  if(!out.startsWith(path.resolve(dest)+path.sep))throw new Error('Invalid archive path');
+  return out;
 }
+export async function fetchLibraries({refresh=false,libraries=LIBRARIES}={}) {
+  const rename=async(from,to)=>{
+    for(let attempt=0;;attempt++)try{return await fs.rename(from,to);}catch(error){
+      if(!['EPERM','EBUSY','EACCES'].includes(error.code)||attempt>=10)throw error;
+      await new Promise(r=>setTimeout(r,300));
+    }
+  };
+  for(const {url,dest} of libraries) {
+    if(!refresh && await fs.access(path.join(dest,'.questlog-complete')).then(()=>true,()=>false)) {
+      console.log(`Using cached library ${dest}`);continue;
+    }
+    console.log(`Downloading ${url}`);
+    const response=await fetch(url,{signal:AbortSignal.timeout(300000)});
+    if(!response.ok)throw new Error(`LDraw download failed: ${response.status}`);
+    const zip=new Uint8Array(await response.arrayBuffer());
+    const files=unzipSync(zip);
+    console.log(`Extracting ${Object.keys(files).length} archive entries`);
+    const stage=dest+`.refresh-${process.pid}`,backup=dest+`.previous-${process.pid}`;
+    const clean=async target=>{
+      if(path.dirname(target)!==path.dirname(dest)||!target.startsWith(dest+'.'))throw new Error('Unsafe refresh cleanup');
+      await fs.rm(target,{recursive:true,force:true});
+    };
+    await clean(stage);await fs.mkdir(stage,{recursive:true});
+    try {
+      const entries=Object.entries(files).filter(([name])=>!name.endsWith('/')&&/\.(dat|ldr|txt|png)$/i.test(name));
+      const outputs=entries.map(([name,data])=>[archivePath(stage,name),data]);
+      await Promise.all([...new Set(outputs.map(([out])=>path.dirname(out)))].map(dir=>fs.mkdir(dir,{recursive:true})));
+      let next=0;
+      await Promise.all(Array.from({length:32},async()=>{
+        while(next<outputs.length){const [out,data]=outputs[next++];await fs.writeFile(out,data);}
+      }));
+      await fs.access(path.join(stage,'parts'));await fs.access(path.join(stage,'p'));
+      await fs.writeFile(path.join(stage,'.questlog-complete'),JSON.stringify({url,sha256:createHash('sha256').update(zip).digest('hex'),etag:response.headers.get('etag'),lastModified:response.headers.get('last-modified'),files:outputs.length},null,2)+'\n');
+      await clean(backup);
+      const hadPrevious=await fs.access(dest).then(()=>true,()=>false);
+      if(hadPrevious)await rename(dest,backup);
+      try{await rename(stage,dest);}catch(error){if(hadPrevious)await rename(backup,dest);throw error;}
+      await clean(backup);
+      console.log(`Installed ${outputs.length} files in ${dest}`);
+    }finally{await clean(stage);}
+  }
+}
+if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url))await fetchLibraries({refresh:process.argv.includes('--refresh')});

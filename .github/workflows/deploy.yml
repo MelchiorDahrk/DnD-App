@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     # Accommodate a 35-minute cold build, browser suites and install/cache overhead.
-    timeout-minutes: 95
+    timeout-minutes: 150
     permissions:
       contents: read
     env:
@@ -55,9 +55,10 @@ jobs:
             vendor/bricktrait/static/ldraw
             vendor/bricktrait/static/thumbs
             vendor/bricktrait/static/portrait-match-index.json
+            .cache/portrait-references
           # Cover both renderers' fingerprints, their dependencies and the packer.
           # Keep these paths stable so older caches can still seed a rebuild.
-          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json') }}
+          key: bricktrait-ldraw-f333d939-v4-${{ hashFiles('package-lock.json', 'equipment-icons.js', 'portrait-image-analysis.js', 'portrait-match.js', 'scripts/build-portrait*.mjs', 'scripts/lib/portrait-themes.mjs', 'vendor/bricktrait/scripts/**', 'vendor/bricktrait/src/lib/**', 'vendor/bricktrait/*catalog.json') }}
           restore-keys: |
             bricktrait-ldraw-f333d939-v4-
             bricktrait-ldraw-f333d939-v3-
@@ -74,12 +75,12 @@ jobs:
       - name: Build static app
         # A genuinely cold reference render can take 20-30 minutes on SwiftShader.
         # Warm builds must report "references unchanged" and skip that work.
-        timeout-minutes: 35
+        timeout-minutes: 100
         run: npm run build
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
       # Save before tests: a later assertion or deploy failure must not discard
-      # a successful 1,634-part render. Exact hits are immutable and need no save.
+      # successful incremental part renders. Exact hits are immutable and need no save.
       - name: Save generated portrait assets
         if: steps.portraits.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
@@ -90,6 +91,7 @@ jobs:
             vendor/bricktrait/static/ldraw
             vendor/bricktrait/static/thumbs
             vendor/bricktrait/static/portrait-match-index.json
+            .cache/portrait-references
           key: ${{ steps.portraits.outputs.cache-primary-key }}
       - name: Save generated equipment thumbnails
         if: steps.equipment.outputs.cache-hit != 'true'

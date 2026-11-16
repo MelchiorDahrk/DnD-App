@@ -5,6 +5,8 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {createServer} from 'vite';
 import puppeteer from 'puppeteer-core';
+import {findChromium} from './lib/chromium.mjs';
+import {geometryFingerprinter} from './lib/geometry-fingerprint.mjs';
 const root=resolve(import.meta.dirname,'..'),vendor=resolve(root,'vendor/bricktrait');
 const out=resolve(vendor,'presets/thumbnails');
 const hash=value=>createHash('sha256').update(value).digest('hex');
@@ -15,12 +17,13 @@ export async function buildPresetThumbnails(){
   const previous=JSON.parse(await fs.readFile(manifestFile,'utf8').catch(()=>'{}'));
   const inputs=['src/lib/ldraw.ts','src/lib/portrait-scene.ts','src/lib/portrait-glow.ts','src/lib/scene.ts','src/lib/lighting.ts','src/lib/materials.ts','scripts/preset-thumbs/main.ts','static/ldraw/core.ldr','static/ldraw/LDConfig.ldr'];
   const rendererVersion=hash(Buffer.concat(await Promise.all(inputs.map(f=>fs.readFile(resolve(vendor,f))))));
+  const fingerprint=await geometryFingerprinter(resolve(vendor,'static/ldraw'));
   const partHashes=new Map();
-  for(const p of presets)for(const part of Object.values(p.figure))if(part?.id&&part.id!=='standard'&&!partHashes.has(part.id))partHashes.set(part.id,hash(await fs.readFile(resolve(vendor,'static/ldraw/p',part.id+'.ldr'))));
+  for(const p of presets)for(const part of Object.values(p.figure))if(part?.id&&part.id!=='standard'&&!partHashes.has(part.id))partHashes.set(part.id,await fingerprint(part.id));
   const manifest=Object.fromEntries(presets.map(p=>[p.id,hash(rendererVersion+JSON.stringify(p.figure)+Object.values(p.figure).map(part=>partHashes.get(part?.id)||'').join(''))]));
   const todo=presets.filter(p=>previous[p.id]!==manifest[p.id]||!existsSync(resolve(out,p.id+'.webp')));
   if(todo.length){
-    const chrome=process.env.CHROME_PATH||process.env.BROWSER_PATH||['C:/Program Files/Google/Chrome/Application/chrome.exe','C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','/usr/bin/google-chrome','/usr/bin/chromium','/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'].find(existsSync);
+    const chrome=await findChromium();
     if(!chrome)throw new Error('Preset thumbnails need Chromium once during catalog refresh. Set CHROME_PATH. Checked-in thumbnails make ordinary builds independent of this step.');
     const server=await createServer({configFile:false,root:resolve(vendor,'scripts/preset-thumbs'),publicDir:resolve(vendor,'static'),logLevel:'error',server:{port:0}});
     let browser;

@@ -7,6 +7,10 @@
       "cat": "headgear",
       "kind": "Hair",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings",
+        "The Hobbit"
+      ],
       "year": 2013
     },
     {
@@ -15,6 +19,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2012
     },
     {
@@ -23,6 +30,10 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Castle",
+        "Lord of the Rings"
+      ],
       "year": 2013
     },
     {
@@ -31,6 +42,9 @@
       "cat": "neck",
       "kind": "Beard",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2014
     },
     {
@@ -38,6 +52,9 @@
       "name": "Sword Small with Curved Blade",
       "cat": "hand",
       "kind": "Weapon",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2014
     },
     {
@@ -46,6 +63,10 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Castle",
+        "Lord of the Rings"
+      ],
       "year": 2013
     },
     {
@@ -54,14 +75,31 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Castle",
+        "Lord of the Rings"
+      ],
       "year": 2025
+    },
+    {
+      "id": "10055p01",
+      "name": "Hair Long Straight with Three Braids and Light Nougat Elves Ears Pattern",
+      "cat": "headgear",
+      "kind": "Hair",
+      "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings",
+        "The Hobbit"
+      ],
+      "year": 2024
     },
     {
       "id": "10065",
       "name": "Beard with Braided Moustache Ends",
       "cat": "neck",
       "kind": "Beard",
-      "unofficial": true
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "10066p01",
@@ -69,6 +107,9 @@
       "cat": "headgear",
       "kind": "Hair",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025
     },
     {
@@ -77,21 +118,225 @@
       "cat": "headgear",
       "kind": "Hair",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025
+    },
+    {
+      "id": "11129p01",
+      "name": "Mask Lion with White Nose, Tan Face and Gold Crown Pattern",
+      "cat": "headgear",
+      "kind": "Mask",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "11938pde4",
+      "name": "Torso with Blue Bird Wing Arms Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "12549p01",
+      "name": "Mask Eagle with Yellow Beak, Red Tiara and Medium Blue Feathers Pattern",
+      "cat": "headgear",
+      "kind": "Mask",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "12551p01",
+      "name": "Mask Crocodile with White Teeth, Red Scar and Olive Green Jaw Pattern",
+      "cat": "headgear",
+      "kind": "Mask",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "12893p03",
+      "name": "Hair Short with Bald Top with Black Hair Pattern",
+      "cat": "headgear",
+      "kind": "Hair",
+      "themes": [],
+      "year": 2026
     },
     {
       "id": "13766p01",
       "name": "Hair Long Wavy with Braid and Light Nougat Elf Ears Pattern",
       "cat": "headgear",
       "kind": "Hair",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2024
+    },
+    {
+      "id": "15",
+      "name": "Hips and Legs with Integral Legs",
+      "cat": "legs",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "15523p01",
+      "name": "Head Simpsons Bart Simpson with Eyes Looking Left Pattern",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2015,
+      "moulded": -45
+    },
+    {
+      "id": "15523p02",
+      "name": "Head Simpsons Bart Simpson with Eyes Pattern",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2015,
+      "moulded": -45
+    },
+    {
+      "id": "15524p02",
+      "name": "Head Simpsons Lisa Simpson with Eyes Pattern",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2014,
+      "moulded": -41
+    },
+    {
+      "id": "16360p01",
+      "name": "Torso with Yellow Dual Mould Arms and Hands Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "16360pam",
+      "name": "Torso with Dual Mould Arms and Hands with Dress with Triangle Panel with White and Silver Floral Motif, Sand Green Folds and Belt Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [],
+      "arms": true
+    },
+    {
+      "id": "16360pd12",
+      "name": "Torso with Dual Mould Arms and Hands with Slingshot on Back Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "16360pxh",
+      "name": "Torso with Dual Mould Arms and Hands with White Arms, Medium Lavender Ruffles and Button Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Disney"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "16360pxu",
+      "name": "Torso with Dual Mould Arms and Hands with  3 Yellow Clasps, Collar, Belt and \"R\" on Black Oval Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
+      "arms": true
+    },
+    {
+      "id": "16501p01",
+      "name": "Helmet SW Snowtrooper with Closed Visor with Black Eyes Pattern",
+      "cat": "headgear",
+      "kind": "Helmet",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "16709p01",
+      "name": "Hips and Legs Short with Yellow Horizontal Stripe Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2023
+    },
+    {
+      "id": "16709p02",
+      "name": "Hips and Legs Short with Yellow Horizontal Stripe and Slingshot on Back Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "16709p0h",
+      "name": "Hips and Legs Short with Medium Nougat Half Leg and Feet with Black Gaps Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "17",
+      "name": "Torso with Integral Arms",
+      "cat": "torso",
+      "themes": [],
+      "year": 2011,
+      "arms": false
     },
     {
       "id": "17349",
       "name": "Hat Wizard without Brim",
       "cat": "headgear",
       "kind": "Hat",
+      "themes": [],
       "year": 2022
+    },
+    {
+      "id": "19026p01",
+      "name": "Helmet Cyborg Open Side with Black Hair, Red Eye and Red Dot Pattern",
+      "cat": "headgear",
+      "kind": "Helmet",
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "20606",
@@ -99,13 +344,111 @@
       "cat": "headgear",
       "kind": "Hair",
       "theme": "Monsters",
+      "themes": [
+        "Monsters"
+      ],
       "year": 2026
+    },
+    {
+      "id": "21019bp0f",
+      "name": "Hips and Legs with White Lower Leg and Red Shoe Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ]
+    },
+    {
+      "id": "21019bpct3",
+      "name": "Hips and Legs with Red Lower Leg and Toa Tahu Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "21019bpde1",
+      "name": "Hips and Legs with Stripes, Kneepad and Bright Pink Boots Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "21019bpde6",
+      "name": "Hips and Legs with White Cat Foot Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "21019bpdg3",
+      "name": "Hips and Legs with Grey Lower Leg and Lab Coat Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "21019bpx2",
+      "name": "Hips and Legs with Bright Light Orange Lower Leg and Medium Lavender Shoe Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Disney"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "21019bpx4",
+      "name": "Hips and Legs with Black Lower Legs, Cargo Pockets, Orange and Silver Lines Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "21019bpx5",
+      "name": "Hips and Legs with Bright Green Hips, Red Boots and Black Line Pattern",
+      "cat": "legs",
+      "theme": "Super Heroes",
+      "themes": [
+        "Super Heroes"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "21970p01",
+      "name": "Head Robot Cybermen with Black Eyes and Mouth Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [],
+      "moulded": -35
     },
     {
       "id": "2338",
       "name": "Hat High Cone Shaped",
       "cat": "headgear",
       "kind": "Hat",
+      "themes": [],
       "year": 2012
     },
     {
@@ -114,13 +457,59 @@
       "cat": "hand",
       "kind": "Food",
       "theme": "Castle",
+      "themes": [
+        "City",
+        "Castle"
+      ],
       "year": 2025
     },
     {
       "id": "24068",
       "name": "Hips and Skirt Wide with Side Hoops",
       "cat": "legs",
+      "themes": [],
       "year": 2023
+    },
+    {
+      "id": "24319pys",
+      "name": "Torso with Flipper Arms with Dark Turquoise Scarf with White Snowflakes and Fish Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "24496p01",
+      "name": "Hat Ninja Wrap with Green Bandana and Metallic Gold Ninjago Logogram Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "24629p01",
+      "name": "Head Mouse with Black Ears, Nose and Skull and Eyes with Black Pupil with White Highlight Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Disney"
+      ],
+      "year": 2024,
+      "moulded": -47
+    },
+    {
+      "id": "24633p02",
+      "name": "Head Duck with Bright Light Orange Bill, Eyelashes and Lavender Eye Shadow Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Disney"
+      ],
+      "year": 2024,
+      "moulded": -37
     },
     {
       "id": "2526",
@@ -128,7 +517,45 @@
       "cat": "neck",
       "kind": "Armour",
       "theme": "Pirates",
+      "themes": [
+        "City",
+        "Space",
+        "Pirates"
+      ],
       "year": 2012
+    },
+    {
+      "id": "2528a",
+      "name": "Hat Bicorne",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2022
+    },
+    {
+      "id": "2528ap30",
+      "name": "Hat Bicorne with White Evil Skull and Crossbones Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2022
+    },
+    {
+      "id": "2528ap31",
+      "name": "Hat Bicorne with Small Rounded Skull and Crossbones Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2022
     },
     {
       "id": "2530",
@@ -136,6 +563,11 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Pirates",
+      "themes": [
+        "Pirates",
+        "Western",
+        "Adventurers"
+      ],
       "year": 2014
     },
     {
@@ -143,6 +575,7 @@
       "name": "Hat Rag",
       "cat": "headgear",
       "kind": "Hat",
+      "themes": [],
       "year": 2024
     },
     {
@@ -151,6 +584,9 @@
       "cat": "headgear",
       "kind": "Hat",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2025
     },
     {
@@ -158,6 +594,7 @@
       "name": "Crown with Bar  0.5L",
       "cat": "headgear",
       "kind": "Hat",
+      "themes": [],
       "year": 2019
     },
     {
@@ -165,6 +602,7 @@
       "name": "Crossbow",
       "cat": "hand",
       "kind": "Weapon",
+      "themes": [],
       "year": 2018
     },
     {
@@ -173,6 +611,9 @@
       "cat": "neck",
       "kind": "Armour",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012
     },
     {
@@ -181,7 +622,29 @@
       "cat": "back",
       "kind": "Cape",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012
+    },
+    {
+      "id": "25971p01",
+      "name": "Headdress Bird with Penguin White Face and Orange Beak Pattern",
+      "cat": "headgear",
+      "kind": "Headdress",
+      "themes": [],
+      "year": 2022
+    },
+    {
+      "id": "26051p01",
+      "name": "Head Sonic the Hedgehog with Green Eyes, Tan Face and Half Smile Pattern",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2020,
+      "moulded": -44
     },
     {
       "id": "2674a",
@@ -189,6 +652,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2026
     },
     {
@@ -197,14 +663,235 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025
+    },
+    {
+      "id": "27186",
+      "name": "Hair with Large High Bun",
+      "cat": "headgear",
+      "kind": "Hair",
+      "themes": [],
+      "year": 2022
+    },
+    {
+      "id": "28145p03",
+      "name": "Hair Wavy Parted with Black Large Thick Glasses and Green Eyes Looking Up Pattern",
+      "cat": "headgear",
+      "kind": "Hair",
+      "theme": "Super Heroes",
+      "themes": [
+        "Super Heroes"
+      ],
+      "year": 2022
     },
     {
       "id": "28551",
       "name": "Hair Bushy Swept Back",
       "cat": "headgear",
       "kind": "Hair",
+      "themes": [],
       "year": 2022
+    },
+    {
+      "id": "28621p01",
+      "name": "Head with Arched Eyebrows, Medium Nougat Braid Across Forehead, Open Mouth Smile and Nougat Lips Pattern",
+      "cat": "head",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "28621p02",
+      "name": "Head with Reddish Brown Bushy Eyebrows and Soul Patch, Metallic Light Blue Lines and Dots on Cheeks, Open Mouth Smile with Teeth Pattern",
+      "cat": "head",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "28621p07",
+      "name": "Head with Medium Nougat Eyebrows and Lips, Neutral / Gold Mesh Veil 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "28621p09",
+      "name": "Head with Black Eyebrows, Dark / Light Bluish Grey Beard, Medium Nougat Wrinkles, Neutral / Smile 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "28621p13",
+      "name": "Head with Small Black Eyebrows Eyes and Smile / Surprised 2-Sided Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "28621p14",
+      "name": "Head with Black Eyebrows and Thick Moustache Rounded, Angry / Laughing 2-Sided Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "28621p15",
+      "name": "Head with Black Eyebrows and Thick Moustache Flared Ends, Angry / Laughing 2-Sided Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "28621p16",
+      "name": "Head with Black Eyebrows, Thick Moustache and Round Glasses Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "28621p17",
+      "name": "Head with Black Eyebrows and Beard, Crow's Feet Smiling / Angry 2-Sided Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "28621p1a",
+      "name": "Head with Dark Bluish Grey Eyebrows, Medium Nougat Wrinkles, Nougat Lips and Neutral / Eyebrow Raised 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "28621pct3",
+      "name": "Head with Balaclava, Bright Pink Headband and Smirk Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "28946",
+      "name": "Head Powerpuff Girls Blossom with Orange Hair and Red Bowtie",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "28948",
+      "name": "Head Powerpuff Girls Bubbles with Yellow Hair",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2023,
+      "moulded": -54
+    },
+    {
+      "id": "28949",
+      "name": "Head Powerpuff Girls Buttercup with Black Hair",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2023,
+      "moulded": -50
+    },
+    {
+      "id": "30114c01",
+      "name": "Hair Long with Headband and Feathers (Complete)",
+      "cat": "headgear",
+      "kind": "Hair",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "30124b",
+      "name": "Helmet Standard",
+      "cat": "headgear",
+      "kind": "Helmet",
+      "theme": "Space",
+      "themes": [
+        "City",
+        "Space"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "30132",
+      "name": "Gun Revolver",
+      "cat": "hand",
+      "kind": "Weapon",
+      "theme": "Western",
+      "themes": [
+        "Western",
+        "Adventurers"
+      ],
+      "year": 2017
+    },
+    {
+      "id": "30133",
+      "name": "Bandana",
+      "cat": "neck",
+      "kind": "Neckwear",
+      "themes": [],
+      "year": 2025
+    },
+    {
+      "id": "30135",
+      "name": "Hat Kepi",
+      "cat": "headgear",
+      "kind": "Hat",
+      "themes": [],
+      "year": 2012
+    },
+    {
+      "id": "30138p01",
+      "name": "Headdress American Indian Warbonnet with Coloured Feathers Pattern",
+      "cat": "headgear",
+      "kind": "Headdress",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "30167",
+      "name": "Hat Wide Brim Flat",
+      "cat": "headgear",
+      "kind": "Hat",
+      "themes": [],
+      "year": 2025
+    },
+    {
+      "id": "30172",
+      "name": "Hat Pith Helmet",
+      "cat": "headgear",
+      "kind": "Helmet",
+      "themes": [],
+      "year": 2012
     },
     {
       "id": "30173a",
@@ -212,6 +899,10 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
       "year": 2011
     },
     {
@@ -220,6 +911,10 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
       "year": 2011
     },
     {
@@ -228,6 +923,10 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
       "year": 2025
     },
     {
@@ -236,6 +935,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2026
     },
     {
@@ -243,6 +945,7 @@
       "name": "Hood Fur-lined",
       "cat": "headgear",
       "kind": "Hood",
+      "themes": [],
       "year": 2017
     },
     {
@@ -251,62 +954,164 @@
       "cat": "headgear",
       "kind": "Hood",
       "theme": "Star Wars",
+      "themes": [
+        "Star Wars",
+        "Castle",
+        "Harry Potter"
+      ],
       "year": 2012
+    },
+    {
+      "id": "30668p01",
+      "name": "Hood with Tan Fringe Pattern",
+      "cat": "headgear",
+      "kind": "Hood",
+      "theme": "Ninjago",
+      "themes": [
+        "Collectible Minifigures",
+        "Ninjago",
+        "Collectible Minifigures"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "36036p00",
+      "name": "Hips and Skirt with Under Dress/Robe with Gold Dress and Dark Brown Trim Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2025
     },
     {
       "id": "36036p01",
       "name": "Hips and Skirt with Gold Robe Ends over Ornate Stole Half Pattern",
       "cat": "legs",
       "theme": "Harry Potter",
+      "themes": [
+        "Castle",
+        "Harry Potter"
+      ],
       "year": 2025
+    },
+    {
+      "id": "36036p02",
+      "name": "Hips and Skirt with Dress with Sand Green and White Trim and Striped Underdress Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "36036p03",
       "name": "Hips and Skirt with Dress with Dark Green Folds Pattern",
       "cat": "legs",
-      "unofficial": true
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "36036p04",
       "name": "Hips and Skirt with White Apron Pattern",
       "cat": "legs",
-      "unofficial": true
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "36036pm0",
       "name": "Hips and Skirt with Silver Dots Under Dress and Black Trim Pattern",
       "cat": "legs",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025
+    },
+    {
+      "id": "3625",
+      "name": "Hair Female with Pigtails",
+      "cat": "headgear",
+      "kind": "Hair",
+      "themes": [],
+      "year": 2012
     },
     {
       "id": "3626a",
       "name": "Head with Solid Stud",
       "cat": "head",
+      "themes": [],
       "year": 2010
     },
     {
       "id": "3626ap01",
       "name": "Head with Standard Grin Pattern (Solid Stud)",
       "cat": "head",
+      "themes": [],
       "year": 2024
     },
     {
       "id": "3626bp01",
       "name": "Head with Standard Grin Pattern (Blocked Hollow Stud)",
       "cat": "head",
+      "themes": [],
       "year": 2022
     },
     {
       "id": "3626bp05",
       "name": "Head with Standard Grin and Eyebrows Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2024
     },
     {
       "id": "3626bp35",
       "name": "Head with Messy Hair, Moustache and Stubble Pattern",
       "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626bp36",
+      "name": "Head with Dark Red Moustache and Beard, Sneer, White Pupil and Eye Patch Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2020
+    },
+    {
+      "id": "3626bp39",
+      "name": "Head with Grin, Dark Grey Beard and Eyebrows Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates",
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bp3j",
+      "name": "Head with Islander White/Red Painted Face Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bp3k",
+      "name": "Head with Islander White/Blue Painted Face Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bp3r",
+      "name": "Head with Brown Moustache, Stubble, Eyebrows, Frowning Pattern",
+      "cat": "head",
+      "themes": [],
       "year": 2024
     },
     {
@@ -314,43 +1119,115 @@
       "name": "Head Female with Red Lips and Black Messy Hair Pattern",
       "cat": "head",
       "theme": "Pirates",
+      "themes": [
+        "Castle",
+        "Pirates"
+      ],
       "year": 2023
+    },
+    {
+      "id": "3626bp42",
+      "name": "Head with Dark Orange Moustache, Beard and Messy Hair Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
     },
     {
       "id": "3626bp43",
       "name": "Head with Red Moustache, Beard and Messy Hair Pattern",
       "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626bp44",
+      "name": "Head with Black Moustache, Beard and Messy Hair Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626bp46",
+      "name": "Head with Eye Patch, Dark Orange Moustache, Beard and Messy Hair Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626bp47",
+      "name": "Head with Eye Patch, Red Moustache, Beard and Messy Hair Pattern",
+      "cat": "head",
+      "themes": [],
       "year": 2024
     },
     {
       "id": "3626bp48",
       "name": "Head with Eye Patch, Fabuland Red Stubble and Messy Hair Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2024
     },
     {
       "id": "3626bp49",
       "name": "Head with Eye Patch, Black Stubble and Messy Hair Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2024
+    },
+    {
+      "id": "3626bp4g",
+      "name": "Head with White Pupils, Crow's Feet, Light Bluish Grey Beard and Sad Mouth Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "Castle",
+        "Pirates"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bp62",
+      "name": "Head with Ice Planet Messy White Hair Pattern",
+      "cat": "head",
+      "theme": "Space",
+      "themes": [
+        "Space"
+      ],
+      "year": 2022
     },
     {
       "id": "3626bp81",
       "name": "Head with Lefty Mouth and Stubble Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2022
     },
     {
       "id": "3626bp82",
       "name": "Head with Smirk, Black Hair and Goatee Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2012
+    },
+    {
+      "id": "3626bpa1",
+      "name": "Head with Glasses and White Muttonchops Pattern",
+      "cat": "head",
+      "theme": "City",
+      "themes": [
+        "City",
+        "Adventurers"
+      ],
+      "year": 2018
     },
     {
       "id": "3626bpa3",
       "name": "Head with Smirk & Black Moustache Pattern",
       "cat": "head",
       "theme": "Adventurers",
+      "themes": [
+        "Adventurers"
+      ],
       "year": 2024
     },
     {
@@ -358,13 +1235,68 @@
       "name": "Head with Evil Skeleton Skull Pattern",
       "cat": "head",
       "theme": "Monsters",
+      "themes": [
+        "Monsters"
+      ],
       "year": 2022
+    },
+    {
+      "id": "3626bpaa",
+      "name": "Head with Aquanaut, Red Headband and Freckles Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626bpc14",
+      "name": "Head with Big Eyes, White Pupils, Large White Mouth and Red Nose Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "3626bpc2g",
+      "name": "Head with Dark Blue Eyebrows, Cheek Lines, Frown and Chin Dimple Pattern",
+      "cat": "head",
+      "theme": "Adventurers",
+      "themes": [
+        "Collectible Minifigures",
+        "Adventurers",
+        "Collectible Minifigures"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "3626bpc34",
+      "name": "Head with Black Thick Eyebrows, Sideburns, Goatee, Moustache and White Pupils Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "3626bpc39",
+      "name": "Head with Long Brown Eyebrows and Nougat Cheek Lines Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
     },
     {
       "id": "3626bpma",
       "name": "Head with LOTR Orc with Grey Hair Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2024
     },
     {
@@ -372,31 +1304,399 @@
       "name": "Head with LOTR Uruk-Hai Lurtz Scowl and White Hand 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpn1",
+      "name": "Head with White Hair, Eyebrows, and Moustache Pattern",
+      "cat": "head",
+      "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
+      "year": 2005
+    },
+    {
+      "id": "3626bpn5",
+      "name": "Head with Red Bandana, Black Eyebrows and Sideburns Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "3626bpq0",
+      "name": "Head Mummy with Wrapped Face with 2 Eyes / 1 Eye 2-Sided Pattern",
+      "cat": "head",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpq1",
+      "name": "Head Mummy with 2 Eyes / Gold Death Mask 2-Sided Pattern",
+      "cat": "head",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpq2",
+      "name": "Head with Sideburns, Goatee, Beard Stubble, Scar Pattern",
+      "cat": "head",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpq4",
+      "name": "Head with Glasses, Brown Sideburns and Moustache Pattern",
+      "cat": "head",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bps5",
+      "name": "Head with SW Smirk and Brown Eyebrows Pattern",
+      "cat": "head",
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpw0",
+      "name": "Head with Angry Moustache, White Teeth and Gold Tooth Pattern",
+      "cat": "head",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2017
+    },
+    {
+      "id": "3626bpw1",
+      "name": "Head with Thick Angry Moustache, Stubble and Long Hair Pattern",
+      "cat": "head",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpw2",
+      "name": "Head with Angry Moustache and Teeth Pattern",
+      "cat": "head",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpw4",
+      "name": "Head with Orange Painted Face Pattern",
+      "cat": "head",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpw5",
+      "name": "Head with Painted Triangles Pattern",
+      "cat": "head",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3626bpw9",
+      "name": "Head with Moustache, Stubble and Bald Hair Part Pattern",
+      "cat": "head",
+      "theme": "Pirates",
+      "themes": [
+        "City",
+        "Pirates",
+        "Western"
+      ],
       "year": 2024
     },
     {
       "id": "3626cp01",
       "name": "Head with Standard Grin Pattern (Hollow Stud)",
       "cat": "head",
+      "themes": [],
       "year": 2024
+    },
+    {
+      "id": "3626cp0d",
+      "name": "Head with Dark Orange Eyebrows, Freckles and Small Open Mouth Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp0j",
+      "name": "Head with Crocodile Bright Light Orange Eye, Missing Eye, Red Scar and Olive Green Jaw Open/Closed Mouth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "3626cp0k",
+      "name": "Head with Stern Black Eyebrows, Frown and Dark Orange Scars Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "3626cp0l",
+      "name": "Head with Black Bushy Eyebrows, Chin Dimple and Frown Pattern",
+      "cat": "head",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "3626cp0n",
+      "name": "Head with Stern Eyebrows (one Scarred), White Pupils and Chin Dimple Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "3626cp0p",
+      "name": "Head with Reddish Brown Glasses, Light Pink Lips Crooked Smile/Open Mouth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ]
+    },
+    {
+      "id": "3626cp0r",
+      "name": "Head with Black Eyebrows, White Pupils and Open Mouth Smile/Clenched Teeth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp0s",
+      "name": "Head with Dark Brown Eyebrows, Wrinkles Calm/Angry with Clenched Teeth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp0t",
+      "name": "Head with Black Eyebrows, Eyelashes, Dark Orange Lips/Green and Gold Robot with Red Eyes 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp0u",
+      "name": "Head with Yellow Eyes, Sand Blue Eye Shadow, Bright Light Orange Beak and Wide Eyes/Narrow Eyes 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "3626cp0v",
+      "name": "Head with White Moustache, Goatee, Bushy Eyebrows, Cheek Lines and Forehead Wrinkles Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "3626cp0z",
+      "name": "Head with Black Eyebrows, Eyelashes, Medium Nougat Lips, Lopsided Open Mouth Smile / Worried 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp10",
+      "name": "Head with Bright Light Orange Eyes, Dark Brown Nose, White Face and Closed/Open Mouth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Legends of Chima"
+      ]
+    },
+    {
+      "id": "3626cp12",
+      "name": "Head with White Mouth Area and Neutral White Eyes/Red Angry Eyes 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp15",
+      "name": "Head with Purple Eye Shadow, Dirt Stains and Smile/Angry 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp1m",
+      "name": "Head with Black Eyebrows, Glasses and Full Beard and Open Mouth Smile Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp1p",
+      "name": "Head with Black Eyebrows, Eyelashes, Nougat Lips and Lopsided Open Mouth Smile with Teeth Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp1u",
+      "name": "Head with Black Glasses with White Lenses, Sideburns and Moustache Neutral / Smiling 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp1v",
+      "name": "Head with Black Eyebrows, Sideburns, Moustache, Neutral / Smiling 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cp71",
+      "name": "Head with Raised Left Eyebrow, Freckles and Crooked Smile Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2019
     },
     {
       "id": "3626cp72",
       "name": "Head with Beard Stubble, Black Raised Right Eyebrow and Smirk Angled to Right Pattern",
       "cat": "head",
+      "themes": [],
       "year": 2022
+    },
+    {
+      "id": "3626cp79",
+      "name": "Head with Black Eyebrows, White Pupils, Chin Dimple, Cheek Lines and Smirk Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2022
+    },
+    {
+      "id": "3626cp7l",
+      "name": "Head with Black Eyelashes, Reddish Brown Eyebrows and Freckles Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626cp7n",
+      "name": "Head with Reddish Brown Eyebrows, White Pupils, Lopsided Smile and Dimple Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "3626cp7p",
+      "name": "Head with Laugh Lines, White and Light Bluish Grey Bushy Eyebrows, Beard and Moustache Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "3626cp85",
+      "name": "Head Female with Reddish Brown Eyebrows, Medium Nougat Freckles and Lips, Small Smirk / Left Eye Squinted 2-Sided Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2023
     },
     {
       "id": "3626cp88",
       "name": "Head with Grin, Brown Beard, White Pupils Pattern (Hollow Stud)",
       "cat": "head",
+      "themes": [],
       "year": 2022
+    },
+    {
+      "id": "3626cp8h",
+      "name": "Head with Silver Sunglasses, Eyebrows Wavy and Thin Grin Pattern",
+      "cat": "head",
+      "themes": [],
+      "year": 2020
+    },
+    {
+      "id": "3626cp8k",
+      "name": "Head with Brown Eyebrows, Open Lopsided Grin and White Pupils Pattern (Hollow Stud)",
+      "cat": "head",
+      "themes": [],
+      "year": 2017
+    },
+    {
+      "id": "3626cpb8",
+      "name": "Head with Black Headband and Closed/Open Mouth 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ]
     },
     {
       "id": "3626cpbb",
       "name": "Head with Beard, Happy/Angry 2-Sided Pattern",
       "cat": "head",
       "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
       "year": 2024
     },
     {
@@ -404,6 +1704,10 @@
       "name": "Head with Beard, Sneering/Scared 2-Sided Pattern",
       "cat": "head",
       "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
       "year": 2024
     },
     {
@@ -411,6 +1715,9 @@
       "name": "Head with LOTR Thick Grey Eyebrows and Smile Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2022
     },
     {
@@ -418,6 +1725,9 @@
       "name": "Head with LOTR Worried / Smile 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013
     },
     {
@@ -425,6 +1735,9 @@
       "name": "Head with LOTR Tired / Poisoned 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025
     },
     {
@@ -432,6 +1745,9 @@
       "name": "Head with LOTR Frowning / Scared 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013
     },
     {
@@ -439,6 +1755,9 @@
       "name": "Head with LOTR Frowning / Shouting 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013
     },
     {
@@ -446,7 +1765,186 @@
       "name": "Head with LOTR Frowning / Grimacing 2-Sided Pattern",
       "cat": "head",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013
+    },
+    {
+      "id": "3626cpnc",
+      "name": "Head with Reddish Brown Eyebrows, Green Eyes, Lopsided Open Mouth Grin / Gritted Teeth 2-Sided Pattern",
+      "cat": "head",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2020
+    },
+    {
+      "id": "3626cpnh",
+      "name": "Head with Green Eyes, White Pupils, Reddish Brown Eyebrows and Scowl Pattern",
+      "cat": "head",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "3626cpni",
+      "name": "Head Robot with Medium Azure Visor with Headset and Eyepiece/Medium Azure Eyes and Silver Face Mask 2-Sided Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "3626cpnj",
+      "name": "Head with Reddish Brown Bushy Eyebrows, White Pupils and Smirk Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "3626cpq0",
+      "name": "Head with Beard Stubble, Eyebrows, Smile, Scar Pattern",
+      "cat": "head",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Pharaoh's Quest"
+      ],
+      "year": 2013
+    },
+    {
+      "id": "3626cps3",
+      "name": "Head with Black Eyebrows, White Pupils, Dark Nougat Cheek Lines and Dimple and Grimacing Pattern",
+      "cat": "head",
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
+      "year": 2022
+    },
+    {
+      "id": "3626cpsa",
+      "name": "Head with Black Eyebrows, Open Mouth, Nougat Lips and Frown Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "3626cpsb",
+      "name": "Head with Black Eyebrows, Open Mouth and Scowl Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "3626cpsc",
+      "name": "Head with Black Eyebrows, Cheek Lines and Lopsided Open Mouth Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "3626cpse",
+      "name": "Head with Black Female Eyebrows, Open Smile and Dark Brown Lips Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "3626cpsj",
+      "name": "Head with Black Eyebrows, White Pupils, Cheek Lines and Circles Around Eyes Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "3626cpxf",
+      "name": "Head with Brown Eyebrows, Dark Tan Freckles and Crooked Smile/Worried Mouth 2-Sided Pattern",
+      "cat": "head",
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "3629",
+      "name": "Hat Cowboy",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "3629pw2",
+      "name": "Hat Cowboy with Silver Star Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "36877",
+      "name": "Head Powerpuff Girls Princess Morbucks with Red Hair",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "moulded": -51
+    },
+    {
+      "id": "37364pdg2",
+      "name": "Hips and Legs Medium with Black Shoes and Lab Coat Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "37364pdg9",
+      "name": "Hips and Legs Medium with Black Shoes Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
     },
     {
       "id": "3837",
@@ -454,6 +1952,9 @@
       "cat": "hand",
       "kind": "Tool",
       "theme": "City",
+      "themes": [
+        "City"
+      ],
       "year": 2025
     },
     {
@@ -461,6 +1962,7 @@
       "name": "Pickaxe",
       "cat": "hand",
       "kind": "Tool",
+      "themes": [],
       "year": 2003
     },
     {
@@ -469,6 +1971,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020
     },
     {
@@ -476,6 +1981,7 @@
       "name": "Shield Triangular",
       "cat": "hand",
       "kind": "Shield",
+      "themes": [],
       "year": 2003
     },
     {
@@ -484,6 +1990,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2004
     },
     {
@@ -492,6 +2001,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2004
     },
     {
@@ -500,7 +2012,18 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2003
+    },
+    {
+      "id": "3878",
+      "name": "Top Hat",
+      "cat": "headgear",
+      "kind": "Hat",
+      "themes": [],
+      "year": 2024
     },
     {
       "id": "3896",
@@ -508,6 +2031,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2024
     },
     {
@@ -515,6 +2041,7 @@
       "name": "Hair Male",
       "cat": "headgear",
       "kind": "Hair",
+      "themes": [],
       "year": 2012
     },
     {
@@ -523,25 +2050,60 @@
       "cat": "headgear",
       "kind": "Hair",
       "theme": "Harry Potter",
+      "themes": [
+        "Harry Potter"
+      ],
       "year": 2024
     },
     {
       "id": "41879a",
       "name": "Hips and Legs Short without Hole",
       "cat": "legs",
+      "themes": [],
       "year": 2020
+    },
+    {
+      "id": "41879ap01",
+      "name": "Hips and Legs Short with Black Open Toe Shoes Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2020
+    },
+    {
+      "id": "41879ap03",
+      "name": "Hips and Legs Short with Black Gaps Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2023
     },
     {
       "id": "41879b",
       "name": "Hips and Legs Short with Hole",
       "cat": "legs",
+      "themes": [],
       "year": 2020
+    },
+    {
+      "id": "41879bp03",
+      "name": "Hips and Legs Short with Orange Toes Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2022
     },
     {
       "id": "42109",
       "name": "Head Goblin",
       "cat": "head",
       "theme": "Harry Potter",
+      "themes": [
+        "Harry Potter"
+      ],
       "year": 2012,
       "moulded": -32
     },
@@ -551,6 +2113,9 @@
       "cat": "hand",
       "kind": "Tool",
       "theme": "Harry Potter",
+      "themes": [
+        "Harry Potter"
+      ],
       "year": 2012
     },
     {
@@ -558,6 +2123,7 @@
       "name": "Spear with Round End",
       "cat": "hand",
       "kind": "Weapon",
+      "themes": [],
       "year": 2020
     },
     {
@@ -565,6 +2131,7 @@
       "name": "Arrow Quiver",
       "cat": "back",
       "kind": "Pack",
+      "themes": [],
       "year": 2015
     },
     {
@@ -572,6 +2139,7 @@
       "name": "Bow with Arrow",
       "cat": "hand",
       "kind": "Weapon",
+      "themes": [],
       "year": 2025
     },
     {
@@ -580,6 +2148,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2024
     },
     {
@@ -588,6 +2159,10 @@
       "cat": "headgear",
       "kind": "Hood",
       "theme": "Castle",
+      "themes": [
+        "City",
+        "Castle"
+      ],
       "year": 2012
     },
     {
@@ -596,6 +2171,10 @@
       "cat": "headgear",
       "kind": "Cap",
       "theme": "Super Heroes",
+      "themes": [
+        "Castle",
+        "Super Heroes"
+      ],
       "year": 2025
     },
     {
@@ -603,6 +2182,7 @@
       "name": "Cape",
       "cat": "back",
       "kind": "Cape",
+      "themes": [],
       "year": 2012
     },
     {
@@ -610,6 +2190,7 @@
       "name": "Hair Shoulder Length",
       "cat": "headgear",
       "kind": "Hair",
+      "themes": [],
       "year": 2012
     },
     {
@@ -618,6 +2199,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2013
     },
     {
@@ -626,13 +2210,17 @@
       "cat": "headgear",
       "kind": "Helmet",
       "unofficial": true,
-      "theme": "Games & TV"
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ]
     },
     {
       "id": "50231c02",
       "name": "Cape Cloth (Formed Floating)",
       "cat": "back",
       "kind": "Cape",
+      "themes": [],
       "year": 2019
     },
     {
@@ -641,6 +2229,10 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
       "year": 2012
     },
     {
@@ -648,6 +2240,7 @@
       "name": "Tool Hammer",
       "cat": "hand",
       "kind": "Tool",
+      "themes": [],
       "year": 2012
     },
     {
@@ -656,7 +2249,10 @@
       "cat": "headgear",
       "kind": "Hair",
       "unofficial": true,
-      "theme": "Games & TV"
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ]
     },
     {
       "id": "59",
@@ -664,6 +2260,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025
     },
     {
@@ -672,13 +2271,17 @@
       "cat": "headgear",
       "kind": "Hood",
       "unofficial": true,
-      "theme": "Star Wars"
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
     },
     {
       "id": "60749",
       "name": "Beard Long with Five Braids",
       "cat": "neck",
       "kind": "Beard",
+      "themes": [],
       "year": 2012
     },
     {
@@ -687,6 +2290,9 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2024
     },
     {
@@ -695,6 +2301,9 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012
     },
     {
@@ -703,6 +2312,9 @@
       "cat": "hand",
       "kind": "Gear",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025
     },
     {
@@ -710,6 +2322,7 @@
       "name": "Wizards Hat",
       "cat": "headgear",
       "kind": "Hat",
+      "themes": [],
       "year": 2015
     },
     {
@@ -718,6 +2331,11 @@
       "cat": "neck",
       "kind": "Beard",
       "theme": "Harry Potter",
+      "themes": [
+        "Castle",
+        "Harry Potter",
+        "Ninjago"
+      ],
       "year": 2012
     },
     {
@@ -726,6 +2344,10 @@
       "cat": "headgear",
       "kind": "Hat",
       "theme": "Adventurers",
+      "themes": [
+        "Indiana Jones",
+        "Adventurers"
+      ],
       "year": 2012
     },
     {
@@ -734,14 +2356,40 @@
       "cat": "hand",
       "kind": "Food",
       "theme": "Castle",
+      "themes": [
+        "City",
+        "Castle"
+      ],
       "year": 2025
+    },
+    {
+      "id": "62810",
+      "name": "Hair Short, Tousled with Side Parting",
+      "cat": "headgear",
+      "kind": "Hair",
+      "themes": [],
+      "year": 2012
     },
     {
       "id": "68495",
       "name": "Cup Stein with Handle",
       "cat": "hand",
       "kind": "Food",
+      "themes": [],
       "year": 2022
+    },
+    {
+      "id": "69974p01",
+      "name": "Head Looney Tunes Tweety with Black Eyelashes, Bright Light Orange Beak and Dark Azure Eyes Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "moulded": -48
     },
     {
       "id": "71015",
@@ -749,41 +2397,1479 @@
       "cat": "headgear",
       "kind": "Hat",
       "theme": "Pirates",
+      "themes": [
+        "Castle",
+        "Pirates"
+      ],
       "year": 2025
+    },
+    {
+      "id": "71168p01",
+      "name": "Head Looney Tunes Sylvester with Red Nose, Black Whiskers and White Face and Neck Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "moulded": -49
+    },
+    {
+      "id": "73200bp02",
+      "name": "Hips and Legs with White Buttons, Black Shoes and Black Line on Sides Pattern",
+      "cat": "legs",
+      "theme": "Castle",
+      "themes": [
+        "Disney",
+        "Castle"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "73200bp04",
+      "name": "Hips and Legs with Gold Belt, Armour Scales, Knee Pads and Claws Pattern",
+      "cat": "legs",
+      "themes": [
+        "Legends of Chima"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bp05",
+      "name": "Hips and Legs with Dark Red Sash and Medium Nougat Knee Pads Pattern",
+      "cat": "legs",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bp06",
+      "name": "Hips and Legs with Light Bluish Grey Sash and Medium Nougat Knee Pads Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "73200bp07",
+      "name": "Hips and Legs with Medium Azure Sash and Medium Nougat Knee Pads Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "73200bp08",
+      "name": "Hips and Legs with Silver Armour Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bp09",
+      "name": "Hips and Legs with Olive Green and Medium Blue Coattails Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ]
+    },
+    {
+      "id": "73200bp0a",
+      "name": "Hips and Legs with Silver Skirt Hems, Dark Silver Chain Mail, Reddish Brown Knee Wrappings and Shoe Tips Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ]
+    },
+    {
+      "id": "73200bp0b",
+      "name": "Hips and Legs with Silver Celtic Tunic Hem, Dark Orange Knee Wrappings and Black Shoe Tips Pattern",
+      "cat": "legs",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bp0c",
+      "name": "Hips and Legs with Loincloth with Silver Celtic Knot, Reddish Brown Belts, Olive Green Feathers and Shoe Tips Pattern",
+      "cat": "legs",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bp0d",
+      "name": "Hips and Legs with Reddish Brown Belt with Tan Tunic with Fur Hem and Silver Celtic Knots, Knee Wrappings and Shoe Tips Pattern",
+      "cat": "legs",
+      "theme": "Castle",
+      "themes": [
+        "Castle",
+        "Vikings"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bp0e",
+      "name": "Hips and Legs with Gold Belt, Dark Red Armour Scales, Knee Pads and Toes Pattern",
+      "cat": "legs",
+      "themes": [
+        "Legends of Chima"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bp0f",
+      "name": "Hips and Legs with Gold and Dark Bluish Grey Loincloth and  4 Gold Clasps Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "73200bp0h",
+      "name": "Hips and Legs with Silver and Metallic Dark Grey Armour Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "73200bp0i",
+      "name": "Hips and Legs with Diving Suit Orange and Medium Azure Stripes Pattern",
+      "cat": "legs",
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bp0j",
+      "name": "Hips and Legs with Gold Belt, Dark Red Scales, Lion Knee Pads and Clawed Toes Pattern",
+      "cat": "legs",
+      "themes": [
+        "Legends of Chima"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bp0k",
+      "name": "Hips and Legs with Black and Metallic Silver Armour and Knee Pads Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bp0n",
+      "name": "Hips and Legs with Dark Purple Boots and Black Leotard Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2025
+    },
+    {
+      "id": "73200bp0o",
+      "name": "Hips and Legs with Black Stripes Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "73200bp0x",
+      "name": "Hips and Legs with Retro Spacesuit Silver Belt and Dark Orange Wrinkles Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2026
+    },
+    {
+      "id": "73200bp0y",
+      "name": "Hips and Legs with Yellow and Red Vertical Stripes on Sides Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bp0z",
+      "name": "Hips and Legs with Yellow and Red Vertical Stripes on Sides with Medium Lilac Left Leg Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bp30",
+      "name": "Hips and Legs with Rags and Patch Pattern",
+      "cat": "legs",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bp3j",
+      "name": "Hips and Legs with Green Leaf Pattern",
+      "cat": "legs",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bp6s",
+      "name": "Hips and Legs with Roboforce Logo, Metallic Gold Circuitry and Red Hips Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Space",
+      "themes": [
+        "Space"
+      ]
     },
     {
       "id": "73200bpa9",
       "name": "Hips and Legs with Holster and Belt Pattern",
       "cat": "legs",
       "theme": "Adventurers",
+      "themes": [
+        "Indiana Jones",
+        "Adventurers"
+      ],
       "year": 2023
+    },
+    {
+      "id": "73200bpb1",
+      "name": "Hips and Legs with Silver Armour Plates and Knee Pads with Bat Pattern",
+      "cat": "legs",
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "73200bpc14",
+      "name": "Hips and Legs with Red and Medium Blue Patches Pattern",
+      "cat": "legs",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bpc2g",
+      "name": "Hips and Legs with Gold Cord and Tunic Pattern",
+      "cat": "legs",
+      "theme": "Adventurers",
+      "themes": [
+        "Collectible Minifigures",
+        "Adventurers",
+        "Collectible Minifigures"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bpc34",
+      "name": "Hips and Legs with Samurai Armour Pattern",
+      "cat": "legs",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "73200bpc39",
+      "name": "Hips and Legs with Dark Green and Silver Scale Mail Pattern",
+      "cat": "legs",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "73200bpcbg",
+      "name": "Hips and Legs with Female Clockwork Robot Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "73200bpde4",
+      "name": "Hips and Legs with Black Gaps between 4 Toes Pattern",
+      "cat": "legs",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2026
+    },
+    {
+      "id": "73200bpdg1",
+      "name": "Hips and Legs with Dark Brown Fur Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bpdg7",
+      "name": "Hips and Legs with Reddish Brown Fur Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bpdga",
+      "name": "Hips and Legs with Black Shoes Pattern",
+      "cat": "legs",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
     },
     {
       "id": "73200bpm1",
       "name": "Hips and Legs with LOTR Scale Armour Pattern",
       "cat": "legs",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2023
+    },
+    {
+      "id": "73200bpn1",
+      "name": "Hips and Legs with Dark Green Shirt Tail, Reddish Brown Belt and Pockets, Metallic Gold Buckle and Rivets Pattern",
+      "cat": "legs",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025
+    },
+    {
+      "id": "73200bpn2",
+      "name": "Hips and Legs with Green Belt and Knee Straps Pattern",
+      "cat": "legs",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2024
+    },
+    {
+      "id": "73200bpn3",
+      "name": "Hips and Legs with Red Sash and Dark Green Samurai Armour Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bpn5",
+      "name": "Hips and Legs with Silver Sash and White Knee Pads Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bpn6",
+      "name": "Hips and Legs with Dark Green Sash, Gold Buckles and Nougat Knee Wrappings Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "73200bpn8",
+      "name": "Hips and Legs with Golden Samurai Leg Armour and Blue Hips Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "73200bpn9",
+      "name": "Hips and Legs with Golden Samurai Leg Armour Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "73200bpq0",
+      "name": "Hips and Legs with Dark Blue Loincloth Pattern",
+      "cat": "legs",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bpq1",
+      "name": "Hips and Legs with Dark Blue and Decorated Gold Loincloth Pattern",
+      "cat": "legs",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bps5",
+      "name": "Hips and Legs with SW Gunbelt Pattern",
+      "cat": "legs",
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bps7",
+      "name": "Hips and Legs with SW Snowtrooper Armour Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ]
+    },
+    {
+      "id": "73200bpw2",
+      "name": "Hips and Legs with Blue/White Triangles, Fringe Pattern",
+      "cat": "legs",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bpw3",
+      "name": "Hips and Legs with Dark Turquoise/White Triangles, White Fringe Pattern",
+      "cat": "legs",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bpy1",
+      "name": "Hips and Legs with White Stripes Pattern",
+      "cat": "legs",
+      "theme": "Sports",
+      "themes": [
+        "Sports"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "73200bpy2",
+      "name": "Hips and Legs with Black Sparco Logo and Black, Blue and Red Stripes Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "73200bpy3",
+      "name": "Hips and Legs with Racing Suit with Black Puma and AMG Logos, Green Halftone and Grey Dotted Lines Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2024
+    },
+    {
+      "id": "73200bpy4",
+      "name": "Hips and Legs with Racing Suit with White Logos and Triangles and Blue Dotted Lines Pattern",
+      "cat": "legs",
+      "unofficial": true,
+      "theme": "City",
+      "themes": [
+        "City"
+      ]
+    },
+    {
+      "id": "73200bpy5",
+      "name": "Hips and Legs with Racing Suit with Orange Lines and Silver Hexagons Pattern Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2025
     },
     {
       "id": "74528",
       "name": "Hood",
       "cat": "headgear",
       "kind": "Hood",
-      "unofficial": true
+      "unofficial": true,
+      "themes": []
+    },
+    {
+      "id": "74604p01",
+      "name": "Head Looney Tunes Road Runner with Bright Light Orange Beak and Medium Blue Neck Pattern",
+      "cat": "head",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2026,
+      "moulded": -42
+    },
+    {
+      "id": "75033p01",
+      "name": "Head Looney Tunes Speedy Gonzales with Bright Light Orange Hat, Black Nose and Whiskers Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "moulded": -59
+    },
+    {
+      "id": "75698p01",
+      "name": "Head Looney Tunes Lola Bunny with White Face, Bright Pink Nose and Tongue Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ]
+    },
+    {
+      "id": "76382p0049",
+      "name": "Torso with Plain Arms and Hands with Green Robe, Gold Scarf, Green Belt, Diamonds and Green Emblem Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "76382p0t",
+      "name": "Torso with Arms and Hands with White Vest, White Shirt and Yellow Bow Tie Pattern",
+      "cat": "torso",
+      "theme": "Castle",
+      "themes": [
+        "Disney",
+        "Castle"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p0x",
+      "name": "Torso with Red Arms and White Hands with Dark Red, Red and Gold Armour and Fire Chi Emblem Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "Legends of Chima",
+        "City"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p0y",
+      "name": "Torso with Arms and Hands with Fire Power Emblem, Kunai Knives and Scabbard Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p0z",
+      "name": "Torso with Arms and Hands with Belt, Pouch, Knife, Scabbard and Earth Power Emblem Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "76382p1x",
+      "name": "Torso with Arms and Hands with Halter Top with Green Apples and Lime Spots Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p2l",
+      "name": "Torso with Arms and Hands with Red and Gold Armour, Pendant, Scales, Belt and Orange Round Jewel Pattern",
+      "cat": "torso",
+      "themes": [
+        "Legends of Chima"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p2p",
+      "name": "Torso with Arms and Hands with Viking Armour, Silver Chestplate, Reddish Brown Belt and Shoulder Strap Pattern",
+      "cat": "torso",
+      "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p2q",
+      "name": "Torso with Arms and Hands with Viking Armour, Medium Nougat Leather, Olive Green Cloak, Necklace and Belt with Silver Disk Pattern",
+      "cat": "torso",
+      "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p2r",
+      "name": "Torso with Arms and Hands with Tan Fur Cloak with Deer on Back, Reddish Brown Belts and Pouches and Light Blue Bottle Pattern",
+      "cat": "torso",
+      "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p2s",
+      "name": "Torso with Arms and Hands with Dark Red Overalls with Tools, Bead Necklace, Medium Nougat Belt and Helmet and Crossed Hammers on Back Pattern",
+      "cat": "torso",
+      "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p2z",
+      "name": "Torso with Arms and Hands with Silver and Metallic Dark Grey Armour Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p31",
+      "name": "Torso with Arms and Hands with Pirate Stripes Red/White Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p35",
+      "name": "Torso with Olive Green Arms and Dark Green Hands with Dark Red, Red and Gold Armour and Fire Chi Emblem Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "Legends of Chima",
+        "City"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p39",
+      "name": "Torso with Arms and Hands with Pirate Open Jacket over Brown Vest Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p3c",
+      "name": "Torso with Arms and Hands with Pirate Green Vest, Shirt, and Belt Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p3h",
+      "name": "Torso with Arms and Hands with Red Loincloth and White Bone Necklace Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p3i",
+      "name": "Torso with Arms and Hands with Red, Green and White Floral Necklace and Black Cleavage Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p3j",
+      "name": "Torso with Arms and Hands with Red, Green and White Feather Necklace and Red, Green Belt with White Dots and Black Outline Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p3v",
+      "name": "Torso with Arms and Hands with Pirate Vest over Yellow Skin, Anchor Tattoo, Rope on Back Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p5e",
+      "name": "Torso with Arms and Hands with Gold Dress and Veil Top, Dark Brown Trim Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p5f",
+      "name": "Torso with Arms and Hands with Diving Suit, Orange Stripes, Belt, Pressure Gauge and Breathing Hose Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382p6o",
+      "name": "Torso with Arms and Hands with Retro Spacesuit with White Light and Green Buttons Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "76382p7c",
+      "name": "Torso with Arms and Hands with Jacket with Lime and Medium Lavender Fluffy Trim Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [],
+      "arms": true
+    },
+    {
+      "id": "76382p7f",
+      "name": "Torso with Arms and Hands with Jacket with Dark Blue Vertical Stripes over Orange Collared Shirt and Lavender and Orange Tie Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [],
+      "arms": true
+    },
+    {
+      "id": "76382p9k",
+      "name": "Torso with Arms and Hands with Sports Tank Top with \"39\", Orange Basketball and Orange and Red Diamonds Pattern",
+      "cat": "torso",
+      "theme": "Sports",
+      "themes": [
+        "Sports"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382p9n",
+      "name": "Torso with Yellow Arms and Hands with T-Shirt with  4 White Horizontal Stripes Front and Back with Cat Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pa0",
+      "name": "Torso with Arms and Hands with Black and Metallic Silver Panels and Medium Azure Circle Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pc14",
+      "name": "Torso with Arms and Hands with Medium Blue Suspenders, Red Bow, Red Buttons and White Dots Pattern",
+      "cat": "torso",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pc2g",
+      "name": "Torso with Arms and Hands with Gold Collar with Blue Jewel, White Belt with Gold Cord Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Collectible Minifigures",
+        "Adventurers",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pc34",
+      "name": "Torso with Arms and Hands with Wrapped Samurai Robe and Flowers Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pc39",
+      "name": "Torso with Arms and Hands with Silver Scale Mail, Straps and Cape Pattern",
+      "cat": "torso",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "76382pc7",
+      "name": "Torso with Arms and Hands with Silver Armour Plate, Batman Logo and Yellow/Dark Blue Shirt Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Castle",
+        "Super Heroes"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pcbg",
+      "name": "Torso with Arms and Hands with Female Clockwork Robot Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pct3",
+      "name": "Torso with Arms and Hands with Toa Tahu Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pd14",
+      "name": "Torso with Arms and Hands with Yellow Chest and White Beads Necklace Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pde1",
+      "name": "Torso with Arms and Hands with Tank Top, Belt and Bunny Tail Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pde5",
+      "name": "Torso with Arms and Hands with Dark Orange and Yellow Feathers Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pde6",
+      "name": "Torso with Arms and Hands with White Furry Chest Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Collectible Minifigures",
+        "Games & TV",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pde8",
+      "name": "Torso with Arms and Hands with Red Neckerchief Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pdg1",
+      "name": "Torso with Arms and Hands with Dark Brown Fur Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382pdg2",
+      "name": "Torso with Arms and Hands with Red Tie, Olive Vest and Lab Coat Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pdg3",
+      "name": "Torso with Arms and Hands with Dark Green Tie, Sand Green Shirt and Lab Coat Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pdg7",
+      "name": "Torso with Arms and Hands with White Scarf, Reddish Brown Fur Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382pdg9",
+      "name": "Torso with Arms and Hands with Three Piece Suit over Dark Orange Polka Dot Tie Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pdga",
+      "name": "Torso with Arms and Hands with Buttoned Three Piece Suit and Blue Tie Pattern",
+      "cat": "torso",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pn0",
+      "name": "Torso with Arms and Hands with Samurai Dragon Robe Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pn1",
+      "name": "Torso with Black Arms and Hands with Yellow Neck, Samurai Robe, Sash and Dagger Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pn2",
+      "name": "Torso with Arms and Hands with Bright Green Ties and Trim over Robe with Ninjago Logogram \"NINJA\" Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pn3",
+      "name": "Torso with Printed Arms and Hands with Green Robe with Diamonds and Green Emblem Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Collectible Minifigures",
+        "Ninjago",
+        "Collectible Minifigures"
+      ],
+      "year": 2026,
+      "arms": true
+    },
+    {
+      "id": "76382pn9",
+      "name": "Torso with Arms and Hands with Red Sash, Dark Green Samurai Armour and Gold Phoenix Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pnc",
+      "name": "Torso with Arms and Hands with Belt, Knife, Scabbard and Lightning Power Emblem Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382pnd",
+      "name": "Torso with Arms and Hands with White Straps, Gold Lion Emblem, Shurikens and Belt Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pne",
+      "name": "Torso with Arms and Hands with Dark Bluish Grey Robe, Gold Trim, Silver Dragons and Gold Lotus Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pnf",
+      "name": "Torso with Arms and Hands with Robe, Black, Bright Green and Gold Trim, Clasps and Dragon Head Pattern",
+      "cat": "torso",
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382ps5",
+      "name": "Torso with Arms and Hands with SW Vest, White Shirt & Yellow Neck Pattern",
+      "cat": "torso",
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars",
+        "City"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pt5",
+      "name": "Torso with Arms and Hands with SW Snowtrooper Armour and Belt on Back Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pt6",
+      "name": "Torso with Arms and Hands with SW Snowtrooper Commander Armour and Belt on Back Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382ptm",
+      "name": "Torso with Arms and Hands with Gold Circuitry and Red Roboforce Logo Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Space",
+      "themes": [
+        "Space"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pto",
+      "name": "Torso with Arms and Hands with Race Suit with McLaren Logos and Orange and Silver Stripes Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382px2",
+      "name": "Torso with Arms and Hands with Black Stripe Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pxg",
+      "name": "Torso with Arms and Hands with Tan Oval and Black Spines and Tail Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pxl",
+      "name": "Torso with Arms and Hands with Jumpsuit, Orange and Silver Lines and \"A.Y.\" ID Badge Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pxo",
+      "name": "Torso with Arms and Hands with Armour Plating and Two Red Circles Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Super Heroes",
+      "themes": [
+        "Superheroes",
+        "Super Heroes"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pxp",
+      "name": "Torso with Arms and Hands with Cloak, Dark Brown Collar and Straps Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pxq",
+      "name": "Torso with Arms and Hands with White Collar and Button Pattern",
+      "cat": "torso",
+      "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pxw",
+      "name": "Torso with Arms and Hands with Female Outline with Red Ovals, Red and Yellow Amulet Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pxz",
+      "name": "Torso with Arms and Hands with Black Tie and Stripes Pattern",
+      "cat": "torso",
+      "themes": [],
+      "year": 2024,
+      "arms": true
+    },
+    {
+      "id": "76382pyg",
+      "name": "Torso with Arms and Hands with Race Suit with Ford Logos Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pyl",
+      "name": "Torso with Arms and Hands with Race Suit with Mercedes Team Logos Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "76382pym",
+      "name": "Torso with Arms and Hands with Race Suit with Ford and MS-RT Logos Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "arms": true
+    },
+    {
+      "id": "76382pyu",
+      "name": "Torso with Arms and Hands with Race Suit with Logos and Tricolor Stripes Pattern",
+      "cat": "torso",
+      "unofficial": true,
+      "theme": "City",
+      "themes": [
+        "City"
+      ],
+      "arms": true
+    },
+    {
+      "id": "78643p01",
+      "name": "Armour Breastplate with Round Shoulder Pads and 2 Back Studs with Silver and Metallic Dark Grey Armour Pattern",
+      "cat": "neck",
+      "kind": "Armour",
+      "unofficial": true,
+      "themes": []
     },
     {
       "id": "80503",
       "name": "Lute",
       "cat": "hand",
       "kind": "Music",
+      "themes": [],
       "year": 2026
+    },
+    {
+      "id": "84637bp01",
+      "name": "Hips and Legs with Brown Wooden Leg Right Pattern",
+      "cat": "legs",
+      "themes": [],
+      "year": 2023
+    },
+    {
+      "id": "84637bp02",
+      "name": "Hips and Legs with Reddish Brown Wooden Leg Right Pattern",
+      "cat": "legs",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "84638p36",
+      "name": "Torso with Arms, Right Hand and Left Hook Hand with Pirate Captain Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "84638p3a",
+      "name": "Torso with Arms, Right Hand and Left Hook Hand with Pirate Ragged Shirt and Dagger Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "84638p3k",
+      "name": "Torso with Arms, Right Hand and Left Hook Hand with Pirate Captain and White Ascot Pattern",
+      "cat": "torso",
+      "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
+      "year": 2025,
+      "arms": true
+    },
+    {
+      "id": "84862p01",
+      "name": "Head Muppet Beaker with Red Hair and Mouth, Bright Light Orange Nose and White Eye with Black Pupil Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "moulded": -55
     },
     {
       "id": "88288",
       "name": "Dagger",
       "cat": "hand",
       "kind": "Weapon",
+      "themes": [],
       "year": 2013
     },
     {
@@ -791,7 +3877,18 @@
       "name": "Scabbard for Two Swords",
       "cat": "back",
       "kind": "Pack",
+      "themes": [
+        "Prince of Persia"
+      ],
       "year": 2012
+    },
+    {
+      "id": "88295",
+      "name": "Armour Shoulder Pads with Top Spikes",
+      "cat": "neck",
+      "kind": "Armour",
+      "themes": [],
+      "year": 2023
     },
     {
       "id": "89520",
@@ -799,7 +3896,74 @@
       "cat": "headgear",
       "kind": "Helmet",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020
+    },
+    {
+      "id": "89534p01",
+      "name": "Head Muppet Bunsen Honeydew with Black Glasses Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "moulded": -35
+    },
+    {
+      "id": "89646p01",
+      "name": "Head Muppet Bear (Fozzie) with Reddish Brown Hat and Eyebrows and Dark Pink Nose Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "moulded": -45
+    },
+    {
+      "id": "89677p01",
+      "name": "Head Muppet Rowlf with Medium Nougat Face and Black Nose Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "moulded": -36
+    },
+    {
+      "id": "90462bpq1",
+      "name": "Headdress Nemes with Darkblue Stripes on Metallic Gold Pattern",
+      "cat": "headgear",
+      "kind": "Headdress",
+      "theme": "Adventurers",
+      "themes": [
+        "Collectible Minifigures",
+        "Pharaoh's Quest",
+        "Adventurers",
+        "Collectible Minifigures"
+      ],
+      "year": 2023
+    },
+    {
+      "id": "93230p01",
+      "name": "Hair Swept Back with Yellow Pointed Ears Pattern",
+      "cat": "headgear",
+      "kind": "Hair",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
+      "year": 2024
     },
     {
       "id": "93247",
@@ -807,13 +3971,30 @@
       "cat": "hand",
       "kind": "Weapon",
       "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
       "year": 2011
+    },
+    {
+      "id": "93249pq0",
+      "name": "Headdress Horus with Eye Pattern",
+      "cat": "headgear",
+      "kind": "Headdress",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2012
     },
     {
       "id": "95049",
       "name": "Staff with Spherical End",
       "cat": "hand",
       "kind": "Gear",
+      "themes": [],
       "year": 2014
     },
     {
@@ -821,6 +4002,7 @@
       "name": "Staff with Crescent End",
       "cat": "hand",
       "kind": "Gear",
+      "themes": [],
       "year": 2014
     },
     {
@@ -828,6 +4010,7 @@
       "name": "Hair Dreadlocks with Beads and Bandana",
       "cat": "headgear",
       "kind": "Hair",
+      "themes": [],
       "year": 2026
     },
     {
@@ -835,12 +4018,14 @@
       "name": "Bottle  1 x  1 x  2 Cylindrical",
       "cat": "hand",
       "kind": "Food",
+      "themes": [],
       "year": 2011
     },
     {
       "id": "973",
       "name": "Torso",
       "cat": "torso",
+      "themes": [],
       "year": 2009,
       "arms": false
     },
@@ -849,6 +4034,9 @@
       "name": "Torso with Gold and Dark Red Trim and Laces Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2023,
       "arms": false
     },
@@ -857,6 +4045,10 @@
       "name": "Torso with Viking Armour, Silver Chestplate, Reddish Brown Belt and Shoulder Strap Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -865,6 +4057,10 @@
       "name": "Torso with Viking Armour, Medium Nougat Leather, Olive Green Cloak, Necklace and Belt with Silver Disk Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -873,6 +4069,10 @@
       "name": "Torso with Tan Fur Cloak with Deer on Back, Reddish Brown Belts and Pouches and Light Blue Bottle Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Vikings",
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -881,6 +4081,9 @@
       "name": "Torso with Pirate Stripes Red/White Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -889,6 +4092,9 @@
       "name": "Torso with Pirate Stripes Blue/White and Gold Buckle Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -897,6 +4103,9 @@
       "name": "Torso with Pirate Stripes Red/Black Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -904,6 +4113,7 @@
       "id": "973p34",
       "name": "Torso with Open Jacket over Striped Vest Pattern",
       "cat": "torso",
+      "themes": [],
       "year": 2015,
       "arms": false
     },
@@ -912,6 +4122,9 @@
       "name": "Torso with Female Pirate Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2018,
       "arms": false
     },
@@ -920,6 +4133,9 @@
       "name": "Torso with Brown Vest, Ascot and Belt Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -928,6 +4144,9 @@
       "name": "Torso with Pirate Green Vest, Shirt, and Belt Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -936,6 +4155,9 @@
       "name": "Torso with Female Pirate Corset with Gold and Blue Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2022,
       "arms": false
     },
@@ -944,6 +4166,9 @@
       "name": "Torso with Blue Imperial Guard Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -952,6 +4177,9 @@
       "name": "Torso with Female Pirate Corset and Light Blue Ribbon Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Pirates"
+      ],
       "year": 2023,
       "arms": false
     },
@@ -960,6 +4188,9 @@
       "name": "Torso with Castle Breastplate Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -968,6 +4199,9 @@
       "name": "Torso with Castle Chainmail Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -976,6 +4210,9 @@
       "name": "Torso with Castle Crossed Pikes Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -984,6 +4221,9 @@
       "name": "Torso with Black Falcon Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -992,6 +4232,9 @@
       "name": "Torso with Wolfpack Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2013,
       "arms": false
     },
@@ -1000,6 +4243,9 @@
       "name": "Torso with Studded Armour Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2019,
       "arms": false
     },
@@ -1008,6 +4254,9 @@
       "name": "Torso with Forestman and Purse Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2018,
       "arms": false
     },
@@ -1016,6 +4265,9 @@
       "name": "Torso with Castle Red/Grey Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -1024,6 +4276,10 @@
       "name": "Torso with Forestman Red Collar Pattern",
       "cat": "torso",
       "theme": "Super Heroes",
+      "themes": [
+        "Castle",
+        "Super Heroes"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1032,6 +4288,9 @@
       "name": "Torso with Forestman Blue Collar Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2009,
       "arms": false
     },
@@ -1040,6 +4299,9 @@
       "name": "Torso with Dragon Head Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2018,
       "arms": false
     },
@@ -1048,6 +4310,9 @@
       "name": "Torso with Scale Mail and Red Diamond Amulet Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2017,
       "arms": false
     },
@@ -1056,6 +4321,9 @@
       "name": "Torso with Royal Knights Lion-Head Shield Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2014,
       "arms": false
     },
@@ -1064,6 +4332,9 @@
       "name": "Torso with Royal Knights Lion Head & Neck-Chain Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2014,
       "arms": false
     },
@@ -1072,6 +4343,9 @@
       "name": "Torso with Lion Gold on Blue Shield Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -1080,6 +4354,9 @@
       "name": "Torso with Castle Bodice and Cloak Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1088,6 +4365,9 @@
       "name": "Torso with Studded Leather Tunic and Belt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1096,6 +4376,9 @@
       "name": "Torso with Apron and Lace Shirt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1104,6 +4387,9 @@
       "name": "Torso with Blue Castle Bodice Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1112,6 +4398,9 @@
       "name": "Torso with Green Castle Bodice Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1120,6 +4409,9 @@
       "name": "Torso with Tri-Coloured Shield Large Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -1128,6 +4420,9 @@
       "name": "Torso with Red/Peach Quarters Shield Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -1136,6 +4431,9 @@
       "name": "Torso with Maroon/Red Quarters Shield Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -1144,6 +4442,9 @@
       "name": "Torso with Dark Brown Collar, Patch, Rope Belt and Pouch without Back Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1152,6 +4453,10 @@
       "name": "Torso with Female Dark Green Corset with Leather Belt Pattern",
       "cat": "torso",
       "theme": "Pirates",
+      "themes": [
+        "Castle",
+        "Pirates"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1160,6 +4465,9 @@
       "name": "Torso with Dark Brown Collar, Patch, Rope Belt and Pouch with Back Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1168,6 +4476,9 @@
       "name": "Torso with Female Corset and Gold Crown and Trim Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1176,6 +4487,9 @@
       "name": "Torso with Forestman Black Collar Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2009,
       "arms": false
     },
@@ -1184,6 +4498,10 @@
       "name": "Torso with Gold Robe with Hood over Ornate Stole and Brooch Pattern",
       "cat": "torso",
       "theme": "Harry Potter",
+      "themes": [
+        "Castle",
+        "Harry Potter"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1192,6 +4510,9 @@
       "name": "Torso with Female Corset with Lavender Trim and Pendant Pattern",
       "cat": "torso",
       "theme": "Monsters",
+      "themes": [
+        "Monsters"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1200,6 +4521,10 @@
       "name": "Torso with Red Necklace and Blue Undershirt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "City",
+        "Castle"
+      ],
       "year": 2015,
       "arms": false
     },
@@ -1208,13 +4533,42 @@
       "name": "Torso with Dress, White Apron and Red Beads Necklace Pattern",
       "cat": "torso",
       "theme": "Games & TV",
+      "themes": [
+        "Games & TV"
+      ],
       "year": 2022,
+      "arms": false
+    },
+    {
+      "id": "973pa1",
+      "name": "Torso with Suspenders and Red Bowtie Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City",
+        "Adventurers"
+      ],
+      "year": 2018,
+      "arms": false
+    },
+    {
+      "id": "973pa3",
+      "name": "Torso with Safari Shirt, Gun, Red Bandana & Yellow Chest Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Adventurers"
+      ],
+      "year": 2016,
       "arms": false
     },
     {
       "id": "973pa9",
       "name": "Torso with Leather Jacket and Light Grey Shirt Pattern",
       "cat": "torso",
+      "themes": [
+        "Indiana Jones"
+      ],
       "year": 2022,
       "arms": false
     },
@@ -1223,12 +4577,20 @@
       "name": "Torso with Wrapped Samurai Robe with Flowers Pattern",
       "cat": "torso",
       "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
       "arms": false
     },
     {
       "id": "973pc39",
       "name": "Torso with Silver Scale Mail, Straps and Cape Pattern",
       "cat": "torso",
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ],
       "year": 2026,
       "arms": false
     },
@@ -1237,6 +4599,9 @@
       "name": "Torso with Dark Bluish Grey Corset, Laces and Rope Belt Pattern",
       "cat": "torso",
       "theme": "Monsters",
+      "themes": [
+        "Monsters"
+      ],
       "year": 2022,
       "arms": false
     },
@@ -1245,6 +4610,11 @@
       "name": "Torso with Egyptian Royal Seal and Belt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Collectible Minifigures",
+        "Castle",
+        "Collectible Minifigures"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1252,6 +4622,7 @@
       "id": "973pc8",
       "name": "Torso with Reddish Brown Apron with Chest Pocket Pattern",
       "cat": "torso",
+      "themes": [],
       "year": 2025,
       "arms": false
     },
@@ -1260,6 +4631,7 @@
       "name": "Torso with White Apron over Dress with with White Collar and Dark Bluish Gray Stripes Pattern",
       "cat": "torso",
       "unofficial": true,
+      "themes": [],
       "arms": false
     },
     {
@@ -1267,6 +4639,11 @@
       "name": "Torso with Robe with Black Gathers and White Neck Pattern",
       "cat": "torso",
       "theme": "Harry Potter",
+      "themes": [
+        "Collectible Minifigures",
+        "Harry Potter",
+        "Collectible Minifigures"
+      ],
       "year": 2022,
       "arms": false
     },
@@ -1275,6 +4652,9 @@
       "name": "Torso with Skull Badge, Chains, Armour and Belt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1283,6 +4663,9 @@
       "name": "Torso with Chain Mail, Belt and Straps Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1291,6 +4674,9 @@
       "name": "Torso with Lion Head Medallion and Fur Trim Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2022,
       "arms": false
     },
@@ -1299,6 +4685,9 @@
       "name": "Torso with Dragon Face Breathing Fire Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1307,6 +4696,9 @@
       "name": "Torso with Dragon Standing Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1315,6 +4707,9 @@
       "name": "Torso with Brown Collar, Black Crossbelt, Silver Square Buckles Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1323,6 +4718,9 @@
       "name": "Torso with Studded Shirt and Light Brown Crossbelt Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1331,6 +4729,9 @@
       "name": "Torso with Dark Grey and Silver Striped Armour Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1339,6 +4740,9 @@
       "name": "Torso with Collar and Red Fleur-de-Lis Pattern",
       "cat": "torso",
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1348,6 +4752,9 @@
       "cat": "torso",
       "unofficial": true,
       "theme": "Castle",
+      "themes": [
+        "Castle"
+      ],
       "arms": false
     },
     {
@@ -1355,6 +4762,9 @@
       "name": "Torso with HP Voldemort Dark Green Robe Lines Pattern",
       "cat": "torso",
       "theme": "Harry Potter",
+      "themes": [
+        "Harry Potter"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1363,6 +4773,9 @@
       "name": "Torso with HP Voldemort Green Robe Lines Pattern",
       "cat": "torso",
       "theme": "Harry Potter",
+      "themes": [
+        "Harry Potter"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1371,6 +4784,9 @@
       "name": "Torso with LOTR Leather Armour with Buckle Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1379,6 +4795,9 @@
       "name": "Torso with LOTR Cloak, Rope and Belt Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -1387,6 +4806,9 @@
       "name": "Torso with LOTR Button Shirt with Braces Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013,
       "arms": false
     },
@@ -1395,6 +4817,9 @@
       "name": "Torso with LOTR Jacket and Dark Red Vest Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013,
       "arms": false
     },
@@ -1403,6 +4828,9 @@
       "name": "Torso with LOTR Shirt, Dark Brown Belt & Bag Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2013,
       "arms": false
     },
@@ -1411,6 +4839,9 @@
       "name": "Torso with LOTR Armour, Brown Belt & Gold Buckle Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1419,6 +4850,9 @@
       "name": "Torso with LOTR Scale Armour and Belt Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1427,6 +4861,9 @@
       "name": "Torso with LOTR Jacket and Yellow Vest Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2014,
       "arms": false
     },
@@ -1435,6 +4872,9 @@
       "name": "Torso with LOTR Orc Leather Armour Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2020,
       "arms": false
     },
@@ -1443,6 +4883,9 @@
       "name": "Torso with LOTR Uruk-Hai Lurtz Muscles Outline Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2014,
       "arms": false
     },
@@ -1451,6 +4894,9 @@
       "name": "Torso with Dark Bluish Grey Robe Gather Lines, Wrinkles and Clasp at Right Shoulder Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1459,6 +4905,9 @@
       "name": "Torso with Female Robe, Center Panel with Silver Spots and Evenstar Pendant Necklace Pattern",
       "cat": "torso",
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "year": 2024,
       "arms": false
     },
@@ -1468,6 +4917,9 @@
       "cat": "torso",
       "unofficial": true,
       "theme": "Lord of the Rings",
+      "themes": [
+        "Lord of the Rings"
+      ],
       "arms": false
     },
     {
@@ -1475,6 +4927,10 @@
       "name": "Torso with Samurai Dragon Robe Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
       "year": 2018,
       "arms": false
     },
@@ -1483,6 +4939,10 @@
       "name": "Torso with Yellow Neck, Samurai Robe, Sash and Dagger Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Castle",
+        "Ninjago"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1491,6 +4951,9 @@
       "name": "Torso with Bright Green Ties and Trim over Robe with Ninjago Logogram \"NINJA\" Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1499,6 +4962,9 @@
       "name": "Torso with Green Robe, Gold Scarf, Green Belt, Diamonds and Green Emblem Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1507,6 +4973,9 @@
       "name": "Torso with Robe, Light Bluish Grey Trim, Clasps and Red Flower Medallion Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1515,6 +4984,9 @@
       "name": "Torso with Dark Bluish Grey Robe, Gold Trim, Silver Dragons and Gold Lotus Pattern",
       "cat": "torso",
       "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
       "year": 2025,
       "arms": false
     },
@@ -1522,7 +4994,80 @@
       "id": "973pnf",
       "name": "Torso with Robe, Black, Bright Green and Gold Trim, Clasps and Dragon Head Pattern",
       "cat": "torso",
+      "themes": [],
       "year": 2025,
+      "arms": false
+    },
+    {
+      "id": "973pq0",
+      "name": "Torso with Bandage and Gold Necklace Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2011,
+      "arms": false
+    },
+    {
+      "id": "973pq1",
+      "name": "Torso with Bandage, Gold Necklace and Gold Belt Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2011,
+      "arms": false
+    },
+    {
+      "id": "973pq3",
+      "name": "Torso with Waistcoat, White Shirt and Bandolier Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2012,
+      "arms": false
+    },
+    {
+      "id": "973pq4",
+      "name": "Torso with Tank Top, Braces & Yellow Skin Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2012,
+      "arms": false
+    },
+    {
+      "id": "973pq5",
+      "name": "Torso with Aviator Jacket with Eagle and \"SMH\" on Back Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2024,
+      "arms": false
+    },
+    {
+      "id": "973pq7",
+      "name": "Torso with Safari Shirt, Tan Bandana & Compass Pattern",
+      "cat": "torso",
+      "theme": "Adventurers",
+      "themes": [
+        "Pharaoh's Quest",
+        "Adventurers"
+      ],
+      "year": 2013,
       "arms": false
     },
     {
@@ -1530,6 +5075,9 @@
       "name": "Torso with SW Robe, Sash and Silver Neck Clasp Pattern",
       "cat": "torso",
       "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -1538,6 +5086,9 @@
       "name": "Torso with SW Robe and Rope Belt Pattern",
       "cat": "torso",
       "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -1546,6 +5097,9 @@
       "name": "Torso with SW Wrap-Around Tunic Pattern",
       "cat": "torso",
       "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
       "year": 2012,
       "arms": false
     },
@@ -1554,6 +5108,9 @@
       "name": "Torso with SW Dark Red Robe Pattern",
       "cat": "torso",
       "theme": "Star Wars",
+      "themes": [
+        "Star Wars"
+      ],
       "year": 2011,
       "arms": false
     },
@@ -1563,13 +5120,199 @@
       "cat": "torso",
       "unofficial": true,
       "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ],
       "arms": false
+    },
+    {
+      "id": "973pw2",
+      "name": "Torso with US Cavalry Officer Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2010,
+      "arms": false
+    },
+    {
+      "id": "973pw3",
+      "name": "Torso with US Cavalry Soldier Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2010,
+      "arms": false
+    },
+    {
+      "id": "973pw4",
+      "name": "Torso with Sheriff Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City",
+        "Western"
+      ],
+      "year": 2025,
+      "arms": false
+    },
+    {
+      "id": "973pw5",
+      "name": "Torso with Jacket over Blue Undershirt with Green Bow and Gun in Belt Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City",
+        "Western"
+      ],
+      "year": 2025,
+      "arms": false
+    },
+    {
+      "id": "973pw6",
+      "name": "Torso with White Braces and Cartridge Belt Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2025,
+      "arms": false
+    },
+    {
+      "id": "973pw7",
+      "name": "Torso with Red Undershirt and Fringe Pattern",
+      "cat": "torso",
+      "theme": "City",
+      "themes": [
+        "City",
+        "Western"
+      ],
+      "year": 2025,
+      "arms": false
+    },
+    {
+      "id": "973pw8",
+      "name": "Torso with Card, Suit, Vest, and Gold Fob Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2009,
+      "arms": false
+    },
+    {
+      "id": "973pwb",
+      "name": "Torso with White/Blue Triangles, Red/White Amulet Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024,
+      "arms": false
+    },
+    {
+      "id": "973pwe",
+      "name": "Torso with Buckskin Tunic, American Indian Necklace and Dark Turquoise Squares Pattern",
+      "cat": "torso",
+      "theme": "Western",
+      "themes": [
+        "Western"
+      ],
+      "year": 2024,
+      "arms": false
+    },
+    {
+      "id": "97457p01",
+      "name": "Head Muppet Waldorf with White Hair and Moustache Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2025,
+      "moulded": -37
+    },
+    {
+      "id": "97459p01",
+      "name": "Head Muppet Statler with Light Bluish Grey Hair and Eyebrows Pattern",
+      "cat": "head",
+      "theme": "Disney",
+      "themes": [
+        "Collectible Minifigures",
+        "Disney",
+        "Collectible Minifigures"
+      ],
+      "year": 2024,
+      "moulded": -38
+    },
+    {
+      "id": "98133p03",
+      "name": "Hat Ninja Wrap Type 1 with Gold Logogram \"Fire\" Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "98133p04",
+      "name": "Hat Ninja Wrap Type 1 with Gold Logogram \"Earth\" Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "98133p05",
+      "name": "Hat Ninja Wrap Type 1 with Gold Logogram \"Lightning\" Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "98133p06",
+      "name": "Hat Ninja Wrap Type 1 with Silver Logogram \"Ice\" Pattern",
+      "cat": "headgear",
+      "kind": "Hat",
+      "unofficial": true,
+      "theme": "Ninjago",
+      "themes": [
+        "Ninjago"
+      ]
+    },
+    {
+      "id": "98384p02",
+      "name": "Head Robot Toy with Lavender Eyes and Red Lips Display Pattern",
+      "cat": "head",
+      "unofficial": true,
+      "themes": [
+        "Collectible Minifigures",
+        "Collectible Minifigures"
+      ]
     },
     {
       "id": "99464c01",
       "name": "Cape Cloth Short (Formed)",
       "cat": "back",
       "kind": "Cape",
+      "themes": [],
       "year": 2019
     },
     {
@@ -1578,7 +5321,10 @@
       "cat": "back",
       "kind": "Cape",
       "unofficial": true,
-      "theme": "Castle"
+      "theme": "Castle",
+      "themes": [
+        "Castle"
+      ]
     }
   ],
   "colors": [

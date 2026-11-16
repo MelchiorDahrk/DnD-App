@@ -11,9 +11,8 @@ Integration changes add a same-origin save/cancel bridge, use relative asset
 paths, render thumbnails locally on demand, and omit uploaded backgrounds
 (upstream does not include their pixels in editable portrait state).
 The downloader uses bounded concurrent writes and completion markers so
-Windows builds can resume interrupted extraction. The packer checks its output
-directory before clearing generated files; its geometry and catalogue logic
-are unchanged.
+Windows builds can resume interrupted extraction. The packer validates dependencies and supported attachments, deduplicates shared
+geometry, and incrementally replaces generated files.
 Small responsive fixes keep the mobile colour strip compact and the header
 controls inside the editor viewport.
 
@@ -27,7 +26,7 @@ Thumbnails render on demand using the original renderer, avoiding thousands
 of pre-rendered thumbnails in the source repository.
 
 Questlog combines `fantasy-catalog.json`, `cmf-catalog.json` and
-`theme-catalog.json` as explicit category-based selection allowlists. The theme
+`theme-catalog.json` as optional category-based browsing metadata. The theme
 snapshot supports shared membership and separate theme filters/search for the
 requested historical, adventure and fantasy themes. Refresh it after preparing
 LDraw with `npm run update:portrait-themes` from the repository root. Empty theme
@@ -46,3 +45,7 @@ texts. Code attribution and the MIT license ship alongside the editor.
 LEGO® is a trademark of the LEGO Group, which does not sponsor, authorize,
 or endorse this project. Neither Questlog nor Bricktrait is affiliated with
 the LEGO Group, LDraw.org, or any game publisher.
+
+## Full minifigure catalog
+
+Questlog defaults to all technically supported minifigure parts. Fantasy, CMF and theme catalogs only organize browsing. Run `npm run refresh:portraits` from the project root for an explicit official/unofficial LDraw and Rebrickable bulk update. See [the coverage report](../../reports/minifigure-coverage.md) and [maintenance guide](../../docs/minifigure-presets.md).

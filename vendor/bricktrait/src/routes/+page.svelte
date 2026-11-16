@@ -15,7 +15,7 @@
 	import { appearance, applyAppearance } from '#lib/appearance.svelte.ts';
 	import { renderer, PortraitRenderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
 	import { RING_PRESETS, setBackdropImage, transparentStyle } from '#lib/compose.ts';
-	import { fantasyCatalog } from '#lib/fantasy-catalog.js';
+	import { selectableCatalog } from '#lib/fantasy-catalog.js';
 	import { applyPortraitSelections } from '../../../../portrait-scan.js';
 	import { fromHash, initial, portrait, randomize, toHash } from '#lib/state.svelte.ts';
 	import { history as timeline, hold, redo, release, track, undo, transaction } from '#lib/history.svelte.ts';
@@ -207,7 +207,7 @@
 	}
 
 	const standard = $derived<Part>({ id: STANDARD_LEGS, name: t('standardLegs'), cat: 'legs' });
-	const selectable = $derived(fantasyCatalog(catalog));
+	const selectable = $derived(selectableCatalog(catalog));
 	const of = (cat: string) => selectable.filter((p) => p.cat === cat);
 	const lists = $derived<Record<SlotId, Part[]>>({
 		headgear: of('headgear'),

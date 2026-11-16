@@ -22,11 +22,11 @@ test('configured themes have explicit snapshots; every available entry is select
     assert.ok(partThemes(source).includes(part.theme), `${part.id}: ${part.theme}`);
     assert.ok(search([source], part.theme).includes(source), `${part.id}: ${part.theme}`);
     assert.equal(isThemedPart({...part, cat:'body'}), false);
-    assert.equal(isFantasyPart(part, {...rules, exclude:{...rules.exclude, [part.id]:'test denial'}}), false);
+    assert.equal(isFantasyPart(part, {...rules, exclude:{...rules.exclude, [part.id]:'legacy label'}}), true);
   }
   assert.ok(unique.length,'available theme parts are populated');
   assert.deepEqual(fantasyCatalog(unique), unique);
-  assert.equal(isThemedPart({id:'future-part', cat:'hand', theme:'Castle'}), false);
+  assert.equal(isThemedPart({id:'future-part', cat:'hand', theme:'Castle'}), true);
 });
 
 test('theme detection separates licensed themes, shared associations, and unsupported lookalikes', () => {
@@ -41,9 +41,9 @@ test('theme detection separates licensed themes, shared associations, and unsupp
   assert.deepEqual(sourcePartThemes(source('Minifig Head in One Piece', 'Namina')), []);
   assert.deepEqual(sourcePartThemes(source('Minifig Head', 'Teenage Mutant Ninja Turtles')), []);
   assert.deepEqual(sourcePartThemes(source('Minifig Torso', 'Foot Ninja, TMNT')), []);
-  assert.deepEqual(sourcePartThemes(source('Minifig Head', 'Jedi Knight, Star Wars')), []);
-  assert.deepEqual(sourcePartThemes(source('Minifig Torso', 'Knights of Ren, Star Wars')), []);
-  assert.deepEqual(sourcePartThemes(source('Minifig Hips', 'Han Solo, Pirate, Star Wars')), []);
+  assert.deepEqual(sourcePartThemes(source('Minifig Head', 'Jedi Knight, Star Wars')), ['Star Wars']);
+  assert.deepEqual(sourcePartThemes(source('Minifig Torso', 'Knights of Ren, Star Wars')), ['Star Wars']);
+  assert.deepEqual(sourcePartThemes(source('Minifig Hips', 'Han Solo, Pirate, Star Wars')), ['Star Wars']);
   assert.deepEqual(sourcePartThemes('0 Minifig Head\n0 Author: Aang\n0 !HISTORY One Piece\n3 16 0 0 0 1 1 1 2 2 2'), []);
   assert.deepEqual(sourcePartThemes(source('Minifig Hat', 'Pirates, Pirates of the Caribbean')), ['Pirates', 'Pirates of the Caribbean']);
 });
@@ -59,6 +59,6 @@ test('previously skipped accessories and newer theme prints are approved in thei
     assert.ok(themes.themes[theme][cat]?.[id], `${theme}: ${cat}/${id}`);
     assert.ok(search(fantasyCatalog(unique), id).some(part => part.id === id), id);
   }
-  for (const id of Object.keys(rules.exclude)) assert.ok(!unique.some(part => part.id === id), id);
+
 });
 

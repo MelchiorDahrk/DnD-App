@@ -4,11 +4,10 @@ import {resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {assembleInventory,extractOMRFigures,deduplicatePresets,digest,slug} from './lib/minifigure-presets.mjs';
 import {emptyFigure,validatePreset} from '../vendor/bricktrait/src/lib/presets.js';
+import {assembleBulkFigure} from './lib/rebrickable-inventories.mjs';
 import {DEFAULT_PORTRAIT_IDS} from '../portrait-defaults.js';
 const root=resolve(import.meta.dirname,'..'),vendor=resolve(root,'vendor/bricktrait');
 const read=async file=>JSON.parse(await fs.readFile(resolve(vendor,file),'utf8'));
-const EXCLUDED_THEMES=new Set(['Western','Adventurers',"Pharaoh's Quest"]);
-export const excludedPresetTheme=preset=>[preset.theme,...preset.themes||[],preset.category].some(theme=>EXCLUDED_THEMES.has(String(theme).split(' > ')[0]));
 async function write(file,data){await fs.mkdir(resolve(file,'..'),{recursive:true});const text=JSON.stringify(data,null,2)+'\n';if(await fs.readFile(file,'utf8').catch(()=>'')!==text)await fs.writeFile(file,text);}
 export function applyPresetOverrides(input,override={}){
   const figure=structuredClone(input.figure);
@@ -55,7 +54,17 @@ export async function buildPresets({refreshSources=false,writeOutput=true}={}){
   const rebrickablePath=resolve(vendor,'presets/sources/rebrickable-inventories.json');
   if(existsSync(rebrickablePath)){
     for(const p of JSON.parse(await fs.readFile(rebrickablePath,'utf8'))){
-      official.push({id:`rebrickable-${p.id}`,name:p.name,description:`Inventory imported from Rebrickable ${p.id}.`,theme:p.theme||'Unclassified',category:p.category||p.theme||'Unclassified',tags:p.tags||[],species:p.species||'',archetypes:p.archetypes||[],kind:'official',originalId:p.id,sources:[{name:'Rebrickable',url:p.url,author:'Rebrickable contributors',license:'Rebrickable Terms of Service §5.1',licenseUrl:'https://rebrickable.com/terms/'}],...assembleInventory(p.parts,parts,{sourceKind:'rebrickable',mappings})});
+      official.push({id:`rebrickable-${p.id}`,name:p.name,description:`Inventory imported from Rebrickable ${p.id}.`,theme:p.theme||'Unclassified',category:p.category||p.theme||'Unclassified',tags:p.tags||[],sourceComponents:p.parts.map(p=>({externalId:p.part.part_num,name:p.part.name,color:p.color.id,quantity:p.quantity})),species:p.species||'',archetypes:p.archetypes||[],kind:'official',originalId:p.id,sources:[{name:'Rebrickable',url:p.url,author:'Rebrickable contributors',license:'Rebrickable Terms of Service §5.1',licenseUrl:'https://rebrickable.com/terms/'}],...assembleInventory(p.parts,parts,{sourceKind:'rebrickable',mappings})});
+    }
+  }
+  const bulkPath=resolve(vendor,'presets/sources/rebrickable-bulk.json');
+  if(existsSync(bulkPath)){
+    const bulk=JSON.parse(await fs.readFile(bulkPath,'utf8'));
+    const verified=await read('presets/rebrickable-mappings.json');
+    const externalMappings={...mappings,parts:{...verified.parts,...mappings.parts},colors:{...verified.colors,...mappings.colors}};
+    for(const fig of bulk.figures){
+      const {source,figure,compatibility}=assembleBulkFigure(fig,bulk,parts,externalMappings);
+      official.push({id:`rebrickable-${source.id}`,name:source.name,description:`Official LEGO minifigure inventory from Rebrickable ${source.id}. ${source.sets.length?`Found in ${source.sets.map(s=>s.id).join(', ')}.`:''}`,theme:source.theme,themes:source.themes,category:source.cmf?'Collectible Minifigures':source.theme,tags:[...source.themes,...source.sets.flatMap(s=>[s.id,s.name,String(s.year)])],species:'',archetypes:[],kind:'official',originalId:source.id,sources:[{name:'Rebrickable bulk catalog',url:source.url,author:'Rebrickable contributors',license:'Rebrickable Terms of Service �5.1',licenseUrl:'https://rebrickable.com/terms/'}],sourceInventory:source.id,sourceComponents:source.parts.map(p=>({externalId:p.part.part_num,name:p.part.name,color:p.color.id,quantity:p.quantity,ldrawId:externalMappings.parts[p.part.part_num]||null})),figure,compatibility});
     }
   }
   const originals=generateOriginals(await read('presets/original-recipes.json'),parts);
@@ -64,9 +73,8 @@ export async function buildPresets({refreshSources=false,writeOutput=true}={}){
     const override=overrides.presets[input.id]||{};
     const p=applyPresetOverrides(input,override);
     // Preset curation never removes source inventories or selectable pieces.
-    if(excludedPresetTheme(p)){excluded.push({id:p.id,name:p.name,theme:p.theme});continue;}
     p.thumbnail=`preset-thumbs/${p.id}.webp`;
-    if(p.hidden||p.compatibility.status==='unavailable'){rejected.push({id:p.id,name:p.name,...p.compatibility,hidden:!!p.hidden});continue;}
+    if(p.hidden||p.compatibility.status==='unavailable'){rejected.push({id:p.id,name:p.name,sourceInventory:p.sourceInventory,...p.compatibility,hidden:!!p.hidden});continue;}
     const errors=validatePreset(p,parts,colors);
     // Physical torso must exist and essential anatomy must be represented.
     if(errors.length)throw new Error(`${p.id}: ${errors.join('; ')}`);
@@ -81,9 +89,9 @@ export async function buildPresets({refreshSources=false,writeOutput=true}={}){
   const stats={total:presets.length,official:presets.filter(p=>p.kind==='official').length,original:presets.filter(p=>p.kind==='original').length,complete:presets.filter(p=>p.compatibility.status==='complete').length,partial:presets.filter(p=>p.compatibility.status==='partial').length,themes:[...new Set(presets.map(p=>p.theme))].sort(),sourceModels:source.models.length,unavailable:rejected.length,excluded:excluded.length,deduplicated:duplicates.length};
   // Full source matrices stay in the build snapshot. Runtime metadata contains
   // original IDs/colors for missing-part inspection without source geometry.
-  const compact=presets.map(({sourceComponents,...p})=>({...p,...(sourceComponents?{sourceComponents:sourceComponents.map(({id,color})=>({id,color}))}:{})}));
+  const compact=presets.map(({sourceComponents,...p})=>({...p,...(sourceComponents?{sourceComponents:sourceComponents.map(({id,color,externalId,ldrawId,quantity,name})=>({...(id?{id}:{}),color,...(externalId?{externalId,ldrawId,quantity,name}:{})}))}:{})}));
   const catalog={version:1,stats,presets:compact};
-  const report={version:1,stats,modelsWithoutFigures:source.models.filter(m=>!source.assemblies.some(p=>p.sources.some(s=>s.url===m.url))).map(({number,name,theme,url})=>({number,name,theme,url,reason:'No isolated compatible minifigure assembly in this model'})),unavailable:rejected,duplicates,partial:presets.filter(p=>p.compatibility.status==='partial').map(p=>({id:p.id,name:p.name,...p.compatibility})),limitations:['OMR is fan-authored; source model omissions are not a guarantee of retail inventory completeness. Models flagged for missing parts or prints remain partial until reviewed.','Unsupported compound accessories, asymmetric limbs and attachment orientations are reported rather than guessed.','Rebrickable optional API imports require a build-time key and verified external part/color mappings. No key is needed to build or browse the checked-in catalog.']};
+  const report={version:1,stats,modelsWithoutFigures:source.models.filter(m=>!source.assemblies.some(p=>p.sources.some(s=>s.url===m.url))).map(({number,name,theme,url})=>({number,name,theme,url,reason:'No isolated compatible minifigure assembly in this model'})),unavailable:rejected.map(p=>p.sourceInventory?{id:p.id,name:p.name,sourceInventory:p.sourceInventory,status:p.status,missingEssential:p.missingEssential,issueCount:p.issues.length,report:'reports/minifigure-coverage.json'}:p),duplicates,partial:presets.filter(p=>p.compatibility.status==='partial').map(p=>({id:p.id,name:p.name,...p.compatibility})),limitations:['OMR is fan-authored; source model omissions are not a guarantee of retail inventory completeness. Models flagged for missing parts or prints remain partial until reviewed.','Unsupported compound accessories, asymmetric limbs and attachment orientations are reported rather than guessed.','Rebrickable bulk inventories and verified LDraw keyword mappings require no API key. Unmapped geometry and colors are reported rather than guessed; targeted API refreshes can add verified mappings.']};
   report.excluded=excluded;
   if(writeOutput){
     const defaults=Object.fromEntries(DEFAULT_PORTRAIT_IDS.map(id=>{

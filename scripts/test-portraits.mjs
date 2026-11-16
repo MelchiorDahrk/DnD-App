@@ -195,7 +195,8 @@ try {
     await browseTheme(cat,theme,theme);
     const shown=await frame.$$eval('.picker .pick .id',elements=>elements.map(el=>el.textContent));
     assert.ok(shown.length>0,theme);
-    for(const id of shown)assert.ok(Object.hasOwn(entries,id),`${theme}: ${cat}/${id}`);
+    const matching=await frame.evaluate(async({cat,theme})=>{const parts=await (await fetch('./ldraw/catalog.json')).json();return parts.filter(p=>p.cat===cat&&(p.themes?.includes(theme)||p.theme===theme)).map(p=>p.id);},{cat,theme});
+    for(const id of shown)assert.ok(Object.hasOwn(entries,id)||matching.includes(id),`${theme}: ${cat}/${id}`);
   }
   const themedFigure=[['headgear','Prince of Persia','88287'],['back','Pirates of the Caribbean','95348'],['hand',"Pharaoh's Quest",'93252'],['torso',"Pharaoh's Quest",'76382pq0'],['legs',"Pharaoh's Quest",'73200bpq0']];
   for(const [cat,theme,id] of themedFigure) {
@@ -220,8 +221,8 @@ try {
   await page.reload({waitUntil:'networkidle0'});
   pass();
 
-  startCheck('legacy ring normalization, excluded equipped part rendering, and lossless cancellation');
-  // Seed an actual v2 legacy save, including a now excluded part. Opening and
+  startCheck('legacy ring normalization, previously excluded equipped part rendering, and lossless cancellation');
+  // Seed an actual v2 legacy save, including a previously excluded part. Opening and
   // canceling must preserve even its old flattened ringed image byte for byte.
   const legacy=structuredClone(saved);
   legacy.design.style={...legacy.design.style,background:'space',ring:true,shape:'round',outline:true};
@@ -239,18 +240,20 @@ try {
   frame=await open();
   assert.equal(await frame.$eval('.modes',el=>el.textContent.includes('Scene')),false);
   assert.equal(await frame.$('input[type=color]'),null,'Embedded editor exposes no background or ring colours');
-  assert.ok(await frame.$('.slots .pick[title*="Darksaber"]'),'Excluded equipped part remains in its slot');
+  assert.ok(await frame.$('.slots .pick[title*="Darksaber"]'),'Previously excluded equipped part remains in its slot');
   await frame.evaluate(()=>document.querySelectorAll('.slots .pick')[6].click());
   await frame.waitForSelector('.picker .pick');
-  assert.equal(await frame.$('.picker .pick[title*="Darksaber"]'),null);
+  await frame.$eval('.picker input[type=search]',input=>{input.value='darksaber';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await frame.waitForSelector('.picker .pick[title*="Darksaber"]');
+  await frame.$eval('.picker input[type=search]',input=>{input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));});
   for(const label of ['Favourites','Recent']) {
     await frame.evaluate(label=>[...document.querySelectorAll('.views button')].find(el=>el.textContent.includes(label)).click(),label);
-    await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===1);
-    assert.match(await frame.$eval('.picker .pick',el=>el.title),/30173a/);
+    await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===2);
+    assert.ok(await frame.$('.picker .pick[title*="Darksaber"]'));
   }
   await frame.evaluate(()=>document.querySelector('.views button').click());
   await frame.$eval('.picker input[type=search]',input=>{input.value='darksaber';input.dispatchEvent(new Event('input',{bubbles:true}));});
-  await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===0);
+  await frame.waitForFunction(()=>document.querySelectorAll('.picker .pick').length===1);
   assert.deepEqual((await imagePixels(await frame.$eval('.preview canvas',c=>c.toDataURL('image/webp')))).corners,[0,0,0,0]);
   await page.click('[data-portrait-close]');
   assert.deepEqual((await state()).characters.find(c=>c.id===firstId).portrait,legacy);

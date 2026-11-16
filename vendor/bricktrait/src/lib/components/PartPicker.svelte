@@ -1,10 +1,11 @@
 <script lang="ts">
+	import {onMount} from 'svelte';
 	import { shortName, type Category, type Part } from '#lib/ldraw.ts';
 	import { search } from '#lib/search.ts';
 	import { isFavourite, prefs, toggleFavourite } from '#lib/prefs.svelte.ts';
 	import { t, tn } from '#lib/i18n.svelte.ts';
 	import Thumb from './Thumb.svelte';
-	import { fantasyCatalog, isCMFPart, isClassicFantasyPart, isThemedPart, partThemes } from '#lib/fantasy-catalog.js';
+	import { selectableCatalog, browseParts, partThemes } from '#lib/fantasy-catalog.js';
 
 	let {
 		parts,
@@ -34,8 +35,19 @@
 	let sort: Sort = $state('classic');
 	let limit = $state(PAGE);
 	let focus = $state(0);
-	let sentinel: HTMLElement | undefined = $state();
 	let grid: HTMLElement | undefined = $state();
+	let offlineSupported=$state(false),offlineBusy=$state(false),offlineStatus=$state('');
+	onMount(()=>{
+		offlineSupported=!!navigator.serviceWorker?.controller;
+		const message=(event:MessageEvent)=>{
+			if(event.data?.type!=='questlog:minifigure-parts-cache')return;
+			offlineBusy=!event.data.complete&&!event.data.error;
+			offlineStatus=event.data.error||(event.data.complete?'All parts are ready offline.':`Downloading parts: ${event.data.done} / ${event.data.total}`);
+		};
+		navigator.serviceWorker?.addEventListener('message',message);
+		return ()=>navigator.serviceWorker?.removeEventListener('message',message);
+	});
+	function downloadParts(){offlineBusy=true;offlineStatus='Downloading all parts…';navigator.serviceWorker?.controller?.postMessage({type:'questlog:cache-minifigure-parts'});}
 
 	// An extra filter where it makes sense
 	const FLAGS: Partial<Record<Category, { label: () => string; test: (p: Part) => boolean }>> = {
@@ -49,15 +61,12 @@
 		for (const v of list) if (v) m.set(v, (m.get(v) ?? 0) + 1);
 		return [...m].sort((a, b) => b[1] - a[1]);
 	};
-	const approved = $derived(fantasyCatalog(parts));
+	const approved = $derived(selectableCatalog(parts));
 	const kinds = $derived(count(approved.map((p) => p.kind)));
 	const themes = $derived(count(approved.flatMap(partThemes)));
 
 	const shown = $derived.by(() => {
-		let list = approved;
-		if (collection === 'cmf') list = list.filter((p) => isCMFPart(p));
-		if (collection === 'fantasy') list = list.filter((p) => isClassicFantasyPart(p));
-		if (collection === 'themes') list = list.filter((p) => isThemedPart(p));
+		let list = browseParts(approved, {theme, collection, query});
 		if (view === 'favourites') list = list.filter((p) => prefs.favourites.includes(p.id));
 		if (view === 'recent') {
 			const order = new Map(prefs.recent.map((id, i) => [id, i]));
@@ -66,7 +75,6 @@
 				.sort((a, b) => order.get(a.id)! - order.get(b.id)!);
 		}
 		if (kind) list = list.filter((p) => p.kind === kind);
-		if (theme) list = list.filter((p) => partThemes(p).includes(theme));
 		if (flag && extra) list = list.filter(extra.test);
 		if (sort === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
 		if (sort === 'new') list = [...list].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
@@ -81,15 +89,6 @@
 			0,
 			shown.findIndex((p) => p.id === selected)
 		);
-	});
-
-	$effect(() => {
-		if (!sentinel) return;
-		const io = new IntersectionObserver(([e]) => e.isIntersecting && (limit += PAGE), {
-			rootMargin: '400px'
-		});
-		io.observe(sentinel);
-		return () => io.disconnect();
 	});
 
 	// Arrow keys move between parts (one tab stop for the whole grid), F toggles a favourite
@@ -108,9 +107,9 @@
 			e.preventDefault();
 			e.stopPropagation();
 			focus = Math.min(shown.length - 1, Math.max(0, focus + step[e.key]));
-			if (focus >= limit) limit = focus + PAGE;
+			limit = (Math.floor(focus / PAGE) + 1) * PAGE;
 			requestAnimationFrame(() => {
-				const el = grid?.querySelectorAll<HTMLElement>('.pick')[focus];
+				const el = grid?.querySelectorAll<HTMLElement>('.pick')[focus - Math.max(0, limit - PAGE)];
 				el?.focus();
 				el?.scrollIntoView({ block: 'nearest' });
 			});
@@ -159,8 +158,8 @@
 		<label class="select">
 			<span class="sr-only">Part collection</span>
 			<select aria-label="Part collection" bind:value={collection}>
-				<option value="">All collections</option>
-				<option value="fantasy">Fantasy</option>
+				<option value="">All Parts</option>
+				<option value="fantasy">Fantasy &amp; Medieval</option>
 				<option value="cmf">CMFs · Collectible Minifigures</option>
 				<option value="themes">Theme parts</option>
 			</select>
@@ -169,9 +168,10 @@
 			<label class="select">
 				<span class="sr-only">{t('theme')}</span>
 				<select aria-label={t('theme')} bind:value={theme}>
-					<option value="">{t('allThemes')}</option>
+					<option value="">All Parts</option>
+					<option value="unclassified">Unclassified Parts</option>
 					{#each themes as [name, n] (name)}
-						<option value={name}>{tn(name)} ({n})</option>
+						<option value={name}>{name === 'Lord of the Rings' ? 'Lord of the Rings / The Hobbit' : name === 'Super Heroes' ? 'Superheroes' : tn(name)} ({n})</option>
 					{/each}
 				</select>
 			</label>
@@ -207,19 +207,20 @@
 		</div>
 	{/if}
 
+	{#if query.trim() && (theme || collection)}<span class="count">Searching all themes</span>{/if}
 	<div class="scroll">
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div class="grid" role="list" bind:this={grid} onkeydown={keydown}>
-			{#each shown.slice(0, limit) as p, i (p.id)}
+			{#each shown.slice(Math.max(0, limit - PAGE), limit) as p, i (p.id)}
 				{@const fav = isFavourite(p.id)}
 				<div class="item" role="listitem" class:selected={p.id === selected}>
 					<button
 						type="button"
 						class="pick"
 						aria-pressed={p.id === selected}
-						tabindex={i === focus ? 0 : -1}
+						tabindex={i + Math.max(0, limit - PAGE) === focus ? 0 : -1}
 						title="{p.name} · {p.id}{p.unofficial ? ` · ${t('unofficialPart')}` : ''}"
-						onfocus={() => (focus = i)}
+						onfocus={() => (focus = i + Math.max(0, limit - PAGE))}
 						onclick={() => onpick(p.id)}
 					>
 						<div class="thumb-wrap">
@@ -243,9 +244,7 @@
 				</div>
 			{/each}
 		</div>
-		{#if shown.length > limit}
-			<div bind:this={sentinel} class="sentinel"></div>
-		{:else if !shown.length}
+		{#if !shown.length}
 			<div class="empty-state">
 				<p class="nothing">
 					{view === 'favourites' && !query
@@ -256,7 +255,18 @@
 				</p>
 			</div>
 		{/if}
-	</div>
+  </div>
+  {#if shown.length > PAGE}
+    <nav class="sub-filters" aria-label="Parts pages">
+      <button type="button" disabled={limit <= PAGE} onclick={() => {limit -= PAGE;focus = Math.max(0,limit-PAGE);}}>Previous</button>
+      <span class="count">Page {Math.ceil(limit / PAGE)} of {Math.ceil(shown.length / PAGE)}</span>
+      <button type="button" disabled={limit >= shown.length} onclick={() => {focus = limit;limit += PAGE;}}>Next</button>
+    </nav>
+  {/if}
+  {#if offlineSupported}
+    <button type="button" disabled={offlineBusy} onclick={downloadParts}>Download all parts for offline use</button>
+    <span class="count" role="status">{offlineStatus||'Includes previews and geometry. Large download; progress is saved.'}</span>
+  {/if}
 </div>
 
 <style>
@@ -637,10 +647,6 @@
 		color: var(--yellow);
 		background: var(--sunk);
 		text-shadow: 0 0 8px var(--yellow-glow);
-	}
-
-	.sentinel {
-		height: 1px;
 	}
 
 	.empty-state {

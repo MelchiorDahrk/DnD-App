@@ -30,9 +30,9 @@ export async function importOMR({refresh=false}={}){
     sets.push(...parseSetList(await cachedFetch(`https://library.ldraw.org/omr/sets?page=${page}`,{refresh})));
     if(page%10===0)console.log(`OMR index ${page}/${pages}`);
   }
-  // Source themes drive discovery; local associations supply the reviewed scope.
-  const themes=Object.keys(JSON.parse(await fs.readFile(resolve(root,'vendor/bricktrait/theme-catalog.json'),'utf8')).themes);
-  const wanted=sets.filter(s=>themes.some(t=>s.theme.toLowerCase().includes(t.toLowerCase()))||/minifigures|kingdoms|knights.kingdom|nexo knights|monster fighters|orient expedition|ninja\b|dungeons|time cruisers/i.test(s.theme));
+  // Discovery spans every source theme. Assembly compatibility is evaluated
+  // downstream without a theme allowlist.
+  const wanted=sets;
   const models=[];
   for(const [i,set] of wanted.entries()){
     const page=await cachedFetch(`https://library.ldraw.org/omr/sets/${set.id}`,{refresh});

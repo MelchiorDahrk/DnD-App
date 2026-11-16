@@ -2,7 +2,6 @@
 // Run after build-parts.mjs; no source downloads or theme guessing run in the UI.
 import {readFile, writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import rules from '../vendor/bricktrait/fantasy-catalog.json' with {type:'json'};
 import {PORTRAIT_THEMES, sourcePartThemes} from './lib/portrait-themes.mjs';
 
 const root = resolve(import.meta.dirname, '..');
@@ -11,9 +10,9 @@ const parts = JSON.parse(await readFile(resolve(root, 'vendor/bricktrait/static/
 const byId = new Map(parts.map(part => [part.id, part]));
 const sources = new Map();
 for (const part of parts) {
-  for (const folder of ['ldraw', 'ldraw-unofficial']) {
+  for (const folder of ['.cache/ldraw', '.cache/ldraw-unofficial','vendor/bricktrait/presets/legacy-ldraw']) {
     try {
-      sources.set(part.id, await readFile(resolve(root, '.cache', folder, 'parts', `${part.id}.dat`), 'utf8'));
+      sources.set(part.id, await readFile(resolve(root, folder, 'parts', `${part.id}.dat`), 'utf8'));
       break;
     } catch (error) {
       if (error.code !== 'ENOENT') throw error;
@@ -69,7 +68,6 @@ for (const part of parts) {
 }
 const themes = Object.fromEntries(PORTRAIT_THEMES.map(([name]) => [name, {}]));
 for (const part of parts) {
-  if (Object.hasOwn(rules.exclude, part.id)) continue;
   for (const theme of memberships.get(part.id)) (themes[theme][part.cat] ??= {})[part.id] = part.name;
 }
 const result = {
@@ -77,7 +75,7 @@ const result = {
     'Explicit selectable IDs associated with the requested themes by LDraw descriptions and !KEYWORDS, shared between printed bodies and their assembled shortcuts, plus reviewed shared-mould supplements.',
     'Only complete, texture-free parts supported by portrait slots are included. Source tags and model coverage are incomplete; this is not a complete set or minifigure inventory.',
     'Empty themes record no identified compatible parts in this source snapshot. Avatar means The Last Airbender, not the unrelated Na’vi theme.',
-    'Regenerate with node scripts/update-theme-catalog.mjs after building LDraw parts. Review the diff; fantasy exclusions still take precedence.'
+    'Regenerate with node scripts/update-theme-catalog.mjs after building LDraw parts. Theme associations are optional browsing metadata and never restrict selection.'
   ],
   themes
 };

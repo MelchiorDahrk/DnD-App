@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {createHash} from 'node:crypto';
 import {LDRAW_ICONS,equipmentIconParts} from '../../../equipment-icons.js';
+import {sourcePartThemes} from '../../../scripts/lib/portrait-themes.mjs';
 
 // Explicit icon-only dependencies (tiles, gems, bars, etc.) use the same packer
 // and attribution pipeline; they never enter the portrait selection allowlist.
@@ -19,10 +20,12 @@ const LDRAW = path.resolve(process.env.LDRAW_DIR ?? '.ldraw');
 // Parts still in review on the LDraw parts tracker, used when present. The
 // official library wins when a file is in both.
 const UNOFFICIAL = path.resolve(process.env.LDRAW_UNOFFICIAL_DIR ?? '.ldraw-unofficial');
+const LEGACY=path.resolve('presets/legacy-ldraw');
 const HAS_UNOFFICIAL = fs.existsSync(path.join(UNOFFICIAL, 'parts'));
 const ROOTS = [
 	{ prefix: '', dir: LDRAW },
-	...(HAS_UNOFFICIAL ? [{ prefix: 'unf/', dir: UNOFFICIAL }] : [])
+	...(HAS_UNOFFICIAL ? [{ prefix: 'unf/', dir: UNOFFICIAL }] : []),
+	{prefix:'legacy/',dir:LEGACY}
 ];
 const OUT = path.resolve('static/ldraw');
 // A file referenced by at least this many parts goes in core.ldr
@@ -38,6 +41,7 @@ const GROUPS = [
 			[/^Minifig (Hair )?(Beard|Moustache)\b/, 'Beard'],
 			[/^Minifig (Neckwear|Neck|Bandana|Collar|Scarf|Bowtie)\b/, 'Neckwear'],
 			[/^Minifig (Face Scarf)\b/, 'Neckwear'],
+			[/^Minifig (Fur Collar|Pauldron|Pauldrons)\b/, 'Neckwear'],
 			[/^Minifig (Armou?r|Breastplate|Epaulette|Shoulder|Body Armou?r|Front Harness)\b/, 'Armour'],
 			[/^Minifig (Vest|Lifevest|Life Jacket|Lifeguard|Life Preserver|Life Ring)\b/, 'Vest']
 		]
@@ -69,6 +73,7 @@ const GROUPS = [
 			[/^Minifig ((?!with\b)\S+ ){0,2}(Hat|Crown|Tiara|Turban|Bonnet|Beret)\b/, 'Hat'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}(Headdress|Headphones|Headset)\b/, 'Headdress'],
 			[/^Minifig (Kufi|Cloth Wrap|Desert Head Wrap)\b/, 'Hat'],
+			[/^Minifig SW Imperial Officer Cap\b/, 'Cap'],
 			// Animal and costume masks worn over the head, not breathing masks
 			[/^Minifig Mask (?!.*\b(Oxygen|Breathing|Gas)\b)/, 'Mask']
 		]
@@ -86,6 +91,7 @@ const GROUPS = [
 			[/^Minifig (Circular Blade Saw)\b/, 'Tool'],
 			[/^Minifig (Cheerleader Pom|Conical Flask)\b/, 'Gear'],
 			[/^Minifig Pharaoh's Staff\b/, 'Gear'],
+			[/^Minifig (Metal Detector|Space Scanner|Shepherd Crook|Small Bow|Oil Lamp|Feeding Bottle|Hoe Blocky|Mace Blocky|Trident Blocky|Sack|Hand Fan|Sports Barbells)\b/, 'Gear'],
 			[
 				/^Minifig (Tool|Shovel|Pickaxe|Jackhammer|Hose|Broom|Mop|Pushbroom|Brush|Paint|Welding|Chainsaw|Sledgehammer|Pitchfork|Oar|Ladle|Frypan|Saucepan|Utensil|Cutlery|Whisk|Plunger|Spray|Watering|Syringe|Keys?|Handcuffs|Comb|Hairbrush|Fishing|Hockey|Baseball Bat|Bat|Tennis|Ski Pole|Crutch|Lasso)\b/,
 				'Tool'
@@ -175,7 +181,7 @@ const BODY = ['3818.dat', '3819.dat', '3820.dat', '3815.dat', '3816.dat', '3817.
 // Keys are paths in the official library, or "unf/..." in the unofficial one
 const texts = new Map();
 const fileOf = (key) =>
-	key.startsWith('unf/') ? path.join(UNOFFICIAL, key.slice(4)) : path.join(LDRAW, key);
+	key.startsWith('unf/') ? path.join(UNOFFICIAL, key.slice(4)) : key.startsWith('legacy/') ? path.join(LEGACY,key.slice(7)) : path.join(LDRAW, key);
 function read(key) {
 	if (!texts.has(key)) texts.set(key, fs.readFileSync(fileOf(key), 'utf8'));
 	return texts.get(key);
@@ -256,10 +262,12 @@ function refsOf(text) {
 function closure(name) {
 	const seen = new Map();
 	seen.missing = 0;
+	seen.missingRefs = [];
 	const stack = [name];
 	while (stack.length) {
-		const r = resolve(stack.pop());
-		if (!r) seen.missing++;
+		const ref = stack.pop();
+		const r = resolve(ref);
+		if (!r) {seen.missing++;seen.missingRefs.push(ref);}
 		if (!r || seen.has(r.name)) continue;
 		seen.set(r.name, r.key);
 		stack.push(...refsOf(read(r.key)));
@@ -288,7 +296,10 @@ const pack = (names, closures) =>
 
 // --- select parts ---------------------------------------------------------
 
+const legacy=new Map(JSON.parse(fs.readFileSync(path.resolve('presets/legacy-parts.json'),'utf8')).parts.map(p=>[p.id,p]));
 const parts = [];
+const diagnostics = [];
+const sourceParts = [];
 let skipped = 0;
 const official = new Set(fs.readdirSync(path.join(LDRAW, 'parts')));
 for (const root of ROOTS) {
@@ -297,19 +308,33 @@ for (const root of ROOTS) {
 		// Unofficial updates of official parts: the official version is kept
 		if (root.prefix && official.has(file)) continue;
 		const key = `${root.prefix}parts/${file}`;
-		const desc = header(read(key));
-		if (/^[~=_|]/.test(desc) || /obsolete|moved to/i.test(desc)) continue;
-		const group = classify(desc) ?? (iconParts.has(file.slice(0,-4)) ? {cat:'equipment'} : null);
-		if (!group) continue;
+		const rawDescription=header(read(key));
+		const prior=legacy.get(file.slice(0,-4));
+		const desc=prior?'Minifig '+prior.name:rawDescription;
+		const id=file.slice(0,-4);
+		const sourceText=read(key),aliasRefs=refsOf(sourceText);
+		const aliasLine=sourceText.split(/\r?\n/).find(line=>/^1\s/.test(line));
+		const aliasTarget=/^=/.test(rawDescription)&&aliasRefs.length===1&&aliasLine?.trim().split(/\s+/).slice(2,14).join(' ')==='0 0 0 1 0 0 0 1 0 0 0 1'?aliasRefs[0].toLowerCase().replace(/\.dat$/,''):null;
+		sourceParts.push({id,name:desc,source:root.prefix==='legacy/'?'legacy-snapshot':root.prefix?'unofficial':'official',...(aliasTarget?{aliasTarget}:{}),externalIds:[...sourceText.matchAll(/^0 !KEYWORDS (.*)$/gmi)].flatMap(m=>[...m[1].matchAll(/\bRebrickable ([a-z0-9]+)/gi)].map(m=>m[1]))});
+		if (/^[~=_|]/.test(desc) || /obsolete|moved to/i.test(desc)) {
+			if (/Minifig/i.test(desc)) diagnostics.push({id,name:desc,reason:'Alias, subpart, obsolete or moved source; canonical geometry remains in the library'});
+			continue;
+		}
+		const group = prior ? {cat:prior.cat,kind:prior.kind} : classify(desc) ?? (iconParts.has(file.slice(0,-4)) ? {cat:'equipment'} : null);
+		if (!group) {
+			if (/^Minifig\b/.test(desc)) diagnostics.push({id,name:desc,reason:'No supported attachment or assembly for this component',type:'classification'});
+			continue;
+		}
 		// The file found for this name must be this one (official first)
 		if (resolve(file)?.key !== key) continue;
 		const deps = closure(file);
 		// LDrawLoader does not support textures; incomplete parts would have holes
 		if (deps.missing || [...deps.values()].some((k) => /!TEXMAP|!DATA/.test(read(k)))) {
+			diagnostics.push({id,name:desc,cat:group.cat,reason:deps.missing?'Missing geometry dependencies':'Unsupported texture rendering',missing:deps.missingRefs,type:deps.missing?'dependencies':'textures'});
 			skipped++;
 			continue;
 		}
-		const unofficial = [...deps.values()].some((k) => k.startsWith('unf/'));
+		const unofficial = [...deps.values()].some((k) => k.startsWith('unf/')||k.startsWith('legacy/'));
 		parts.push({ file, key, desc, cat: group.cat, kind: group.kind, deps, unofficial });
 	}
 }
@@ -317,7 +342,10 @@ for (const root of ROOTS) {
 const base = (desc) => desc.replace(/\s*\((Formed|Needs Work)\)/g, '');
 const formed = new Set(parts.filter((p) => /\(Formed\)/.test(p.desc)).map((p) => base(p.desc)));
 for (let i = parts.length - 1; i >= 0; i--)
-	if (!/\(Formed\)/.test(parts[i].desc) && formed.has(base(parts[i].desc))) parts.splice(i, 1);
+	if (!/\(Formed\)/.test(parts[i].desc) && formed.has(base(parts[i].desc))) {
+		diagnostics.push({id:parts[i].file.slice(0,-4),name:parts[i].desc,reason:'Flat cloth has a formed equivalent for attachment',type:'attachment'});
+		parts.splice(i, 1);
+	}
 for (const file of BODY) {
 	const key = `parts/${file}`;
 	parts.push({ file, key, desc: header(read(key)), cat: 'body', deps: closure(file) });
@@ -333,14 +361,21 @@ const coreSet = new Set(core);
 const shared = [...uses].filter(([, c]) => c > 1 && c < CORE_MIN_USES).map(([n]) => n);
 const sharedSet = new Set(shared);
 
+function writeChanged(file,data) {
+  const bytes=Buffer.isBuffer(data)?data:Buffer.from(data);
+  if(fs.existsSync(file)&&fs.readFileSync(file).equals(bytes))return;
+  fs.writeFileSync(file,bytes);
+}
+
 // --- write output ---------------------------------------------------------
 
 if (OUT !== path.resolve(import.meta.dirname, '../static/ldraw'))
 	throw new Error('Run the parts builder from vendor/bricktrait.');
-fs.rmSync(OUT, { recursive: true, force: true });
+// Keep cached geometry for saved portraits; rewrite only changed content.
+// Shared sources are deduplicated as before, and stale packs never enter the catalog.
 fs.mkdirSync(path.join(OUT, 'p'), { recursive: true });
 
-fs.writeFileSync(path.join(OUT, 'core.ldr'), `0 FILE core.ldr\n${pack(core, keys)}`);
+writeChanged(path.join(OUT, 'core.ldr'), `0 FILE core.ldr\n${pack(core, keys)}`);
 
 let sharedBytes = 0;
 for (const n of shared) {
@@ -348,7 +383,7 @@ for (const n of shared) {
 	fs.mkdirSync(path.dirname(out), { recursive: true });
 	const text = normalize(read(keys.get(n)));
 	sharedBytes += text.length;
-	fs.writeFileSync(out, text);
+	writeChanged(out, text);
 }
 
 const armNames = new Set(['3818.dat', '3819.dat']);
@@ -362,14 +397,22 @@ for (const p of parts) {
 	requests += deps.filter((n) => sharedSet.has(n)).length;
 	const text = pack(own, keys);
 	bytes += text.length;
-	fs.writeFileSync(path.join(OUT, 'p', `${id}.ldr`), text);
+	writeChanged(path.join(OUT, 'p', `${id}.ldr`), text);
 	const entry = { id, name: p.desc.replace(/^Minifig /, ''), cat: p.cat };
+	// These parts are retained for existing saved designs, but require a second
+	// attachment point that the current standalone slots cannot position.
+	if (/^Minifig (?:Head Extension|Hair Decoration|Helmet (?:Visor|Ornament|Viking Horn)|Axe Head)\b/.test(p.desc)) {
+		entry.attachmentOnly=true;
+		diagnostics.push({id,name:p.desc,reason:'Requires a host part attachment point; retained to render existing saved portraits',type:'attachment'});
+	}
 	if (p.kind) entry.kind = p.kind;
 	const source = read(p.key);
 	// Still in review on the LDraw parts tracker (or made of parts that are)
 	if (p.unofficial) entry.unofficial = true;
 	const theme = themeOf(`${p.desc} ${keywordsOf(source)}`);
 	if (theme) entry.theme = theme;
+	entry.themes = [...new Set([...sourcePartThemes(source), ...(theme?[theme]:[])])];
+	if (/\bCMF\b|collect(?:i|a)ble minifigures|minifigures series|\b71047\b/i.test(keywordsOf(source))) entry.themes.push('Collectible Minifigures');
 	const year = source.match(/^0 !LDRAW_ORG \S+ UPDATE (\d{4})/m)?.[1];
 	if (year) entry.year = Number(year);
 	if (p.cat === 'head') {
@@ -399,7 +442,7 @@ const rank = (p) =>
 catalog.sort(
 	(a, b) => a.cat.localeCompare(b.cat) || rank(a) - rank(b) || a.name.localeCompare(b.name)
 );
-fs.writeFileSync(path.join(OUT, 'catalog.json'), JSON.stringify(catalog));
+writeChanged(path.join(OUT, 'catalog.json'), JSON.stringify(catalog));
 
 // Colours, from LDConfig.ldr
 const config = fs.readFileSync(path.join(LDRAW, 'LDConfig.ldr'), 'utf8');
@@ -420,7 +463,11 @@ for (const line of config.split(/\r?\n/)) {
 	if (finish) color.finish = finish.toLowerCase();
 	colors.push(color);
 }
-fs.writeFileSync(path.join(OUT, 'colors.json'), JSON.stringify(colors));
+writeChanged(path.join(OUT, 'colors.json'), JSON.stringify(colors));
+fs.mkdirSync(path.resolve('../../.cache/portrait-coverage'),{recursive:true});
+writeChanged(path.resolve('../../.cache/portrait-coverage/ldraw-build-report.json'), JSON.stringify({version:1,available:catalog.length,skipped:diagnostics,sourceParts},null,2)+'\n');
+// Offline downloads need each pack's shared dependency closure, not just its entry file.
+writeChanged(path.join(OUT, 'dependencies.json'), JSON.stringify(Object.fromEntries(parts.map(p=>[p.file.slice(0,-4),[...p.deps.keys()].filter(n=>sharedSet.has(n)).map(n=>`parts/${n}`)])))+'\n');
 
 // Attribution: every shipped file with its authors
 const shipped = new Set([...core, ...parts.flatMap((p) => [...p.deps.keys()])]);
@@ -430,7 +477,7 @@ const credits = [...shipped].sort().map((n) => {
 	const license = text.match(/^0 !LICENSE\s*(.+)$/m)?.[1].trim() ?? '';
 	return `${n}\t${author}\t${license}`;
 });
-fs.writeFileSync(
+writeChanged(
 	path.join(OUT, 'CREDITS.txt'),
 	[
 		'Parts from the LDraw.org Parts Library (https://library.ldraw.org), and from',
@@ -445,7 +492,9 @@ fs.writeFileSync(
 );
 for (const f of ['CAreadme.txt', 'CAlicense.txt', 'CAlicense4.txt'])
 	fs.copyFileSync(path.join(LDRAW, f), path.join(OUT, f));
-fs.writeFileSync(path.join(OUT, '.questlog-parts-complete'), createHash('sha256').update(fs.readFileSync(import.meta.filename)).digest('hex'));
+const stamp=createHash('sha256');
+for(const input of [import.meta.filename,path.resolve('../../equipment-icons.js'),path.resolve('../../scripts/lib/portrait-themes.mjs'),path.resolve('presets/legacy-parts.json'),path.resolve('presets/legacy-ldraw/parts/3815bp01.dat'),path.resolve('presets/legacy-ldraw/parts/s/3815bp01s01.dat'),path.join(LDRAW,'.questlog-complete'),path.join(UNOFFICIAL,'.questlog-complete')])if(fs.existsSync(input))stamp.update(fs.readFileSync(input));
+writeChanged(path.join(OUT, '.questlog-parts-complete'), stamp.digest('hex'));
 
 const count = (cat) => catalog.filter((c) => c.cat === cat).length;
 const coreSize = fs.statSync(path.join(OUT, 'core.ldr')).size;

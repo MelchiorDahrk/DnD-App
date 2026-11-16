@@ -41,14 +41,14 @@ export function assembleInventory(items,parts,{sourceKind='omr',mappings={}}={})
   const list=items.filter(p=>!p.is_spare).flatMap(p=>{
     if(sourceKind==='rebrickable'){
       const id=resolveExternalPart(p.part,catalog,mappings),color=resolveExternalColor(p.color,mappings);
-      if(!id||color===null){issues.push({part:p.part.part_num,color:p.color.id,reason:'No verified LDraw part/color mapping'});return [];}
+      if(!id||color===null){issues.push({part:p.part.part_num,name:p.part.name||p.part.part_num,color:p.color.id,quantity:p.quantity??1,ldrawId:mappings.parts?.[p.part.part_num]||p.part.external_ids?.LDraw?.[0]||null,reason:!id?'No selectable geometry with a verified LDraw mapping':'No verified LDraw color mapping'});return [];}
       const quantity=p.quantity??1;
       if(!Number.isInteger(quantity)||quantity<1||quantity>35){issues.push({part:p.part.part_num,reason:'Unsupported inventory quantity'});return [];}
       return Array.from({length:quantity},()=>({id,color:Number(color)}));
     }return [p];
   });
   for(const slot of ['head','torso','legs','headgear','neck','back']){
-    const found=list.filter(p=>catalog.get(p.id)?.cat===slot);
+    const found=list.filter(p=>catalog.get(p.id)?.cat===slot&&!catalog.get(p.id)?.attachmentOnly);
     if(found.length>1){issues.push({slot,reason:'Multiple components compete for one slot'});continue;}
     if(found.length){figure[slot].id=found[0].id;figure[slot].color=found[0].color;assigned.add(found[0]);}
   }

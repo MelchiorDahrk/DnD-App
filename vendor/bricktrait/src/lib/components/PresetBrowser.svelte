@@ -76,7 +76,7 @@
     <nav class="pagination" aria-label="Preset pages"><button type="button" disabled={page<=1} onclick={()=>page=Math.max(1,page-1)}>Previous</button><span>Page {Math.min(page,pages)} of {pages}</span><button type="button" disabled={page>=pages} onclick={()=>page=Math.min(pages,page+1)}>Next</button></nav>
   {/if}
   <p class="notice">Official figure reconstructions are credited fan models. Partial presets list omitted components. Original combinations are Questlog designs, not LEGO products.</p>
-  {#if offlineSupported}<button type="button" disabled={offlineBusy} onclick={downloadOffline}>Download collection for offline use</button><p class="notice" role="status">{offlineStatus||'Includes previews and parts for all presets. About 15 MB; downloads only missing files.'}</p>{/if}
+  {#if offlineSupported}<button type="button" disabled={offlineBusy} onclick={downloadOffline}>Download collection for offline use</button><p class="notice" role="status">{offlineStatus||'Includes previews and parts for all presets. Downloads only missing files, including shared geometry.'}</p>{/if}
 </section>
 
 <style>

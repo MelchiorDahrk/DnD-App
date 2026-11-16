@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "notes": [
+    "Preserve existing part identities when upstream marks a file as an alias or obsolete. Source geometry and dependencies remain verified by the packer."
+  ],
+  "parts": [
+    {
+      "id": "49595d",
+      "name": "Animal Shell Clam Small - Sea Life Set",
+      "cat": "equipment",
+      "year": 2026
+    },
+    {
+      "id": "3815bp01",
+      "name": "Hips with Apron Pattern",
+      "cat": "legs",
+      "unofficial": true
+    }
+  ]
+}

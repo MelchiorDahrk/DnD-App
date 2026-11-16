@@ -53,100 +53,41 @@ image and design in the version 2 save remain untouched until **Use portrait**.
 Cancel (including Escape) discards changes. No image background removal or save
 migration runs. The standalone Bricktrait page retains its scene controls.
 
-## Maintain the part allowlist
+## Unrestricted parts and optional themes
 
-Edit [`vendor/bricktrait/fantasy-catalog.json`](../vendor/bricktrait/fantasy-catalog.json).
-It contains **527 fantasy parts** grouped by the existing `head`, `headgear`,
-`torso`, `legs`, `neck`, `back`, and `hand` categories. Each ID has a readable
-description for review. Descriptions and theme metadata do not decide eligibility.
+All supported minifigure slot parts are selectable by default, including modern,
+science-fiction, superhero and unclassified parts. `selectableCatalog` applies
+technical slot/attachment support only. The fantasy JSON remains browsing
+metadata; its historical `exclude` entries no longer deny selection, randomization
+or photo matching. Equipment-only general LEGO bricks stay outside body pickers.
 
-- `categories`: normal approved IDs, including the synthetic `standard` legs.
-- `include`: explicit additions, including useful Ninjago, City and Star Wars
-  pieces whose models are appropriate for fantasy.
-- `exclude`: explicit denials with review reasons; these always take precedence.
+The collection selector offers All Parts, Fantasy & Medieval and CMFs. Theme
+metadata supports multiple memberships, with Castle, Pirates, Lord of the Rings /
+The Hobbit, Harry Potter, Star Wars, Ninjago, Superheroes, other detected themes,
+and Unclassified Parts. Search spans all themes even when a theme is selected.
+The grid displays at most 90 items at a time; static WebP images load lazily,
+recolored previews render only in view, and geometry loads on demand.
 
-Add an ID to the correct category or `include` without changing a component.
-Find IDs and descriptions in the generated `portrait-maker/ldraw/catalog.json`.
-Rebuild after editing. The build fails on unknown IDs, category mismatches, empty
-slots, and equipment mappings that refer to unavailable parts.
+Run `npm run refresh:portraits` for an intentional update of official and
+unofficial LDraw libraries, public Rebrickable bulk inventories, geometry,
+metadata, presets, previews and coverage. Ordinary builds use cached sources.
+Refresh stages complete libraries before swapping directories, records archive
+hashes, replaces same-size changed files and preserves licenses. File-lock
+retries support Windows. Geometry generation writes only changed assets.
 
-The independent [`vendor/bricktrait/cmf-catalog.json`](../vendor/bricktrait/cmf-catalog.json)
-snapshot records **365 CMF-associated parts**. It records IDs associated with Collectible
-Minifigures by LDraw header keywords, plus reviewed mohawk and D&D CMF additions.
-Shared moulds can appear in both collections. Tags and model coverage are
-incomplete: this is not an inventory of every CMF series. The existing explicit
-exclusions take precedence across both collections. Refresh the snapshot with
-`node scripts/update-cmf-catalog.mjs` after the LDraw catalog is prepared; review
-the resulting diff. No catalog or CMF metadata is fetched at runtime.
+See [coverage](../reports/minifigure-coverage.md) and the accompanying JSON for
+counts and all technical restrictions. Eight patterned parts currently require
+unsupported texture rendering; missing transitive geometry is separately
+reported. Host-dependent visors, ornaments and similar components retain their
+geometry for legacy portraits but need additional attachment support before
+standalone selection. The removed upstream apron hip print is archived under
+`presets/legacy-ldraw` with its original author and CC BY license header.
 
-The picker defaults to **All collections**, with separate **Fantasy**, **CMFs**
-and **Theme parts** collection filters. CMF search terms are indexed independently
-of theme. All browser views, randomization and photo suggestions use the combined
-explicit catalog. Existing excluded saved parts remain renderable as before.
-
-## Theme coverage
-
-[`vendor/bricktrait/theme-catalog.json`](../vendor/bricktrait/theme-catalog.json)
-adds **1,046 unique theme-associated parts**, including **772 new selections**,
-for **1,634 selectable parts** across all collections. Each theme lists parts by slot
-and explicit LDraw ID. A shared mould can belong to several themes. These specific
-memberships replace the old single-theme guesses for filtering and search, so
-Vikings, Indiana Jones, The Hobbit and the other named themes are discoverable
-independently. The snapshot also includes printed torsos/hips and their assembled
-variants, whose source headers can carry different theme information.
-
-Coverage in the current source snapshot:
-
-| Theme | Compatible parts |
-| --- | ---: |
-| Castle | 316 |
-| Pirates | 123 |
-| Western | 78 |
-| Adventurers | 76 |
-| Lord of the Rings | 94 |
-| Harry Potter | 149 |
-| Vikings | 29 |
-| Avatar: The Last Airbender | 0 identified |
-| Indiana Jones | 9 |
-| Ninjago | 183 |
-| Prince of Persia | 8 |
-| Pirates of the Caribbean | 11 |
-| Atlantis | 12 |
-| Pharaoh's Quest | 38 |
-| The Hobbit | 18 |
-| Legends of Chima | 23 |
-| Dreamzzz | 12 |
-| One Piece | 0 identified |
-
-Counts overlap across themes. LDraw source metadata and geometry coverage are
-incomplete, so this is not a complete inventory of every figure or set. No
-compatible Last Airbender or One Piece parts were identified in the cached
-official/unofficial library; the unrelated Na’vi Avatar parts are not substitutes.
-Empty themes remain recorded in the snapshot and do not produce empty picker
-filters. Loose arms/legs, separate plumes/clip-on wing inserts, flat cloth, full moulded figures,
-missing dependencies and textured models remain outside the supported slots.
-
-The packer now supports scabbards at the torso, the Prince of Persia desert head
-wrap, the Pharaoh's Quest staff and American-spelled armor headers. The Caribbean
-shoulder-strap scabbard is classified as a back accessory, sharing the torso
-attachment with neckwear, rather than a held sword. Reviewed shared moulds also
-cover Dastan/Tamina hair and the Dagger of Time, Ninjago sword carriers and pirate
-gear. The Atlantis speargun is explicitly approved; its previous fantasy-only
-exclusion was removed for this theme. Inventory references for the supplements
-include [Dastan](https://www.bricklink.com/catalogItemInv.asp?M=pop004),
-[Tamina](https://www.minifig-pictures.be/controler/c_FicheMinifig.php?Code=pop003),
-[Caribbean gear](https://www.bricklink.com/CatalogItemInv.asp?S=853219-1) and
-[Atlantis gear](https://www.bricklink.com/catalogItemInv.asp?G=852777).
-
-After preparing LDraw parts, run `npm run update:portrait-themes`, review the
-snapshot diff and rebuild. Matching rules and reviewed supplements live in
-`scripts/lib/portrait-themes.mjs` and `scripts/update-theme-catalog.mjs`.
-Normal builds validate every snapshot ID/category and publish the snapshot with
-the editor; no metadata is fetched at runtime. The parts completion marker now
-tracks the packer source hash, so cached libraries rebuild when slot recognition
-changes. Source tests cover all memberships, searches, exclusions and randomizer
-eligibility; browser checks exercise all available theme filters and save/reopen
-a figure with new headgear, scabbard, staff and printed body parts.
+The preset downloader includes shared geometry dependencies and the editor shell.
+The parts editor also offers a deliberate full-library offline download. Neither
+action loads every model into browser memory. Incremental reference checkpoints
+under `.cache/portrait-references` avoid re-rendering completed parts after an
+interruption; fingerprints include transitive shared geometry.
 
 ## Offline photo matching
 
@@ -158,7 +99,7 @@ retains its separate endpoint and configuration.
 ### Reference generation
 
 `scripts/build-portrait-match-index.mjs` uses the existing `drawThumb` and
-`Stage` through the build-only Vite thumbnail page. It renders every approved
+`Stage` through the build-only Vite thumbnail page. It renders every selectable
 part at 160 pixels with alpha, samples descriptors at 96 pixels and writes
 `vendor/bricktrait/static/thumbs/<id>.webp` and
 `vendor/bricktrait/static/portrait-match-index.json`. Vite copies these to
@@ -169,13 +110,13 @@ Every reference has a straight-on view. Headgear, neckwear, back accessories
 and held parts also have a -30° yaw, 12° pitch view. A black-plastic comparison
 render estimates which pixels belong to recolourable plastic; fixed print
 colours stay in a separate histogram. Membership metadata records fantasy,
-CMF and specific theme associations from the existing allowlists. No alternate
+CMF and specific theme associations from optional browsing metadata. No alternate
 part-ID catalog is maintained.
 
 Descriptors contain a tight bounding-box aspect ratio, occupied area, 8×8
 silhouette occupancy, 8×8 contrast-normalized luminance, 16 edge bins, 64 RGB
 histogram bins, three dominant RGB samples and print complexity. Arrays are
-quantized to bytes. The full index is about 2.4 MiB for 1,634 parts; thumbnails
+quantized to bytes. The full index spans all selectable parts; thumbnails
 are loaded lazily in the UI rather than decoded as a catalog-sized image set.
 
 The SHA-256 source fingerprint includes approved geometry packs (including
@@ -276,9 +217,9 @@ explicitly. Real Safari/mobile hardware and a representative physical-photo
 benchmark remain unverified; Chromium touch emulation covers layout/gestures.
 
 Browsing, filter counts, search, favourites, recent parts and randomization all
-use the allowlist. Full catalog metadata and geometry stay available to the
-renderer: an excluded part already equipped in a save remains visible and
-editable, without appearing as a new choice. Randomization changes the figure
+use the full supported minifigure catalog. Full catalog metadata and geometry stay available to the
+renderer. Previously theme-excluded parts can now be selected and saved;
+host-dependent attachment parts remain renderable in old saves. Randomization changes the figure
 only when the user requests it; it never repairs or substitutes saved parts.
 
 ## Maintain equipment icons
@@ -327,7 +268,7 @@ also show their icons in Inventory; starring an item displays it on the sheet.
 Additional tiles, gems, feathers, and bars are included by the existing LDraw
 packer only when explicitly referenced by an icon recipe. Their dependencies
 and author credits are bundled by that same pipeline. These icon-only models
-do not expand the portrait allowlist. The build detects missing icon part packs
+stay outside minifigure body slots. The build detects missing icon part packs
 and refreshes the cached library as needed.
 
 ## Build and verify
@@ -363,7 +304,7 @@ used. No new runtime dependency is required.
 
 The browser suites check alpha pixels and nonempty geometry for portraits and
 every icon, all 63 default items and mapped weapon attacks on the sheet, legacy
-styles/excluded parts, favourites/recent/search restrictions, save/cancel,
+styles/excluded parts, favourites/recent/search across the full library, save/cancel,
 backups with inventory, missing assets, desktop/mobile, and offline save and
 icons. CI serves the built site at `/DnD-App/` for both suites. Relative
 URLs also support `/dist/` and GitHub Pages without a router or server backend.
@@ -374,6 +315,6 @@ behavior without downloading the entire LDraw library to every browser.
 
 MIT Bricktrait attribution, dependency licenses, LDraw per-file `CREDITS.txt`,
 and LDraw license texts remain in the deployed `portrait-maker/` directory.
-The editable allowlist is also copied there; the equipment mapping ships as a
+The optional browsing metadata is also copied there; the equipment mapping ships as a
 normal app module. Keep these files with any redistributed icons. LEGO® does
 not sponsor, authorize, or endorse Questlog or Bricktrait.

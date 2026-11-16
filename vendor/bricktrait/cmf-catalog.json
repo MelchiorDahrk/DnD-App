@@ -2,7 +2,7 @@
   "_notes": [
     "CMF = Collectible Minifigures. Explicit LDraw IDs associated by source keywords, plus reviewed supplements.",
     "Includes shared moulds and available D&D CMF parts; incomplete source tags and missing LDraw geometry mean this is not an exhaustive CMF inventory.",
-    "Regenerate with node scripts/update-cmf-catalog.mjs after building the LDraw catalog. Explicit fantasy exclusions still take precedence."
+    "Regenerate with node scripts/update-cmf-catalog.mjs after building the LDraw catalog. All supported parts remain selectable regardless of metadata."
   ],
   "categories": {
     "back": {
@@ -42,6 +42,8 @@
       "90370p01": "Microphone with Metallic Silver Top Pattern",
       "90391p02": "Pike / Spear Elaborate with Rubber Flat Silver Head Pattern",
       "90391p01": "Pike / Spear Elaborate with Rubber Pearl Light Grey Head Pattern",
+      "10169p02": "Sack with Hand Grab with Dark Brown Patch and Stitch Pattern",
+      "10169p01": "Sack with Hand Grab with White \"$\" Pattern",
       "98367p01": "Shield Rectangular Curved with Stud with Gold Lightning Wings and Arrows Pattern",
       "75902p0b": "Shield Round Bowed with Blue and White Panels Pattern",
       "75902p07": "Shield Round Bowed with Clouds and Lightning Pattern",
@@ -307,6 +309,7 @@
       "76382pdg2": "Torso with Arms and Hands with Red Tie, Olive Vest and Lab Coat Pattern",
       "76382pd99": "Torso with Arms and Hands with Robe with Black Gathers and White Neck Pattern",
       "76382pc53": "Torso with Arms and Hands with Royal Guard Uniform, Gold Buttons and White Belt Pattern",
+      "76382pff": "Torso with Arms and Hands with Ruffled Collar, Roped Belt and Silver Buckle Pattern",
       "76382pc27": "Torso with Arms and Hands with Safari Shirt with Red Scarf, Belt and Water Bottle Pattern",
       "76382pc4d": "Torso with Arms and Hands with Safety Suit with Belt and Radioactivity Warning Pattern",
       "76382pxj": "Torso with Arms and Hands with Sailor Suit, Red Bow Tie, White Hands Pattern",
@@ -354,6 +357,7 @@
       "973pdg2": "Torso with Red Tie, Olive Vest and Lab Coat Pattern",
       "973pd99": "Torso with Robe with Black Gathers and White Neck Pattern",
       "973pc53": "Torso with Royal Guard Uniform, Gold Buttons and White Belt Pattern",
+      "973pff": "Torso with Ruffled Collar, Roped Belt and Silver Buckle Pattern",
       "973pc4d": "Torso with Safety Suit with Belt and Radioactivity Warning Pattern",
       "973pc39": "Torso with Silver Scale Mail, Straps and Cape Pattern",
       "973pde1": "Torso with Tank Top, Belt and Bunny Tail Pattern",

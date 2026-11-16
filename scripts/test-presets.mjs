@@ -61,6 +61,12 @@ try{
     if(visualChecks){assert.equal(t.width,192,t.id);assert.equal(t.alpha,0,t.id);assert.ok(t.opaque>500&&t.opaque<t.width*t.height*.85,t.id);}
   }
   console.log(`PASS ${thumbnails.length} usable assembled previews`);
+  console.log('RUN imported CMF preset geometry and editable figure application');
+  for(const cmf of catalog.presets.filter(p=>p.theme==='Collectible Minifigures')){
+    await presets(page);await find(page,cmf);await page.click(`${card(cmf)} .choose`);await settled(page);
+    assert.deepEqual((await design(page)).figure,cmf.figure,cmf.id);
+  }
+  console.log('PASS imported CMF presets render and remain editable');
   console.log('RUN browser search, filters, favorites, recent picks, application and undo/redo');
   await presets(page);await find(page,originalPreset);
   const before=await design(page);
@@ -111,6 +117,15 @@ try{
   await page.click('[data-action=portrait]');frame=await editor();assert.deepEqual((await design(frame)).figure,customized.figure);
   await presets(frame);await frame.waitForSelector('button:not([disabled])');
   await frame.waitForFunction(()=>!!navigator.serviceWorker.controller,{timeout:60000});
+  console.log('RUN previously excluded part selection, save and reopen');
+  await tab(frame,'Parts');
+  await frame.evaluate(()=>document.querySelectorAll('.slots .pick')[6].click());
+  await frame.$eval('.picker input[type=search]',input=>{input.value='darksaber';input.dispatchEvent(new Event('input',{bubbles:true}));});
+  await frame.waitForSelector('.picker .pick[title*="Darksaber"]');await frame.click('.picker .pick[title*="Darksaber"]');await settled(frame);
+  assert.equal((await design(frame)).figure.handR.id,'3885');
+  await page.click('.portrait-use');await page.waitForFunction(()=>!document.querySelector('.portrait-dialog'),{timeout:60000});
+  await page.click('[data-action=portrait]');frame=await editor();assert.equal((await design(frame)).figure.handR.id,'3885');
+  await presets(frame);
   console.log('RUN offline collection download and uncached-choice reconstruction');
   await frame.evaluate(()=>[...document.querySelectorAll('.preset-browser button')].find(b=>b.textContent.includes('Download collection')).click());
   await frame.waitForFunction(()=>document.querySelector('.preset-browser').textContent.includes('collection is ready offline'),{timeout:120000});

@@ -4,26 +4,217 @@
     "Grips use the existing Bricktrait bar-along-Y attachment convention; source OMR positions determine left/right hand. Original source transforms are retained.",
     "Plain 3815/3816/3817 a/b mould revisions normalize to Bricktrait standard legs, with exact source colors. Printed components never use that normalization."
   ],
-  "parts": {},
+  "parts": {
+    "26066": "26066",
+    "27186": "27186",
+    "88295": "88295",
+    "77263": "77263",
+    "53451": "53451",
+    "5684": "5684",
+    "36806": "36806",
+    "50231": "50231",
+    "28621": "28621"
+  },
   "colors": {},
   "legAssemblies": [
-    {"parts":["3815pa9","3816pa9","3817pa9"],"id":"73200bpa9","hips":"parent","evidence":"LDraw Indiana Jones gunbelt pattern; corrected hips/leg mould revision."},
-    {"parts":["3815b","3816bpw3","3817bpw3"],"id":"73200bpw3","hips":"parent","evidence":"LDraw shortcut !HISTORY and Dark Turquoise/White Triangles, White Fringe pattern."},
-    {"parts":["3815b","3816bpw2","3817bpw2"],"id":"73200bpw2","hips":1,"evidence":"LDraw shortcut explicitly fixes 3815b hips to blue (1); Blue/White Triangles, Fringe pattern."},
-    {"parts":["3815pq0","3816pq0","3817pq0"],"id":"73200bpq0","hips":"parent","evidence":"LDraw shortcut !HISTORY credits original pattern design; Mummy Warrior Dark Blue Loincloth."},
-    {"parts":["3815pq1","3816pq1","3817pq1"],"id":"73200bpq1","hips":"parent","evidence":"LDraw shortcut !HISTORY credits original pattern design; Amset-Ra decorated gold loincloth."},
-    {"parts":["3815pm1","3816pm1","3817pm1"],"id":"73200bpm1","hips":72,"evidence":"LDraw LOTR Scale Armour shortcut fixes hips to Dark Bluish Grey (72), including Eomer/King Theoden."}
+    {
+      "parts": [
+        "3815pa9",
+        "3816pa9",
+        "3817pa9"
+      ],
+      "id": "73200bpa9",
+      "hips": "parent",
+      "evidence": "LDraw Indiana Jones gunbelt pattern; corrected hips/leg mould revision."
+    },
+    {
+      "parts": [
+        "3815b",
+        "3816bpw3",
+        "3817bpw3"
+      ],
+      "id": "73200bpw3",
+      "hips": "parent",
+      "evidence": "LDraw shortcut !HISTORY and Dark Turquoise/White Triangles, White Fringe pattern."
+    },
+    {
+      "parts": [
+        "3815b",
+        "3816bpw2",
+        "3817bpw2"
+      ],
+      "id": "73200bpw2",
+      "hips": 1,
+      "evidence": "LDraw shortcut explicitly fixes 3815b hips to blue (1); Blue/White Triangles, Fringe pattern."
+    },
+    {
+      "parts": [
+        "3815pq0",
+        "3816pq0",
+        "3817pq0"
+      ],
+      "id": "73200bpq0",
+      "hips": "parent",
+      "evidence": "LDraw shortcut !HISTORY credits original pattern design; Mummy Warrior Dark Blue Loincloth."
+    },
+    {
+      "parts": [
+        "3815pq1",
+        "3816pq1",
+        "3817pq1"
+      ],
+      "id": "73200bpq1",
+      "hips": "parent",
+      "evidence": "LDraw shortcut !HISTORY credits original pattern design; Amset-Ra decorated gold loincloth."
+    },
+    {
+      "parts": [
+        "3815pm1",
+        "3816pm1",
+        "3817pm1"
+      ],
+      "id": "73200bpm1",
+      "hips": 72,
+      "evidence": "LDraw LOTR Scale Armour shortcut fixes hips to Dark Bluish Grey (72), including Eomer/King Theoden."
+    }
   ],
   "grips": {
-    "59": {"spin": 0}, "3847": {"spin": 0}, "3848": {"spin": 0},
-    "3849": {"spin": 0}, "4497": {"spin": 0}, "6123": {"spin": 0},
-    "2530": {"spin": 0}, "2343": {"spin": 0}, "6269": {"spin": 0},
-    "4499": {"spin": 0}, "2570": {"spin": 0}, "3837": {"spin": 0},
-    "3841": {"spin": 0}, "10050": {"spin": 0}, "10053": {"spin": 0},
-    "93247": {"spin": 0}, "93252": {"spin": 0}, "30173a": {"spin": 0},
-    "30173b": {"spin": 0}, "30172": {"spin": 0}, "30132": {"spin": 0},
-    "30133": {"spin": 0}, "3959": {"spin": 0}, "98370": {"spin": 0},
-    "88288": {"spin": 0}, "55295": {"spin": 0}, "80503": {"spin": 0},
-    "6124b": {"spin": 0}, "95049": {"spin": 0}, "95050": {"spin": 0}
+    "59": {
+      "spin": 0
+    },
+    "3847": {
+      "spin": 0
+    },
+    "3848": {
+      "spin": 0
+    },
+    "3849": {
+      "spin": 0
+    },
+    "4497": {
+      "spin": 0
+    },
+    "6123": {
+      "spin": 0
+    },
+    "2530": {
+      "spin": 0
+    },
+    "2343": {
+      "spin": 0
+    },
+    "6269": {
+      "spin": 0
+    },
+    "4499": {
+      "spin": 0
+    },
+    "2570": {
+      "spin": 0
+    },
+    "3837": {
+      "spin": 0
+    },
+    "3841": {
+      "spin": 0
+    },
+    "10050": {
+      "spin": 0
+    },
+    "10053": {
+      "spin": 0
+    },
+    "93247": {
+      "spin": 0
+    },
+    "93252": {
+      "spin": 0
+    },
+    "30173a": {
+      "spin": 0
+    },
+    "30173b": {
+      "spin": 0
+    },
+    "30172": {
+      "spin": 0
+    },
+    "30132": {
+      "spin": 0
+    },
+    "30133": {
+      "spin": 0
+    },
+    "3959": {
+      "spin": 0
+    },
+    "98370": {
+      "spin": 0
+    },
+    "88288": {
+      "spin": 0
+    },
+    "55295": {
+      "spin": 0
+    },
+    "80503": {
+      "spin": 0
+    },
+    "6124b": {
+      "spin": 0
+    },
+    "95049": {
+      "spin": 0
+    },
+    "95050": {
+      "spin": 0
+    }
+  },
+  "partEvidence": {
+    "26066": {
+      "ldraw": "26066",
+      "source": "Reviewed unprinted design: LDraw 26066.dat header and Rebrickable bulk parts.csv description; Collar Fur / Minifig Neckwear Fur Collar",
+      "url": "https://rebrickable.com/parts/26066/"
+    },
+    "27186": {
+      "ldraw": "27186",
+      "source": "Reviewed unprinted design: LDraw 27186.dat header and Rebrickable bulk parts.csv description; Hair with Large High Bun / Hair Large High Bun",
+      "url": "https://rebrickable.com/parts/27186/"
+    },
+    "88295": {
+      "ldraw": "88295",
+      "source": "Reviewed unprinted design: LDraw 88295.dat header and Rebrickable bulk parts.csv description; Armour Shoulder Pads with Top Spikes / Armour Shoulder Pads Spiky",
+      "url": "https://rebrickable.com/parts/88295/"
+    },
+    "77263": {
+      "ldraw": "77263",
+      "source": "Reviewed unprinted design: LDraw 77263.dat header and Rebrickable bulk parts.csv description; Tail Mouse / Hipwear Tail Mouse",
+      "url": "https://rebrickable.com/parts/77263/"
+    },
+    "53451": {
+      "ldraw": "53451",
+      "source": "Reviewed unprinted design: LDraw 53451.dat header and Rebrickable bulk parts.csv description; Helmet Viking Horn / Small Barb Claw Tooth Talon Horn",
+      "url": "https://rebrickable.com/parts/53451/"
+    },
+    "5684": {
+      "ldraw": "5684",
+      "source": "Reviewed unprinted design: LDraw 5684.dat header and Rebrickable bulk parts.csv description; Wings Eagle / Neckwear Wings Bird",
+      "url": "https://rebrickable.com/parts/5684/"
+    },
+    "36806": {
+      "ldraw": "36806",
+      "source": "Reviewed unprinted design: LDraw 36806.dat header and Rebrickable bulk parts.csv description; Hair Long Parted in Center",
+      "url": "https://rebrickable.com/parts/36806/"
+    },
+    "50231": {
+      "ldraw": "50231",
+      "source": "Reviewed unprinted design: LDraw 50231.dat header and Rebrickable bulk parts.csv description; Cape Cloth / Standard Starched Fabric Cape",
+      "url": "https://rebrickable.com/parts/50231/"
+    },
+    "28621": {
+      "ldraw": "28621",
+      "source": "Reviewed unprinted design: LDraw 28621.dat header and Rebrickable bulk parts.csv description; Head with Vented Stud / Plain Vented Stud 2 Holes",
+      "url": "https://rebrickable.com/parts/28621/"
+    }
   }
 }
