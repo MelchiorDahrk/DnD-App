@@ -37,7 +37,7 @@ const linkFeatures = (c,names,url) => c.features.filter(f=>names.includes(f.name
 const review = (source,body) => ({id:uid(),title:'2024 conversion & paper sheet notes',tag:'Personal',pinned:true,updated:new Date().toISOString(),body:`Source: ${source}.\n\n${body}\n\nThe recorded final ability scores and rolled maximum HP are retained. Background increases are already included; do not add species ability increases. Blank current HP starts at maximum; blank XP and temporary HP start at 0. Equipment weights follow the catalog, with labeled estimates where rules omit a weight. Ammunition is counted per piece; the expanded Explorer’s pack counts only its backpack here. Special effects and situational modifiers are resolved manually unless a roll mode or resource explicitly tracks them.\n\n2024 rules and older-origin guidance: https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character#BackgroundsandSpeciesfromOlderBooks`});
 
 function melchior() {
-  const c=makeCharacter({name:'Melchior',playerName:'Eric',race:'Drow',class:'Fighter',subclass:'Battle Master',background:'Criminal (Fence)',alignment:'Chaotic Neutral',campaign:'',level:3,
+  const c=makeCharacter({name:'Melchior',playerName:'Player 1',race:'Drow',class:'Fighter',subclass:'Battle Master',background:'Criminal (Fence)',alignment:'Chaotic Neutral',campaign:'',level:3,
     stats:{str:16,dex:10,con:12,int:8,wis:10,cha:7},maxHp:21,hp:21,ac:18,speed:30,hitDice:3,initiativeBonus:2,
     copper:175,silver:301,electrum:100,gold:373,platinum:7,
     saves:['str','con'],skills:['Acrobatics','Athletics','Deception','Stealth','Perception','Insight'],spellAbility:'cha',
@@ -84,7 +84,7 @@ function melchior() {
 }
 
 function balin() {
-  const c=makeCharacter({name:'Balin',playerName:'Rob',race:'Hill Dwarf',class:'Barbarian',subclass:'Path of the Beast',background:'Guild Artisan',alignment:'Neutral Good',campaign:'',level:3,
+  const c=makeCharacter({name:'Balin',playerName:'Player 2',race:'Hill Dwarf',class:'Barbarian',subclass:'Path of the Beast',background:'Guild Artisan',alignment:'Neutral Good',campaign:'',level:3,
     stats:{str:16,dex:14,con:14,int:10,wis:4,cha:9},maxHp:35,hp:35,ac:16,speed:25,hitDice:3,
     copper:100,silver:140,electrum:40,gold:90,platinum:14,
     saves:['str','con'],skills:['Athletics','Insight','Intimidation','Persuasion','Perception'],
@@ -126,7 +126,7 @@ function balin() {
 }
 
 function teyla() {
-  const c=makeCharacter({name:'Teyla',playerName:'Jen',race:'Wood Elf',class:'Rogue',subclass:'Assassin',background:'Folk Hero (Insurrectionist)',alignment:'Chaotic Neutral',campaign:'',level:3,
+  const c=makeCharacter({name:'Teyla',playerName:'Player 3',race:'Wood Elf',class:'Rogue',subclass:'Assassin',background:'Folk Hero (Insurrectionist)',alignment:'Chaotic Neutral',campaign:'',level:3,
     stats:{str:12,dex:20,con:12,int:12,wis:8,cha:8},maxHp:24,hp:24,ac:17,speed:35,hitDice:3,inspiration:true,initiativeAdvantage:true,spellAbility:'int',
     copper:80,silver:271,electrum:70,gold:338,platinum:5,
     saves:['dex','int'],skills:['Acrobatics','Animal Handling','Athletics','Investigation','Stealth','Survival','Perception'],expertise:['Athletics','Stealth'],

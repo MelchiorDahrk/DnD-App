@@ -16,7 +16,7 @@ test('the optional default party contains the three photographed characters and 
   const state=defaultPartyState();
   assert.equal(SAVE_VERSION,2);assert.equal(STORAGE_KEY,'questlog.v2');
   assert.deepEqual(state.characters.map(c=>[c.name,c.playerName,c.class,c.level,c.maxHp]),[
-    ['Melchior','Eric','Fighter',3,21],['Balin','Rob','Barbarian',3,35],['Teyla','Jen','Rogue',3,24]
+    ['Melchior','Player 1','Fighter',3,21],['Balin','Player 2','Barbarian',3,35],['Teyla','Player 3','Rogue',3,24]
   ]);
   assert.equal(state.activeId,state.characters[0].id);
   assert.deepEqual(parseBackup(JSON.stringify(state)),state);

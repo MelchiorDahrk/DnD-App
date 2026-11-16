@@ -50,15 +50,16 @@ export function itemDefense(item) {
 
 // Equipping represents what is worn or held now, rather than everything carried.
 // Prefer the newly selected item when it conflicts with armor or occupied hands.
+// Return displaced items so the UI can explain the equipment change.
 export function setItemEquipped(character,item,value) {
   item.equipped=!!value&&item.qty>0;
-  if(!item.equipped)return;
+  if(!item.equipped)return [];
   const profile=itemDefense(item),others=character.items.filter(other=>other!==item&&equipped(other));
   if(profile.armor&&profile.armor.family!=='Shield') {
     for(const other of others)if(itemDefense(other).armor&&itemDefense(other).armor.family!=='Shield')other.equipped=false;
   }
   const isShield=profile.armor?.family==='Shield';
-  if(!isShield&&!profile.hands)return;
+  if(!isShield&&!profile.hands)return others.filter(other=>!other.equipped);
   let available=2-(isShield?1:profile.hands);
   // Keep a compatible second weapon before a shield when starting dual wielding.
   const held=others.filter(other=>itemDefense(other).hands).reverse();
@@ -68,6 +69,7 @@ export function setItemEquipped(character,item,value) {
     if((isShield&&otherProfile.armor?.family==='Shield')||cost>available)other.equipped=false;
     else available-=cost;
   }
+  return others.filter(other=>!other.equipped);
 }
 
 export function armorClassDetails(character) {

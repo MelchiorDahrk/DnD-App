@@ -25,12 +25,12 @@ test('AC derives from current armor and ability scores rather than the recorded 
 
 test('equipping replacement armor, unequipping, deletion, and zero quantity update AC immediately',()=>{
   const c=fighter(),leather=item('leather-armor'),plate=item('plate-armor');c.items=[leather,plate];
-  setItemEquipped(c,leather,true);assert.equal(armorClass(c),15);
-  setItemEquipped(c,plate,true);assert.equal(leather.equipped,false);assert.equal(armorClass(c),18);
-  setItemEquipped(c,plate,false);assert.equal(armorClass(c),14);
+  assert.deepEqual(setItemEquipped(c,leather,true),[]);assert.equal(armorClass(c),15);
+  assert.deepEqual(setItemEquipped(c,plate,true),[leather]);assert.equal(leather.equipped,false);assert.equal(armorClass(c),18);
+  assert.deepEqual(setItemEquipped(c,plate,false),[]);assert.equal(armorClass(c),14);
   setItemEquipped(c,plate,true);c.sheetLayout={collapsed:[],favorites:{pack:[plate.id]}};
   setItemQuantity(c,plate,0);assert.ok(c.items.includes(plate));assert.equal(armorClass(c),14);
-  setItemEquipped(c,plate,true);assert.equal(plate.equipped,false);
+  assert.deepEqual(setItemEquipped(c,plate,true),[]);assert.equal(plate.equipped,false);
   setItemQuantity(c,plate,1);setItemEquipped(c,plate,true);assert.equal(armorClass(c),18);
   c.items=c.items.filter(i=>i!==plate);assert.equal(armorClass(c),14);
 });
@@ -50,7 +50,7 @@ test('switching between shield, dual weapons, and two-handed weapons manages han
   assert.equal(armorClass(c),18);
   setItemEquipped(c,dagger,true);assert.equal(sword.equipped,true);assert.equal(shield.equipped,false);assert.equal(armorClass(c),16);
   setItemEquipped(c,dagger,false);setItemEquipped(c,shield,true);assert.equal(armorClass(c),18);
-  setItemEquipped(c,bow,true);assert.equal(sword.equipped,false);assert.equal(shield.equipped,false);assert.equal(armorClass(c),16);
+  assert.deepEqual(setItemEquipped(c,bow,true),[shield,sword]);assert.equal(sword.equipped,false);assert.equal(shield.equipped,false);assert.equal(armorClass(c),16);
   setItemEquipped(c,shield,true);assert.equal(bow.equipped,false);assert.equal(armorClass(c),18);
   sword.wielding='Two hands';setItemEquipped(c,sword,true);assert.equal(shield.equipped,false);assert.equal(armorClass(c),16);
 });
