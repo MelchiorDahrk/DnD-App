@@ -3,6 +3,7 @@ import {icon} from './icons.js';
 export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials','personality','proficiencies'];
 // Keep older layouts valid, including favorites still used by the inventory page.
 const SAVED_SECTIONS = [...SHEET_SECTIONS,'journal','pack'];
+const sheetScrolls = new WeakMap();
 
 export function validSheetLayout(layout) {
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -119,6 +120,8 @@ function mountSheetNavigation(root,activeSection) {
     const offset=top+header.getBoundingClientRect().height+12;
     const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
     root.style.setProperty('--sheet-scroll-offset',`${Math.max(0,offset-scrollPadding)}px`);
+    // Keep the requested destination selected while passing other headings.
+    if(sheetScrolls.has(root))return;
     const positions=sections.map(section=>({key:section.dataset.sheetSection,rect:section.getBoundingClientRect()}));
     const current=positions.find(({key})=>key===header.dataset.activeSection);
     // Short or collapsed sheets can reach the page bottom before a destination
@@ -133,16 +136,31 @@ function mountSheetNavigation(root,activeSection) {
     setActiveSheetSection(header,key);
   };
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
+  const interrupt=()=>{
+    if(!sheetScrolls.has(root))return;
+    cancelSheetScroll(root);
+    schedule();
+  };
+  const onKeydown=event=>{
+    if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))interrupt();
+  };
   const observer=new ResizeObserver(schedule);
   observer.observe(header);
   for(const section of sections)observer.observe(section);
   window.addEventListener('scroll',schedule,{passive:true});
   window.addEventListener('resize',schedule);
+  window.addEventListener('wheel',interrupt,{passive:true});
+  window.addEventListener('pointerdown',interrupt,{passive:true});
+  window.addEventListener('keydown',onKeydown);
   update();
   return ()=>{
+    cancelSheetScroll(root);
     observer.disconnect();
     window.removeEventListener('scroll',schedule);
     window.removeEventListener('resize',schedule);
+    window.removeEventListener('wheel',interrupt);
+    window.removeEventListener('pointerdown',interrupt);
+    window.removeEventListener('keydown',onKeydown);
     cancelAnimationFrame(frame);
     root.style.removeProperty('--sheet-scroll-offset');
   };
@@ -162,13 +180,36 @@ function setActiveSheetSection(header,key) {
   }
 }
 
+function cancelSheetScroll(root) {
+  const scroll=sheetScrolls.get(root);
+  if(scroll)cancelAnimationFrame(scroll.frame);
+  sheetScrolls.delete(root);
+}
+
 export function jumpToSheetSection(root,key) {
   if(!SHEET_SECTIONS.includes(key))return;
   const section=root.querySelector(`[data-sheet-section="${key}"]`),header=root.querySelector('.sheet-header');
   if(!section||!header)return;
+  cancelSheetScroll(root);
   setActiveSheetSection(header,key);
   section.querySelector('.sheet-section-toggle').focus({preventScroll:true});
-  section.scrollIntoView({block:'start',behavior:'instant'});
+  const offset=(parseFloat(getComputedStyle(header).top)||0)+header.getBoundingClientRect().height+12;
+  const start=window.scrollY,left=window.scrollX;
+  const target=Math.max(0,Math.min(start+section.getBoundingClientRect().top-offset,document.documentElement.scrollHeight-innerHeight));
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||Math.abs(target-start)<1) {
+    window.scrollTo({top:target,left,behavior:'instant'});
+    return;
+  }
+  // Cap travel at a brief 240 ms, even for long mobile sheets.
+  const scroll={frame:0},started=performance.now();
+  sheetScrolls.set(root,scroll);
+  const step=now=>{
+    const progress=Math.min(1,(now-started)/240),eased=1-(1-progress)**3;
+    window.scrollTo({top:start+(target-start)*eased,left,behavior:'instant'});
+    if(progress<1)scroll.frame=requestAnimationFrame(step);
+    else sheetScrolls.delete(root);
+  };
+  scroll.frame=requestAnimationFrame(step);
 }
 
 export function refreshSheetLayout(root,c) {

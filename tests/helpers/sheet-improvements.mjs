@@ -15,6 +15,25 @@ export async function checkSheetNavigation(page,{original,root}) {
   await page.reload({waitUntil:'load'});
   const link=key=>`.sheet-section-nav [data-section="${key}"]`;
   const active=()=>page.$eval('.sheet-section-link[aria-current="location"]',n=>n.dataset.section);
+  const waitForDestination=key=>page.waitForFunction(key=>{
+    const rect=document.querySelector(`[data-sheet-section="${key}"]`).getBoundingClientRect();
+    const header=document.querySelector('.sheet-header').getBoundingClientRect();
+    const atBottom=scrollY+innerHeight>=document.documentElement.scrollHeight-1;
+    return rect.top>=header.bottom-1&&rect.top<innerHeight-80&&(Math.abs(rect.top-header.bottom-12)<1||atBottom);
+  },{timeout:3000},key);
+  const sampleJump=key=>page.evaluate(async key=>{
+    const header=document.querySelector('.sheet-header'),section=document.querySelector(`[data-sheet-section="${key}"]`);
+    const start=scrollY,started=performance.now(),frames=[];
+    document.querySelector(`.sheet-section-nav [data-section="${key}"]`).click();
+    await new Promise(resolve=>{
+      const sample=now=>{
+        frames.push({y:scrollY,key:header.dataset.activeSection,time:now-started});
+        if(now-started<360)requestAnimationFrame(sample);else resolve();
+      };
+      requestAnimationFrame(sample);
+    });
+    return {start,end:scrollY,frames,sameHeader:header===document.querySelector('.sheet-header'),sameSection:section===document.querySelector(`[data-sheet-section="${key}"]`)};
+  },key);
   assert.deepEqual(await page.$$eval('.sheet-section-link',nodes=>nodes.map(n=>n.dataset.section)),SHEET_SECTIONS);
   assert.ok(await page.$$eval('.sheet-section-link',nodes=>nodes.every(n=>document.getElementById(n.getAttribute('aria-controls')))));
   assert.match(await page.$eval('.sheet-health',n=>n.getAttribute('aria-label')),/5 of .*plus 7 temporary hit points/);
@@ -37,7 +56,7 @@ export async function checkSheetNavigation(page,{original,root}) {
     for(const key of SHEET_SECTIONS) {
       await page.$eval(link(key),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
       await page.click(link(key));
-      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      await waitForDestination(key);
       await page.waitForFunction(key=>document.activeElement?.dataset.section===key,{},key);
       assert.equal(await page.$eval(`[data-sheet-section="${key}"] .sheet-section-toggle`,n=>n.getAttribute('aria-expanded')),'true',`${key} opens on jump`);
       await page.waitForFunction(key=>document.querySelector('.sheet-header').dataset.activeSection===key,{timeout:3000},key);
@@ -50,11 +69,54 @@ export async function checkSheetNavigation(page,{original,root}) {
     }
     await page.$eval(link('skills'),n=>n.scrollIntoView({block:'nearest',inline:'nearest'}));
     await page.click(link('skills'));
+    await waitForDestination('skills');
     await page.evaluate(()=>scrollBy(0,100));
     await page.waitForFunction(()=>document.querySelector('.sheet-header').dataset.activeSection==='skills');
     await page.evaluate(()=>{document.activeElement?.blur();document.querySelectorAll('.toast').forEach(n=>n.remove());});
     await page.screenshot({path:resolve(root,`.tmp/sheet-navigation-${width}.png`)});
+    if(width<=390) {
+      await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+      for(const key of ['proficiencies','abilities']) {
+        const motion=await sampleJump(key),low=Math.min(motion.start,motion.end),high=Math.max(motion.start,motion.end);
+        assert.ok(high-low>300,`${width}px ${key} exercises a long jump`);
+        assert.ok(motion.frames.some(frame=>frame.y>low+1&&frame.y<high-1),`${width}px ${key} scrolls through intermediate positions`);
+        const direction=Math.sign(motion.end-motion.start);
+        assert.ok(motion.frames.every((frame,i)=>i===0||(frame.y-motion.frames[i-1].y)*direction>=-1),`${width}px ${key} moves steadily toward the destination`);
+        assert.ok(motion.frames.every(frame=>frame.key===key),`${width}px selected destination stays steady during travel`);
+        assert.ok(motion.frames.some(frame=>Math.abs(frame.y-motion.end)<1&&frame.time<340),`${width}px ${key} arrives quickly`);
+        assert.ok(motion.sameHeader&&motion.sameSection,'Scrolling preserves the mounted sheet');
+        await waitForDestination(key);
+      }
+    }
   }
+  await page.evaluate(async()=>{
+    document.querySelector('.sheet-section-nav [data-section="proficiencies"]').click();
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  });
+  const redirected=await sampleJump('abilities');
+  assert.ok(redirected.end<redirected.start,'A second tap redirects an unfinished scroll');
+  assert.ok(redirected.frames.every(frame=>frame.key==='abilities'),'The newest destination stays selected');
+  await waitForDestination('abilities');
+  const interrupted=await page.evaluate(async()=>{
+    document.querySelector('.sheet-section-nav [data-section="proficiencies"]').click();
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    window.dispatchEvent(new PointerEvent('pointerdown'));
+    const stopped=scrollY;
+    await new Promise(resolve=>setTimeout(resolve,300));
+    return {stopped,end:scrollY};
+  });
+  assert.equal(interrupted.end,interrupted.stopped,'Touch or pointer input stops the animated scroll');
+  await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  try {
+    const motion=await page.evaluate(()=>{
+      const start=scrollY;
+      document.querySelector('.sheet-section-nav [data-section="proficiencies"]').click();
+      return {start,end:scrollY};
+    });
+    assert.ok(motion.end-motion.start>300,'Reduced motion jumps directly to the destination');
+    await waitForDestination('proficiencies');
+  } finally {await page.emulateMediaFeatures([]);}
   const layout=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters.find(c=>c.id===JSON.parse(localStorage.getItem('questlog.v2')).activeId).sheetLayout);
   assert.deepEqual(layout.favorites,{abilities:['str']},'Jumping preserves favorites');
   assert.deepEqual(layout.collapsed,[],'Expanded destinations are saved');
