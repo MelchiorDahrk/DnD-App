@@ -206,9 +206,9 @@ try {
   await waitForRollResult(page);
   await page.locator('#modal [data-action="close"]').click();
   assert.equal(active(await state()).features.find(f=>f.id===selected.features).used,featureBefore.used+1);
-  await page.click(`${entrySelector('skills',selected.skills)} [data-action="skill-prof"]`);
+  assert.equal(await page.$eval(`${entrySelector('skills',selected.skills)} [data-action="skill-prof"]`,n=>n.disabled),true,'Collapsed favorites cannot edit proficiency accidentally');
   assert.deepEqual(await visibleKeys('skills'),[selected.skills]);
-  console.log('PASS collapsed favorites still roll abilities and attacks, spend resources, and edit proficiency');
+  console.log('PASS collapsed favorites still roll abilities and attacks and spend resources while proficiency stays locked');
 
   phase='favorite persistence and character switching';
   const layout=active(await state()).sheetLayout;

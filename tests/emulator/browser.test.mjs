@@ -96,6 +96,9 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.waitForFunction(()=>!document.querySelector('[data-action="cloud-revoke"]'));
     assert.equal(await alice.page.$$eval('#main details',els=>els.filter(el=>el.textContent.includes('Manage invitations')).length),0,'Revoked invitations disappear from the list.');
     phase='share character';await click(alice.page,'cloud-share');await click(alice.page,'cloud-share-character');
+    await alice.page.waitForSelector('#modal:not([open])');
+    await alice.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='24');
+    assert.match(await alice.page.$eval('#main',el=>el.textContent),/Alice Brick/,'Sharing refreshes the sender’s party without a reload');
     await waitText(bob.page,'Alice Brick');await bob.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='24');
     phase='live damage';await alice.page.goto(url+'#sheet');await click(alice.page,'hp');await alice.page.$eval('#modal [name="amount"]',el=>el.value='12');await alice.page.click('[data-action="hp-apply"][data-kind="damage"]');
     await bob.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='12');
