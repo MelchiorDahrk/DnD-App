@@ -1,8 +1,8 @@
 import {icon} from './icons.js';
 
-export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features','essentials'];
+export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features'];
 // Keep older layouts valid, including favorites still used by the inventory page.
-const SAVED_SECTIONS = [...SHEET_SECTIONS,'proficiencies','personality','journal','pack'];
+const SAVED_SECTIONS = [...SHEET_SECTIONS,'essentials','proficiencies','personality','journal','pack'];
 const sheetScrolls = new WeakMap();
 
 export function validSheetLayout(layout) {
@@ -93,7 +93,7 @@ export function mountSheetLayout(root,c,activeSection='') {
 function mountSheetNavigation(root,activeSection) {
   const header=root.querySelector('.sheet-header'),nav=header?.querySelector('.sheet-section-nav');
   if(!nav)return ()=>{};
-  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',skills:'Skills',features:'Features',essentials:'Senses',proficiencies:'Training'};
+  const labels={abilities:'Abilities',combat:'Status',attacks:'Actions',skills:'Skills',features:'Features',proficiencies:'Training'};
   const sections=[...root.querySelectorAll('[data-sheet-section]')];
   for(const section of sections) {
     const key=section.dataset.sheetSection,toggle=section.querySelector('.sheet-section-toggle');
@@ -231,7 +231,7 @@ export function refreshSheetLayout(root,c) {
     for (const extra of section.querySelectorAll('[data-sheet-extra]')) extra.hidden=collapsed;
     if(key==='skills'){
       for(const extra of section.querySelectorAll('.training-tabs,.training-notes,.skill-controls'))extra.hidden=collapsed;
-      for(const panel of section.querySelectorAll('.training-tab-panel'))panel.hidden=collapsed?!panel.querySelector('[data-sheet-entry]:not([hidden])'):panel.id!==`skills-panel-${c.sheetLayout?.skillsTab||'skills'}`;
+      for(const panel of section.querySelectorAll('.training-tab-panel'))panel.hidden=collapsed?!panel.querySelector('[data-sheet-entry]:not([hidden])'):panel.id!==`skills-panel-${c.sheetLayout?.skillsTab==='saves'?'skills':c.sheetLayout?.skillsTab||'skills'}`;
     }
     for (const group of section.querySelectorAll('[data-sheet-group]')) group.hidden=collapsed && !group.querySelector('[data-sheet-entry]:not([hidden])');
     section.classList.toggle('is-collapsed',collapsed);

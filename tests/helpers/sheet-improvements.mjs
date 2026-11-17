@@ -117,7 +117,7 @@ export async function checkSheetNavigation(page,{original,root}) {
   }
   assert.equal(await page.$eval('.sheet-health-track>.hp-temp',n=>getComputedStyle(n).backgroundColor),await page.$eval('.hp-track>.hp-temp',n=>getComputedStyle(n).backgroundColor));
   for(const width of [1440,390,320]) {
-    await page.setViewport({width,height:width===1440?1100:844});
+    await page.setViewport({width,height:width===1440?900:844});
     await page.evaluate(()=>scrollTo(0,400));
     await page.waitForFunction(()=>document.querySelector('.sheet-header').getBoundingClientRect().top===(innerWidth<=760?65:0));
     const dimensions=await page.$eval('.sheet-header',n=>({height:n.offsetHeight,width:n.offsetWidth,scrollWidth:document.documentElement.scrollWidth,viewport:innerWidth}));
@@ -146,7 +146,7 @@ export async function checkSheetNavigation(page,{original,root}) {
     await page.screenshot({path:resolve(root,`.tmp/sheet-navigation-${width}.png`)});
     if(width<=390) {
       await page.evaluate(()=>scrollTo({top:0,behavior:'instant'}));
-      for(const key of ['essentials','abilities']) {
+      for(const key of ['features','abilities']) {
         const motion=await sampleJump(key);
         assert.notEqual(motion.start,motion.end,`${width}px ${key} moves to another section`);
         const direction=Math.sign(motion.end-motion.start);
@@ -157,13 +157,13 @@ export async function checkSheetNavigation(page,{original,root}) {
     }
   }
   await page.evaluate(()=>{
-    document.querySelector('.sheet-section-nav [data-section="essentials"]').click();
+    document.querySelector('.sheet-section-nav [data-section="features"]').click();
     document.querySelector('.sheet-section-nav [data-section="skills"]').click();
   });
   await waitForDestination('skills');
   assert.equal(await active(),'skills','A second tap redirects the scroll to the newest destination');
   const interrupted=await page.evaluate(async()=>{
-    document.querySelector('.sheet-section-nav [data-section="essentials"]').click();
+    document.querySelector('.sheet-section-nav [data-section="features"]').click();
     window.dispatchEvent(new PointerEvent('pointerdown'));
     const stopped=scrollY;
     await new Promise(resolve=>setTimeout(resolve,300));
@@ -175,11 +175,11 @@ export async function checkSheetNavigation(page,{original,root}) {
   try {
     const motion=await page.evaluate(()=>{
       const start=scrollY;
-      document.querySelector('.sheet-section-nav [data-section="essentials"]').click();
+      document.querySelector('.sheet-section-nav [data-section="features"]').click();
       return {start,end:scrollY};
     });
     assert.ok(motion.end-motion.start>300,'Reduced motion jumps directly to the destination');
-    await waitForDestination('essentials');
+    await waitForDestination('features');
   } finally {await page.emulateMediaFeatures([]);}
   const layout=await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters.find(c=>c.id===JSON.parse(localStorage.getItem('questlog.v2')).activeId).sheetLayout);
   assert.deepEqual(layout.favorites,{abilities:['str']},'Jumping preserves favorites');

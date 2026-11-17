@@ -6,7 +6,7 @@ import {jumpToSheetSection} from '../sheet-layout.js';
 // evidence that scrolling is slow. Browser checks cover the actual destination.
 function navigationClock(run,{reducedMotion=false}={}) {
   let now=0,nextId=0,y=0,focused;
-  const frames=new Map(),positions={abilities:900,skills:2600,essentials:7200};
+  const frames=new Map(),positions={abilities:900,skills:2600,features:7200};
   const header={dataset:{},querySelectorAll:()=>[],getBoundingClientRect:()=>({height:84})};
   const sections=Object.fromEntries(Object.entries(positions).map(([key,top])=>[key,{
     getBoundingClientRect:()=>({top:top-y}),
@@ -35,18 +35,18 @@ function navigationClock(run,{reducedMotion=false}={}) {
 }
 
 test('sheet navigation eases through intermediate positions and finishes within 240 ms',()=>navigationClock(clock=>{
-  clock.jump('essentials');
+  clock.jump('features');
   assert.equal(clock.y,0,'starting a jump must not snap to its destination');
-  assert.deepEqual(clock.focused,{key:'essentials',preventScroll:true});
+  assert.deepEqual(clock.focused,{key:'features',preventScroll:true});
   let previous=0;
   for(const time of [16,60,120,200,239]) {
     clock.tick(time);
-    assert.ok(clock.y>previous&&clock.y<clock.target('essentials'),'each frame advances toward the heading');
-    assert.equal(clock.header.dataset.activeSection,'essentials');
+    assert.ok(clock.y>previous&&clock.y<clock.target('features'),'each frame advances toward the heading');
+    assert.equal(clock.header.dataset.activeSection,'features');
     previous=clock.y;
   }
   clock.tick(240);
-  assert.equal(clock.y,clock.target('essentials'),'the heading clears the sticky header');
+  assert.equal(clock.y,clock.target('features'),'the heading clears the sticky header');
   assert.equal(clock.frames.size,0);
 }));
 
@@ -58,7 +58,7 @@ test('sheet navigation completes on the next available frame when painting stall
 }));
 
 test('a second section jump cancels unfinished travel in either direction',()=>navigationClock(clock=>{
-  clock.jump('essentials');clock.tick(60);
+  clock.jump('features');clock.tick(60);
   const start=clock.y;
   clock.jump('abilities');
   assert.equal(clock.y,start,'retargeting preserves the current position');

@@ -14,7 +14,7 @@ body.no-character .page-footer{max-width:1060px;margin:0 auto;padding:20px 32px}
 .landing-intro .eyebrow{line-height:1.7}
 .landing-intro h1{font:400 clamp(32px,4.5vw,48px)/1.1 Georgia,serif;letter-spacing:-1.4px;margin:16px 0}
 .landing-intro>p:last-child{font-size:15px;line-height:1.7;color:var(--text-secondary);max-width:510px}
-.landing-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.landing-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .landing-option{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:16px;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:24px;min-width:0;transition:border-color .15s}
 .landing-option:hover{border-color:var(--border-subtle)}
 .landing-option-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:10px;background:var(--soft);color:var(--green)}
@@ -354,6 +354,15 @@ dialog{background:var(--surface-panel);border:1px solid var(--accent-edge);borde
 .death-counter{gap:10px}.death-counter button{position:relative;width:18px;height:18px;border-color:var(--border-control)}.death-counter button:before{content:'';position:absolute;inset:-4px}.death-counter button.active:after{content:'✓';display:block;font-size:11px;line-height:16px;color:var(--surface-panel)}
 .death-counter button.active{background:var(--status-danger);border-color:var(--status-danger)}
 @media(max-width:760px){.ability-entry .ability-card{padding-top:32px}.ability-entry .ability-label{font-size:9px;letter-spacing:.2px;padding-right:0;text-align:center}.ability-entry>.sheet-favorite{width:26px;height:26px;min-width:26px;min-height:26px}.ability-card .roll-hint{display:none}}
+
+/* Keep ability checks and their saving throws together. */
+.ability-entry{display:flex;flex-direction:column}.ability-entry .ability-card{height:auto;flex:1;border-radius:5px 5px 0 0}
+.ability-save{display:flex;align-items:center;border:1px solid var(--accent-edge);border-top:0;border-radius:0 0 5px 5px;background:var(--surface-raised);padding:2px}
+.ability-save .prof-toggle{width:28px;min-width:28px;height:36px;padding:4px}.ability-save .save-roll{display:flex;align-items:center;justify-content:center;gap:5px;flex:1;min-height:36px;padding:4px;border-radius:3px;font:12px var(--mono);color:var(--text-primary)}
+.ability-save .save-roll:hover{background:var(--surface-hover)}.ability-save .save-roll .icon{width:15px;height:15px;color:var(--accent-brass)}
+.ability-section .hint .icon{width:12px;height:12px;vertical-align:middle}.sheet-layout-help>span{flex:1}.sheet-layout-help>.icon-btn{flex-shrink:0;margin-left:auto;min-width:32px;min-height:32px}
+.xp-strip{flex-wrap:wrap}.passive-summary{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-secondary);margin-left:auto}.passive-summary>.icon{width:16px;height:16px}.passive-summary strong{color:var(--text-primary);font-family:var(--mono)}.passive-summary .icon-btn{width:32px;height:32px;min-width:32px;min-height:32px}.tool-ability{font-size:12px;color:var(--text-secondary);line-height:1.7;margin:0 0 18px}
+@media(max-width:760px){.passive-summary{flex-basis:100%;margin-left:0}.ability-save .prof-toggle{width:24px;min-width:24px}.ability-save .save-roll{font-size:11px}}
 
 /* Compact sheet navigation stays available without covering section headings. */
 .dashboard-grid{align-items:start}

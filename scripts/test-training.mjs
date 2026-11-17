@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
-import {parseBackup} from '../model.js';
+import {parseBackup,SKILLS,signed,skillBonus,saveBonus} from '../model.js';
 import {waitForRollResult} from '../tests/helpers/browser-checks.mjs';
 const root=resolve(import.meta.dirname,'..'),port=process.env.TRAINING_TEST_PORT||'4198';
 const base=process.env.TRAINING_TEST_URL||`http://127.0.0.1:${port}/`;
@@ -24,6 +24,7 @@ try {
   await page.setViewport({width:1440,height:1100});
   await page.goto(base,{waitUntil:'load'});
   const fixture=defaultPartyState(),c=fixture.characters.find(c=>c.id===fixture.activeId);
+  c.sheetLayout={collapsed:[],favorites:{essentials:['perception']},skillsTab:'saves'};
   delete c.training;c.items=c.items.filter(i=>!/thieves|smith/i.test(i.name));
   await page.evaluate(s=>localStorage.setItem('questlog.v2',JSON.stringify(s)),fixture);
   await page.reload({waitUntil:'load'});
@@ -31,8 +32,20 @@ try {
   const active=s=>s.characters.find(c=>c.id===s.activeId);
   const click=async selector=>{await page.$eval(selector,node=>node.scrollIntoView({block:'center',behavior:'instant'}));await page.click(selector);};
   const tab=async id=>{await click(`#skills-tab-${id}`);await page.waitForSelector(`#skills-panel-${id}:not([hidden])`);};
-  assert.equal(await page.$$eval('.training-tabs [role="tab"]',nodes=>nodes.length),5);
+  assert.equal(await page.$$eval('.training-tabs [role="tab"]',nodes=>nodes.length),4);
   assert.equal(await page.$('[data-sheet-section="proficiencies"]'),null);
+  assert.equal(await page.$('#skills-tab-saves'),null);
+  assert.equal(await page.$eval('#skills-tab-skills',n=>n.getAttribute('aria-selected')),'true','Older Saves tab choices fall back to Skills');
+  assert.equal(await page.$$eval('.ability-entry [data-action="save-roll"]',nodes=>nodes.length),6);
+  const dexSave='.ability-entry [data-action="save-roll"][data-key="dex"]';
+  const beforeSave=active(await state());
+  assert.equal(await page.$eval(dexSave,n=>n.textContent),signed(saveBonus(beforeSave,'dex')));
+  await click('.ability-entry [data-action="save-prof"][data-key="dex"]');
+  assert.equal(await page.$eval(dexSave,n=>n.textContent),signed(saveBonus(active(await state()),'dex')));
+  await click(dexSave);await waitForRollResult(page);
+  assert.equal(await page.$eval('#modal .roll-expression',n=>n.textContent),`1d20${signed(saveBonus(active(await state()),'dex'))}`);
+  await click('#modal [data-action="close"]');
+  await click('.ability-entry [data-action="save-prof"][data-key="dex"]');
   let saved=active(await state());assert.ok(saved.training.tools.includes('thieves-tools'));assert.ok(saved.items.some(i=>/smith/i.test(i.name)));
   const first=saved.attacks.find(a=>a.name==='Longsword'),attackSelector=`[data-sheet-entry="${first.id}"] [data-action="attack-roll"]`;
   const hitBefore=await page.$eval(attackSelector,n=>n.textContent);
@@ -49,7 +62,10 @@ try {
   await page.focus('#skills-tab-languages');await page.keyboard.press('ArrowRight');assert.equal(await page.$eval(':focus',n=>n.id),'skills-tab-tools');
   saved=active(await state());const thieves=saved.items.find(i=>/thieves/i.test(i.name));
   await click(`#skills-panel-tools [data-action="use-item"][data-id="${thieves.id}"]`);
-  assert.equal(await page.$eval('#modal [name="toolAbility"]',n=>n.value),'dex');
+  assert.equal(await page.$('#modal [name="toolAbility"]'),null,'Tool abilities cannot be changed');
+  assert.match(await page.$eval('#modal .tool-ability',n=>n.textContent),/Dexterity/);
+  const options=await page.$$eval('#modal [name="toolSkill"] option',nodes=>nodes.map(n=>[n.value,n.textContent]));
+  assert.deepEqual(options,[['None','None'],...Object.keys(SKILLS).map(name=>[name,`${name} (${signed(skillBonus(saved,name))})`])]);
   await page.select('#modal [name="toolSkill"]','Stealth');
   await click('#modal button[type="submit"]');await waitForRollResult(page);
   assert.match(await page.$eval('.roll-expression',n=>n.textContent),/1d20\+2/);
@@ -59,7 +75,7 @@ try {
   await click('[data-action="add-tool"][data-tool="alchemists-supplies"]');assert.equal(active(await state()).items.length,count+1);
   for(const width of [1440,390,320]){
     await page.setViewport({width,height:900});
-    for(const id of ['skills','proficiencies','languages','tools','saves']){
+    for(const id of ['skills','proficiencies','languages','tools']){
       await tab(id);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`${width}px ${id} fits`);
     }
     await tab('tools');await page.$eval('[data-sheet-section="skills"]',n=>n.scrollIntoView({block:'start'}));
@@ -68,7 +84,7 @@ try {
   // Inventory uses the same tool and opens the same roll dialog without equipping it.
   await page.evaluate(()=>location.hash='inventory');await page.waitForSelector('.inventory-list');
   await click(`.inventory-list [data-action="use-item"][data-id="${thieves.id}"]`);
-  assert.ok(await page.$('#modal [name="toolAbility"]'));await page.keyboard.press('Escape');
+  assert.equal(await page.$('#modal [name="toolAbility"]'),null);assert.ok(await page.$('#modal .tool-ability'));await page.keyboard.press('Escape');
   await page.evaluate(()=>location.hash='sheet');await page.waitForSelector('.training-tabs');
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);await page.reload({waitUntil:'load'});

@@ -58,6 +58,7 @@ test('tool checks use the catalog ability, one proficiency, applicable Expertise
   const c=makeCharacter({level:5,skills:['Sleight of Hand'],stats:{str:16,dex:18,con:10,int:12,wis:10,cha:10}});
   ensureTraining(c);const tools=addToolToInventory(c,'thieves-tools');
   assert.equal(toolCheck(c,tools).bonus,4);assert.equal(toolCheck(c,tools).ability,'dex');
+  assert.equal(toolCheck(c,tools,{ability:'str'}).ability,'dex','Tool checks always use the catalog ability');
   c.training.tools.push('thieves-tools');assert.equal(toolCheck(c,tools).bonus,7);
   let check=toolCheck(c,tools,{skill:'Sleight of Hand'});assert.equal(check.bonus,7);assert.equal(check.advantage,true);
   c.expertise.push('Sleight of Hand');check=toolCheck(c,tools,{skill:'Sleight of Hand'});assert.equal(check.bonus,10);

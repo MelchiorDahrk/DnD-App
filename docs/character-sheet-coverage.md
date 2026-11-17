@@ -1,6 +1,6 @@
 # Session character sheet coverage
 
-The three supplied photographs (IMG_4389, IMG_4390, IMG_4391) are the references for field coverage and the default party. Every printed section and type of handwritten addition has a place in the app. All three characters start in a fresh save. **Settings & backup → Add default party** adds new copies at any time.
+The photographed character data remains in the test fixtures for rules and backup coverage. New journals offer character creation or backup import; existing saved characters are preserved.
 
 The defaults use **2024 class rules** with the group's existing older options retained where indicated. Teyla is **Wood Elf / Folk Hero**, as requested. Older backgrounds receive background ability increases and an Origin feat; species ability increases are not added again. Written final scores and rolled HP are retained. Pinned journal notes record corrections, selected options, uncertain handwriting, marginal notes, and table rulings.
 
@@ -18,16 +18,16 @@ All three passive Perception totals now come from actual Perception proficiency,
 | Six ability scores and modifiers | **Abilities**. Edit total scores; modifiers update and can be rolled. |
 | Heroic Inspiration | Toggle in **Status**, or gain/spend points when **Settings & backup → Heroic Inspiration → Maximum points** is above 1. Spend 1 to reroll one die immediately after rolling it, keeping the new result. Guided attacks apply the reroll; other rerolls are manual. |
 | Proficiency bonus | Calculated from level in **Skills & training**. |
-| Six saving throws and proficiency circles | **Skills & training → Saves**: toggle proficiency and roll each saving throw. |
-| All 18 skills and proficiency circles | Toggle untrained/proficient/expertise and roll each skill. Switch between all skills and proficient skills; this preference is saved per character. Saving throws have their own Saves tab. |
+| Six saving throws and proficiency circles | **Abilities**: toggle proficiency below each ability and use its shield button to roll a saving throw. |
+| All 18 skills and proficiency circles | Toggle untrained/proficient/expertise and roll each skill. Switch between all skills and proficient skills; this preference is saved per character. Saving throws appear with their abilities. |
 | Armor class, including handwritten shield bonus | AC and its breakdown update automatically from equipped armor, shield, defensive items, Dexterity, and Monk/Barbarian Unarmored Defense. Equipping weapons manages available hands, so dual wielding and two-handed weapons replace the shield. In the item editor, choose base armor for magic/custom armor, mark attunement, or set an AC bonus; choose **Dual wield (2 from stack)** to hold two from a stack. **Edit stats** provides an AC adjustment and optional total override; leave the override blank for dynamic AC. Imported written AC is retained as a reference. |
 | Initiative | Dexterity modifier plus editable **Initiative bonus** in **Edit stats**; enable **Advantage on initiative** for features such as Assassinate. Tap initiative to roll the total and chosen mode. |
-| Speed | Editable walking speed in **Edit stats**; other movement modes can be recorded in senses or features. |
+| Speed | Editable walking speed in **Edit stats**; other movement modes can be recorded in features. |
 | Maximum, current, and temporary HP | **Edit stats** sets all three directly. **Harm/Heal** applies changes and temporary HP absorption. |
-| Hit dice total, size, remaining | **Senses & essentials** shows remaining / character level and die size. **Edit stats** changes die size and remaining dice. **Short rest** spends dice. |
+| Hit dice total, size, remaining | **Short rest** shows remaining / character level and die size. **Edit stats** changes die size and remaining dice. **Short rest** spends dice. |
 | Death save success and failure circles | Shown at 0 HP; manually set counters or roll death saves. |
 | Weapon name, attack bonus, damage dice/type | **Attacks & actions**. Each attack has an ability, proficiency toggle, additional attack bonus, damage formula, type, range, roll mode (normal/advantage/disadvantage), and notes for versatile weapons or special item effects. Change situational modes when circumstances change. |
-| Passive Wisdom (Perception) | **Senses & essentials** calculates 10 + Perception skill bonus + editable passive adjustment. This supports the photographed sheet's separately recorded passive value. |
+| Passive Wisdom (Perception) | The summary beside **Experience** calculates 10 + Perception skill bonus + editable passive adjustment. This supports the photographed sheet's separately recorded passive value. |
 | Other proficiencies and languages | **Skills & training → Proficiencies / Languages / Tools**: checkboxes drive weapon bonuses, armor training and tool checks. Physical tools live in Inventory. [Rules behavior](training.md). |
 | CP, SP, EP, GP, PP | **Inventory → coin summary → Manage**. All five denominations are editable and saved independently. |
 | Equipment, arrows, rations, packs, tools, potions, magic items | The dedicated **Inventory** page stores quantity, category, equipped state, weight, item notes, and reference link. Star an item to find it in the Favorites filter. Use consumables directly, or open equipped gear's notes, reference, and matching weapon attack. |
@@ -41,7 +41,7 @@ All three passive Perception totals now come from actual Perception proficiency,
 - **Second Wind:** a 2024 feature with 2 uses, long-rest refresh, 1 use regained on a Short Rest, and `1d10+3` at Fighter level 3. **Use & roll** spends the use. Apply the resulting healing with **Heal**; update the formula when the character's level changes.
 - **Action Surge:** a feature with 1 use and short-rest refresh; tap its use square when spent.
 - **Battle Master:** a shared **Superiority dice** feature with 4 uses, `1d8`, and short-rest refresh. Put maneuvers such as Feinting Strike and Riposte in its notes or separate unlimited features. Roll the shared pool to spend one die; restoring a square corrects accidental use.
-- **Superior darkvision:** record `120 ft.` in **Senses**. Other species abilities and fighting-style bonuses can be described in features. Adjust attack bonuses explicitly for equipment or fighting style.
+- **Superior darkvision:** record `120 ft.` in **Features & resources**. Other species abilities and fighting-style bonuses can be described in features. Adjust attack bonuses explicitly for equipment or fighting style.
 - **Dancing Lights:** add a cantrip in **Spellbook**. Scrolls and item-based spells can be cast using **No slot (ritual / item / feature)**, then decrement the relevant item in inventory.
 - **Magic items and potion effects:** item descriptions preserve special rules; temporary ability changes are entered in ability scores, and temporary HP is entered in health controls.
 

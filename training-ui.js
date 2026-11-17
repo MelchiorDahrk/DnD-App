@@ -1,4 +1,4 @@
-import {ABILITIES,SKILLS,signed,proficiency,skillBonus,saveBonus} from './model.js';
+import {ABILITIES,SKILLS,signed,proficiency,skillBonus} from './model.js';
 import {ARMOR_TRAINING,LANGUAGE_GROUPS,trainingFor} from './training-rules.js';
 import {WEAPONS} from './catalog.js';
 import {toolCatalog,itemTool} from './inventory.js';
@@ -9,10 +9,9 @@ const sheetEntry=(key,label)=>`data-sheet-entry="${esc(key)}" data-sheet-label="
 const choice=(kind,id,label,checked)=>`<label class="training-choice"><input type="checkbox" data-training="${kind}" value="${esc(id)}" ${checked?'checked':''}><span>${esc(label)}</span></label>`;
 const group=(title,body)=>`<fieldset class="training-group"><legend>${esc(title)}</legend>${body}</fieldset>`;
 export function renderSkills(c) {
-  const t=trainingFor(c),active=c.sheetLayout?.skillsTab||'skills';
-  const tabs=[['skills','Skills'],['proficiencies','Proficiencies'],['languages','Languages'],['tools','Tools'],['saves','Saves']];
+  const t=trainingFor(c),active=c.sheetLayout?.skillsTab==='saves'?'skills':c.sheetLayout?.skillsTab||'skills';
+  const tabs=[['skills','Skills'],['proficiencies','Proficiencies'],['languages','Languages'],['tools','Tools']];
   const skills=`<p class="skill-description">Tap a dot: untrained → proficient → expertise. Tap a bonus to roll.</p>${Object.entries(SKILLS).filter(([name])=>!c.sheetLayout?.skillsProficientOnly||c.skills.includes(name)||c.expertise.includes(name)).map(([name,key])=>`<div class="skill-row" ${sheetEntry('skill-'+name,name)}>${btn('skill-prof',`<span class="prof-dot ${c.expertise.includes(name)?'expert':c.skills.includes(name)?'active':''}"></span>`,'prof-toggle',`data-skill="${esc(name)}" aria-label="${esc(name)} proficiency: ${c.expertise.includes(name)?'expertise':c.skills.includes(name)?'proficient':'untrained'}. Tap to change."`)}<span class="skill-name">${name}</span><span class="skill-ability">${key}</span>${btn('skill-roll',signed(skillBonus(c,name)),'skill-roll',`data-skill="${esc(name)}" aria-label="Roll ${esc(name)}"`)}</div>`).join('')}`;
-  const saves=`${Object.entries(ABILITIES).map(([key,name])=>`<div class="skill-row" ${sheetEntry('save-'+key,name+' saving throw')}>${btn('save-prof',`<span class="prof-dot ${c.saves.includes(key)?'active':''}"></span>`,'prof-toggle',`data-key="${key}" aria-label="Toggle ${name} saving throw proficiency" aria-pressed="${c.saves.includes(key)}"`)}<span class="skill-name">${name} save</span>${btn('save-roll',signed(saveBonus(c,key)),'skill-roll',`data-key="${key}" aria-label="Roll ${name} saving throw"`)}</div>`).join('')}`;
   const proficiencies=`<p class="skill-description">Your weapon choices update attack bonuses. Armor training controls shield AC and the penalties for untrained armor.</p>`+
     group('Armor training',ARMOR_TRAINING.map(name=>choice('armor',name,name==='Shield'?'Shields':name+' armor',t.armor.includes(name))).join(''))+
     ['Simple','Martial'].map(family=>{const weapons=WEAPONS.filter(w=>w.family.startsWith(family));return group(family+' weapons',choice('weapon-group',family,'All '+family.toLowerCase()+' weapons',weapons.every(w=>t.weapons.includes(w.id)))+`<div class="training-options">${weapons.map(w=>choice('weapons',w.id,w.name,t.weapons.includes(w.id))).join('')}</div>`);}).join('');
@@ -27,7 +26,7 @@ export function renderSkills(c) {
       const owned=c.items.filter(item=>itemTool(item)?.id===entry.id&&item.qty>0),trained=t.tools.includes(entry.id);
       return `<div class="training-tool-row"><span class="item-symbol">${itemIconMarkup(entry)}</span><div class="training-tool-info">${choice('tools',entry.id,entry.name,trained)}<small>${ABILITIES[entry.toolAbility]} · ${owned.length?'In pack ×'+owned.reduce((sum,item)=>sum+item.qty,0):'Not in pack'}</small></div>${owned.length?btn('use-item','Use','btn btn-sm',`data-id="${owned[0].id}" aria-label="Use ${esc(entry.name)}"`):btn('add-tool','Add to pack','btn btn-sm',`data-tool="${entry.id}" aria-label="Add ${esc(entry.name)} to pack"`)}</div>`;
     }).join(''))).join('');
-  const content={skills,proficiencies,languages,tools,saves};
+  const content={skills,proficiencies,languages,tools};
   const notes=['languages','armorProficiencies','weaponProficiencies','toolProficiencies'].filter(key=>c[key]);
   return `<section class="panel" data-sheet-section="skills"><div class="panel-heading"><h2>Skills & training</h2><span class="badge">PROFICIENCY ${signed(proficiency(c.level))}</span></div><div class="panel-body"><div class="training-tabs" role="tablist" aria-label="Skills and training">${tabs.map(([id,label])=>btn('skills-tab',label,`filter-tab${active===id?' active':''}`,`id="skills-tab-${id}" role="tab" aria-selected="${active===id}" aria-controls="skills-panel-${id}" tabindex="${active===id?0:-1}" data-tab="${id}"`)).join('')}</div>${tabs.map(([id,label])=>`<div class="training-tab-panel" role="tabpanel" id="skills-panel-${id}" aria-labelledby="skills-tab-${id}" ${active===id?'':'hidden'}>${id==='skills'?`<div class="skill-controls">${btn('skills-filter',c.sheetLayout?.skillsProficientOnly?'Proficient only':'All skills','btn btn-sm',`aria-pressed="${!!c.sheetLayout?.skillsProficientOnly}" aria-label="Show only proficient skills"`)}</div>`:''}${content[id]}</div>`).join('')}${notes.length?`<details class="training-notes"><summary>Original training notes</summary><p class="form-help">Kept from your previous sheet for reference. The selections above control your rules.</p>${notes.map(key=>`<p>${esc(c[key])}</p>`).join('')}</details>`:''}</div></section>`;
 }

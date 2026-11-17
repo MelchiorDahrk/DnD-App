@@ -31,11 +31,11 @@ test('section choices and stable entry favorites survive backups separately for 
   assert.equal(isSheetFavorite(first,'abilities','str'),false);
 });
 
-test('legacy story, journal and pack layouts remain valid without restoring removed sheet sections',()=>{
-  const sheetLayout={collapsed:[...SHEET_SECTIONS,'personality','journal','pack'],favorites:{personality:['ideals'],journal:['old-note'],pack:['old-item']}};
+test('legacy senses, story, journal and pack layouts remain valid without restoring removed sheet sections',()=>{
+  const sheetLayout={collapsed:[...SHEET_SECTIONS,'essentials','personality','journal','pack'],favorites:{essentials:['perception'],personality:['ideals'],journal:['old-note'],pack:['old-item']}};
   const c=makeCharacter({sheetLayout});
   assert.deepEqual(parseBackup(JSON.stringify(backup([c]))).characters[0].sheetLayout,sheetLayout);
-  assert.ok(['personality','journal','pack'].every(section=>!SHEET_SECTIONS.includes(section)));
+  assert.ok(['essentials','personality','journal','pack'].every(section=>!SHEET_SECTIONS.includes(section)));
   toggleSheetFavorite(c,'pack','old-item');
   assert.equal(isSheetFavorite(c,'pack','old-item'),false,'Inventory favorites can still be removed');
   toggleSheetFavorite(c,'pack','new-item');

@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer-core';
 import {STORAGE_KEY,parseBackup} from '../model.js';
 import {initialState} from '../default-characters.js';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
+import {linkWeaponActions} from '../inventory.js';
 
 const root=resolve(import.meta.dirname,'..'),port=process.env.CHARACTER_TEST_PORT||'4194';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/chromium'].find(existsSync);
@@ -22,6 +23,7 @@ try{
   const fixture=defaultPartyState(),[first,second,last]=fixture.characters;
   first.name=second.name='Éowyn "Ember" <the Bold>';
   last.name='Long adventurer name '.repeat(6).slice(0,120).trim();
+  fixture.characters.forEach(linkWeaponActions);
   parseBackup(JSON.stringify(fixture));
   const saved=()=>page.evaluate(key=>JSON.parse(localStorage.getItem(key)),STORAGE_KEY);
   const manage=()=>page.click('.character-switch');
@@ -36,15 +38,12 @@ try{
   assert.deepEqual(await saved(),initialState());
   for(const width of [1280,390,320]){
     await page.setViewport({width,height:900});
-    assert.equal(await page.$$eval('.landing-option',ns=>ns.length),3);
+    assert.equal(await page.$$eval('.landing-option',ns=>ns.length),2);
     assert.ok(await page.$eval('#sidebar',n=>n.hidden));
     assert.ok(await page.$eval('#mobile-nav',n=>n.hidden));
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Landing fits ${width}px`);
     await page.screenshot({path:resolve(root,`.tmp/landing-${width}.png`)});
-    await page.click('[data-action="choose-default"]');
-    assert.equal(await page.$$eval('#modal [data-action="load-default"]',ns=>ns.length),3);
-    assert.ok(await fits(),`Default chooser fits ${width}px`);
-    await close();
+    assert.equal(await page.$('[data-action="choose-default"]'),null);
   }
   await page.click('[data-action="new-character"]');await page.keyboard.press('Escape');
   assert.deepEqual(await saved(),initialState(),'Canceling onboarding leaves an empty journal');
@@ -52,17 +51,11 @@ try{
   await page.waitForSelector('.landing');
   await page.reload({waitUntil:'networkidle0'});
   assert.ok(await page.$('.landing'),'A character-specific deep link still shows onboarding when empty');
-  await page.focus('[data-action="choose-default"]');await page.keyboard.press('Enter');
-  await page.click('[data-action="load-default"][data-index="1"]');
-  assert.deepEqual((await saved()).characters.map(c=>c.name),['Balin'],'Choose only the requested default');
-  assert.equal(await page.$eval('.hero h2',n=>n.textContent),'Balin');
-  await page.reload({waitUntil:'networkidle0'});
-  assert.equal(await page.$('.landing'),null,'Existing saves resume the character sheet');
-  console.log('PASS fresh landing, responsive choices, cancellation, deep links, keyboard default selection and reload');
+  console.log('PASS fresh landing, responsive choices, cancellation, deep links and no default party');
 
   await page.evaluate((key,s)=>localStorage.setItem(key,JSON.stringify(s)),STORAGE_KEY,initialState());
   await page.reload({waitUntil:'networkidle0'});
-  await page.click('[data-action="new-character"]');
+  await page.focus('[data-action="new-character"]');await page.keyboard.press('Enter');
   await page.type('#modal [name="name"]','A new adventurer');
   await page.select('#modal [name="class"]','Wizard');
   await page.click('#modal button[type="submit"]');
@@ -153,6 +146,8 @@ try{
   await remove(last.id);await type(last.name);await confirm();
   expected.characters=[];expected.activeId=null;
   assert.deepEqual(await saved(),expected,'Deleting the final character persists an empty journal');
+  assert.ok(await page.$('.settings-grid'),'Settings remain accessible without a character');
+  await page.click('.cloud-actions [data-route="sheet"]');
   assert.ok(await page.$('.landing'));
   await page.reload({waitUntil:'networkidle0'});assert.deepEqual(await saved(),expected);
   parseBackup(JSON.stringify(await saved()));
@@ -172,7 +167,7 @@ try{
   await page.reload({waitUntil:'networkidle0'});
   assert.match(await page.$eval('.storage-warning',n=>n.textContent),/Saving is paused/);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),STORAGE_KEY),'unreadable save');
-  await page.click('[data-action="choose-default"]');await page.click('[data-action="load-default"]');
+  await page.click('[data-action="new-character"]');await page.type('#modal [name="name"]','Temporary adventurer');await page.click('#modal button[type="submit"]');
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),STORAGE_KEY),'unreadable save','Onboarding never overwrites unreadable saves');
   assert.deepEqual(errors,[]);
   console.log('PASS unreadable saves remain protected through onboarding; no browser errors');

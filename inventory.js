@@ -22,10 +22,11 @@ export function prepareTraining(c) {
   if(importing)for(const id of c.training.tools)if(c.items.length<2000)addToolToInventory(c,id);
   return c;
 }
-export function toolCheck(c,item,{ability=itemTool(item)?.toolAbility,skill=''}={}) {
+export function toolCheck(c,item,{skill=''}={}) {
   const tool=itemTool(item);
   if(!tool||!c.items.includes(item)||item.qty<1)throw new Error('Carry this tool in your pack before using it.');
-  if(!['str','dex','con','int','wis','cha'].includes(ability)||skill&&!Object.hasOwn(SKILLS,skill))throw new Error('Choose an ability and an applicable skill.');
+  const ability=tool.toolAbility;
+  if(skill&&!Object.hasOwn(SKILLS,skill))throw new Error('Choose an applicable skill.');
   const trained=ensureTraining(c).tools.includes(tool.id),skilled=skill&&(c.skills.includes(skill)||c.expertise.includes(skill));
   const multiplier=skilled&&c.expertise.includes(skill)?2:trained||skilled?1:0;
   return {ability,skill,trained,skilled:!!skilled,advantage:!!(trained&&skilled),bonus:abilityCheckBonus(c,ability)+multiplier*proficiency(c.level)};

@@ -51,6 +51,28 @@ try {
   const visibleKeys=section=>page.$$eval(`${sectionSelector(section)} [data-sheet-entry]`,nodes=>nodes.filter(node=>node.getBoundingClientRect().height>0).map(node=>node.dataset.sheetEntry));
   const selected={};
   const original=await state();
+  assert.equal(await page.$('[data-sheet-section="essentials"], #skills-tab-saves'),null);
+  assert.equal(await page.$$eval('.ability-entry [data-action="save-roll"]',nodes=>nodes.length),6);
+  assert.ok(await page.$('.xp-strip .passive-summary'),'Passive Perception is beside XP');
+  assert.equal(await page.$('[data-sheet-entry="hit-dice"]'),null);
+  assert.notEqual(await page.$eval('.inspiration .icon',n=>n.innerHTML),await page.$eval('.sheet-favorite .icon',n=>n.innerHTML),'Inspiration has a unique icon');
+  await page.click('[data-action="dismiss-sheet-help"]');
+  assert.equal(await page.$('.sheet-layout-help'),null);
+  await page.reload({waitUntil:'load'});
+  assert.equal(await page.$('.sheet-layout-help'),null,'Favorites tip stays dismissed after reload');
+  const passiveBefore=Number(await page.$eval('.passive-summary strong',n=>n.textContent));
+  await page.click('[data-action="passives"]');
+  await page.$eval('#modal [name="passivePerceptionBonus"]',n=>n.value=String(Number(n.value)+1));
+  await page.click('#modal button[type="submit"]');
+  assert.equal(await page.$eval('.passive-summary strong',n=>Number(n.textContent)),passiveBefore+1);
+  await page.evaluate(()=>location.hash='settings');
+  await page.waitForSelector('.settings-grid');
+  const settingsCopy=await page.$eval('.settings-grid',n=>n.textContent);
+  assert.doesNotMatch(settingsCopy,/The default party|Made for the table|Offline, and ready for the road/);
+  assert.equal(await page.$('[data-action="default-party"]'),null);
+  await page.evaluate(()=>location.hash='sheet');
+  await page.waitForSelector('.ability-entry');
+
   phase='default party sheet and attack artwork';
   console.log(`RUN ${phase}`);
 
@@ -198,6 +220,7 @@ try {
   await page.click('[data-action="characters"]');
   await page.click('[data-action="switch-character"]:not(.active)');
   assert.equal(await page.$$eval('.sheet-section-toggle[aria-expanded="true"]',nodes=>nodes.length),SHEET_SECTIONS.length);
+  assert.equal(await page.$('.sheet-layout-help'),null,'Dismissal also applies to other characters');
   await page.click('[data-action="characters"]');
   await page.click(`[data-action="switch-character"][data-id="${original.activeId}"]`);
   assert.deepEqual(active(await state()).sheetLayout,layout);
