@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {demoCharacter,parseBackup} from '../model.js';
 import {configuration} from '../firebase-config.js';
-import {authMessage} from '../firebase-client.js';
+import {authMessage,cloudMessage} from '../firebase-client.js';
 import {CharacterSync} from '../cloud-sync.js';
 import {splitCharacter,joinCharacter,fragments,makeOperation,applyLive,applyFields,publicProjection,accountKey,invitationToken,CloudConflict,emptyState} from '../cloud-model.js';
 
@@ -11,6 +11,30 @@ test('phase 1: missing configuration preserves optional guest entry point',()=>{
   assert.ok(configuration({}).projectId);
   assert.match(authMessage({code:'auth/popup-closed-by-user'}),/cancelled/);
   assert.match(authMessage({code:'auth/account-exists-with-different-credential'}),/originally used/);
+});
+
+test('Firestore permission errors explain the required rules and preserve local copies',()=>{
+  const denied={code:'permission-denied',message:'Missing or insufficient permissions.'};
+  assert.match(cloudMessage(denied),/publish Questlog’s Firestore rules/);
+  assert.match(cloudMessage(denied),/local characters are preserved/);
+  assert.equal(authMessage(denied),cloudMessage(denied));
+  assert.equal(cloudMessage({...denied,code:'firestore/permission-denied'}),cloudMessage(denied));
+});
+
+test('denied character index stays in error and retry reconnects after rules are published',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  let deny,indexWatches=0,stops=0;
+  const state={characters:[],activeId:null};
+  const store={uid:'alice',watchIndex:(next,error)=>{indexWatches++;if(indexWatches===1)deny=error;else next([]);return ()=>stops++;}};
+  const sync=new CharacterSync({store,storage:{getItem:()=>null},getState:()=>state,onRemote:()=>{},online:()=>true});
+  // Mimic Firestore's terminal listener error, including an empty local queue.
+  sync.listenIndex();deny({code:'permission-denied',message:'Missing or insufficient permissions.'});
+  await sync.flush();
+  assert.equal(sync.state,'error','An empty queue cannot conceal a denied database read.');
+  assert.equal(sync.loaded,false);assert.match(sync.message,/Firestore permissions/);
+  await sync.retrySync();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(indexWatches,2);assert.equal(stops,1);
+  assert.equal(sync.loaded,true);assert.equal(sync.state,'synced');
 });
 test('phase 2: private content and all custom fields survive split, fragments and v2 backup',()=>{
   const c=demoCharacter();c.custom={value:'🐉'.repeat(70000)};
@@ -86,6 +110,7 @@ test('edits queued while a completed flush releases its browser lock still uploa
   let uploaded;
   const store={uid:'alice',apply:async(id,op)=>{applied.push(op);uploaded=op.create;},readCharacter:async()=>({character:uploaded,meta:{revision:1},live:{...splitCharacter(uploaded).live,revision:1}})};
   const sync=new CharacterSync({store,storage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},getState:()=>state,onRemote:()=>{},online:()=>true});
+  sync.loaded=true;
   const initial=sync.flush();await finished;
   state.characters.push(demoCharacter());sync.observe();t.mock.timers.tick(0);
   assert.equal(applied.length,0,'The first flush still holds the lock.');

@@ -59,6 +59,17 @@ revision increments, allowed document fields, invite validity, and read-only
 sharing. Invitations are random 256-bit bearer tokens, valid for 7 days, and can
 be revoked by the party creator. Knowing a party ID grants no access.
 
+If sign-in works but guest transfers, cloud backups and party creation report
+**Missing or insufficient permissions**, check Firestore Database → Rules in the
+same project as `firebase-config.js`. The default production-mode rule,
+`allow read, write: if false`, blocks signed-in accounts too. Replace the complete
+editor contents with this repository's `firestore.rules` and click **Publish**,
+or run the deployment command above. Keep the full ownership and membership
+checks; an unrestricted read/write rule is not needed. After publishing, use
+**Settings → Account → Retry sync**. This reconnects stopped database listeners
+and retries pending saves. JSON import can succeed before rules are deployed
+because it first saves into the current browser's local account storage.
+
 ## 7. Configure public SDK settings
 
 The checked-in `firebase-config.js` contains the supplied public web settings.

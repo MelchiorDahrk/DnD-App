@@ -1,4 +1,8 @@
 import {configuration} from './firebase-config.js';
+export function cloudMessage(error) {
+  if(['permission-denied','firestore/permission-denied'].includes(error?.code))return 'Cloud access is blocked by Firestore permissions. The project owner must publish Questlog’s Firestore rules, then retry sync. Your local characters are preserved.';
+  return error?.message||'Cloud connection failed. Your local changes are preserved.';
+}
 export function authMessage(error) {
   const code=error?.code||'';
   if(['auth/popup-closed-by-user','auth/cancelled-popup-request'].includes(code))return 'Sign-in cancelled. You can continue as a guest.';
@@ -14,7 +18,7 @@ export function authMessage(error) {
     'auth/network-request-failed':'Unable to connect. Your local characters are still available.',
     'auth/too-many-requests':'Too many attempts. Wait a moment and try again.'
   };
-  return messages[code]||error?.message||'Account service unavailable. Guest play is still available.';
+  return messages[code]||(code.includes('permission-denied')?cloudMessage(error):error?.message)||'Account service unavailable. Guest play is still available.';
 }
 export async function createFirebaseClient({onUser=()=>{}}={}) {
   const config=configuration();

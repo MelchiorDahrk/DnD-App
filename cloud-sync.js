@@ -1,16 +1,21 @@
 import {copy,equal,queueKey,makeOperation,hasChanges,splitCharacter,joinCharacter} from './cloud-model.js';
 import {uid} from './model.js';
+import {cloudMessage} from './firebase-client.js';
 
 export class CharacterSync {
   constructor({store,storage=localStorage,getState,onRemote,onStatus=()=>{},online=()=>navigator.onLine}){
     Object.assign(this,{store,storage,getState,onRemote,onStatus,online});
     this.key=queueKey(store.uid);this.prefix=this.key+'.op.';this.sequence=0;this.baseline=new Map(getState().characters.map(c=>[c.id,copy(c)]));
-    this.remote=new Map();this.meta=new Map();this.liveRecords=new Map();this.refreshSequence=new Map();this.stops=[];this.activeStop=null;this.activeId=null;
+    this.remote=new Map();this.meta=new Map();this.liveRecords=new Map();this.refreshSequence=new Map();this.indexStop=null;this.indexError=null;this.activeStop=null;this.activeId=null;
     this.queue=[];this.conflict=null;this.running=false;this.stopped=false;this.loaded=false;
     try{const saved=storage.getItem(this.key);if(saved){const data=JSON.parse(saved);if(data.queue){if(!Array.isArray(data.queue))throw new Error('Invalid queue');this.queue=data.queue;this.saveQueue();}}this.reloadQueue();}
     catch{this.blocked=true;this.status('error','Pending cloud operations could not be read. Export a backup; this queue has been preserved.');}
   }
-  status(state,message=''){this.state=state;this.message=message;this.onStatus({state,message,pending:this.queue.length,conflict:this.conflict,loaded:this.loaded});}
+  status(state,message=''){
+    if(state==='synced'&&this.indexError){state='error';message=cloudMessage(this.indexError);}
+    else if(state==='synced'&&!this.loaded)state='connecting';
+    this.state=state;this.message=message;this.onStatus({state,message,pending:this.queue.length,conflict:this.conflict,loaded:this.loaded});
+  }
   // Each operation has its own key. Two tabs cannot overwrite an entire queue
   // with stale localStorage snapshots. Web Locks serialize consumers, and server
   // receipts also cover browsers without Web Locks.
@@ -25,13 +30,26 @@ export class CharacterSync {
   acceptExternal(){this.baseline=new Map(this.getState().characters.map(c=>[c.id,copy(c)]));this.reloadQueue();this.flush();}
   start(){
     if(this.blocked)return;
-    this.stops.push(this.store.watchIndex(rows=>this.receiveIndex(rows),error=>this.fail(error)));
-    this.reconnect=()=>this.flush();window.addEventListener('online',this.reconnect);
+    this.listenIndex();
+    this.reconnect=()=>this.retrySync();window.addEventListener('online',this.reconnect);
     this.offline=()=>this.status('offline','Changes stay on this device until you reconnect.');window.addEventListener('offline',this.offline);
     this.queueChanged=event=>{if(event.key?.startsWith(this.prefix)){this.reloadQueue();this.flush();}};window.addEventListener('storage',this.queueChanged);
     this.select(this.getState().activeId);this.flush();
   }
-  stop(){this.stopped=true;clearTimeout(this.timer);clearTimeout(this.retry);this.stops.forEach(stop=>stop());this.activeStop?.();window.removeEventListener('online',this.reconnect);window.removeEventListener('offline',this.offline);window.removeEventListener('storage',this.queueChanged);}
+  listenIndex(){
+    this.indexStop?.();
+    this.indexStop=this.store.watchIndex(rows=>{this.indexError=null;this.receiveIndex(rows);},error=>{this.indexError=error;this.fail(error);});
+  }
+  retrySync(){
+    if(this.stopped||this.blocked)return;
+    clearTimeout(this.retry);
+    // Firestore ends a listener after a permissions error. Recreate it after
+    // rules are published rather than only retrying queued writes.
+    this.listenIndex();
+    const active=this.activeId;this.activeId=null;this.select(active);
+    return this.flush();
+  }
+  stop(){this.stopped=true;clearTimeout(this.timer);clearTimeout(this.retry);this.indexStop?.();this.activeStop?.();window.removeEventListener('online',this.reconnect);window.removeEventListener('offline',this.offline);window.removeEventListener('storage',this.queueChanged);}
   select(id){
     if(id===this.activeId)return;this.activeStop?.();this.activeStop=null;this.activeId=id;
     if(!id)return;
@@ -115,8 +133,8 @@ export class CharacterSync {
   }
   fail(error){
     if(this.stopped)return;
-    this.status(this.online()?'error':'offline',error.message||'Cloud connection failed. Your local changes are preserved.');
-    clearTimeout(this.retry);this.retry=setTimeout(()=>this.flush(),10000);
+    this.status(this.online()?'error':'offline',cloudMessage(error));
+    clearTimeout(this.retry);this.retry=setTimeout(()=>this.indexError?this.retrySync():this.flush(),10000);
   }
   async flush(){
     if(this.stopped||this.blocked||this.conflict)return;

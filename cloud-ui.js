@@ -17,6 +17,9 @@ export function createCloudUI(ui){
   function characterStatus(id){if(sync?.conflict?.characterId===id)return 'Conflict';if(sync?.queue.some(op=>op.characterId===id))return navigator.onLine?'Pending':'Offline · pending';return sync?.meta.has(id)?'Synced':sync?.loaded?'Local · upload pending':'Connecting…';}
   function updateStatus(){document.querySelectorAll('[data-cloud-account-error]').forEach(el=>el.textContent=accountError);document.querySelectorAll('[data-cloud-message]').forEach(el=>el.textContent=status.message||'');document.querySelectorAll('[data-cloud-status]').forEach(el=>el.textContent=statusText());document.querySelectorAll('[data-cloud-character]').forEach(el=>el.textContent=characterStatus(el.dataset.cloudCharacter));}
   const statusText=()=>({guest:'Guest · saved on this device',pending:`Pending · ${status.pending} change${status.pending===1?'':'s'}`,synced:'Synced',offline:`Offline · ${status.pending} pending`,error:'Cloud error · local copy preserved',conflict:'Conflict · choose a copy'}[status.state]||'Connecting…');
+  function characterMenuMarkup(){
+    return `<section class="character-menu-account" aria-label="Account and cloud saves"><h3>Account & cloud saves</h3>${user?`<p><strong>${esc(user.displayName||user.email)}</strong><br><span data-cloud-status role="status">${esc(statusText())}</span></p><div class="cloud-actions">${btn('cloud-upload','Copy guest characters','btn')}${btn('navigate','Account & settings','btn btn-ghost','data-route="settings"')}</div>`:`<p>Keep your adventurers across devices and join a live party.</p><div class="cloud-actions">${btn('cloud-signup','Create an account','btn btn-primary')}${btn('cloud-email','Sign in','btn')}</div>`}</section>`;
+  }
   function accountMarkup(){
     return `<section class="panel account-panel" aria-labelledby="account-title"><div class="panel-heading"><h2 id="account-title">Account</h2><span class="badge" data-cloud-status role="status">${esc(statusText())}</span></div><div class="panel-body about-copy">${user?
       `<p><strong>${esc(user.displayName||user.email)}</strong>${user.displayName?`<br>${esc(user.email)}`:''}</p>${!user.emailVerified?`<p>Please verify your email. ${btn('cloud-verify','Send verification email','btn btn-sm')}</p>`:''}<p>${status.pending?`${status.pending} queued change(s). Keep a JSON backup while offline.`:'Local account characters upload automatically; guest characters require your choice below.'}</p><p data-cloud-message>${esc(status.message||'')}</p><details><summary>Character synchronization (${getState().characters.length})</summary><ul>${getState().characters.map(c=>`<li>${esc(c.name)} — <span data-cloud-character="${esc(c.id)}">${esc(characterStatus(c.id))}</span></li>`).join('')}</ul></details><div class="cloud-actions">${btn('cloud-upload','Copy guest characters to account','btn')}${btn('cloud-retry','Retry sync','btn')}${btn('cloud-signout','Sign out','btn btn-ghost')}</div>${sync?.conflict?`<p>Export a backup before resolving. “Keep local” deliberately replaces overlapping cloud fields with this device’s current values.</p><div class="cloud-actions">${btn('cloud-keep-cloud','Use cloud copy','btn')}${btn('cloud-keep-local','Keep local copy','btn btn-danger')}${btn('cloud-conflict-copy','Keep both as separate characters','btn')}</div>`:''}`:
@@ -46,6 +49,10 @@ export function createCloudUI(ui){
       if(token!==generation||id!==selected)return;stopParty();party=null;selected='';partyIds=partyIds.filter(p=>p!==id);if(modal.querySelector('[data-cloud-shared]'))modal.close();toast('Party access ended. You may have been removed, or the party is unavailable.',true);refresh();
     });refresh();
   }
+  function listenParties(){
+    stopParties();const token=generation;
+    stopParties=store.watchParties(ids=>{if(token!==generation)return;partyIds=ids;if(!selected&&ids.length)chooseParty(ids[0]);refresh();},error=>toast(authMessage(error),true));
+  }
   async function changeUser(next){
     // Initial signed-out Auth readiness must not replace an active guest sheet
     // or interrupt existing dialogs and clicks.
@@ -70,7 +77,7 @@ export function createCloudUI(ui){
       ui.saveRemote();refresh();return true;
     },onStatus:value=>{if(token===generation){const changed=!!status.conflict!==!!value.conflict;status=value;updateStatus();if(changed&&!modal.open)render();}}});
     sync.start();
-    stopParties=store.watchParties(ids=>{if(token!==generation)return;partyIds=ids;if(!selected&&ids.length)chooseParty(ids[0]);refresh();},error=>toast(error.message,true));
+    listenParties();
     render();
     // Migration is explicitly offered in the account panel and first-sign-in dialog.
     const guest=localStorage.getItem(accountKey(null));
@@ -107,7 +114,7 @@ export function createCloudUI(ui){
         if(!getState().activeId)getState().activeId=getState().characters[0]?.id??null;
         ui.persist();localStorage.setItem(`questlog.migration.${user.uid}`,'offered');modal.close();toast(`${count} character(s) queued. ${skipped} matching ID(s) kept in guest storage.`);
       });break;
-      case 'cloud-retry':sync?.flush();break;
+      case 'cloud-retry':sync?.retrySync();if(store){listenParties();chooseParty(selected||partyIds[0]||'');}break;
       case 'cloud-keep-cloud':case 'cloud-keep-local':run(()=>sync.resolve(action==='cloud-keep-local'?'local':'cloud'));break;
       case 'cloud-conflict-copy':run(async()=>{const id=sync.conflict.characterId,c=copy(getState().characters.find(c=>c.id===id));if(!c)throw new Error('Export your backup before resolving the deletion.');await sync.resolve('cloud');c.id=uid();c.name=c.name.slice(0,105)+' (local copy)';getState().characters.push(c);ui.persist();});break;
       case 'cloud-create-party':if(!user){navigate('settings');break;}setModal('Gather your party',`${field('Party name','name','','text','required maxlength="100"')}${actions('Create party')}`,data=>run(async()=>{const id=await signed().createParty(String(data.get('name')).trim(),user.displayName||'Adventurer');modal.close();chooseParty(id);}));break;
@@ -129,7 +136,7 @@ export function createCloudUI(ui){
     }
     return true;
   }
-  return {accountMarkup,partyMarkup,handle,statusText,storageKey:()=>accountKey(user?.uid),get user(){return user;},observe:hpActions=>sync?sync.observe(hpActions):true,external:()=>sync?.acceptExternal(),deferred:()=>{if(sync){sync.deliverDeferred();if(visibleRoute==='party')refresh();}},viewRoute:next=>{if(next===visibleRoute)return;visibleRoute=next;if(next==='party'&&store)chooseParty(selected||partyIds[0]||'');else{stopParty();stopParty=()=>{};}},
+  return {accountMarkup,characterMenuMarkup,partyMarkup,handle,statusText,storageKey:()=>accountKey(user?.uid),get user(){return user;},observe:hpActions=>sync?sync.observe(hpActions):true,external:()=>sync?.acceptExternal(),deferred:()=>{if(sync){sync.deliverDeferred();if(visibleRoute==='party')refresh();}},viewRoute:next=>{if(next===visibleRoute)return;visibleRoute=next;if(next==='party'&&store)chooseParty(selected||partyIds[0]||'');else{stopParty();stopParty=()=>{};}},
     async start(){try{client=await createFirebaseClient();if(client)client.watch(next=>{changeUser(next).catch(error=>{accountError=authMessage(error);toast(accountError,true);});});else{accountError='Cloud accounts are disabled on this installation.';updateStatus();}}catch(error){accountError=authMessage(error);status={state:'guest',pending:0};updateStatus();}}
   };
 }

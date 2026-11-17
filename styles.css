@@ -502,6 +502,9 @@ html{scroll-padding-top:85px;scroll-padding-bottom:25px}button,a,input,select,te
 @media(max-width:400px){.training-tool-row>.item-symbol{display:none}.training-group{padding:8px}.training-tool-row>.btn{max-width:78px}}
 .cloud-actions{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
 .account-panel{margin-bottom:24px}
+.character-menu-account{border-top:1px solid var(--border-subtle);margin-top:20px;padding-top:18px;overflow-wrap:anywhere}
+.character-menu-account h3{margin:0 0 8px;font-size:14px}
+.character-menu-account p{font-size:12px;line-height:1.7;color:var(--text-secondary)}
 .account-panel .panel-heading{flex-wrap:wrap;gap:12px}
 .party-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:20px;margin-top:24px}
 .party-character{overflow:hidden}

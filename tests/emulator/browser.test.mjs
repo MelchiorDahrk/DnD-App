@@ -58,7 +58,11 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
 
     phase='sign up';alice=await open('Alice Brick',{guest:true,holdSyncLock:true});bob=await open('Bob Brick');
     const aliceEmail=`alice-${uid()}@example.com`,bobEmail=`bob-${uid()}@example.com`;
-    await alice.page.goto(url+'#settings');await signup(alice.page,aliceEmail);
+    await click(alice.page,'characters');
+    assert.ok(await alice.page.$('#modal [data-action="cloud-signup"]'),'Create an account is available from the character menu.');
+    assert.ok(await alice.page.$('#modal [data-action="cloud-email"]'),'Sign in is available from the character menu.');
+    await signup(alice.page,aliceEmail);
+    await alice.page.goto(url+'#settings');
     phase='upload guest';await click(alice.page,'cloud-upload');await click(alice.page,'cloud-upload-confirm');
     await alice.page.waitForFunction(()=>!document.querySelector('#modal').open);
     // The first empty sync has finished its callback but still holds its request
@@ -68,6 +72,12 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.waitForFunction(()=>document.querySelector('[data-cloud-status]')?.textContent==='Synced');
     const uploaded=await alice.page.evaluate(async id=>{const s=await import('./firebase-sdk/firebase.js'),{CloudStore}=await import('./cloud-store.js');return new CloudStore({sdk:s,db:s.getFirestore()},s.getAuth().currentUser.uid).readCharacter(id);},alice.c.id);
     assert.equal(uploaded?.character.name,'Alice Brick','Synced means the guest character reached the server.');
+    await click(alice.page,'characters');
+    assert.ok(await alice.page.$('#modal [data-action="cloud-upload"]'),'Account characters can access guest transfer from the character menu.');
+    assert.match(await alice.page.$eval('#modal .character-menu-account',el=>el.innerText),new RegExp(aliceEmail));
+    assert.equal(await alice.page.$('#modal [data-action="cloud-signup"]'),null,'Signed-in accounts show their account details.');
+    await alice.page.click('#modal [data-action="navigate"][data-route="settings"]');
+    await alice.page.waitForFunction(()=>!document.querySelector('#modal').open);
     phase='create party';await alice.page.goto(url+'#party');await click(alice.page,'cloud-create-party');await fill(alice.page,'name','Browser Fellowship');await alice.page.click('#modal button[type="submit"]');
     await waitText(alice.page,'Browser Fellowship');await click(alice.page,'cloud-invite');
     await alice.page.waitForSelector('#modal [name="link"]');const invite=await alice.page.$eval('#modal [name="link"]',el=>el.value);

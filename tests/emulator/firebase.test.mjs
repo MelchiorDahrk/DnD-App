@@ -40,6 +40,31 @@ test('phase 2: uploads preserve fields, reject duplicates and deny other account
   await assertFails(sdk.updateDoc(sdk.doc(alice.db,`${alice.path(c.id)}/state/live`),{hp:-1,revision:2}));
   await assertFails(sdk.getDoc(sdk.doc(env.unauthenticatedContext().firestore(),alice.path(c.id))));
 });
+
+test('publishing app rules recovers denied listeners and queued character backups',async()=>{
+  const rules=await readFile(new URL('../../firestore.rules',import.meta.url),'utf8');
+  const denied=await initializeTestEnvironment({projectId,firestore:{rules:"rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"}});
+  let restored,sync;
+  try{
+    const store=new CloudStore({sdk,db:denied.authenticatedContext('alice').firestore()},'alice');
+    const state={characters:[],activeId:null},values=new Map();
+    const storage={getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key),key:i=>[...values.keys()][i],get length(){return values.size;}};
+    sync=new CharacterSync({store,storage,getState:()=>state,onRemote:()=>{},online:()=>true});
+    sync.listenIndex();await waitFor(()=>sync.indexError);
+    await sync.flush();assert.equal(sync.state,'error');assert.equal(sync.loaded,false);
+    const character=demoCharacter();state.characters.push(character);sync.observe();await sync.flush();
+    assert.equal(sync.queue.length,1,'A denied backup remains queued on this device.');
+    assert.equal(sync.state,'error');assert.match(sync.message,/Firestore permissions/);
+    restored=await initializeTestEnvironment({projectId,firestore:{rules}});
+    await sync.retrySync();await waitFor(()=>sync.loaded&&sync.state==='synced'&&sync.queue.length===0);
+    assert.deepEqual((await store.readCharacter(character.id)).character,character);
+    assert.ok(await store.createParty('After publishing rules','Alice'));
+  }finally{
+    if(sync){sync.stopped=true;clearTimeout(sync.timer);clearTimeout(sync.retry);sync.indexStop?.();sync.activeStop?.();}
+    if(!restored)restored=await initializeTestEnvironment({projectId,firestore:{rules}});
+    await restored.cleanup();await denied.cleanup();
+  }
+});
 test('phase 2: two devices merge independent fields and surface overlapping edits',async()=>{
   const a=storeFor('alice'),b=storeFor('alice'),c=await create(a),left=copy(c),right=copy(c);
   left.name='Left device';right.campaign='Right device';
