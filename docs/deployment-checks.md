@@ -2,6 +2,19 @@
 
 Pages deployment is gated on working functionality: source syntax, a successful build, rules and save validation, loading the built site beneath the Pages subpath, usable images, character and equipment interactions, portrait creation/editing, photo matching, appearance selection/persistence, keyboard dialog focus, and offline operation. Functional failures still stop deployment.
 
+## Sheet browser deadline — November 17, 2026
+
+[Run 44017193702](https://github.com/MelchiorDahrk/DnD-App/actions/runs/44017193702)
+passed packaging, Firebase validation and the other four browser groups. The sheet
+runner stopped its suite at exactly three minutes during the final 320px dialog
+checks, after the preceding interactions, favorites, persistence, offline and
+navigation checks passed. The resulting browser-closed error came from the
+runner terminating the suite at its deadline.
+
+The expanded sheet suite now has a five-minute limit. All functional checks and
+failure gates remain required. The registry regression test verifies that each
+group's combined suite limits leave room within the actual workflow step deadline.
+
 ## Cloud upload scheduling regression — November 16, 2026
 
 [Run 43967998889](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43967998889)
@@ -41,7 +54,7 @@ the bottleneck was the **13m48s of serial browser suites**, not uploading Pages.
 | Pages publication | About 40s | Every production deployment, after validation |
 
 The workflow now runs five browser groups on **separate GitHub runners** after a
-single build. The sheet group also runs the three inexpensive suites; dice,
+single build. The sheet group also runs the four inexpensive suites; dice,
 portraits, photos and presets each have a dedicated runner. At the measured times,
 the browser critical path falls from 13m48s to about 4m09s, plus parallel runner
 setup and artifact transfer. **Roughly 7–9 minutes for a warm deployment is an
@@ -86,7 +99,7 @@ its logs and failed timing result.
 ## Commands
 
 Run `npm run verify:deploy` before pushing. It runs syntax and unit checks,
-builds the production app, rechecks generated assets, then runs **all eight**
+builds the production app, rechecks generated assets, then runs **all nine**
 required browser suites under `/dist/`. Set `BROWSER_PATH` to a Chromium executable.
 `npm run test:deploy` runs just the production browser checks against an existing
 build and starts/stops its own preview server. To check an already-running preview,
@@ -184,8 +197,10 @@ animation scheduler with delayed callbacks. That simulation now runs as a unit
 regression with a controlled clock. The browser cleanup check uses normal playback,
 timer-based polling and a bounded 15-second wait, retaining real cleanup coverage.
 
-The workflow retains all eight per-suite limits (38 minutes in total), with each
-parallel browser job allowing 20 minutes including setup. The packaging job allows
+The workflow retains bounded limits for all nine suites (42 minutes in total), with
+each parallel browser step allowing 20 minutes and its job allowing 25 minutes
+including setup. The sheet group's combined suite limits total 18 minutes.
+The packaging job allows
 110 minutes, including a 100-minute cold-build limit and install/cache overhead.
 Static packaging clears `dist/` first, so removed files cannot linger
 and hide a packaging defect during repeated local verification.

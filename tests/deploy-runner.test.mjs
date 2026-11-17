@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {existsSync} from 'node:fs';
+import {existsSync,readFileSync} from 'node:fs';
 import {mkdir,mkdtemp,readFile} from 'node:fs/promises';
 import {execFile,spawnSync} from 'node:child_process';
 import {createServer} from 'node:http';
@@ -11,13 +11,19 @@ import {deploymentGroups,deploymentOptions} from '../scripts/lib/deploy-suites.m
 const root=resolve(import.meta.dirname,'..');
 const required=['sheet-layout','item-icons','magic-items','treasure','dice','themes','portraits','portrait-photos','presets'];
 
-test('CI matrix partitions every required browser suite exactly once and keeps its timeout',()=>{
+test('CI matrix partitions every required browser suite exactly once and fits the workflow deadline',()=>{
   const {matrix}=deploymentOptions(['--matrix']);
   const grouped=matrix.group.flatMap(group=>deploymentOptions(['--group',group]).suites);
   assert.deepEqual(grouped,deploymentOptions().suites);
   assert.deepEqual(grouped.map(([name])=>name).sort(),required.toSorted());
   assert.equal(new Set(grouped.map(([name])=>name)).size,required.length);
-  assert.equal(grouped.reduce((sum,[,minutes])=>sum+minutes,0),40);
+  const workflow=readFileSync(resolve(root,'.github/workflows/deploy.yml'),'utf8');
+  const browserStep=workflow.match(/- name: Check production interactions, assets and offline behavior[\s\S]*?timeout-minutes:\s*(\d+)/);
+  assert.ok(browserStep,'The production browser step has a bounded deadline.');
+  for(const [group,suites] of Object.entries(deploymentGroups)) {
+    const minutes=suites.reduce((sum,[,limit])=>sum+limit,0);
+    assert.ok(minutes<Number(browserStep[1]),`${group}: suite limits leave room for the runner within the workflow step`);
+  }
   for(const [name,minutes] of grouped) {
     assert.ok(existsSync(resolve(root,`scripts/test-${name}.mjs`)),name);
     assert.ok(minutes>0,name);
