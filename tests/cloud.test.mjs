@@ -71,3 +71,41 @@ test('phase 4: queue storage failure preserves the baseline and reports unsaved 
   c.hp--;assert.equal(sync.observe(new Map([[c.id,{kind:'damage',amount:1}]])),false);
   assert.equal(sync.queue.length,0);assert.equal(sync.baseline.get(c.id).hp,c.hp+1);assert.equal(sync.state,'error');
 });
+
+test('edits queued while a completed flush releases its browser lock still upload',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const original=Object.getOwnPropertyDescriptor(globalThis,'navigator');
+  t.after(()=>{if(original)Object.defineProperty(globalThis,'navigator',original);else delete globalThis.navigator;});
+  let release,completed;
+  const gate=new Promise(resolve=>release=resolve),finished=new Promise(resolve=>completed=resolve);
+  let requests=0;
+  Object.defineProperty(globalThis,'navigator',{configurable:true,value:{locks:{request:async(name,work)=>{
+    await work();if(++requests===1){completed();await gate;}
+  }}}});
+  const state={characters:[],activeId:null},applied=[],storage=new Map();
+  let uploaded;
+  const store={uid:'alice',apply:async(id,op)=>{applied.push(op);uploaded=op.create;},readCharacter:async()=>({character:uploaded,meta:{revision:1},live:{...splitCharacter(uploaded).live,revision:1}})};
+  const sync=new CharacterSync({store,storage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},getState:()=>state,onRemote:()=>{},online:()=>true});
+  const initial=sync.flush();await finished;
+  state.characters.push(demoCharacter());sync.observe();t.mock.timers.tick(0);
+  assert.equal(applied.length,0,'The first flush still holds the lock.');
+  release();await initial;
+  // Let any immediately requested follow-up finish without an online/retry event.
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(applied.length,1,'The queued upload must not need another event.');
+  assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
+});
+
+for(const conflict of [false,true])test(`concurrent flush requests preserve ${conflict?'conflict resolution':'error retry backoff'}`,async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const c=demoCharacter(),state={characters:[c]},storage=new Map();let calls=0;
+  const store={uid:'alice',apply:async()=>{calls++;throw conflict?new CloudConflict(['name']):new Error('Temporarily unavailable');}};
+  const sync=new CharacterSync({store,storage:{getItem:key=>storage.get(key)||null,setItem:(key,value)=>storage.set(key,value),removeItem:key=>storage.delete(key)},getState:()=>state,onRemote:()=>{},online:()=>true,onStatus:({state})=>{if(state==='pending')sync.flush();}});
+  sync.queue.push({id:'queued',characterId:c.id,create:c});sync.saveQueue();
+  await sync.flush();
+  assert.equal(calls,1);assert.equal(sync.queue.length,1);assert.equal(sync.state,conflict?'conflict':'error');
+  t.mock.timers.tick(9999);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(calls,1,'Concurrent requests must not bypass the retry delay.');
+  t.mock.timers.tick(1);await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(calls,conflict?1:2,'Conflicts stay paused; connection failures keep their scheduled retry.');
+});

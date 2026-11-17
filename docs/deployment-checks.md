@@ -2,6 +2,23 @@
 
 Pages deployment is gated on working functionality: source syntax, a successful build, rules and save validation, loading the built site beneath the Pages subpath, usable images, character and equipment interactions, portrait creation/editing, photo matching, appearance selection/persistence, keyboard dialog focus, and offline operation. Functional failures still stop deployment.
 
+## Cloud upload scheduling regression — November 16, 2026
+
+[Run 43967998889](https://github.com/MelchiorDahrk/DnD-App/actions/runs/43967998889)
+built successfully but timed out waiting for the guest upload to become synced.
+A completed sync's Web Locks request can still be pending after its callback has
+drained the queue. An upload queued during that interval requested another flush,
+but the running guard discarded the request and left the upload pending.
+
+Sync now remembers concurrent flush requests and drains again after a successful
+lock release. Connection errors retain their retry delay and conflicts still
+require resolution. Unit tests control this interval and both failure paths.
+The Firebase browser check holds the initial request open while uploading, then
+requires a synced status and reads the character back from Firestore. This check
+reproduces the timeout against the original build. Firebase failures save the
+active phase, account status, queue, browser messages, HTML and screenshots;
+the packaging job uploads these with the emulator log.
+
 Palette values, text contrast measurements, exact dimensions, panel height ceilings, label overlap measurements, artwork centering/camera angles, compact swatch layout, and image byte budgets are optional design review checks. Changing a font, color, spacing value, thumbnail resolution, or decorative treatment should not block publication. These checks remain available for design work; the deployment job explicitly sets `QUESTLOG_VISUAL_CHECKS=0`.
 
 ## Deployment time audit — November 16, 2026

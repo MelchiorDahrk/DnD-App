@@ -121,6 +121,16 @@ jobs:
         env:
           CHROME_PATH: ${{ steps.chrome.outputs.chrome-path }}
           QUESTLOG_TEST_BUILD: dist
+      - name: Upload Firebase failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firebase-failure-diagnostics
+          path: |
+            .tmp/browser-diagnostics/firebase/
+            firestore-debug.log
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Run tests including generated matching assets
         timeout-minutes: 5
         run: npm test

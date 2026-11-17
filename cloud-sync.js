@@ -119,9 +119,10 @@ export class CharacterSync {
     clearTimeout(this.retry);this.retry=setTimeout(()=>this.flush(),10000);
   }
   async flush(){
-    if(this.stopped||this.blocked||this.running||this.conflict)return;
+    if(this.stopped||this.blocked||this.conflict)return;
+    if(this.running){this.flushRequested=true;return;}
     if(!this.online()){this.status('offline','Changes stay on this device until you reconnect.');return;}
-    this.running=true;
+    this.flushRequested=false;this.running=true;let succeeded=false;
     const work=async()=>{
       try{
         this.reloadQueue();
@@ -134,14 +135,20 @@ export class CharacterSync {
           if(operation.create||operation.delete||operation.content?.length)await this.refresh(operation.characterId);
           else await this.refreshLive(operation.characterId);
         }
-        this.status('synced');
+        this.status('synced');succeeded=true;
       }catch(error){this.fail(error);}
     };
     try{
       // Serialize queue consumers across tabs. Operation receipts remain the
       // ultimate deduplication mechanism after crashes or lost responses.
       if(globalThis.navigator?.locks)await navigator.locks.request(`questlog-sync-${this.store.uid}`,work);else await work();
-    }finally{this.running=false;}
+    }finally{
+      this.running=false;
+      // The lock callback can finish before locks.request releases the lock.
+      // Preserve a flush requested in that window, while retaining error backoff
+      // and the explicit resolution required for conflicts.
+      if(this.flushRequested&&succeeded)await this.flush();
+    }
   }
   async resolve(choice){
     if(!this.conflict)return;
