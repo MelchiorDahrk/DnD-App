@@ -150,7 +150,13 @@ export class CloudStore {
       tx.set(this.ref(`users/${this.uid}/parties/${partyId}`),{partyId});return partyId;
     });
   }
-  watchParties(next,error){return this.s.onSnapshot(this.s.collection(this.db,`users/${this.uid}/parties`),snapshot=>next(snapshot.docs.map(d=>d.id)),error);}
+  watchParties(next,error){
+    return this.s.onSnapshot(this.s.collection(this.db,`users/${this.uid}/parties`),{includeMetadataChanges:true},snapshot=>{
+      // A local party index entry can arrive before its membership batch is
+      // authorized. Wait for the server before opening member-only listeners.
+      if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)next(snapshot.docs.map(d=>d.id));
+    },error);
+  }
   async share(partyId,character){
     const id=character.id,path=this.path(id),shared=`parties/${partyId}/characters/${this.uid}_${id}`;
     await this.s.runTransaction(this.db,async tx=>{

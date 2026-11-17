@@ -4,7 +4,33 @@ import {demoCharacter,parseBackup} from '../model.js';
 import {configuration} from '../firebase-config.js';
 import {authMessage,cloudMessage} from '../firebase-client.js';
 import {CharacterSync} from '../cloud-sync.js';
+import {CloudStore} from '../cloud-store.js';
 import {splitCharacter,joinCharacter,fragments,makeOperation,applyLive,applyFields,publicProjection,accountKey,invitationToken,CloudConflict,emptyState} from '../cloud-model.js';
+
+test('party discovery waits for committed membership, including metadata-only acknowledgments',()=>{
+  let deliver,fail,stopped=false;
+  const received=[],errors=[],denied={code:'permission-denied'};
+  const sdk={collection:(_,path)=>path,onSnapshot:(path,options,next,error)=>{
+    assert.equal(path,'users/alice/parties');
+    assert.equal(options.includeMetadataChanges,true);
+    deliver=next;fail=error;return ()=>{stopped=true;};
+  }};
+  const store=new CloudStore({sdk,db:{}},'alice');
+  const stop=store.watchParties(ids=>received.push(ids),error=>errors.push(error));
+  const snapshot=(ids,metadata)=>deliver({docs:ids.map(id=>({id})),metadata});
+  snapshot(['old-party'],{fromCache:true,hasPendingWrites:false});
+  snapshot([],{fromCache:false,hasPendingWrites:false});
+  // Creating a first party publishes an optimistic index before the server
+  // can authorize its member-only reads. Joining has the same write ordering.
+  snapshot(['new-party'],{fromCache:false,hasPendingWrites:true});
+  assert.deepEqual(received,[[]],'Pending membership must not open the party.');
+  snapshot(['new-party'],{fromCache:false,hasPendingWrites:false});
+  assert.deepEqual(received,[[],['new-party']],'The metadata-only acknowledgment makes the party available.');
+  snapshot([],{fromCache:false,hasPendingWrites:false});
+  assert.deepEqual(received.at(-1),[],'Confirmed membership removal still propagates.');
+  fail(denied);assert.deepEqual(errors,[denied]);
+  stop();assert.equal(stopped,true);
+});
 
 test('phase 1: missing configuration preserves optional guest entry point',()=>{
   assert.equal(configuration({QUESTLOG_FIREBASE_CONFIG:null}),null);
