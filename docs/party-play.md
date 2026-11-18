@@ -66,6 +66,14 @@ As with existing character editing, game inventory values are controlled by
 their owners; Firestore cannot validate arithmetic inside JSON content chunks.
 Deploy the updated `firestore.rules` together with the app assets.
 
+Pages publication does not deploy Firebase rules. The production Firebase project
+must have this revision's rules before enabling the new session features. A denied
+feature listener preserves the party and shows one setup warning; only a
+server-confirmed missing membership or deleted party produces “Party access ended.”
+After publishing rules, use **Retry connection** to reconnect the listeners.
+The legacy-rules emulator/browser tests exercise sign-in, existing parties,
+creation, and recovery across this version mismatch.
+
 ## Verification
 
 `tests/party.test.mjs` covers layout, ordering, skills, activities, transfers, and

@@ -160,6 +160,14 @@ export class CloudStore extends PartyStore {
       if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)next(snapshot.docs.map(d=>d.id));
     },error);
   }
+  async partyAccess(partyId){
+    // A feature read being denied is not proof that membership was revoked.
+    // Confirm against the server, never an empty/offline cache snapshot.
+    const member=await this.s.getDocFromServer(this.ref(`parties/${partyId}/members/${this.uid}`));
+    if(!member.exists())return false;
+    const root=await this.s.getDocFromServer(this.ref(`parties/${partyId}`));
+    return root.exists();
+  }
   async share(partyId,character){
     const id=character.id,path=this.path(id),shared=`parties/${partyId}/characters/${this.uid}_${id}`;
     await this.s.runTransaction(this.db,async tx=>{
@@ -214,10 +222,21 @@ export class CloudStore extends PartyStore {
     await batch.commit();
   }
   watchParty(partyId,next,error){
-    const stops=[],liveStops=new Map(),replyStops=new Map(),data={id:partyId,members:[],characters:[],invitations:[],activities:[],transfers:[],rests:[],combat:{}};let stopped=false;
+    const stops=[],liveStops=new Map(),replyStops=new Map(),data={id:partyId,members:[],characters:[],invitations:[],activities:[],transfers:[],rests:[],combat:{},errors:{}};let stopped=false,checking=false;
     const emit=()=>{if(!stopped)next(copy(data));};
-    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}`),snapshot=>{if(snapshot.exists()){Object.assign(data,snapshot.data());emit();}},error));
-    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/session/combat`),snapshot=>{data.combat=snapshot.exists()?snapshot.data():{};emit();},error));
+    const fail=scope=>async failure=>{
+      if(stopped)return;
+      data.errors[scope]={code:failure.code||'',message:failure.message||'Connection unavailable'};emit();
+      if(['combat','activities','transfers','rests','replies'].includes(scope)||checking)return;
+      checking=true;
+      try{if(!await this.partyAccess(partyId)&&!stopped){stopped=true;error(Object.assign(new Error('Party membership ended.'),{code:'questlog/party-access-ended'}));}}
+      catch{/* A rules or network error must not erase the party selection. */}
+      finally{checking=false;}
+    };
+    const ended=()=>{if(!stopped){stopped=true;error(Object.assign(new Error('Party membership ended.'),{code:'questlog/party-access-ended'}));}};
+    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/members/${this.uid}`),{includeMetadataChanges:true},snapshot=>{if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites&&!snapshot.exists())ended();},fail('membership')));
+    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}`),{includeMetadataChanges:true},snapshot=>{if(snapshot.exists()){Object.assign(data,snapshot.data());emit();}else if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)ended();},fail('party')));
+    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/session/combat`),snapshot=>{data.combat=snapshot.exists()?snapshot.data():{};emit();},fail('combat')));
     for(const kind of ['members','characters','invitations','activities','transfers','rests']){
       const collection=this.s.collection(this.db,`parties/${partyId}/${kind}`),source=['activities','rests'].includes(kind)?this.s.query(collection,this.s.orderBy('createdAt','desc'),this.s.limit(kind==='rests'?10:50)):collection;
       stops.push(this.s.onSnapshot(source,snapshot=>{
@@ -225,14 +244,14 @@ export class CloudStore extends PartyStore {
         if(kind==='characters'){
           const ids=new Set(data.characters.map(c=>c.id));
           for(const [id,stop] of liveStops)if(!ids.has(id)){stop();liveStops.delete(id);}
-          for(const c of data.characters)if(!liveStops.has(c.id))liveStops.set(c.id,this.s.onSnapshot(this.ref(`parties/${partyId}/characters/${c.id}/state/live`),snapshot=>{const target=data.characters.find(row=>row.id===c.id);if(target&&snapshot.exists()){target.live=snapshot.data();emit();}},error));
+          for(const c of data.characters)if(!liveStops.has(c.id))liveStops.set(c.id,this.s.onSnapshot(this.ref(`parties/${partyId}/characters/${c.id}/state/live`),snapshot=>{const target=data.characters.find(row=>row.id===c.id);if(target&&snapshot.exists()){target.live=snapshot.data();emit();}},fail('characters')));
         }
         if(kind==='rests'){
           for(const [id,stop] of replyStops)if(!data.rests.some(r=>r.id===id)){stop();replyStops.delete(id);}
-          for(const rest of data.rests)if(!replyStops.has(rest.id))replyStops.set(rest.id,this.s.onSnapshot(this.s.collection(this.db,`parties/${partyId}/rests/${rest.id}/replies`),snapshot=>{const target=data.rests.find(r=>r.id===rest.id);if(target){target.replies=snapshot.docs.map(d=>({id:d.id,...d.data()}));target.repliesReady=true;emit();}},error));
+          for(const rest of data.rests)if(!replyStops.has(rest.id))replyStops.set(rest.id,this.s.onSnapshot(this.s.collection(this.db,`parties/${partyId}/rests/${rest.id}/replies`),snapshot=>{const target=data.rests.find(r=>r.id===rest.id);if(target){target.replies=snapshot.docs.map(d=>({id:d.id,...d.data()}));target.repliesReady=true;emit();}},fail('replies')));
         }
         emit();
-      },kind==='invitations'?()=>{}:error));
+      },kind==='invitations'?()=>{}:fail(kind)));
     }
     return ()=>{stopped=true;stops.forEach(stop=>stop());liveStops.forEach(stop=>stop());replyStops.forEach(stop=>stop());};
   }

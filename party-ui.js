@@ -14,8 +14,14 @@ export function createPartyPlay(ui) {
   const run=async fn=>{try{await fn();}catch(error){toast(error.message,true);}};
   const checked=(key,fallback=false)=>getState().settings[key]??fallback;
   const safeSigned=value=>signed(Number.isFinite(Number(value))?Number(value):0);
+  function connectionMarkup(){
+    const errors=party()?.errors||{},issue=ui.serviceIssue?.();
+    if(!Object.keys(errors).length&&!issue)return '';
+    const permissions=!!issue||Object.values(errors).some(error=>error.code==='permission-denied');
+    return `<section class="storage-warning party-connection-warning" role="status"><div><strong>${permissions?'Party session setup needs an update.':'Party updates are interrupted.'}</strong><p>${permissions?'Your party selection is preserved. Some session features are unavailable until the server has the Firestore rules for this app version.':'Your party selection is preserved. Reconnect and retry to resume live updates.'}</p></div>${btn('cloud-retry','Retry connection','btn btn-sm')}</section>`;
+  }
   function settingsMarkup(){
-    return `<section class="panel party-settings" data-settings-section="party" tabindex="-1"><div class="panel-heading"><h2>${icon('people')}Party</h2></div><div class="setting-row"><div><strong>Live activity notifications</strong><p>Show party activity at the bottom of other pages.</p></div>${btn('party-notifications-toggle','','toggle-switch'+(checked('partyNotifications',true)?' active':''),`role="switch" aria-checked="${checked('partyNotifications',true)}" aria-label="Party activity notifications"`)}</div><div class="setting-row"><div><strong>Session Mode</strong><p>Keep party health, conditions, and the current turn at the top of every page.</p></div>${btn('party-session-toggle','','toggle-switch'+(checked('sessionMode')?' active':''),`role="switch" aria-checked="${checked('sessionMode')}" aria-label="Session Mode"`)}</div></section>`;
+    return `<section class="panel party-settings" data-settings-section="party" tabindex="-1"><div class="panel-heading"><h2>${icon('people')}Party</h2></div><div class="setting-row"><div><strong>Live activity notifications</strong><p>Show party activity at the bottom of other pages.</p></div>${btn('party-notifications-toggle','','toggle-switch'+(checked('partyNotifications',true)?' active':''),`role="switch" aria-checked="${checked('partyNotifications',true)}" aria-label="Party activity notifications"`)}</div><div class="setting-row"><div><strong>Session Mode</strong><p>Keep party health, conditions, and the current turn at the top of every page.</p></div>${btn('party-session-toggle','','toggle-switch'+(checked('sessionMode')?' active':''),`role="switch" aria-checked="${checked('sessionMode')}" aria-label="Session Mode"`)}</div></section>${connectionMarkup()}`;
   }
   function card(c,index){
     const live=c.live,sheet=c.sheet;if(!sheet)return '';
@@ -48,7 +54,7 @@ export function createPartyPlay(ui) {
   }
   function markup(){
     const p=party(),ordered=turnOrder(p.characters,p.combat);let index=0;
-    return `<div class="page-heading party-heading"><div><div class="eyebrow">YOUR ADVENTURING PARTY <span class="party-live-dot">LIVE</span></div><div class="party-title"><h1>${esc(p.name)}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div></div><div class="heading-actions">${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}${btn('party-rest',icon('camp')+'Group rest','btn')}</div></div>
+    return `${connectionMarkup()}<div class="page-heading party-heading"><div><div class="eyebrow">YOUR ADVENTURING PARTY <span class="party-live-dot">LIVE</span></div><div class="party-title"><h1>${esc(p.name||'Your party')}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div></div><div class="heading-actions">${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}${btn('party-rest',icon('camp')+'Group rest','btn')}</div></div>
       <section class="party-table" aria-label="Party members in turn order">${partyRows(ordered).map(row=>`<div class="party-player-row">${row.map(c=>card(c,index++)).join('')}</div>`).join('')||`<div class="panel panel-body"><p>Bring your adventurers to the table.</p>${btn('cloud-share','Share a character','btn btn-primary')}</div>`}</section>
       <section class="party-turn-bar" aria-label="Shared initiative tracker"><div><span class="eyebrow">${p.combat.active?'ROUND '+esc(p.combat.round):'SHARED INITIATIVE'}</span><strong>${p.combat.active?esc(p.characters.find(c=>c.id===p.combat.current)?.sheet.name||'Choose next turn')+'’s turn':'Set initiative, then start the encounter.'}</strong></div><div class="cloud-actions">${p.combat.active?btn('party-next-turn','Next turn '+icon('chevron'),'btn btn-primary')+btn('party-end-combat','End encounter','btn btn-ghost'):btn('party-start-combat','Start encounter','btn btn-primary')}</div></section>
       <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><span>${icon('dice')}THE PLAY AREA</span><div class="cloud-actions">${btn('party-roll','Roll dice','btn btn-sm')}${btn('party-rest','Rest','btn btn-sm btn-ghost')}</div></div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>${skillMarkup()}`;
@@ -90,10 +96,11 @@ export function createPartyPlay(ui) {
   }
   function requestRest(kind){
     if(!party()||!own().some(c=>c.characterId===active()?.id))return false;
+    if(party().errors?.rests){ui.openRest(kind);return true;}
     run(async()=>{const id=await store().requestRest(partyId,kind,active().id);await store().replyRest(partyId,id,true,active().id);ui.openRest(kind);});return true;
   }
   async function broadcastRoll(result,label){
-    const c=active(),shared=own().find(s=>s.characterId===c?.id);if(!shared)return;
+    const c=active(),shared=own().find(s=>s.characterId===c?.id);if(!shared||party().errors?.activities)return;
     const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label};
     await store().activity(partyId,{kind:'roll',characterId:c.id,name:c.name,result:JSON.stringify(r)});
     if(/^initiative$/i.test(label))await store().setInitiative(partyId,shared.id,r.total);
@@ -110,6 +117,8 @@ export function createPartyPlay(ui) {
     if(action==='party-session-toggle'||action==='party-notifications-toggle'){const key=action==='party-session-toggle'?'sessionMode':'partyNotifications';getState().settings[key]=!checked(key,key==='partyNotifications');ui.commit();return true;}
     if(action==='party-notification-dismiss'){notification='';mount();return true;}
     if(!p){toast('Join a party first.',true);return true;}
+    const feature=action.includes('transfer')||action.startsWith('party-offer-')?'transfers':action.includes('rest')?'rests':action.includes('initiative')||action.includes('combat')||action==='party-next-turn'?'combat':action==='party-roll'?'activities':'';
+    if(feature&&p.errors?.[feature]){toast('This party feature needs the updated server rules. Use Retry connection after the rules are published.',true);return true;}
     switch(action){
       case 'party-member':{const c=p.characters.find(c=>c.id===id);if(!c)break;setModal(esc(c.sheet.name),`<div class="party-member-preview">${portraitMarkup(c.sheet)}<p>${esc(c.sheet.class)} · Level ${esc(c.sheet.level)}</p></div><div class="party-member-actions">${btn('cloud-view',icon('sheet')+'View character sheet','btn btn-primary',`data-id="${esc(id)}"`)}${c.ownerId!==user().uid?btn('party-offer-item',icon('bag')+'Transfer items','btn',`data-id="${esc(id)}"`)+btn('party-offer-money',icon('coin')+'Transfer money','btn',`data-id="${esc(id)}"`):''}</div>`);break;}
       case 'party-offer-item':case 'party-offer-money':run(()=>transferDialog(p.characters.find(c=>c.id===id),action.endsWith('money')?'money':'item'));break;
@@ -126,5 +135,5 @@ export function createPartyPlay(ui) {
     return true;
   }
   document.addEventListener('change',event=>{if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;ui.refresh();}});
-  return {markup,settingsMarkup,handle,update,mount,requestRest,broadcastRoll,reset:()=>{partyId='';latestRoll=null;notification='';reactions.clear();mount();}};
+  return {markup,settingsMarkup,connectionMarkup,handle,update,mount,requestRest,broadcastRoll,reset:()=>{partyId='';latestRoll=null;notification='';reactions.clear();mount();}};
 }

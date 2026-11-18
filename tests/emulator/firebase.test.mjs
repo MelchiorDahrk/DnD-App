@@ -154,6 +154,30 @@ test('publishing app rules recovers denied listeners and queued character backup
     await restored.cleanup();await denied.cleanup();
   }
 });
+
+test('legacy rules preserve party reads when new session listeners are denied, and retry restores them',async()=>{
+  const current=await readFile(new URL('../../firestore.rules',import.meta.url),'utf8'),legacy=await readFile(new URL('../fixtures/pre-party-play.rules',import.meta.url),'utf8');
+  const a=storeFor('alice'),id=await a.createParty('A party that already exists','Alice');let latest,stop,legacyEnv,restored;const errors=[];
+  try{
+    legacyEnv=await initializeTestEnvironment({projectId,firestore:{rules:legacy}});
+    assert.equal(await a.partyAccess(id),true);
+    stop=a.watchParty(id,data=>latest=data,error=>errors.push(error));
+    await waitFor(()=>latest?.name==='A party that already exists'&&latest.errors.combat&&latest.errors.activities&&latest.errors.transfers&&latest.errors.rests);
+    assert.deepEqual(errors,[],'Feature permission errors must not report revoked membership.');
+    assert.equal(latest.members[0].uid,'alice');
+    const created=await a.createParty('Created under legacy rules','Alice');assert.equal(await a.partyAccess(created),true);
+    stop();restored=await initializeTestEnvironment({projectId,firestore:{rules:current}});
+    latest=null;stop=a.watchParty(id,data=>latest=data,error=>errors.push(error));
+    await waitFor(()=>latest?.name==='A party that already exists'&&latest.members.length===1);
+    await a.setInitiative(id,'alice_character',17);await waitFor(()=>latest.combat.scores?.alice_character===17);
+    assert.deepEqual(latest.errors,{});assert.deepEqual(errors,[]);
+    await sdk.deleteDoc(a.ref(`parties/${id}`));await waitFor(()=>errors.length===1);
+    assert.equal(errors[0].code,'questlog/party-access-ended','A deleted party still ends access.');
+  }finally{
+    stop?.();if(!restored)restored=await initializeTestEnvironment({projectId,firestore:{rules:current}});
+    await restored.cleanup();await legacyEnv?.cleanup();
+  }
+});
 test('phase 2: two devices merge independent fields and surface overlapping edits',async()=>{
   const a=storeFor('alice'),b=storeFor('alice'),c=await create(a),left=copy(c),right=copy(c);
   left.name='Left device';right.campaign='Right device';

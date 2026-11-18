@@ -9,8 +9,8 @@ import {createPartyPlay} from './party-ui.js';
 
 export function createCloudUI(ui){
   const {esc,btn,field,actions,setModal,modal,toast,getState,setState,render,navigate}=ui;
-  let client=null,user=null,sync=null,store=null,stopParties=()=>{},stopParty=()=>{},party=null,partyIds=[],selected='',accountError='',busy=false,status={state:'guest',pending:0},generation=0,renderTimer,pointerDown=false,visibleRoute=location.hash.slice(1);
-  const play=createPartyPlay({...ui,party:()=>party,store:()=>store,user:()=>user,route:()=>visibleRoute,refresh:()=>refresh(),ready:async()=>{
+  let client=null,user=null,sync=null,store=null,stopParties=()=>{},stopParty=()=>{},party=null,partyIds=[],selected='',accountError='',partyServiceIssue='',busy=false,status={state:'guest',pending:0},generation=0,renderTimer,pointerDown=false,visibleRoute=location.hash.slice(1);
+  const play=createPartyPlay({...ui,party:()=>party,store:()=>store,user:()=>user,serviceIssue:()=>partyServiceIssue,route:()=>visibleRoute,refresh:()=>refresh(),ready:async()=>{
     if(!navigator.onLine)throw new Error('Reconnect before transferring items or coins.');
     sync?.reloadQueue();if(!sync?.loaded||sync.blocked||sync.conflict||sync.queue.length||sync.running)throw new Error('Wait for pending cloud saves to finish, then try again.');
   },refreshCharacter:async id=>{if(!sync)return;if(id)await sync.refresh(id);else for(const c of getState().characters)await sync.refresh(c.id);sync.deliverDeferred();}});
@@ -65,7 +65,7 @@ export function createCloudUI(ui){
     if(!user)return `<div class="page-heading"><h1>Party</h1></div>${accountMarkup()}`;
     const token=new URL(location.href).searchParams.get('invite');
     const invitations=party?.invitations.filter(invitation=>!invitation.revoked)||[];
-    return `<div class="page-heading"><h1>Party management</h1><div class="heading-actions">${party?btn('navigate','Back to table','btn','data-route="party"'):''}${btn('cloud-create-party','Create party','btn btn-primary')}${btn('cloud-join','Join invitation','btn')}</div></div>${token?`<section class="panel panel-body"><p>An invitation is ready. Join after signing in.</p>${btn('cloud-join-link','Join this party','btn btn-primary')}</section>`:''}<div class="cloud-actions party-tabs">${partyIds.map(id=>btn('cloud-select-party',party?.id===id?esc(party.name):'Open party','btn'+(selected===id?' btn-primary':''),`data-id="${esc(id)}"`)).join('')}</div>${party?`<section class="panel"><div class="panel-heading"><h2>${esc(party.name||'Your party')}</h2><span class="badge">LIVE</span></div><div class="panel-body"><div class="cloud-actions">${btn('cloud-share','Share a character','btn')}${party.ownerId===user.uid?btn('cloud-invite','Create invitation link','btn')+btn('cloud-rename','Rename party','btn'):''}${btn('cloud-leave','Leave party','btn btn-ghost')}</div><p>Shared characters show public sheet details and combat resources. Your journal, inventory, spell notes and personal metadata remain private.</p><div class="party-members">${party.members.map(m=>`<span>${esc(partyMemberLabel(m))}${party.ownerId===user.uid&&m.uid!==user.uid?btn('cloud-remove-member','Remove','btn btn-sm btn-ghost',`data-id="${esc(m.uid)}"`):''}</span>`).join('')}</div>${party.ownerId===user.uid&&invitations.length?`<details><summary>Manage invitations</summary>${invitations.map(i=>`<div class="setting-row"><span>${'Invitation · expires '+new Date((i.createdAt.seconds+7*86400)*1000).toLocaleDateString()}</span>${btn('cloud-revoke','Revoke','btn btn-sm',`data-id="${esc(i.token)}"`)}</div>`).join('')}</details>`:''}</div></section><div class="party-grid">${party.characters.map(c=>{try{return partyCard(c);}catch{return '<p>A shared character contains invalid data. Ask its owner to share it again.</p>';}}).join('')||'<p>No characters shared yet.</p>'}</div>`:'<p>Select or create a party. You can belong to several parties; each character shares with one at a time.</p>'}`;
+    return play.connectionMarkup()+`<div class="page-heading"><h1>Party management</h1><div class="heading-actions">${party?btn('navigate','Back to table','btn','data-route="party"'):''}${btn('cloud-create-party','Create party','btn btn-primary')}${btn('cloud-join','Join invitation','btn')}</div></div>${token?`<section class="panel panel-body"><p>An invitation is ready. Join after signing in.</p>${btn('cloud-join-link','Join this party','btn btn-primary')}</section>`:''}<div class="cloud-actions party-tabs">${partyIds.map(id=>btn('cloud-select-party',party?.id===id?esc(party.name):'Open party','btn'+(selected===id?' btn-primary':''),`data-id="${esc(id)}"`)).join('')}</div>${party?`<section class="panel"><div class="panel-heading"><h2>${esc(party.name||'Your party')}</h2><span class="badge">LIVE</span></div><div class="panel-body"><div class="cloud-actions">${btn('cloud-share','Share a character','btn')}${party.ownerId===user.uid?btn('cloud-invite','Create invitation link','btn')+btn('cloud-rename','Rename party','btn'):''}${btn('cloud-leave','Leave party','btn btn-ghost')}</div><p>Shared characters show public sheet details and combat resources. Your journal, inventory, spell notes and personal metadata remain private.</p><div class="party-members">${party.members.map(m=>`<span>${esc(partyMemberLabel(m))}${party.ownerId===user.uid&&m.uid!==user.uid?btn('cloud-remove-member','Remove','btn btn-sm btn-ghost',`data-id="${esc(m.uid)}"`):''}</span>`).join('')}</div>${party.ownerId===user.uid&&invitations.length?`<details><summary>Manage invitations</summary>${invitations.map(i=>`<div class="setting-row"><span>${'Invitation · expires '+new Date((i.createdAt.seconds+7*86400)*1000).toLocaleDateString()}</span>${btn('cloud-revoke','Revoke','btn btn-sm',`data-id="${esc(i.token)}"`)}</div>`).join('')}</details>`:''}</div></section><div class="party-grid">${party.characters.map(c=>{try{return partyCard(c);}catch{return '<p>A shared character contains invalid data. Ask its owner to share it again.</p>';}}).join('')||'<p>No characters shared yet.</p>'}</div>`:'<p>Select or create a party. You can belong to several parties; each character shares with one at a time.</p>'}`;
   }
   const partyMarkup=()=>party&&!new URL(location.href).searchParams.has('invite')?play.markup():partyManagementMarkup();
   function chooseParty(id){
@@ -79,6 +79,12 @@ export function createCloudUI(ui){
       if(token!==generation||id!==selected)return;stopParty();party=null;selected='';partyIds=partyIds.filter(p=>p!==id);play.reset();store?.recoverEscrow().catch(()=>{});if(modal.querySelector('[data-cloud-shared]'))modal.close();toast('Party access ended. You may have been removed, or the party is unavailable.',true);refresh();
     });refresh();
   }
+  async function recoverPartyTransfers(){
+    const token=generation;
+    try{await store?.recoverEscrow();if(token===generation)partyServiceIssue='';}
+    catch(error){if(token!==generation)return;if(error.code==='permission-denied')partyServiceIssue='rules';else toast(authMessage(error),true);}
+    if(token===generation)refresh(true);
+  }
   function listenParties(){
     stopParties();const token=generation;
     stopParties=store.watchParties(ids=>{if(token!==generation)return;partyIds=ids;if(!selected||!ids.includes(selected))chooseParty(ids[0]||'');refresh();},error=>toast(authMessage(error),true));
@@ -91,7 +97,7 @@ export function createCloudUI(ui){
     if(modal.open)modal.close();
     // Switch namespaces without copying account characters or preferences into
     // another account or the guest key.
-    user=next;
+    user=next;partyServiceIssue='';
     play.reset();
     try{
       const saved=localStorage.getItem(accountKey(next?.uid));
@@ -108,7 +114,7 @@ export function createCloudUI(ui){
       ui.saveRemote();refresh();return true;
     },onStatus:value=>{if(token===generation){const changed=!!status.conflict!==!!value.conflict;status=value;updateStatus();if(changed&&!modal.open)render();}}});
     sync.start();
-    store.recoverEscrow().catch(error=>toast(authMessage(error),true));
+    recoverPartyTransfers();
     listenParties();
     render();
     // Migration is explicitly offered in the account panel and first-sign-in dialog.
@@ -147,7 +153,7 @@ export function createCloudUI(ui){
         if(!getState().activeId)getState().activeId=getState().characters[0]?.id??null;
         ui.persist();localStorage.setItem(`questlog.migration.${user.uid}`,'offered');modal.close();toast(`${count} character(s) queued. ${skipped} matching ID(s) kept in guest storage.`);
       });break;
-      case 'cloud-retry':sync?.retrySync();if(store){listenParties();chooseParty(selected||partyIds[0]||'');}break;
+      case 'cloud-retry':sync?.retrySync();if(store){recoverPartyTransfers();listenParties();chooseParty(selected||partyIds[0]||'');}break;
       case 'cloud-keep-cloud':case 'cloud-keep-local':run(()=>sync.resolve(action==='cloud-keep-local'?'local':'cloud'));break;
       case 'cloud-conflict-copy':run(async()=>{const id=sync.conflict.characterId,c=copy(getState().characters.find(c=>c.id===id));if(!c)throw new Error('Export your backup before resolving the deletion.');await sync.resolve('cloud');c.id=uid();c.name=c.name.slice(0,105)+' (local copy)';getState().characters.push(c);ui.persist();});break;
       case 'cloud-create-party':if(!user){navigate('settings');break;}setModal('Gather your party',`${field('Party name','name','','text','required maxlength="100"')}${actions('Create party')}`,data=>run(async()=>{const id=await signed().createParty(String(data.get('name')).trim(),user.displayName||'Adventurer');modal.close();chooseParty(id);}));break;

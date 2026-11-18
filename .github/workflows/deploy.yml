@@ -129,6 +129,7 @@ jobs:
           path: |
             .tmp/browser-diagnostics/firebase/
             .tmp/browser-diagnostics/party/
+            .tmp/browser-diagnostics/party-access/
             firestore-debug.log
           include-hidden-files: true
           if-no-files-found: ignore

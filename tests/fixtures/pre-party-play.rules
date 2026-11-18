@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signed() { return request.auth != null; }
+    function own(uid) { return signed() && request.auth.uid == uid; }
+    function member(party) { return signed() && exists(/databases/$(database)/documents/parties/$(party)) && exists(/databases/$(database)/documents/parties/$(party)/members/$(request.auth.uid)); }
+    function creator(party) { return signed() && get(/databases/$(database)/documents/parties/$(party)).data.ownerId == request.auth.uid; }
+    function afterMember(party) { return signed() && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.auth.uid)); }
+    function integer(n, low, high) { return n is int && n >= low && n <= high; }
+    function text(s, max) { return s is string && s.size() <= max; }
+    function manifest(d, uid) {
+      return d.keys().hasAll(['ownerId','name','revision','chunks','partyId','deleted'])
+        && d.keys().hasOnly(['ownerId','name','revision','chunks','partyId','deleted'])
+        && d.ownerId == uid && text(d.name,120) && d.name.size()>0
+        && integer(d.revision,1,2147483647) && integer(d.chunks,1,34)
+        && text(d.partyId,100) && d.deleted is bool;
+    }
+    function live(d) {
+      return d.keys().hasAll(['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice','slotUses','slotMax','featureUses','featureMax','revision'])
+        && d.keys().hasOnly(['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice','slotUses','slotMax','featureUses','featureMax','revision'])
+        && integer(d.maxHp,1,9999) && integer(d.hp,0,d.maxHp) && integer(d.tempHp,0,9999)
+        && integer(d.exhaustion,0,6) && integer(d.deathSuccess,0,3) && integer(d.deathFailure,0,3)
+        && integer(d.inspiration,0,999) && text(d.concentration,500) && integer(d.hitDice,0,20)
+        && d.conditions is list && d.conditions.size()<=14
+        && d.conditions.hasOnly(['Blinded','Charmed','Deafened','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious'])
+        && d.slotUses is list && d.slotUses.size()==9
+        && d.slotMax is list && d.slotMax.size()==9
+        && integer(d.slotMax[0],0,99) && integer(d.slotMax[1],0,99) && integer(d.slotMax[2],0,99)
+        && integer(d.slotMax[3],0,99) && integer(d.slotMax[4],0,99) && integer(d.slotMax[5],0,99)
+        && integer(d.slotMax[6],0,99) && integer(d.slotMax[7],0,99) && integer(d.slotMax[8],0,99)
+        && integer(d.slotUses[0],0,d.slotMax[0]) && integer(d.slotUses[1],0,d.slotMax[1]) && integer(d.slotUses[2],0,d.slotMax[2])
+        && integer(d.slotUses[3],0,d.slotMax[3]) && integer(d.slotUses[4],0,d.slotMax[4]) && integer(d.slotUses[5],0,d.slotMax[5])
+        && integer(d.slotUses[6],0,d.slotMax[6]) && integer(d.slotUses[7],0,d.slotMax[7]) && integer(d.slotUses[8],0,d.slotMax[8])
+        && d.featureUses is map && d.featureUses.size()<=2000 && d.featureMax is map && d.featureMax.size()<=2000 && integer(d.revision,1,2147483647);
+    }
+    match /users/{uid}/characters/{id} {
+      allow read: if own(uid);
+      allow create: if own(uid) && id.matches('[a-zA-Z0-9_-]{1,100}') && manifest(request.resource.data,uid)
+        && request.resource.data.revision==1 && request.resource.data.partyId=='' && request.resource.data.deleted==false;
+      allow update: if own(uid) && manifest(request.resource.data,uid)
+        && request.resource.data.ownerId==resource.data.ownerId
+        && request.resource.data.revision==resource.data.revision+1
+        && (!resource.data.deleted || request.resource.data.deleted)
+        && (request.resource.data.partyId==resource.data.partyId || request.resource.data.partyId=='' || member(request.resource.data.partyId));
+      match /content/{index} {
+        allow read: if own(uid);
+        allow create, update: if own(uid) && index.matches('[0-9]{1,2}')
+          && request.resource.data.keys().hasOnly(['json']) && text(request.resource.data.json,240000)
+          && getAfter(/databases/$(database)/documents/users/$(uid)/characters/$(id)).data.ownerId==uid;
+        allow delete: if own(uid);
+      }
+      match /state/{stateId} {
+        allow read: if own(uid);
+        allow create: if own(uid) && stateId=='live' && live(request.resource.data) && request.resource.data.revision==1
+          && getAfter(/databases/$(database)/documents/users/$(uid)/characters/$(id)).data.ownerId==uid;
+        allow update: if own(uid) && stateId=='live' && live(request.resource.data)
+          && request.resource.data.revision==resource.data.revision+1;
+        allow delete: if own(uid) && stateId=='live'
+          && getAfter(/databases/$(database)/documents/users/$(uid)/characters/$(id)).data.deleted==true;
+      }
+      match /operations/{operationId} {
+        allow read: if own(uid);
+        allow create: if own(uid) && request.resource.data.keys().hasOnly(['operationId','createdAt'])
+          && request.resource.data.operationId==operationId && request.resource.data.createdAt==request.time;
+      }
+    }
+    match /users/{uid}/parties/{party} {
+      allow read, delete: if own(uid);
+      allow create, update: if own(uid) && request.resource.data.keys().hasOnly(['partyId'])
+        && request.resource.data.partyId==party && afterMember(party);
+    }
+    match /parties/{party} {
+      allow get: if signed() && exists(/databases/$(database)/documents/parties/$(party)/members/$(request.auth.uid));
+      allow create: if signed() && request.resource.data.keys().hasOnly(['ownerId','name','createdAt'])
+        && request.resource.data.ownerId==request.auth.uid && text(request.resource.data.name,100)
+        && request.resource.data.name.size()>0 && request.resource.data.createdAt==request.time;
+      allow update: if creator(party) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+        && text(request.resource.data.name,100) && request.resource.data.name.size()>0;
+      allow update: if creator(party) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerId'])
+        && text(request.resource.data.ownerId,128)
+        && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.resource.data.ownerId));
+      allow delete: if creator(party);
+      match /members/{uid} {
+        // A prospective member may read only their own membership, never the roster.
+        allow get: if own(uid) || member(party);
+        allow list: if member(party);
+        allow create: if own(uid) && request.resource.data.keys().hasOnly(['uid','displayName','invitation','joinedAt'])
+          && request.resource.data.uid==uid && text(request.resource.data.displayName,254)
+          && request.resource.data.joinedAt==request.time
+          && (getAfter(/databases/$(database)/documents/parties/$(party)).data.ownerId==uid
+              || validInvitation(party,request.resource.data.invitation));
+        allow delete: if (own(uid) || creator(party))
+          && (!existsAfter(/databases/$(database)/documents/parties/$(party))
+              || getAfter(/databases/$(database)/documents/parties/$(party)).data.ownerId!=uid);
+      }
+      match /invitations/{token} {
+        allow read: if creator(party);
+        allow create, update: if creator(party) && request.resource.data.keys().hasOnly(['token','createdAt','revoked'])
+          && request.resource.data.token==token
+          && request.resource.data.revoked==getAfter(/databases/$(database)/documents/invitations/$(token)).data.revoked
+          && request.resource.data.createdAt==getAfter(/databases/$(database)/documents/invitations/$(token)).data.createdAt
+          && getAfter(/databases/$(database)/documents/invitations/$(token)).data.partyId==party;
+      }
+      match /characters/{sharedId} {
+        allow read: if member(party);
+        allow create, update: if signed() && request.resource.data.keys().hasOnly(['ownerId','characterId','sheet','chunks','detailsHash','sheetHash'])
+          && request.resource.data.ownerId==request.auth.uid && member(party)
+          && sharedId==request.auth.uid+'_'+request.resource.data.characterId
+          && publicSheet(request.resource.data.sheet,request.resource.data.characterId)
+          && integer(request.resource.data.chunks,1,34) && request.resource.data.detailsHash.matches('[a-f0-9]{64}')
+          && request.resource.data.sheetHash.matches('[a-f0-9]{64}')
+          && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(request.resource.data.characterId)).data.partyId==party
+          && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(request.resource.data.characterId)).data.deleted==false
+          && (!exists(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)) || resource.data.ownerId==request.auth.uid);
+        allow delete: if signed() && (resource.data.ownerId==request.auth.uid || creator(party));
+        match /sheet/{index} {
+          allow read: if member(party);
+          allow create, update: if member(party) && index.matches('[0-9]{1,2}')
+            && request.resource.data.keys().hasOnly(['json']) && text(request.resource.data.json,240000)
+            && getAfter(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)).data.ownerId==request.auth.uid;
+          allow delete: if signed() && (get(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)).data.ownerId==request.auth.uid || creator(party));
+        }
+        match /state/{stateId} {
+          allow read: if member(party);
+          allow create, update: if stateId=='live' && member(party) && live(request.resource.data)
+            && getAfter(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)).data.ownerId==request.auth.uid
+            && request.resource.data==getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(getAfter(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)).data.characterId)/state/live).data;
+          allow delete: if signed() && (get(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)).data.ownerId==request.auth.uid || creator(party));
+        }
+      }
+    }
+    function publicSheet(d,id) {
+      return d.keys().hasOnly(['id','name','playerName','class','subclass','level','race','ac','portrait','slots','features'])
+        && d.id==id && text(d.name,120) && text(d.playerName,120) && text(d.class,100)
+        && text(d.subclass,500) && integer(d.level,1,20) && text(d.race,500) && integer(d.ac,-99,100000000)
+        && (d.portrait==null || (d.portrait is map && d.portrait.keys().hasOnly(['image','design']) && text(d.portrait.image,180000)))
+        && d.slots is list && d.slots.size()==9 && d.features is list && d.features.size()<=2000;
+    }
+    function validInvitation(party,token) {
+      let invite=get(/databases/$(database)/documents/invitations/$(token));
+      return token is string && token.matches('[a-f0-9]{64}') && invite.data.partyId==party
+        && invite.data.revoked==false && invite.data.createdAt+duration.value(7,'d')>request.time
+        && exists(/databases/$(database)/documents/parties/$(party));
+    }
+    match /invitations/{token} {
+      allow get: if signed() && token.matches('[a-f0-9]{64}');
+      allow create: if signed() && token.matches('[a-f0-9]{64}')
+        && request.resource.data.keys().hasOnly(['partyId','creatorId','createdAt','revoked'])
+        && creator(request.resource.data.partyId) && request.resource.data.creatorId==request.auth.uid
+        && request.resource.data.revoked==false && request.resource.data.createdAt==request.time;
+      allow update: if creator(resource.data.partyId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['revoked']) && request.resource.data.revoked==true;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
