@@ -590,8 +590,8 @@ html{scroll-padding-top:85px;scroll-padding-bottom:25px}button,a,input,select,te
 /* Keep list search and type filters together while browsing long collections. */
 .list-toolbar{position:sticky;top:0;z-index:14;padding:12px 0 1px;margin-bottom:20px;background:var(--surface-page);border-bottom:1px solid var(--accent-edge);box-shadow:0 4px 8px -6px var(--shadow-deep)}
 .list-toolbar .toolbar{margin-bottom:12px}
-.list-toolbar .filter-tabs{margin-bottom:12px}
-.list-toolbar .filter-tab{display:inline-flex;align-items:center;gap:6px}
+.list-toolbar .filter-tabs{flex-wrap:nowrap;gap:4px;margin-bottom:12px}
+.list-toolbar .filter-tab{display:inline-flex;align-items:center;justify-content:center;flex:0 1 36px;min-width:0;padding:8px 0}
 .list-toolbar .filter-tab .icon{width:15px;height:15px;flex-shrink:0}
 .inventory-list .action-row{position:relative;padding-right:56px}
 .inventory-list .action-info{min-width:0}

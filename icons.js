@@ -1,4 +1,5 @@
 const paths = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   dice: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10M12 2 8 9l-5 8m9-15 4 7 5 8M8 9h8l-4 13Z"/>',
   sheet: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 7h6M9 16h6M9 12h2m4 0h.01"/>',
   bag: '<path d="M8 7V5a4 4 0 0 1 8 0v2M5 7h14l2 14H3L5 7Z"/><path d="M8 10v2m8-2v2M8 16h8"/>',
