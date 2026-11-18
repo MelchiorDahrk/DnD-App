@@ -10,6 +10,7 @@ import {createPartyPlay} from './party-ui.js';
 export function createCloudUI(ui){
   const {esc,btn,field,actions,setModal,modal,toast,getState,setState,render,navigate}=ui;
   let client=null,user=null,sync=null,store=null,stopParties=()=>{},stopParty=()=>{},party=null,partyIds=[],selected='',accountError='',partyServiceIssue='',busy=false,status={state:'guest',pending:0},generation=0,renderTimer,pointerDown=false,visibleRoute=location.hash.slice(1);
+  const partySummaries=new Map(),summaryStops=new Map();let editingParty='',switchCharacter=false;
   const play=createPartyPlay({...ui,party:()=>party,store:()=>store,user:()=>user,serviceIssue:()=>partyServiceIssue,route:()=>visibleRoute,refresh:()=>refresh(),ready:async()=>{
     if(!navigator.onLine)throw new Error('Reconnect before transferring items or coins.');
     sync?.reloadQueue();if(!sync?.loaded||sync.blocked||sync.conflict||sync.queue.length||sync.running)throw new Error('Wait for pending cloud saves to finish, then try again.');
@@ -64,20 +65,31 @@ export function createCloudUI(ui){
   function partyManagementMarkup(){
     if(!user)return `<div class="page-heading"><h1>Party</h1></div>${accountMarkup()}`;
     const token=new URL(location.href).searchParams.get('invite');
-    const invitations=party?.invitations.filter(invitation=>!invitation.revoked)||[];
-    return play.connectionMarkup()+`<div class="page-heading"><h1>Party management</h1><div class="heading-actions">${party?btn('navigate','Back to table','btn','data-route="party"'):''}${btn('cloud-create-party','Create party','btn btn-primary')}${btn('cloud-join','Join invitation','btn')}</div></div>${token?`<section class="panel panel-body"><p>An invitation is ready. Join after signing in.</p>${btn('cloud-join-link','Join this party','btn btn-primary')}</section>`:''}<div class="cloud-actions party-tabs">${partyIds.map(id=>btn('cloud-select-party',party?.id===id?esc(party.name):'Open party','btn'+(selected===id?' btn-primary':''),`data-id="${esc(id)}"`)).join('')}</div>${party?`<section class="panel"><div class="panel-heading"><h2>${esc(party.name||'Your party')}</h2><span class="badge">LIVE</span></div><div class="panel-body"><div class="cloud-actions">${btn('cloud-share','Share a character','btn')}${party.ownerId===user.uid?btn('cloud-invite','Create invitation link','btn')+btn('cloud-rename','Rename party','btn'):''}${btn('cloud-leave','Leave party','btn btn-ghost')}</div><p>Shared characters show public sheet details and combat resources. Your journal, inventory, spell notes and personal metadata remain private.</p><div class="party-members">${party.members.map(m=>`<span>${esc(partyMemberLabel(m))}${party.ownerId===user.uid&&m.uid!==user.uid?btn('cloud-remove-member','Remove','btn btn-sm btn-ghost',`data-id="${esc(m.uid)}"`):''}</span>`).join('')}</div>${party.ownerId===user.uid&&invitations.length?`<details><summary>Manage invitations</summary>${invitations.map(i=>`<div class="setting-row"><span>${'Invitation · expires '+new Date((i.createdAt.seconds+7*86400)*1000).toLocaleDateString()}</span>${btn('cloud-revoke','Revoke','btn btn-sm',`data-id="${esc(i.token)}"`)}</div>`).join('')}</details>`:''}</div></section><div class="party-grid">${party.characters.map(c=>{try{return partyCard(c);}catch{return '<p>A shared character contains invalid data. Ask its owner to share it again.</p>';}}).join('')||'<p>No characters shared yet.</p>'}</div>`:'<p>Select or create a party. You can belong to several parties; each character shares with one at a time.</p>'}`;
+    return play.connectionMarkup()+`<div class="page-heading party-management-heading"><h1>Parties</h1><div class="heading-actions">${btn('cloud-create-party','Create party','btn btn-primary')}${btn('cloud-join','Join invitation','btn')}</div></div>${token?`<section class="panel panel-body"><p>An invitation is ready. Join after signing in.</p>${btn('cloud-join-link','Join this party','btn btn-primary')}</section>`:''}<div class="party-management-list">${partyIds.map(id=>{
+      const p=partySummaries.get(id)||(party?.id===id?party:null);if(!p?.name)return '<section class="panel panel-body" role="status">Loading party…</section>';
+      const attrs=`data-party-id="${esc(id)}"`,owner=p.ownerId===user.uid,invitations=p.invitations.filter(i=>!i.revoked),own=p.characters.filter(c=>c.ownerId===user.uid);
+      const memberName=m=>m.uid===user.uid?'You':p.characters.filter(c=>c.ownerId===m.uid).map(c=>c.sheet?.name).filter(Boolean).join(', ')||`Party member ${p.members.indexOf(m)+1}`;
+      return `<section class="panel party-management-card" data-party-management="${esc(id)}"><div class="panel-heading"><h2>${esc(p.name)}</h2>${selected===id?'<span class="badge">Selected</span>':''}</div><div class="panel-body"><div class="cloud-actions">${btn('cloud-select-party',selected===id?'Go to party':'Switch to party','btn btn-primary',`data-id="${esc(id)}"`)}${owner?btn('cloud-edit-party',icon('edit')+'Edit party','btn',`data-id="${esc(id)}" aria-expanded="${editingParty===id}"`):''}${btn('cloud-share','Share a character','btn',attrs)}${btn('cloud-leave','Leave party','btn btn-ghost',attrs)}</div>${own.length?`<ul class="party-shared-members">${own.map(c=>`<li><span>${esc(c.sheet.name)}</span>${btn('cloud-unshare','Remove character','btn btn-sm btn-ghost',`${attrs} data-id="${esc(c.characterId)}"`)}</li>`).join('')}</ul>`:'<p class="form-help">No characters shared by you yet.</p>'}${owner&&editingParty===id?`<div class="party-management-editor"><div class="cloud-actions">${btn('cloud-invite','Create invitation link','btn',attrs)}${btn('cloud-rename','Rename party','btn',attrs)}</div><div class="party-members">${p.members.map(m=>`<span>${esc(memberName(m))}${m.uid!==user.uid?btn('cloud-remove-member','Remove','btn btn-sm btn-ghost',`${attrs} data-id="${esc(m.uid)}"`):''}</span>`).join('')}</div>${invitations.length?`<details><summary>Manage invitations</summary>${invitations.map(i=>`<div class="setting-row"><span>Invitation${i.createdAt?' · expires '+new Date((i.createdAt.seconds+7*86400)*1000).toLocaleDateString():''}</span>${btn('cloud-revoke','Revoke','btn btn-sm',`${attrs} data-id="${esc(i.token)}"`)}</div>`).join('')}</details>`:''}</div>`:''}</div></section>`;
+    }).join('')||'<p>Create a party or join an invitation to gather your companions.</p>'}</div>`;
   }
   const partyMarkup=()=>party&&!new URL(location.href).searchParams.has('invite')?play.markup():partyManagementMarkup();
   function chooseParty(id){
-    stopParty();party=null;selected=id;
+    stopParty();party=null;selected=id;switchCharacter=true;
     if(!id){play.reset();return refresh();}
     const token=generation;
     const details=new Map();
-    stopParty=signed().watchParty(id,data=>{if(token!==generation||id!==selected)return;party=data;play.update(data);
-      for(const c of data.characters){if(c.sheet.skillBonuses)continue;const cached=details.get(c.detailsHash);if(cached?.value)c.sheet.details=cached.value;else if(!cached){details.set(c.detailsHash,{});signed().readShared(id,c.id).then(latest=>{if(token!==generation||id!==selected)return;details.set(latest.detailsHash,{value:latest.sheet.details});const current=party?.characters.find(s=>s.id===c.id);if(current&&current.detailsHash===latest.detailsHash)current.sheet.details=latest.sheet.details;refresh();}).catch(()=>{});}}
+    stopParty=signed().watchParty(id,data=>{if(token!==generation||id!==selected)return;party=data;selectPartyCharacter();play.update(data);
+      for(const c of data.characters){if(c.sheet.skillBonuses&&Number.isFinite(c.sheet.initiative))continue;const cached=details.get(c.detailsHash);if(cached?.value)c.sheet.details=cached.value;else if(!cached){details.set(c.detailsHash,{});signed().readShared(id,c.id).then(latest=>{if(token!==generation||id!==selected)return;details.set(latest.detailsHash,{value:latest.sheet.details});const current=party?.characters.find(s=>s.id===c.id);if(current&&current.detailsHash===latest.detailsHash)current.sheet.details=latest.sheet.details;refresh();}).catch(()=>{});}}
       const view=modal.querySelector('[data-cloud-shared]');if(view){const c=party.characters.find(c=>c.id===view.dataset.cloudShared);if(c){c.sheet.details=view._details;view.innerHTML=partyCard(c,true);if(view.dataset.detailsHash!==c.detailsHash){view.dataset.detailsHash=c.detailsHash;signed().readShared(id,c.id).then(latest=>{if(!view.isConnected||token!==generation||id!==selected||latest.detailsHash!==view.dataset.detailsHash)return;const active=party.characters.find(c=>c.id===latest.id);if(active?.live&&active.live.revision>latest.live.revision)latest.live=active.live;view._details=latest.sheet.details;view.innerHTML=partyCard(latest,true);}).catch(error=>toast(error.message,true));}}else modal.close();}refresh(true);},error=>{
       if(token!==generation||id!==selected)return;stopParty();party=null;selected='';partyIds=partyIds.filter(p=>p!==id);play.reset();store?.recoverEscrow().catch(()=>{});if(modal.querySelector('[data-cloud-shared]'))modal.close();toast('Party access ended. You may have been removed, or the party is unavailable.',true);refresh();
     });refresh();
+  }
+  function selectPartyCharacter(){
+    if(!switchCharacter||!party?.charactersReady)return;
+    const state=getState(),owned=party.characters.filter(c=>c.ownerId===user?.uid);
+    if(owned.some(c=>c.characterId===state.activeId)){switchCharacter=false;return;}
+    const next=state.characters.find(c=>owned.some(shared=>shared.characterId===c.id));
+    if(next){state.activeId=next.id;switchCharacter=false;ui.saveRemote();}
   }
   async function recoverPartyTransfers(){
     const token=generation;
@@ -87,13 +99,13 @@ export function createCloudUI(ui){
   }
   function listenParties(){
     stopParties();const token=generation;
-    stopParties=store.watchParties(ids=>{if(token!==generation)return;partyIds=ids;if(!selected||!ids.includes(selected))chooseParty(ids[0]||'');refresh();},error=>toast(authMessage(error),true));
+    stopParties=store.watchParties(ids=>{if(token!==generation)return;partyIds=ids;for(const [id,stop] of summaryStops)if(!ids.includes(id)){stop();summaryStops.delete(id);partySummaries.delete(id);}for(const id of ids)if(!summaryStops.has(id))summaryStops.set(id,store.watchPartySummary(id,data=>{if(token!==generation)return;partySummaries.set(id,data);refresh(true);},()=>{}));if(!selected||!ids.includes(selected))chooseParty(ids[0]||'');refresh();},error=>toast(authMessage(error),true));
   }
   async function changeUser(next){
     // Initial signed-out Auth readiness must not replace an active guest sheet
     // or interrupt existing dialogs and clicks.
     if(!next&&!user){status={state:'guest',pending:0};updateStatus();return;}
-    const token=++generation;sync?.stop();sync=null;stopParties();stopParty();party=null;partyIds=[];selected='';store=null;
+    const token=++generation;sync?.stop();sync=null;stopParties();stopParty();for(const stop of summaryStops.values())stop();summaryStops.clear();partySummaries.clear();editingParty='';party=null;partyIds=[];selected='';store=null;
     if(modal.open)modal.close();
     // Switch namespaces without copying account characters or preferences into
     // another account or the guest key.
@@ -111,7 +123,7 @@ export function createCloudUI(ui){
       if(remote){if(index<0){if(state.characters.length>=100){toast('Cloud sheet limit reached. Remove or back up local sheets first.',true);return false;}state.characters.push(remote);}else state.characters[index]=remote;}
       else if(index>=0)state.characters.splice(index,1);
       if(!state.characters.some(c=>c.id===state.activeId))state.activeId=state.characters[0]?.id??null;
-      ui.saveRemote();refresh();return true;
+      selectPartyCharacter();ui.saveRemote();refresh();return true;
     },onStatus:value=>{if(token===generation){const changed=!!status.conflict!==!!value.conflict;status=value;updateStatus();if(changed&&!modal.open)render();}}});
     sync.start();
     recoverPartyTransfers();
@@ -131,6 +143,7 @@ export function createCloudUI(ui){
     if(action==='delete-character'&&user){run(async()=>{await signed().checkTransferDeletion(el.dataset.id||getState().activeId);ui.deleteCharacter(el.dataset.id);});return true;}
     if(play.handle(action,el))return true;
     if(!action.startsWith('cloud-'))return false;
+    const targetId=el.dataset.partyId||selected,target=partySummaries.get(targetId)||(party?.id===targetId?party:null);
     if(['cloud-email','cloud-signup','cloud-google'].includes(action)&&!client){toast(accountError||'Account service is loading or disabled. Guest play remains available.',true);return true;}
     switch(action){
       case 'cloud-guest':if(modal.open)modal.close();navigate('sheet');break;
@@ -157,9 +170,10 @@ export function createCloudUI(ui){
       case 'cloud-keep-cloud':case 'cloud-keep-local':run(()=>sync.resolve(action==='cloud-keep-local'?'local':'cloud'));break;
       case 'cloud-conflict-copy':run(async()=>{const id=sync.conflict.characterId,c=copy(getState().characters.find(c=>c.id===id));if(!c)throw new Error('Export your backup before resolving the deletion.');await sync.resolve('cloud');c.id=uid();c.name=c.name.slice(0,105)+' (local copy)';getState().characters.push(c);ui.persist();});break;
       case 'cloud-create-party':if(!user){navigate('settings');break;}setModal('Gather your party',`${field('Party name','name','','text','required maxlength="100"')}${actions('Create party')}`,data=>run(async()=>{const id=await signed().createParty(String(data.get('name')).trim(),user.displayName||'Adventurer');modal.close();chooseParty(id);}));break;
-      case 'cloud-select-party':chooseParty(el.dataset.id);break;
-      case 'cloud-rename':setModal('Rename your party',`${field('Party name','name',party.name,'text','required maxlength="100"')}${actions('Save name')}`,data=>run(async()=>{const name=String(data.get('name')).trim();if(!name)throw new Error('Enter a party name.');await signed().s.updateDoc(signed().ref(`parties/${selected}`),{name});modal.close();}));break;
-      case 'cloud-invite':run(async()=>{const token=await signed().invite(selected),url=new URL(location.href);url.search='';url.searchParams.set('invite',token);url.hash='party';setModal('An invitation for the road',`<p>Anyone with this link can sign in and join for 7 days, unless you revoke it.</p>${field('Invitation link','link',url.href,'url','readonly')}<div class="cloud-actions">${btn('cloud-copy-invite','Copy link','btn btn-primary')}</div>${actions('Done')}`,()=>modal.close());});break;
+      case 'cloud-select-party':chooseParty(el.dataset.id);navigate('party');break;
+      case 'cloud-edit-party':editingParty=editingParty===el.dataset.id?'':el.dataset.id;render();break;
+      case 'cloud-rename':setModal('Rename your party',`${field('Party name','name',target.name,'text','required maxlength="100"')}${actions('Save name')}`,data=>run(async()=>{const name=String(data.get('name')).trim();if(!name)throw new Error('Enter a party name.');await signed().s.updateDoc(signed().ref(`parties/${targetId}`),{name});modal.close();}));break;
+      case 'cloud-invite':run(async()=>{const token=await signed().invite(targetId),url=new URL(location.href);url.search='';url.searchParams.set('invite',token);url.hash='party';setModal('An invitation for the road',`<p>Anyone with this link can sign in and join for 7 days, unless you revoke it.</p>${field('Invitation link','link',url.href,'url','readonly')}<div class="cloud-actions">${btn('cloud-copy-invite','Copy link','btn btn-primary')}</div>${actions('Done')}`,()=>modal.close());});break;
       case 'cloud-copy-invite':run(async()=>{
         const input=modal.querySelector('[name="link"]');if(!input)return;
         try{await navigator.clipboard.writeText(input.value);}
@@ -169,23 +183,23 @@ export function createCloudUI(ui){
         }
         toast('Invitation link copied.');
       });break;
-      case 'cloud-revoke':run(()=>signed().revoke(selected,el.dataset.id));break;
+      case 'cloud-revoke':run(()=>signed().revoke(targetId,el.dataset.id));break;
       case 'cloud-join':setModal('Join your companions',`${field('Invitation link or token','invitation','','text','required maxlength="2000"')}${actions('Join party')}`,data=>run(async()=>{const value=String(data.get('invitation'));let token=value;try{token=new URL(value).searchParams.get('invite')||value;}catch{}const id=await signed().join(token,user.displayName||'Adventurer');modal.close();chooseParty(id);}));break;
       case 'cloud-join-link':run(async()=>{const url=new URL(location.href),id=await signed().join(url.searchParams.get('invite'),user.displayName||'Adventurer');url.searchParams.delete('invite');history.replaceState(null,'',url);chooseParty(id);});break;
-      case 'cloud-share':setModal('Share an adventurer',`<p>Only public sheet details and combat state are shared. Wait for pending cloud saves to finish first.</p>${getState().characters.map(c=>btn('cloud-share-character',esc(c.name),'character-option',`data-id="${esc(c.id)}"`)).join('')}`);break;
-      case 'cloud-share-character':run(async()=>{if(sync.queue.length)throw new Error('Wait for pending saves, then try sharing again.');const partyId=selected;await signed().share(partyId,getState().characters.find(c=>c.id===el.dataset.id));modal.close();chooseParty(partyId);render();});break;
-      case 'cloud-unshare':run(()=>signed().unshare(selected,el.dataset.id));break;
+      case 'cloud-share':setModal('Share an adventurer',`<p>Only public sheet details and combat state are shared. Wait for pending cloud saves to finish first.</p>${getState().characters.map(c=>btn('cloud-share-character',esc(c.name),'character-option',`data-id="${esc(c.id)}" data-party-id="${esc(targetId)}"`)).join('')}`);break;
+      case 'cloud-share-character':run(async()=>{if(sync.queue.length)throw new Error('Wait for pending saves, then try sharing again.');await signed().share(targetId,getState().characters.find(c=>c.id===el.dataset.id));modal.close();if(selected===targetId)chooseParty(targetId);render();});break;
+      case 'cloud-unshare':run(()=>signed().unshare(targetId,el.dataset.id));break;
       case 'cloud-view':run(async()=>{const c=await signed().readShared(selected,el.dataset.id);setModal('Shared character sheet',`<div data-cloud-shared="${esc(c.id)}">${partyCard(c,true)}</div>`);const view=modal.querySelector('[data-cloud-shared]');view._details=c.sheet.details;view.dataset.detailsHash=c.detailsHash;});break;
       case 'cloud-leave':{
-        const wasCreator=party.ownerId===user.uid;
-        const leave=async successor=>{if(sync.queue.length)throw new Error('Wait for pending cloud saves before leaving.');for(const offer of party.transfers.filter(o=>o.senderId===user.uid&&['pending','declined'].includes(o.status)))await signed().reclaimTransfer(selected,offer.id,{cancel:true});for(const c of party.characters.filter(c=>c.ownerId===user.uid))await signed().unshare(selected,c.characterId);if(wasCreator){if(successor)await signed().transferAndLeave(selected,successor);else await signed().closeParty(selected);}else await signed().removeMember(selected,user.uid);stopParty();selected='';party=null;play.reset();if(modal.open)modal.close();};
-        if(party.ownerId===user.uid){const others=party.members.filter(m=>m.uid!==user.uid);setModal('Leave your party?',others.length?`<p>Choose a new creator before leaving. Your shared characters will be removed. Private character ownership stays unchanged.</p><label class="form-field">New party creator<select name="successor" required>${others.map(m=>`<option value="${esc(m.uid)}">${esc(partyMemberLabel(m))}</option>`).join('')}</select></label>${actions('Transfer and leave')}`:`<p>You are the final member. Leaving will close the party and invalidate its invitations. Your private characters remain saved.</p>${actions('Leave and close party')}`,data=>run(()=>leave(String(data.get('successor')||''))));}else run(()=>leave(''));break;
+        const wasCreator=target.ownerId===user.uid;
+        const leave=async successor=>{if(sync.queue.length)throw new Error('Wait for pending cloud saves before leaving.');const offers=await signed().s.getDocs(signed().s.query(signed().s.collection(signed().db,`parties/${targetId}/transfers`),signed().s.where('senderId','==',user.uid)));for(const offer of offers.docs)if(['pending','declined'].includes(offer.data().status))await signed().reclaimTransfer(targetId,offer.id,{cancel:true});for(const c of target.characters.filter(c=>c.ownerId===user.uid))await signed().unshare(targetId,c.characterId);if(wasCreator){if(successor)await signed().transferAndLeave(targetId,successor);else await signed().closeParty(targetId);}else await signed().removeMember(targetId,user.uid);if(selected===targetId){stopParty();selected='';party=null;play.reset();}if(modal.open)modal.close();};
+        if(wasCreator){const others=target.members.filter(m=>m.uid!==user.uid);setModal('Leave your party?',others.length?`<p>Choose a new creator before leaving. Your shared characters will be removed. Private character ownership stays unchanged.</p><label class="form-field">New party creator<select name="successor" required>${others.map(m=>`<option value="${esc(m.uid)}">${esc(target.characters.filter(c=>c.ownerId===m.uid).map(c=>c.sheet?.name).filter(Boolean).join(', ')||`Party member ${target.members.indexOf(m)+1}`)}</option>`).join('')}</select></label>${actions('Transfer and leave')}`:`<p>You are the final member. Leaving will close the party and invalidate its invitations. Your private characters remain saved.</p>${actions('Leave and close party')}`,data=>run(()=>leave(String(data.get('successor')||''))));}else run(()=>leave(''));break;
       }
-      case 'cloud-remove-member':run(()=>signed().removeMember(selected,el.dataset.id));break;
+      case 'cloud-remove-member':run(()=>signed().removeMember(targetId,el.dataset.id));break;
     }
     return true;
   }
-  return {accountMarkup,characterMenuMarkup,partyMarkup,partyManagementMarkup,partySettingsMarkup:play.settingsMarkup,afterRender:play.mount,requestRest:play.requestRest,broadcastRoll:play.broadcastRoll,handle,statusText,storageKey:()=>accountKey(user?.uid),get user(){return user;},observe:hpActions=>sync?sync.observe(hpActions):true,external:()=>sync?.acceptExternal(),deferred:()=>{if(sync){sync.deliverDeferred();refresh();}},viewRoute:next=>{visibleRoute=next;},
+  return {accountMarkup,characterMenuMarkup,partyMarkup,partyManagementMarkup,partySettingsMarkup:play.settingsMarkup,afterRender:play.mount,requestRest:play.requestRest,broadcastRoll:play.broadcastRoll,initiativeModifier:play.initiativeModifier,handle,statusText,storageKey:()=>accountKey(user?.uid),get user(){return user;},observe:hpActions=>sync?sync.observe(hpActions):true,external:()=>sync?.acceptExternal(),deferred:()=>{if(sync){sync.deliverDeferred();refresh();}},viewRoute:next=>{visibleRoute=next;},
     async start(){try{client=await createFirebaseClient();if(client)client.watch(next=>{changeUser(next).catch(error=>{accountError=authMessage(error);toast(accountError,true);});});else{accountError='Cloud accounts are disabled on this installation.';updateStatus();}}catch(error){accountError=authMessage(error);status={state:'guest',pending:0};updateStatus();}}
   };
 }

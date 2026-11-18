@@ -175,6 +175,7 @@ function renderChrome() {
 }
 function render() {
   const partyRoll=route==='party'?$('#party-roll'):null;
+  const partyControls=route==='party'?$('.party-roll-controls'):null;
   cloud.viewRoute(route);
   const previousSection=$('.sheet-header')?.dataset.activeSection;
   cleanupSheetNavigation();
@@ -194,6 +195,7 @@ function render() {
   const views={sheet:renderSheet,inventory:renderInventory,spells:renderSpells,journal:renderJournal,dice:renderDice,party:cloud.partyMarkup,'party-manage':cloud.partyManagementMarkup,wiki:renderWiki,settings:renderSettings};
   $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)} ${btn('export','Export current sheet','btn btn-sm')}</div>`:'')+views[route]();
   if(partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('#party-roll').replaceWith(partyRoll);
+  if(partyControls&&partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('.party-roll-controls')?.replaceWith(partyControls);
   if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
   document.title=`${routes[route][0]} · Questlog`;
@@ -248,7 +250,7 @@ function editPassives() {
 function renderInspiration(c) {
   const points=inspirationPoints(c),limit=inspirationLimit(state.settings);
   const title='Spend 1 Heroic Inspiration to reroll one die immediately after rolling it; use the new roll. Track the reroll manually.';
-  if(limit===1&&points<=1)return btn('inspiration',icon('inspiration')+'Heroic Inspiration'+(points?' · ready':''),`btn btn-sm inspiration${points?' active':''}`,`${sheetEntry('inspiration','Heroic Inspiration')} aria-pressed="${!!points}" title="${title}"`);
+  if(limit===1&&points<=1)return btn('inspiration',icon('inspiration')+'Heroic Inspiration',`btn btn-sm inspiration${points?' active':''}`,`${sheetEntry('inspiration','Heroic Inspiration')} aria-pressed="${!!points}" title="${title}"`);
   return `<div class="sheet-inline-entry inspiration-control" ${sheetEntry('inspiration','Heroic Inspiration')}><span class="inspiration${points?' active':''}" title="${title}">${icon('inspiration')}Heroic Inspiration <span class="inspiration-count" role="status">${points} / ${limit}</span></span><div class="quantity-stepper" role="group" aria-label="Heroic Inspiration points">${btn('inspiration',icon('minus'),'','data-change="spend" aria-label="Spend 1 Heroic Inspiration" '+(points?'':'disabled'))}${btn('inspiration',icon('plus'),'','data-change="gain" aria-label="Gain 1 Heroic Inspiration" '+(points>=limit?'disabled':''))}</div></div>`;
 }
 function renderCombat(c) {
@@ -559,9 +561,9 @@ function editSlots() {const c=character();setModal('Magic for the road ahead.',`
 function castSpell(id) {const c=character(),s=c.spells.find(s=>s.id===id);if(!s)return;if(armorTrainingEffects(c).blocksCasting){toast('You cannot cast spells while wearing armor without training.',true);return;}const available=c.slots.map((slot,i)=>({slot,level:i+1})).filter(({slot,level})=>level>=s.level&&slot.used<slot.max);setModal(`Cast ${esc(s.name)}.`,`${s.concentration&&c.concentration?`<div class="concentration-banner">${icon('spark')}This will replace concentration on ${esc(c.concentration)}.</div>`:''}<p class="modal-intro">${s.level===0?'Cantrips don’t use a spell slot.':'Choose the slot you’re using. You can cast without a slot for rituals, scrolls, or a class feature if your table allows it.'}</p>${s.level>0?select('Cast using','slot',[...available.map(v=>'Level '+v.level),'No slot (ritual / item / feature)'],available[0]?'Level '+available[0].level:'No slot (ritual / item / feature)'):''}${s.notes?`<div class="detail-paragraph">${esc(s.notes)}</div>`:''}<p class="form-help">Apply the spell’s damage, healing, and other effects separately. ${ext(referenceURL(s.wiki,s.name,'spell'),'Read the full spell '+icon('external'))}</p>${actions('Cast spell')}`,data=>{if(armorTrainingEffects(c).blocksCasting)throw new Error('Remove armor without training before casting.');if(s.level>0&&String(data.get('slot')).startsWith('Level ')){const i=Number(String(data.get('slot')).slice(6))-1;if(!c.slots[i]||c.slots[i].used>=c.slots[i].max)throw new Error('That slot is no longer available.');c.slots[i].used++;}if(s.concentration)c.concentration=s.name;modal.close();commit(`${s.name} cast.${s.concentration?' You’re concentrating.':''}`);sound.play(spellSoundEvent(s));playEffect('spell',{label:s.name,detail:s.concentration?'CONCENTRATION BEGINS':'SPELL CAST',target:'.concentration-banner, .spell-grid'});});}
 
 function rollBreakdown(r) {if(!r.rolls.length)return `Fixed result: ${r.total}`;return `${r.rolls.join(r.mode==='normal'?' + ':' & ')}${r.mode!=='normal'?` → ${r.mode==='advantage'?'higher':'lower'} die`:''}${r.bonus?' '+signed(r.bonus):''} = ${r.total}`;}
-function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,result=null,featureId='') {
+function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,result=null,featureId='',partyOptions={}) {
   clearEffects();
-  const r=recordRoll(result||rollDice(expression,mode),label,{celebrate:true});
+  const r=recordRoll(result||rollDice(expression,mode),label,{celebrate:true,inlineParty:!inDialog&&route==='party',partyOptions});
   if(inDialog)setModal(esc(label),`<div class="roll-modal"><div class="roll-expression">${esc(r.expression)}${mode!=='normal'?' · '+mode:''}</div><div class="big-die">${icon('dice')}<strong>${r.total}</strong></div>${r.natural===20?'<div class="roll-critical">✦ NATURAL 20! ✦</div>':r.natural===1?'<div class="roll-critical fail">NATURAL 1. A NEW PLOT TWIST.</div>':''}<div class="roll-breakdown">${esc(rollBreakdown(r))}</div></div><div class="modal-actions">${btn('close','Keep adventuring','btn')}${featureId?btn('feature-roll',icon('dice')+'Use & roll again','btn btn-primary',`data-id="${featureId}" ${character().features.some(f=>f.id===featureId&&f.maxUses&&f.used>=f.maxUses)?'disabled':''}`):btn('reroll',icon('dice')+'Roll again','btn btn-primary',`data-expression="${esc(expression)}" data-label="${esc(label)}" data-mode="${mode}"`)}</div>`);
   else render();
   return r;
@@ -569,17 +571,17 @@ function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,re
 function afterRoll(result,callback) {
   result.finished.then(status=>{if(lastRoll===result&&status!=='cancelled')callback();});
 }
-function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal}={}) {
+function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal,inlineParty=false,partyOptions={}}={}) {
   const r={...result,label,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
   if(r.rolls.length)beginDice();
-  cloud.broadcastRoll(r,label).catch(error=>toast('Party roll could not be shared: '+error.message,true));
+  cloud.broadcastRoll(r,label,{...partyOptions,inline:inlineParty}).catch(error=>toast('Party roll could not be shared: '+error.message,true));
   let finish;
   Object.defineProperty(r,'finished',{value:new Promise(resolve=>{finish=resolve;})});
   const event=rollSoundEvent(r,label);if(event)sound.play(event);
   // Rules and their callers finish rendering before the tray mounts (including combat dialogs).
   queueMicrotask(async()=>{
     if(lastRoll!==r){finish('cancelled');return;}
-    const inDialog=modal.open,host=inDialog?modal.querySelector('.modal-body'):$('#dice-stage');
+    const inDialog=modal.open,host=inlineParty?$('#party-roll'):inDialog?modal.querySelector('.modal-body'):$('#dice-stage');
     if(!host?.isConnected){clearDice();finish('cancelled');return;}
     const status=await presentDice(r,host);
     finish(status);
@@ -644,7 +646,7 @@ document.addEventListener('click',event=>{
       case 'passives':editPassives();break;
       case 'dismiss-sheet-help':{sheetHelpDismissed=true;try{localStorage.setItem(SHEET_HELP_KEY,'true');}catch{}el.closest('.sheet-layout-help').remove();$('[data-sheet-section="abilities"] .sheet-section-toggle')?.focus({preventScroll:true});break;}
       case 'ability-roll':performRoll(`1d20${signed(abilityCheckBonus(c,el.dataset.key))}`,ABILITIES[el.dataset.key]+' check',armorCheckMode(c,el.dataset.key));break;
-      case 'initiative':performRoll(`1d20${signed(initiative(c))}`,'Roll for initiative',armorCheckMode(c,'dex',c.initiativeAdvantage));break;
+      case 'initiative':performRoll(`1d20${signed(initiative(c)+cloud.initiativeModifier())}`,'Roll for initiative',armorCheckMode(c,'dex',c.initiativeAdvantage));break;
       case 'skill-roll':performRoll(`1d20${signed(skillBonus(c,el.dataset.skill))}`,el.dataset.skill+' check',armorCheckMode(c,SKILLS[el.dataset.skill],false,false,el.dataset.skill));break;
       case 'save-roll':performRoll(`1d20${signed(saveBonus(c,el.dataset.key))}`,ABILITIES[el.dataset.key]+' saving throw',armorCheckMode(c,el.dataset.key));break;
       case 'training-edit':{const editing=trainingEditingId!==c.id;trainingEditingId=editing?c.id:null;if(editing&&c.sheetLayout?.collapsed.includes('skills')){toggleSheetSection(c,'skills');persist();}render();$('#main [data-action="training-edit"]')?.focus({preventScroll:true});break;}

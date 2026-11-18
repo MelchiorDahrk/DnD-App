@@ -1,6 +1,6 @@
 // Pure synchronization rules, shared by the browser and emulator tests.
-import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS,skillBonus} from './model.js';
-import {armorClass} from './armor-class.js';
+import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS,skillBonus,initiative} from './model.js';
+import {armorClass,armorCheckMode} from './armor-class.js';
 export const LIVE_KEYS=['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice'];
 export const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
 export const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -92,8 +92,8 @@ export function applyLive(current,operation){
 export const hasChanges=op=>!!(op.content?.length||op.live?.length||op.conditions||op.hpAction||op.resources?.slots.length||op.resources?.features.length);
 export function publicProjection(character){
   // Deliberate allowlist: no notes, backstory, inventory, spell notes, or metadata.
-  return {id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
-    stats:Object.fromEntries(Object.keys(ABILITIES).map(key=>[key,character.stats[key]])),skills:copy(character.skills),expertise:copy(character.expertise),saves:copy(character.saves),speed:character.speed,hitDie:character.hitDie,spellAbility:character.spellAbility,
+  return {initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
+    stats:Object.fromEntries(Object.keys(ABILITIES).map(key=>[key,character.stats[key]])),initiativeBonus:character.initiativeBonus,initiativeAdvantage:character.initiativeAdvantage,initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),skills:copy(character.skills),expertise:copy(character.expertise),saves:copy(character.saves),speed:character.speed,hitDie:character.hitDie,spellAbility:character.spellAbility,
     attacks:character.attacks.map(a=>({name:a.name,ability:a.ability,bonus:a.bonus,damage:a.damage,type:a.type,range:a.range})),
     spells:character.spells.map(s=>({name:s.name,level:s.level,school:s.school,castingTime:s.castingTime,range:s.range,duration:s.duration,concentration:s.concentration,prepared:s.prepared}))
   }};
@@ -104,6 +104,10 @@ export function invitationToken(random=globalThis.crypto){
 export function validPublicDetails(d){
   const text=(s,max)=>typeof s==='string'&&s.length<=max,integer=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
   return !!d&&Object.keys(ABILITIES).every(key=>integer(d.stats?.[key],1,30))
+    && (d.initiativeBonus===undefined||integer(d.initiativeBonus,-99,99))
+    && (d.initiativeAdvantage===undefined||typeof d.initiativeAdvantage==='boolean')
+    && (d.initiative===undefined||integer(d.initiative,-199,199))
+    && (d.initiativeMode===undefined||['normal','advantage','disadvantage'].includes(d.initiativeMode))
     && ['skills','expertise'].every(key=>Array.isArray(d[key])&&d[key].length<=30&&d[key].every(skill=>Object.hasOwn(SKILLS,skill)))
     && Array.isArray(d.saves)&&d.saves.length<=30&&d.saves.every(key=>Object.hasOwn(ABILITIES,key))
     && integer(d.speed,0,100000000)&&[6,8,10,12].includes(d.hitDie)

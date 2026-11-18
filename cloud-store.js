@@ -160,6 +160,12 @@ export class CloudStore extends PartyStore {
       if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)next(snapshot.docs.map(d=>d.id));
     },error);
   }
+  watchPartySummary(partyId,next,error){
+    const data={id:partyId,members:[],characters:[],invitations:[]},stops=[];
+    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}`),snapshot=>{if(snapshot.exists()){Object.assign(data,snapshot.data());next(copy(data));}},error));
+    for(const kind of ['members','characters','invitations'])stops.push(this.s.onSnapshot(this.s.collection(this.db,`parties/${partyId}/${kind}`),snapshot=>{data[kind]=snapshot.docs.map(d=>({id:d.id,...d.data()}));next(copy(data));},kind==='invitations'?()=>{}:error));
+    return ()=>stops.forEach(stop=>stop());
+  }
   async partyAccess(partyId){
     // A feature read being denied is not proof that membership was revoked.
     // Confirm against the server, never an empty/offline cache snapshot.
@@ -242,6 +248,7 @@ export class CloudStore extends PartyStore {
       stops.push(this.s.onSnapshot(source,snapshot=>{
         data[kind]=snapshot.docs.filter(d=>!['activities','rests'].includes(kind)||d.data().createdAt).map(d=>({id:d.id,...d.data(),...(kind==='characters'?{live:data.characters.find(c=>c.id===d.id)?.live}:kind==='rests'?{replies:data.rests.find(r=>r.id===d.id)?.replies||[],repliesReady:data.rests.find(r=>r.id===d.id)?.repliesReady||false}: {})}));
         if(kind==='characters'){
+          data.charactersReady=true;
           const ids=new Set(data.characters.map(c=>c.id));
           for(const [id,stop] of liveStops)if(!ids.has(id)){stop();liveStops.delete(id);}
           for(const c of data.characters)if(!liveStops.has(c.id))liveStops.set(c.id,this.s.onSnapshot(this.ref(`parties/${partyId}/characters/${c.id}/state/live`),snapshot=>{const target=data.characters.find(row=>row.id===c.id);if(target&&snapshot.exists()){target.live=snapshot.data();emit();}},fail('characters')));

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {demoCharacter,parseBackup,SAVE_VERSION} from '../model.js';
+import {demoCharacter,parseBackup,SAVE_VERSION,initiative} from '../model.js';
+import {PartyStore} from '../party-store.js';
 import {publicProjection} from '../cloud-model.js';
 import {partyRows,turnOrder,skillLeaders,liveActivities,reserveTransfer,receiveTransfer} from '../party-model.js';
 
@@ -11,6 +12,24 @@ test('initiative rotates from the current turn and keeps deterministic ties',()=
   const characters=['c','a','b','d'].map(id=>({id})),combat={scores:{a:20,b:15,c:15},current:'b'};
   assert.deepEqual(turnOrder(characters,combat).map(c=>c.id),['b','c','a','d']);
   assert.deepEqual(characters.map(c=>c.id),['c','a','b','d']);
+});
+
+test('shared initiative carries calculated bonuses and roll mode without baking in Exhaustion',()=>{
+  const c=demoCharacter();c.stats.dex=18;c.initiativeBonus=3;c.exhaustion=2;c.initiativeAdvantage=true;
+  const sheet=publicProjection(c);assert.equal(sheet.initiative,7);assert.equal(sheet.initiative-2*c.exhaustion,initiative(c));assert.equal(sheet.initiativeMode,'advantage');
+});
+
+test('ending an encounter clears rolled scores and temporary modifiers together, including legacy sessions',async()=>{
+  let data={scores:{},current:'',round:1,active:false};
+  const store=new PartyStore();store.uid='alice';store.ref=path=>path;store.db={};
+  store.s={runTransaction:async(_,fn)=>fn({get:async()=>({exists:()=>true,data:()=>structuredClone(data)}),set:(_,next)=>{data=next;}})};
+  await store.advanceTurn('party',[{id:'a'}],{start:true});assert.equal(data.active,true);assert.equal(data.current,'');
+  await store.setInitiative('party','a',18,{temporaryModifier:4});assert.equal(data.current,'');assert.deepEqual(data.modifiers,{a:4});
+  await store.advanceTurn('party',[{id:'a'}]);assert.equal(data.current,'a');assert.equal(data.round,1);
+  await store.advanceTurn('party',[{id:'a'}]);assert.equal(data.round,2);
+  await store.advanceTurn('party',[{id:'a'}],{end:true});assert.deepEqual(data,{scores:{},modifiers:{},active:false,current:'',round:1,updatedBy:'alice'});
+  await store.setInitiative('party','a',12);assert.deepEqual(data.modifiers,{});assert.equal(data.scores.a,12);
+  await assert.rejects(store.setInitiative('party','a',10,{temporaryModifier:1.5}),/Temporary/);
 });
 test('skill finder includes tied leaders and uses shared public bonuses',()=>{
   const a=demoCharacter(),b=demoCharacter();b.name='Other';

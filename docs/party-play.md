@@ -5,6 +5,13 @@ icon beside its name opens `#party-manage` for sharing characters, invitations,
 renaming, switching parties, and membership management. Guest and no-party entry
 flows remain available. Cards use equal widths, at most three per desktop row;
 four characters balance into two rows of two. Small screens use two columns.
+Status icons sit beside each portrait and open a label dialog. Management lists
+all named parties without character sheets; editing a party preserves the current
+character, while switching selects a local character shared with that party.
+
+Session Mode replaces the main Questlog/character header. Sheet navigation and
+page filters remain sticky beneath it. Skills opens the comparison dialog from
+the play controls. Dice roll directly in the fixed-size party tray.
 
 `party-model.js` contains row balancing, initiative ordering, skill ranking,
 activity descriptions, and inventory reservation/receipt rules. `party-ui.js`
@@ -14,8 +21,12 @@ round-trip through backups. The selected party stays subscribed across routes.
 
 ## Shared state
 
-- `parties/{party}/session/combat`: initiative scores, active character, round,
-  and encounter state. Transactions serialize simultaneous turn changes.
+- `parties/{party}/session/combat`: rolled initiative scores, temporary modifier
+  map, active character, round, and encounter state. Transactions serialize
+  simultaneous turn changes. Initiative uses the sheet's Dexterity, recorded
+  feat/class initiative bonus, Exhaustion and roll mode. Temporary modifiers add
+  to this calculation for the encounter; ending it clears scores and modifiers
+  and resets the round. The sheet's initiative roll also updates the party.
 - `activities/{event}`: immutable events with a server timestamp. Character
   changes append damage, healing, unconsciousness, inspiration, condition, and
   concentration events in the same transaction as their live state. Operation

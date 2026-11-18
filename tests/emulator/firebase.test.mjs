@@ -68,10 +68,11 @@ test('competing offers cannot overspend and accepting an item preserves its quan
 test('party session streams initiative, rest votes, exact rolls and damage activity',async()=>{
   const {a,b,c,d,party}=await transferParty();let latest;const stop=b.watchParty(party,data=>latest=data,error=>{throw error;});
   try{
-    await a.setInitiative(party,`alice_${c.id}`,20);await b.setInitiative(party,`bob_${d.id}`,10);
+    await a.setInitiative(party,`alice_${c.id}`,20,{temporaryModifier:4});await b.setInitiative(party,`bob_${d.id}`,10);
     const chars=[{id:`alice_${c.id}`},{id:`bob_${d.id}`}];await a.advanceTurn(party,chars,{start:true});
     await waitFor(()=>latest?.combat.current===`alice_${c.id}`);await b.advanceTurn(party,chars);await waitFor(()=>latest?.combat.current===`bob_${d.id}`);
     await a.advanceTurn(party,chars);await waitFor(()=>latest?.combat.round===2);
+    assert.equal(latest.combat.modifiers[`alice_${c.id}`],4);await a.advanceTurn(party,chars,{end:true});await waitFor(()=>latest?.combat.active===false);assert.deepEqual(latest.combat.scores,{});assert.deepEqual(latest.combat.modifiers,{});assert.equal(latest.combat.round,1);
     const rest=await a.requestRest(party,'short',c.id);await a.replyRest(party,rest,true,c.id);await b.replyRest(party,rest,false,d.id);
     await waitFor(()=>latest?.rests.find(r=>r.id===rest)?.replies.length===2);
     await assertFails(sdk.setDoc(b.ref(`parties/${party}/rests/${rest}/replies/alice`),{yes:false,characterId:c.id,actorId:'alice'}));

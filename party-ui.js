@@ -1,6 +1,7 @@
-import {SKILLS,COINS,signed,uid} from './model.js';
+import {SKILLS,COINS,signed,uid,initiative,mod} from './model.js';
 import {portraitMarkup} from './portrait.js';
-import {icon} from './icons.js';
+import {icon,conditionIcon} from './icons.js';
+import {armorCheckMode} from './armor-class.js';
 import {partyRows,turnOrder,skillLeaders,partyTime} from './party-model.js';
 import {presentPartyDice} from './dice-roller.js';
 import {sound} from './sound.js';
@@ -27,13 +28,17 @@ export function createPartyPlay(ui) {
     const live=c.live,sheet=c.sheet;if(!sheet)return '';
     const current=party().combat.active&&party().combat.current===c.id,unconscious=live&&(live.hp===0||live.conditions.includes('Unconscious'));
     const reaction=reactions.get(c.id),effect=reaction?.until>Date.now()?reaction.kind:'';
+    const statusButton=(name,content)=>btn('party-status',content,'party-status-icon',`data-status="${esc(name)}" aria-label="${esc(name)}" title="${esc(name)}" aria-haspopup="dialog"`);
+    const conditions=[...(live?.conditions||[])];if(unconscious&&!conditions.includes('Unconscious'))conditions.push('Unconscious');
+    const statuses=conditions.map(name=>statusButton(name,conditionIcon(name)));
+    if(live?.exhaustion)statuses.push(statusButton('Exhaustion '+live.exhaustion,conditionIcon('Exhaustion')));
+    if(live?.concentration)statuses.push(statusButton('Concentration: '+live.concentration,icon('eye')));
+    const left=statuses.filter((_,i)=>i%2===0).join(''),right=(live?.inspiration?statusButton('Heroic Inspiration'+(live.inspiration>1?' ×'+live.inspiration:''),icon('inspiration')):'')+statuses.filter((_,i)=>i%2===1).join('');
     return `<article class="party-player${current?' is-current':''}${unconscious?' is-unconscious':''}${effect?' reaction-'+effect:''}" data-party-character="${esc(c.characterId)}" ${current?'aria-current="step"':''}>
       <div class="party-player-top"><span>${icon('heart')} <strong>${live?esc(live.hp):'…'}</strong><small> / ${live?esc(live.maxHp):'…'} HP${live?.tempHp?` +${esc(live.tempHp)}`:''}</small></span><span title="Armor class">${icon('shield')} <strong>${esc(sheet.ac)}</strong><small> AC</small></span></div>
-      ${btn('party-member',`<span class="party-portrait${live?.inspiration?' is-inspired':''}">${portraitMarkup(sheet)}<span class="party-heal-sparks" aria-hidden="true">✦ · ✧ · ✦</span></span>`,'party-portrait-button',`data-id="${esc(c.id)}" aria-label="Interact with ${esc(sheet.name)}" aria-haspopup="dialog"`)}
+      <div class="party-portrait-row"><div class="party-portrait-status">${left}</div>${btn('party-member',`<span class="party-portrait${live?.inspiration?' is-inspired':''}">${portraitMarkup(sheet)}<span class="party-heal-sparks" aria-hidden="true">✦ · ✧ · ✦</span></span>`,'party-portrait-button',`data-id="${esc(c.id)}" aria-label="Interact with ${esc(sheet.name)}" aria-haspopup="dialog"`)}<div class="party-portrait-status">${right}</div></div>
       <h2>${esc(sheet.name)}</h2><p>Level ${esc(sheet.level)} ${esc(sheet.class)}${c.ownerId===user()?.uid?' · You':''}</p>
-      <div class="party-health"><div class="hp-track${live&&live.hp/live.maxHp<.3?' low':''}" role="progressbar" aria-label="${esc(sheet.name)} health" aria-valuemin="0" aria-valuemax="${esc(live?.maxHp||1)}" aria-valuenow="${esc(live?.hp||0)}"><span class="hp-current" style="width:${live?live.hp/live.maxHp*100:0}%"></span></div></div>
-      <div class="party-player-status">${unconscious?'<span>Unconscious</span>':''}${(live?.conditions||[]).filter(s=>s!=='Unconscious').map(s=>`<span>${esc(s)}</span>`).join('')}${live?.inspiration?`<span class="party-inspired">✦ Inspired${live.inspiration>1?' ×'+esc(live.inspiration):''}</span>`:''}${live?.concentration?`<span title="Concentration">${icon('spark')}${esc(live.concentration)}</span>`:''}${live?.exhaustion?`<span>Exhaustion ${esc(live.exhaustion)}</span>`:''}</div>
-      <div class="party-player-turn"><span>${current?'CURRENT TURN':party().combat.active?Object.hasOwn(party().combat.scores||{},c.id)?`UP NEXT · ${index}`:'NOT IN ENCOUNTER':'INITIATIVE'}</span>${btn('party-initiative',Object.hasOwn(party().combat.scores||{},c.id)?safeSigned(party().combat.scores[c.id]):'Set','btn btn-sm btn-ghost',`data-id="${esc(c.id)}" aria-label="Set initiative for ${esc(sheet.name)}"`)}</div>
+      <div class="party-player-turn"><span>${current?'CURRENT TURN':party().combat.active?Object.hasOwn(party().combat.scores||{},c.id)?`UP NEXT · ${index}`:'INITIATIVE':'INITIATIVE'}</span>${btn('party-initiative',Object.hasOwn(party().combat.scores||{},c.id)?esc(party().combat.scores[c.id]):icon('dice')+'Roll','btn btn-sm btn-ghost',`data-id="${esc(c.id)}" aria-label="Roll initiative for ${esc(sheet.name)}"`)}</div>
     </article>`;
   }
   function transferText(offer){try{const payload=JSON.parse(offer.payload);return payload.kind==='money'?`${payload.amount} ${COINS[payload.coin]}`:`${payload.amount} × ${payload.item.name}`;}catch{return 'Invalid offer';}}
@@ -54,10 +59,9 @@ export function createPartyPlay(ui) {
   }
   function markup(){
     const p=party(),ordered=turnOrder(p.characters,p.combat);let index=0;
-    return `${connectionMarkup()}<div class="page-heading party-heading"><div><div class="eyebrow">YOUR ADVENTURING PARTY <span class="party-live-dot">LIVE</span></div><div class="party-title"><h1>${esc(p.name||'Your party')}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div></div><div class="heading-actions">${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}${btn('party-rest',icon('camp')+'Group rest','btn')}</div></div>
+    return `${connectionMarkup()}<div class="page-heading party-heading"><div class="party-title"><h1>${esc(p.name||'Your party')}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div><div class="heading-actions">${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}</div></div>
       <section class="party-table" aria-label="Party members in turn order">${partyRows(ordered).map(row=>`<div class="party-player-row">${row.map(c=>card(c,index++)).join('')}</div>`).join('')||`<div class="panel panel-body"><p>Bring your adventurers to the table.</p>${btn('cloud-share','Share a character','btn btn-primary')}</div>`}</section>
-      <section class="party-turn-bar" aria-label="Shared initiative tracker"><div><span class="eyebrow">${p.combat.active?'ROUND '+esc(p.combat.round):'SHARED INITIATIVE'}</span><strong>${p.combat.active?esc(p.characters.find(c=>c.id===p.combat.current)?.sheet.name||'Choose next turn')+'’s turn':'Set initiative, then start the encounter.'}</strong></div><div class="cloud-actions">${p.combat.active?btn('party-next-turn','Next turn '+icon('chevron'),'btn btn-primary')+btn('party-end-combat','End encounter','btn btn-ghost'):btn('party-start-combat','Start encounter','btn btn-primary')}</div></section>
-      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><span>${icon('dice')}THE PLAY AREA</span><div class="cloud-actions">${btn('party-roll','Roll dice','btn btn-sm')}${btn('party-rest','Rest','btn btn-sm btn-ghost')}</div></div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>${skillMarkup()}`;
+      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><div class="cloud-actions party-encounter-actions">${p.combat.active?btn('party-end-combat','End','btn btn-sm btn-ghost','aria-label="End encounter"'):btn('party-start-combat','Start','btn btn-sm','aria-label="Start encounter"')}${btn('party-roll',icon('dice')+'Roll','btn btn-sm btn-primary')}${p.combat.active?btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`):''}</div><div class="cloud-actions">${btn('party-skills','Skills','btn btn-sm btn-ghost')}${btn('party-rest','Rest','btn btn-sm btn-ghost')}</div></div>${p.combat.active?`<p class="party-encounter-status" role="status">Round ${esc(p.combat.round)} · ${p.combat.current?esc(p.characters.find(c=>c.id===p.combat.current)?.sheet.name||'Adventurer')+'’s turn':'Roll initiative, then begin turns'}</p>`:''}<div class="party-roll-controls">${field('Dice','party-expression','1d20','text','required maxlength="30" aria-label="Dice expression"')}${field('Label','party-label','Party roll','text','required maxlength="120" aria-label="Roll label"')}</div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>`;
   }
   function staticRoll(event){try{const r=JSON.parse(event.result);return `<div class="party-last-roll"><span>${esc(event.name)} · ${esc(r.label)}</span><strong>${esc(r.total)}</strong><small>${esc(r.expression)} · ${r.rolls.map(v=>esc(v)).join(' + ')}${r.bonus?' '+safeSigned(r.bonus):''}</small></div>`;}catch{return '';}}
   function update(data){
@@ -80,7 +84,7 @@ export function createPartyPlay(ui) {
     let header=document.getElementById('party-session-header');
     if(!header){header=document.createElement('header');header.id='party-session-header';header.className='party-session-header';document.querySelector('.app-shell').prepend(header);}
     header.hidden=!session;
-    if(session){const ordered=turnOrder(p.characters,p.combat);header.innerHTML=`${btn('navigate',`<span class="party-live-dot">SESSION</span><strong>${esc(p.name)}</strong>`,'session-party-name','data-route="party"')}<div class="session-members">${ordered.map(c=>btn('party-member',`${portraitMarkup(c.sheet)}<span><strong>${esc(c.sheet.name)}</strong><small>${esc(c.live?.hp??'…')}/${esc(c.live?.maxHp??'…')} HP · AC ${esc(c.sheet.ac)}${c.live?.conditions.length?' · '+esc(c.live.conditions.join(', ')):''}</small></span>`,'session-member'+(p.combat.active&&p.combat.current===c.id?' is-current':''),`data-id="${esc(c.id)}"`)).join('')}</div><div class="session-controls">${p.combat.active?`<small>R${esc(p.combat.round)}</small>${btn('party-next-turn',icon('chevron'),'icon-btn','aria-label="Next turn"')}`:''}${btn('party-session-toggle',icon('close'),'icon-btn','aria-label="Exit Session Mode"')}</div>`;}
+    if(session){const ordered=turnOrder(p.characters,p.combat);header.innerHTML=`${btn('navigate',icon('people'),'session-party-name icon-btn','data-route="party" aria-label="Party menu" title="Party menu"')}<div class="session-members">${ordered.map(c=>btn('party-member',`${portraitMarkup(c.sheet)}<span><strong>${esc(c.sheet.name)}</strong><small>${esc(c.live?.hp??'…')}/${esc(c.live?.maxHp??'…')} HP · AC ${esc(c.sheet.ac)}${c.live?.conditions.length?' · '+esc(c.live.conditions.join(', ')):''}</small></span>`,'session-member'+(p.combat.active&&p.combat.current===c.id?' is-current':''),`data-id="${esc(c.id)}"`)).join('')}</div><div class="session-controls">${p.combat.active?`<small>R${esc(p.combat.round)}</small>${btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`)}`:''}${btn('party-session-toggle',icon('close'),'icon-btn','aria-label="Exit Session Mode"')}</div>`;}
     let notice=document.getElementById('party-notification');
     if(!notice){notice=document.createElement('div');notice.id='party-notification';notice.className='party-notification';notice.setAttribute('role','status');document.body.append(notice);}
     notice.hidden=!p||!notification||ui.route()==='party'||!checked('partyNotifications',true);
@@ -99,12 +103,26 @@ export function createPartyPlay(ui) {
     if(party().errors?.rests){ui.openRest(kind);return true;}
     run(async()=>{const id=await store().requestRest(partyId,kind,active().id);await store().replyRest(partyId,id,true,active().id);ui.openRest(kind);});return true;
   }
-  async function broadcastRoll(result,label){
-    const c=active(),shared=own().find(s=>s.characterId===c?.id);if(!shared||party().errors?.activities)return;
+  async function broadcastRoll(result,label,{characterId,temporaryModifier,inline=false}={}){
+    const shared=characterId?party()?.characters.find(c=>c.id===characterId):own().find(s=>s.characterId===active()?.id);
+    if(!shared){if(inline)throw new Error('Select a character shared with this party first.');return;}
     const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label};
-    await store().activity(partyId,{kind:'roll',characterId:c.id,name:c.name,result:JSON.stringify(r)});
-    if(/^initiative$/i.test(label))await store().setInitiative(partyId,shared.id,r.total);
+    const id=uid(),event={id,kind:'roll',actorId:user().uid,characterId:shared.characterId,name:shared.sheet.name,result:JSON.stringify(r)};
+    if(inline){latestRoll=event;const host=document.getElementById('party-roll');if(host){host.dataset.rollId=id;host.innerHTML=staticRoll(event);}}
+    if(!party().errors?.activities)await store().activity(partyId,{kind:event.kind,characterId:event.characterId,name:event.name,result:event.result},id);
+    if(/^(?:roll for )?initiative$/i.test(label))await store().setInitiative(partyId,shared.id,r.total,{temporaryModifier});
   }
+  function initiativeDialog(c){
+    const local=getState().characters.find(s=>c.ownerId===user().uid&&s.id===c.characterId),details=c.sheet.details;
+    const base=local?initiative(local):Number.isFinite(c.sheet.initiative)?c.sheet.initiative-2*(c.live?.exhaustion||0):details?mod(details.stats.dex)+(details.initiativeBonus||0)-2*(c.live?.exhaustion||0):null;
+    if(base===null){toast('Loading initiative details. Try again in a moment.',true);return;}
+    const mode=local?armorCheckMode(local,'dex',local.initiativeAdvantage):c.sheet.initiativeMode||details?.initiativeMode||'normal';
+    setModal('Roll initiative',`<p><strong>${esc(c.sheet.name)}</strong> · Calculated modifier ${safeSigned(base)}${mode!=='normal'?' · '+mode:''}</p><p class="form-help">Includes Dexterity, recorded feat and class bonuses, and Exhaustion.</p>${field('Temporary initiative modifier','temporaryModifier',party().combat.modifiers?.[c.id]||0,'number','required min="-99" max="99" step="1"')}<p class="form-help">Added for this encounter. Ending the encounter clears this modifier and the roll.</p>${actions('Roll initiative')}`,data=>{
+      const temporaryModifier=Number(data.get('temporaryModifier'));modal.close();
+      ui.roll(`1d20${signed(base+temporaryModifier)}`,'Initiative',mode,false,null,'',{characterId:c.id,temporaryModifier});
+    });
+  }
+  function skillsDialog(){setModal('Party skills',`<div id="party-skills-dialog">${skillMarkup()}</div>`);}
   async function transferDialog(target,kind){
     await ui.ready();const sources=own().map(c=>getState().characters.find(s=>s.id===c.characterId)).filter(Boolean),source=sources.find(c=>c.id===active()?.id)||sources[0];
     if(!source)throw new Error('Share one of your characters with this party first.');
@@ -120,20 +138,23 @@ export function createPartyPlay(ui) {
     const feature=action.includes('transfer')||action.startsWith('party-offer-')?'transfers':action.includes('rest')?'rests':action.includes('initiative')||action.includes('combat')||action==='party-next-turn'?'combat':action==='party-roll'?'activities':'';
     if(feature&&p.errors?.[feature]){toast('This party feature needs the updated server rules. Use Retry connection after the rules are published.',true);return true;}
     switch(action){
+      case 'party-status':setModal(esc(el.dataset.status),`<p>${esc(el.dataset.status)}</p><div class="modal-actions">${btn('close','Done','btn btn-primary')}</div>`);break;
+      case 'party-skills':skillsDialog();break;
       case 'party-member':{const c=p.characters.find(c=>c.id===id);if(!c)break;setModal(esc(c.sheet.name),`<div class="party-member-preview">${portraitMarkup(c.sheet)}<p>${esc(c.sheet.class)} · Level ${esc(c.sheet.level)}</p></div><div class="party-member-actions">${btn('cloud-view',icon('sheet')+'View character sheet','btn btn-primary',`data-id="${esc(id)}"`)}${c.ownerId!==user().uid?btn('party-offer-item',icon('bag')+'Transfer items','btn',`data-id="${esc(id)}"`)+btn('party-offer-money',icon('coin')+'Transfer money','btn',`data-id="${esc(id)}"`):''}</div>`);break;}
       case 'party-offer-item':case 'party-offer-money':run(()=>transferDialog(p.characters.find(c=>c.id===id),action.endsWith('money')?'money':'item'));break;
       case 'party-transfer-accept':case 'party-transfer-decline':run(async()=>{await ui.ready();const offer=p.transfers.find(o=>o.id===id);await store().answerTransfer(partyId,id,action.endsWith('accept'));modal.close();await ui.refreshCharacter(offer?.toCharacter);sound.play('item.acquire');ui.refresh();});break;
       case 'party-transfer-cancel':run(async()=>{await ui.ready();await store().reclaimTransfer(partyId,id,{cancel:true});await ui.refreshCharacter();ui.refresh();});break;
-      case 'party-initiative':{const c=p.characters.find(c=>c.id===id);setModal('Set shared initiative',`${field(esc(c.sheet.name),'score',p.combat.scores?.[id]??0,'number','required min="-99" max="999" step="1"')}${actions('Set initiative')}`,data=>run(async()=>{await store().setInitiative(partyId,id,Number(data.get('score')));modal.close();ui.refresh();}));break;}
+      case 'party-initiative':{const c=p.characters.find(c=>c.id===id);if(c)initiativeDialog(c);break;}
       case 'party-start-combat':case 'party-next-turn':case 'party-end-combat':run(()=>store().advanceTurn(partyId,p.characters,{start:action==='party-start-combat',end:action==='party-end-combat'}));break;
       case 'party-rest':setModal('Rest with the party',`<p>Invite everyone to take a rest. Each player can answer yes or no.</p><div class="modal-actions">${btn('party-rest-short','Short rest','btn btn-primary')}${btn('party-rest-long','Long rest','btn')}</div>`);break;
       case 'party-rest-short':case 'party-rest-long':if(!requestRest(action.endsWith('long')?'long':'short'))toast('Select a character shared with this party first.',true);break;
       case 'party-rest-reply':{const rest=p.rests.find(r=>r.id===id);if(rest)restDialog(rest);break;}
       case 'party-rest-yes':case 'party-rest-no':run(async()=>{const rest=p.rests.find(r=>r.id===id),yes=action.endsWith('yes');if(yes&&!own().some(c=>c.characterId===active()?.id))throw new Error('Select a character shared with this party first.');await store().replyRest(partyId,id,yes,active()?.id||'');modal.close();if(yes)ui.openRest(rest.kind);ui.refresh();});break;
-      case 'party-roll':setModal('Roll at the table',`${field('Dice expression','expression','1d20','text','required maxlength="30"')}${field('Roll label','label','Party roll','text','required maxlength="120"')}${actions('Roll dice')}`,data=>{const expression=String(data.get('expression')),label=String(data.get('label'));ui.roll(expression,label);});break;
+      case 'party-roll':{const controls=document.querySelector('.party-roll-controls'),expression=controls.querySelector('[name="party-expression"]'),label=controls.querySelector('[name="party-label"]');if(!expression.reportValidity()||!label.reportValidity())break;if(!own().some(c=>c.characterId===active()?.id)){toast('Select a character shared with this party first.',true);break;}ui.roll(expression.value,label.value,'normal',false);break;}
     }
     return true;
   }
-  document.addEventListener('change',event=>{if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;ui.refresh();}});
-  return {markup,settingsMarkup,connectionMarkup,handle,update,mount,requestRest,broadcastRoll,reset:()=>{partyId='';latestRoll=null;notification='';reactions.clear();mount();}};
+  document.addEventListener('change',event=>{if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;const host=document.getElementById('party-skills-dialog');if(host)host.innerHTML=skillMarkup();}});
+  const initiativeModifier=()=>party()?.combat.modifiers?.[own().find(c=>c.characterId===active()?.id)?.id]||0;
+  return {markup,settingsMarkup,connectionMarkup,handle,update,mount,requestRest,broadcastRoll,initiativeModifier,reset:()=>{partyId='';latestRoll=null;notification='';reactions.clear();mount();}};
 }

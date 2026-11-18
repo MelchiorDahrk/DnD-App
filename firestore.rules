@@ -89,8 +89,9 @@ service cloud.firestore {
       match /session/combat {
         allow read: if member(party);
         allow create, update: if member(party)
-          && request.resource.data.keys().hasOnly(['scores','current','round','active','updatedBy'])
+          && request.resource.data.keys().hasOnly(['scores','modifiers','current','round','active','updatedBy'])
           && request.resource.data.scores is map && request.resource.data.scores.size()<=100
+          && (!('modifiers' in request.resource.data) || (request.resource.data.modifiers is map && request.resource.data.modifiers.size()<=100))
           && text(request.resource.data.current,230) && integer(request.resource.data.round,1,1000000)
           && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
       }
@@ -193,8 +194,10 @@ service cloud.firestore {
       }
     }
     function publicSheet(d,id) {
-      return d.keys().hasOnly(['id','name','playerName','class','subclass','level','race','ac','portrait','slots','features','skillBonuses'])
+      return d.keys().hasOnly(['id','name','playerName','class','subclass','level','race','ac','portrait','slots','features','skillBonuses','initiative','initiativeMode'])
         && (!('skillBonuses' in d) || (d.skillBonuses is map && d.skillBonuses.size()<=18))
+        && (!('initiative' in d) || integer(d.initiative,-199,199))
+        && (!('initiativeMode' in d) || d.initiativeMode in ['normal','advantage','disadvantage'])
         && d.id==id && text(d.name,120) && text(d.playerName,120) && text(d.class,100)
         && text(d.subclass,500) && integer(d.level,1,20) && text(d.race,500) && integer(d.ac,-99,100000000)
         && (d.portrait==null || (d.portrait is map && d.portrait.keys().hasOnly(['image','design']) && text(d.portrait.image,180000)))
