@@ -72,7 +72,7 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.waitForFunction(()=>document.querySelector('[data-cloud-status]')?.textContent==='Synced');
     const uploaded=await alice.page.evaluate(async id=>{const s=await import('./firebase-sdk/firebase.js'),{CloudStore}=await import('./cloud-store.js');return new CloudStore({sdk:s,db:s.getFirestore()},s.getAuth().currentUser.uid).readCharacter(id);},alice.c.id);
     assert.equal(uploaded?.character.name,'Alice Brick','Synced means the guest character reached the server.');
-    await click(alice.page,'characters');
+    await alice.page.locator('#topbar [data-action="characters"]').click();
     assert.ok(await alice.page.$('#modal [data-action="cloud-upload"]'),'Account characters can access guest transfer from the character menu.');
     assert.match(await alice.page.$eval('#modal .character-menu-account',el=>el.innerText),new RegExp(aliceEmail));
     assert.equal(await alice.page.$('#modal [data-action="cloud-signup"]'),null,'Signed-in accounts show their account details.');
@@ -80,6 +80,7 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.waitForFunction(()=>!document.querySelector('#modal').open);
     phase='create party';await alice.page.goto(url+'#party');await click(alice.page,'cloud-create-party');await fill(alice.page,'name','Browser Fellowship');await alice.page.click('#modal button[type="submit"]');
     await waitText(alice.page,'Browser Fellowship');
+    await alice.page.goto(url+'#party-manage');await alice.page.waitForSelector('.party-members');
     assert.doesNotMatch(await alice.page.$eval('#toasts',el=>el.textContent),/Party access ended/i,'Creating the first party must not report lost access.');
     assert.match(await alice.page.$eval('.party-members',el=>el.textContent),/You/);
     assert.doesNotMatch(await alice.page.$eval('.party-members',el=>el.textContent),new RegExp(aliceEmail),'The party roster hides the account identity.');
@@ -99,6 +100,7 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.waitForSelector('#modal:not([open])');
     await alice.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='24');
     assert.match(await alice.page.$eval('#main',el=>el.textContent),/Alice Brick/,'Sharing refreshes the sender’s party without a reload');
+    await alice.page.goto(url+'#party');await alice.page.waitForSelector('.party-player');
     await waitText(bob.page,'Alice Brick');await bob.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='24');
     phase='live damage';await alice.page.goto(url+'#sheet');await click(alice.page,'hp');await alice.page.$eval('#modal [name="amount"]',el=>el.value='12');await alice.page.click('[data-action="hp-apply"][data-kind="damage"]');
     await bob.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='12');
@@ -108,7 +110,7 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.reload({waitUntil:'load'});await waitText(alice.page,'Alice Brick');
     await alice.page.setOfflineMode(false);
     await bob.page.waitForFunction(()=>document.querySelector('.party-health [role="progressbar"]')?.getAttribute('aria-valuenow')==='10');
-    phase='shared sheet';await click(bob.page,'cloud-view');await waitText(bob.page,'Strength');assert.equal(await bob.page.$('#modal [data-action="hp-apply"]'),null);await click(bob.page,'close');
+    phase='shared sheet';await bob.page.click('.party-portrait-button');await click(bob.page,'cloud-view');await waitText(bob.page,'Strength');assert.equal(await bob.page.$('#modal [data-action="hp-apply"]'),null);await click(bob.page,'close');
     phase='account isolation';await alice.page.goto(url+'#settings');await click(alice.page,'cloud-signout');await waitText(alice.page,'Continue without an account');
     assert.equal(await alice.page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters[0].hp),24,'guest original preserved');
     await click(alice.page,'cloud-email');await fill(alice.page,'email',bobEmail);await fill(alice.page,'password','sword-and-shield-123');await alice.page.click('#modal button[type="submit"]');

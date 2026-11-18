@@ -1,7 +1,8 @@
 // Animate the exact, already-recorded dice. Physics never spends resources or rerolls rules.
 const SUPPORTED=new Set([4,6,8,10,12,20,100]);
 const MAX_PHYSICAL_DICE=20;
-let current=null,engineModule=null;
+let current=null,partyCurrent=null,engineModule=null;
+const isCurrent=session=>(session.spectator?partyCurrent:current)===session;
 
 export const DICE_COLORS_KEY='questlog.dice-colors.v1';
 export const DEFAULT_DICE_COLORS=Object.freeze({body:'#365f58',numbers:'#fff5d7'});
@@ -33,7 +34,7 @@ export function beginDice() {
 }
 
 function reveal(session) {
-  document.body.classList.remove('dice-pending');
+  if(!session.spectator)document.body.classList.remove('dice-pending');
   for(const {node,inert,hidden} of session.concealed) {
     node.inert=inert;
     if(hidden===null)node.removeAttribute('aria-hidden');else node.setAttribute('aria-hidden',hidden);
@@ -77,18 +78,20 @@ function releaseEngine(session) {
   }
 }
 
-export function clearDice() {
-  document.body.classList.remove('dice-pending');
-  if(!current)return;
-  const session=current;current=null;
+export function clearDice(spectator=false) {
+  if(!spectator)document.body.classList.remove('dice-pending');
+  const session=spectator?partyCurrent:current;
+  if(!session)return;
+  if(spectator)partyCurrent=null;else current=null;
   reveal(session);
   session.observer.disconnect();session.motion.removeEventListener('change',session.onMotion);
   document.removeEventListener('visibilitychange',session.onVisibility);
   releaseEngine(session);session.stage.remove();session.resolve('cancelled');
 }
 
-export function presentDice(result,host) {
-  clearDice();
+export const presentPartyDice=(result,host)=>presentDice(result,host,{spectator:true});
+export function presentDice(result,host,{spectator=false}={}) {
+  clearDice(spectator);
   if(!host?.isConnected||!result.rolls?.length||document.hidden)return Promise.resolve('skipped');
   const plan=diceAnimationPlan(result),motion=matchMedia('(prefers-reduced-motion: reduce)');
   const stage=document.createElement('section');stage.className='dice-stage';stage.dataset.state='loading';
@@ -113,15 +116,15 @@ export function presentDice(result,host) {
   stage.append(heading,surface,faces,note);host.prepend(stage);
   let resolve;
   const done=new Promise(finish=>{resolve=finish;});
-  const session={stage,surface,status,motion,resolve,faces,engine:null,timer:null,concealed:[]};current=session;
-  document.body.classList.add('dice-pending');
-  const targets=[...document.querySelectorAll('#tray-die, #roll-detail, .history-row:first-child')];
+  const session={stage,surface,status,motion,resolve,faces,spectator,engine:null,timer:null,concealed:[]};if(spectator)partyCurrent=session;else current=session;
+  if(!spectator)document.body.classList.add('dice-pending');
+  const targets=spectator?[]:[...document.querySelectorAll('#tray-die, #roll-detail, .history-row:first-child')];
   if(host.classList.contains('modal-body'))targets.push(...[...host.children].filter(node=>node!==stage));
   for(const node of targets) {
     session.concealed.push({node,inert:node.inert,hidden:node.getAttribute('aria-hidden')});
     node.inert=true;node.setAttribute('aria-hidden','true');
   }
-  const active=()=>current===session&&stage.isConnected;
+  const active=()=>isCurrent(session)&&stage.isConnected;
   const fallback=message=>{
     if(!active())return;
     session.failed=true;
@@ -130,12 +133,12 @@ export function presentDice(result,host) {
     status.textContent=`Result: ${result.total}`;note.hidden=false;note.textContent=message;
     resolve('static');
   };
-  session.observer=new MutationObserver(()=>{if(current===session&&!stage.isConnected)clearDice();});
+  session.observer=new MutationObserver(()=>{if(isCurrent(session)&&!stage.isConnected)clearDice(spectator);});
   session.observer.observe(document.body,{childList:true,subtree:true});
   session.onMotion=()=>{
     if(motion.matches&&['loading','rolling'].includes(stage.dataset.state))fallback('Reduced motion · see individual results below.');
   };
-  session.onVisibility=()=>{if(document.hidden&&current===session)clearDice();};
+  session.onVisibility=()=>{if(document.hidden&&isCurrent(session))clearDice(spectator);};
   motion.addEventListener('change',session.onMotion);
   document.addEventListener('visibilitychange',session.onVisibility);
   if(motion.matches||!plan.dice.length) {

@@ -19,6 +19,71 @@ const op=value=>({id:uid(),...value});
 const create=async(store,c=demoCharacter())=>{await store.apply(c.id,op({create:c}));return c;};
 const waitFor=async predicate=>{const until=Date.now()+15000;while(Date.now()<until){if(await predicate())return;await new Promise(resolve=>setTimeout(resolve,30));}throw new Error('Timed out waiting for realtime state');};
 
+async function transferParty(){
+  const a=storeFor('alice'),b=storeFor('bob'),c=await create(a),d=await create(b),party=await a.createParty('Shared adventure','Alice');
+  await b.join(await a.invite(party),'Bob');await a.share(party,c);await b.share(party,d);
+  return {a,b,c,d,party,target:{id:`bob_${d.id}`,ownerId:'bob',characterId:d.id}};
+}
+
+test('party transfers escrow coins, require the recipient, and credit an acceptance only once',async()=>{
+  const {a,b,c,d,party,target}=await transferParty(),eve=storeFor('eve');
+  const id=await a.offerTransfer(party,c.id,target,{kind:'money',coin:'gold',amount:9});
+  await assert.rejects(a.checkTransferDeletion(c.id),/pending party transfers/);
+  assert.equal((await a.readCharacter(c.id)).character.gold,c.gold-9);assert.equal((await b.readCharacter(d.id)).character.gold,d.gold);
+  await assert.rejects(a.answerTransfer(party,id,true),/another player/);await assert.rejects(eve.answerTransfer(party,id,true));
+  await assertFails(sdk.updateDoc(a.ref(`parties/${party}/transfers/${id}`),{status:'accepted'}));
+  await assertFails(sdk.updateDoc(b.ref(`parties/${party}/transfers/${id}`),{payload:'{}'}));
+  await Promise.all([b.answerTransfer(party,id,true),b.answerTransfer(party,id,true)]);
+  assert.equal((await b.readCharacter(d.id)).character.gold,d.gold+9);
+  await a.reclaimTransfer(party,id,{cancel:true});assert.equal((await a.readCharacter(c.id)).character.gold,c.gold-9);
+  await a.checkTransferDeletion(c.id);
+  assert.equal((await sdk.getDocs(sdk.collection(a.db,'users/alice/escrow'))).size,0);
+  await assertFails(sdk.getDoc(b.ref(`users/alice/characters/${c.id}/content/0`)));
+});
+
+test('declined and cancelled item transfers refund once, preserve private descriptions, and survive removal',async()=>{
+  const {a,b,c,d,party,target}=await transferParty(),item=c.items.find(i=>i.name==='Moonstone pendant');
+  const id=await a.offerTransfer(party,c.id,target,{kind:'item',itemId:item.id,amount:1});
+  assert.equal((await a.readCharacter(c.id)).character.items.some(i=>i.id===item.id),false);
+  assert.equal((await sdk.getDoc(b.ref(`parties/${party}/transfers/${id}`))).data().payload.includes(item.description),false);
+  await b.answerTransfer(party,id,false);await Promise.all([a.reclaimTransfer(party,id),a.reclaimTransfer(party,id)]);
+  assert.deepEqual((await a.readCharacter(c.id)).character.items.find(i=>i.id===item.id),item);
+  assert.equal((await b.readCharacter(d.id)).character.items.length,d.items.length);
+  const pending=await b.offerTransfer(party,d.id,{id:`alice_${c.id}`,ownerId:'alice',characterId:c.id},{kind:'money',coin:'silver',amount:3});
+  await a.removeMember(party,'bob');await b.recoverEscrow();
+  assert.equal((await b.readCharacter(d.id)).character.silver,d.silver);
+  assert.equal((await sdk.getDoc(b.ref(`parties/${party}/transfers/${pending}`))).data().status,'refunded');
+});
+
+test('competing offers cannot overspend and accepting an item preserves its quantity',async()=>{
+  const {a,b,c,d,party,target}=await transferParty();
+  const results=await Promise.allSettled([a.offerTransfer(party,c.id,target,{kind:'money',coin:'gold',amount:60}),a.offerTransfer(party,c.id,target,{kind:'money',coin:'gold',amount:60})]);
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal((await a.readCharacter(c.id)).character.gold,14);
+  const arrows=c.items.find(i=>i.name==='Arrows'),id=await a.offerTransfer(party,c.id,target,{kind:'item',itemId:arrows.id,amount:4});
+  await b.answerTransfer(party,id,true);await b.answerTransfer(party,id,true);
+  assert.equal((await a.readCharacter(c.id)).character.items.find(i=>i.id===arrows.id).qty,16);
+  assert.equal((await b.readCharacter(d.id)).character.items.filter(i=>i.name==='Arrows').reduce((n,i)=>n+i.qty,0),24);
+});
+
+test('party session streams initiative, rest votes, exact rolls and damage activity',async()=>{
+  const {a,b,c,d,party}=await transferParty();let latest;const stop=b.watchParty(party,data=>latest=data,error=>{throw error;});
+  try{
+    await a.setInitiative(party,`alice_${c.id}`,20);await b.setInitiative(party,`bob_${d.id}`,10);
+    const chars=[{id:`alice_${c.id}`},{id:`bob_${d.id}`}];await a.advanceTurn(party,chars,{start:true});
+    await waitFor(()=>latest?.combat.current===`alice_${c.id}`);await b.advanceTurn(party,chars);await waitFor(()=>latest?.combat.current===`bob_${d.id}`);
+    await a.advanceTurn(party,chars);await waitFor(()=>latest?.combat.round===2);
+    const rest=await a.requestRest(party,'short',c.id);await a.replyRest(party,rest,true,c.id);await b.replyRest(party,rest,false,d.id);
+    await waitFor(()=>latest?.rests.find(r=>r.id===rest)?.replies.length===2);
+    await assertFails(sdk.setDoc(b.ref(`parties/${party}/rests/${rest}/replies/alice`),{yes:false,characterId:c.id,actorId:'alice'}));
+    const result={expression:'2d6+3',rolls:[2,5],total:10,bonus:3,label:'Stealth',mode:'normal'};
+    const event=await a.activity(party,{kind:'roll',characterId:c.id,name:c.name,result:JSON.stringify(result)});
+    await waitFor(()=>latest?.activities.some(e=>e.id===event));assert.deepEqual(JSON.parse(latest.activities.find(e=>e.id===event).result),result);
+    await a.apply(c.id,op({hpAction:{amount:4,kind:'damage'}}));await waitFor(()=>latest?.activities.some(e=>e.kind==='damage'));
+    assert.equal(latest.characters.find(s=>s.characterId===c.id).live.hp,c.hp-4);
+    const eve=storeFor('eve');await assertFails(sdk.getDoc(eve.ref(`parties/${party}/session/combat`)));await assert.rejects(eve.activity(party,{kind:'roll',characterId:c.id,name:c.name,result:'{}'}));
+  }finally{stop();}
+});
+
 test('phase 1: Auth emulator creates an account, verifies, signs out and logs in',async()=>{
   const app=initializeApp({apiKey:'fake-key',projectId,appId:'emulator'},'auth-test');
   try{

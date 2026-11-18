@@ -69,6 +69,12 @@ service cloud.firestore {
       allow create, update: if own(uid) && request.resource.data.keys().hasOnly(['partyId'])
         && request.resource.data.partyId==party && afterMember(party);
     }
+    match /users/{uid}/escrow/{offer} {
+      allow read, delete: if own(uid);
+      allow create: if own(uid) && request.resource.data.keys().hasOnly(['partyId','characterId','refund'])
+        && text(request.resource.data.refund,120000)
+        && getAfter(/databases/$(database)/documents/parties/$(request.resource.data.partyId)/transfers/$(offer)).data.senderId==uid;
+    }
     match /parties/{party} {
       allow get: if signed() && exists(/databases/$(database)/documents/parties/$(party)/members/$(request.auth.uid));
       allow create: if signed() && request.resource.data.keys().hasOnly(['ownerId','name','createdAt'])
@@ -80,6 +86,63 @@ service cloud.firestore {
         && text(request.resource.data.ownerId,128)
         && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.resource.data.ownerId));
       allow delete: if creator(party);
+      match /session/combat {
+        allow read: if member(party);
+        allow create, update: if member(party)
+          && request.resource.data.keys().hasOnly(['scores','current','round','active','updatedBy'])
+          && request.resource.data.scores is map && request.resource.data.scores.size()<=100
+          && text(request.resource.data.current,230) && integer(request.resource.data.round,1,1000000)
+          && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
+      }
+      match /activities/{event} {
+        allow read: if member(party);
+        allow create: if member(party) && request.resource.data.actorId==request.auth.uid
+          && request.resource.data.keys().hasOnly(['actorId','createdAt','kind','text','characterId','name','result'])
+          && request.resource.data.createdAt==request.time
+          && request.resource.data.kind in ['damage','healing','unconscious','inspiration','condition','roll']
+          && text(request.resource.data.characterId,100) && text(request.resource.data.name,120)
+          && (!('text' in request.resource.data) || text(request.resource.data.text,1000))
+          && (!('result' in request.resource.data) || text(request.resource.data.result,4000));
+      }
+      match /rests/{rest} {
+        allow read: if member(party);
+        allow create: if member(party) && request.resource.data.keys().hasOnly(['kind','actorId','characterId','createdAt'])
+          && request.resource.data.kind in ['short','long'] && request.resource.data.actorId==request.auth.uid
+          && text(request.resource.data.characterId,100) && request.resource.data.createdAt==request.time;
+        match /replies/{uid} {
+          allow read: if member(party);
+          allow create: if own(uid) && member(party) && exists(/databases/$(database)/documents/parties/$(party)/rests/$(rest))
+            && request.resource.data.keys().hasOnly(['yes','characterId','actorId']) && request.resource.data.yes is bool
+            && request.resource.data.actorId==uid && text(request.resource.data.characterId,100);
+        }
+      }
+      match /transfers/{offer} {
+        function changedSheet(uid,id) {
+          return getAfter(/databases/$(database)/documents/users/$(uid)/characters/$(id)).data.revision
+            ==get(/databases/$(database)/documents/users/$(uid)/characters/$(id)).data.revision+1;
+        }
+        allow list: if member(party);
+        allow get: if member(party) || (signed() && request.auth.uid in [resource.data.senderId,resource.data.recipientId]);
+        allow create: if member(party) && request.resource.data.keys().hasOnly(['senderId','recipientId','fromCharacter','toCharacter','fromName','toName','payload','status','createdAt'])
+          && request.resource.data.senderId==request.auth.uid && request.resource.data.recipientId!=request.auth.uid
+          && exists(/databases/$(database)/documents/parties/$(party)/members/$(request.resource.data.recipientId))
+          && get(/databases/$(database)/documents/parties/$(party)/characters/$(request.resource.data.recipientId+'_'+request.resource.data.toCharacter)).data.ownerId==request.resource.data.recipientId
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(request.resource.data.fromCharacter)).data.partyId==party
+          && text(request.resource.data.payload,40000) && text(request.resource.data.fromName,120) && text(request.resource.data.toName,120)
+          && request.resource.data.status=='pending' && request.resource.data.createdAt==request.time
+          && changedSheet(request.auth.uid,request.resource.data.fromCharacter)
+          && existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)/escrow/$(offer));
+        allow update: if signed() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) && (
+          (member(party) && request.auth.uid==resource.data.recipientId && resource.data.status=='pending'
+            && exists(/databases/$(database)/documents/parties/$(party)/members/$(resource.data.senderId))
+            && (request.resource.data.status=='declined' || (request.resource.data.status=='accepted'
+              && get(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(resource.data.toCharacter)).data.partyId==party
+              && changedSheet(request.auth.uid,resource.data.toCharacter))))
+          || (request.auth.uid==resource.data.senderId && resource.data.status in ['pending','declined']
+            && request.resource.data.status=='refunded' && changedSheet(request.auth.uid,resource.data.fromCharacter)
+            && !existsAfter(/databases/$(database)/documents/users/$(request.auth.uid)/escrow/$(offer)))
+        );
+      }
       match /members/{uid} {
         // A prospective member may read only their own membership, never the roster.
         allow get: if own(uid) || member(party);
@@ -130,7 +193,8 @@ service cloud.firestore {
       }
     }
     function publicSheet(d,id) {
-      return d.keys().hasOnly(['id','name','playerName','class','subclass','level','race','ac','portrait','slots','features'])
+      return d.keys().hasOnly(['id','name','playerName','class','subclass','level','race','ac','portrait','slots','features','skillBonuses'])
+        && (!('skillBonuses' in d) || (d.skillBonuses is map && d.skillBonuses.size()<=18))
         && d.id==id && text(d.name,120) && text(d.playerName,120) && text(d.class,100)
         && text(d.subclass,500) && integer(d.level,1,20) && text(d.race,500) && integer(d.ac,-99,100000000)
         && (d.portrait==null || (d.portrait is map && d.portrait.keys().hasOnly(['image','design']) && text(d.portrait.image,180000)))

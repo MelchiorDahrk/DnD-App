@@ -1,5 +1,5 @@
 // Pure synchronization rules, shared by the browser and emulator tests.
-import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS} from './model.js';
+import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS,skillBonus} from './model.js';
 import {armorClass} from './armor-class.js';
 export const LIVE_KEYS=['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice'];
 export const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
@@ -92,7 +92,7 @@ export function applyLive(current,operation){
 export const hasChanges=op=>!!(op.content?.length||op.live?.length||op.conditions||op.hpAction||op.resources?.slots.length||op.resources?.features.length);
 export function publicProjection(character){
   // Deliberate allowlist: no notes, backstory, inventory, spell notes, or metadata.
-  return {id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
+  return {id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
     stats:Object.fromEntries(Object.keys(ABILITIES).map(key=>[key,character.stats[key]])),skills:copy(character.skills),expertise:copy(character.expertise),saves:copy(character.saves),speed:character.speed,hitDie:character.hitDie,spellAbility:character.spellAbility,
     attacks:character.attacks.map(a=>({name:a.name,ability:a.ability,bonus:a.bonus,damage:a.damage,type:a.type,range:a.range})),
     spells:character.spells.map(s=>({name:s.name,level:s.level,school:s.school,castingTime:s.castingTime,range:s.range,duration:s.duration,concentration:s.concentration,prepared:s.prepared}))

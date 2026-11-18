@@ -1,7 +1,9 @@
 import {copy,equal,splitCharacter,joinCharacter,fragments,applyFields,applyLive,CloudConflict,publicProjection,invitationToken,validPublicDetails} from './cloud-model.js';
+import {PartyStore} from './party-store.js';
+import {liveActivities} from './party-model.js';
 
-export class CloudStore {
-  constructor(client,uid){this.client=client;this.s=client.sdk;this.db=client.db;this.uid=uid;}
+export class CloudStore extends PartyStore {
+  constructor(client,uid){super();this.client=client;this.s=client.sdk;this.db=client.db;this.uid=uid;}
   ref(path){return this.s.doc(this.db,path);}
   async sharedData(character){
     const sheet=publicProjection(character),details=sheet.details;delete sheet.details;
@@ -115,6 +117,7 @@ export class CloudStore {
                 if(previous?.sheetHash!==projection.sheetHash||previous?.detailsHash!==projection.detailsHash)tx.set(this.ref(shared),{ownerId:this.uid,characterId:id,sheet:projection.sheet,chunks:projection.chunks.length,detailsHash:projection.detailsHash,sheetHash:projection.sheetHash});
               }
               if(!equal(currentLive,nextLive))tx.set(this.ref(`${shared}/state/live`),{...nextLive,revision:currentLive.revision+1});
+              liveActivities(currentLive,nextLive).forEach((event,index)=>tx.set(this.ref(`parties/${meta.partyId}/activities/${operation.id}_${index}`),{...event,characterId:id,name:content?.name||meta.name,actorId:this.uid,createdAt:this.s.serverTimestamp()}));
             }
           }
         }
@@ -211,20 +214,26 @@ export class CloudStore {
     await batch.commit();
   }
   watchParty(partyId,next,error){
-    const stops=[],liveStops=new Map(),data={id:partyId,members:[],characters:[],invitations:[]};let stopped=false;
+    const stops=[],liveStops=new Map(),replyStops=new Map(),data={id:partyId,members:[],characters:[],invitations:[],activities:[],transfers:[],rests:[],combat:{}};let stopped=false;
     const emit=()=>{if(!stopped)next(copy(data));};
     stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}`),snapshot=>{if(snapshot.exists()){Object.assign(data,snapshot.data());emit();}},error));
-    for(const kind of ['members','characters','invitations']){
-      stops.push(this.s.onSnapshot(this.s.collection(this.db,`parties/${partyId}/${kind}`),snapshot=>{
-        data[kind]=snapshot.docs.map(d=>({id:d.id,...d.data(),...(kind==='characters'?{live:data.characters.find(c=>c.id===d.id)?.live}: {})}));
+    stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/session/combat`),snapshot=>{data.combat=snapshot.exists()?snapshot.data():{};emit();},error));
+    for(const kind of ['members','characters','invitations','activities','transfers','rests']){
+      const collection=this.s.collection(this.db,`parties/${partyId}/${kind}`),source=['activities','rests'].includes(kind)?this.s.query(collection,this.s.orderBy('createdAt','desc'),this.s.limit(kind==='rests'?10:50)):collection;
+      stops.push(this.s.onSnapshot(source,snapshot=>{
+        data[kind]=snapshot.docs.filter(d=>!['activities','rests'].includes(kind)||d.data().createdAt).map(d=>({id:d.id,...d.data(),...(kind==='characters'?{live:data.characters.find(c=>c.id===d.id)?.live}:kind==='rests'?{replies:data.rests.find(r=>r.id===d.id)?.replies||[],repliesReady:data.rests.find(r=>r.id===d.id)?.repliesReady||false}: {})}));
         if(kind==='characters'){
           const ids=new Set(data.characters.map(c=>c.id));
           for(const [id,stop] of liveStops)if(!ids.has(id)){stop();liveStops.delete(id);}
           for(const c of data.characters)if(!liveStops.has(c.id))liveStops.set(c.id,this.s.onSnapshot(this.ref(`parties/${partyId}/characters/${c.id}/state/live`),snapshot=>{const target=data.characters.find(row=>row.id===c.id);if(target&&snapshot.exists()){target.live=snapshot.data();emit();}},error));
         }
+        if(kind==='rests'){
+          for(const [id,stop] of replyStops)if(!data.rests.some(r=>r.id===id)){stop();replyStops.delete(id);}
+          for(const rest of data.rests)if(!replyStops.has(rest.id))replyStops.set(rest.id,this.s.onSnapshot(this.s.collection(this.db,`parties/${partyId}/rests/${rest.id}/replies`),snapshot=>{const target=data.rests.find(r=>r.id===rest.id);if(target){target.replies=snapshot.docs.map(d=>({id:d.id,...d.data()}));target.repliesReady=true;emit();}},error));
+        }
         emit();
       },kind==='invitations'?()=>{}:error));
     }
-    return ()=>{stopped=true;stops.forEach(stop=>stop());liveStops.forEach(stop=>stop());};
+    return ()=>{stopped=true;stops.forEach(stop=>stop());liveStops.forEach(stop=>stop());replyStops.forEach(stop=>stop());};
   }
 }

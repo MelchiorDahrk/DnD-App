@@ -235,6 +235,12 @@ Fantasy catalog and equipment icon maintenance, build requirements, and regressi
 
 ## Appearance
 
+The live Party table includes shared initiative, spectator dice, accepted item
+and coin transfers, group rest replies, a skill finder, and Session Mode. Party
+notification preferences are in **Settings → Party**. See the
+[party play architecture and verification guide](docs/party-play.md); deploy its
+updated Firestore rules alongside the app.
+
 Questlog uses a shared fantasy journal interface in **Daylight Adventurer** and **Candlelit Adventurer** appearances, with a System option that follows your device. Change it on the welcome page, desktop sidebar, or in Settings & backup. Appearance stays on this device, separately from character backups.
 
 See [the appearance architecture and validation guide](docs/appearance.md) and [GUI asset credits](assets/gui/README.md). During development, open `/dev/theme-showcase.html` to compare production components in both appearances; the workshop is excluded from the static build. Run `npm run test:themes` for functional appearance and offline checks. Run `npm run test:visual` separately for optional contrast and layout review; see [deployment check policy](docs/deployment-checks.md).

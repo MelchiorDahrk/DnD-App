@@ -37,7 +37,7 @@ const fmt = n => Number(n).toLocaleString();
 function themeSelect(id='appearance') {
   return `<label class="theme-control" for="${id}"><span>Appearance</span><select id="${id}" data-theme-select>${[['system','System — follow device'],['light','Light — Daylight Adventurer'],['dark','Dark — Candlelit Adventurer']].map(([value,label])=>`<option value="${value}" ${window.QuestlogTheme.preference===value?'selected':''}>${label}</option>`).join('')}</select></label>`;
 }
-const routes = {sheet:['Character sheet','sheet'],inventory:['Inventory','bag'],spells:['Spellbook','book'],journal:['Journal','journal'],dice:['Dice roller','dice'],party:['Party','people'],wiki:['Compendium','compass'],settings:['Settings','settings']};
+const routes = {sheet:['Character sheet','sheet'],inventory:['Inventory','bag'],spells:['Spellbook','book'],journal:['Journal','journal'],dice:['Dice roller','dice'],party:['Party','people'],wiki:['Compendium','compass'],settings:['Settings','settings'],'party-manage':['Party management','people']};
 let storageError = '';
 let state;
 try { const saved=localStorage.getItem(STORAGE_KEY);state=saved?parseBackup(saved):initialState(); }
@@ -174,6 +174,7 @@ function renderChrome() {
   $('#mobile-nav').innerHTML=mobile.map(([key,sym,label])=>btn(key==='more'?'more':'navigate',icon(sym)+`<span>${label}</span>`,`${route===key||(key==='more'&&['party','wiki','settings'].includes(route))?'active':''}`,`data-route="${key}" ${route===key?'aria-current="page"':''}`)).join('');
 }
 function render() {
+  const partyRoll=route==='party'?$('#party-roll'):null;
   cloud.viewRoute(route);
   const previousSection=$('.sheet-header')?.dataset.activeSection;
   cleanupSheetNavigation();
@@ -184,16 +185,19 @@ function render() {
   $('.skip-link').textContent=hasCharacter?'Skip to character':'Skip to main content';
   if(!hasCharacter){
     for(const id of ['sidebar','topbar','mobile-nav'])$('#'+id).replaceChildren();
-    $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)}</div>`:'')+(route==='settings'?renderSettings():route==='party'?cloud.partyMarkup():renderLanding()+cloud.accountMarkup())+`<div class="cloud-actions">${btn('navigate','Home','btn btn-ghost','data-route="sheet"')}${btn('navigate','Account & settings','btn btn-ghost','data-route="settings"')}${btn('navigate','Party','btn btn-ghost','data-route="party"')}</div>`;
+    $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)}</div>`:'')+(route==='settings'?renderSettings():route==='party'?cloud.partyMarkup():route==='party-manage'?cloud.partyManagementMarkup():renderLanding()+cloud.accountMarkup())+`<div class="cloud-actions">${btn('navigate','Home','btn btn-ghost','data-route="sheet"')}${btn('navigate','Account & settings','btn btn-ghost','data-route="settings"')}${btn('navigate','Party','btn btn-ghost','data-route="party"')}</div>`;
     document.title='Welcome · Questlog';
+    cloud.afterRender();
     return;
   }
   renderChrome();
-  const views={sheet:renderSheet,inventory:renderInventory,spells:renderSpells,journal:renderJournal,dice:renderDice,party:cloud.partyMarkup,wiki:renderWiki,settings:renderSettings};
+  const views={sheet:renderSheet,inventory:renderInventory,spells:renderSpells,journal:renderJournal,dice:renderDice,party:cloud.partyMarkup,'party-manage':cloud.partyManagementMarkup,wiki:renderWiki,settings:renderSettings};
   $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)} ${btn('export','Export current sheet','btn btn-sm')}</div>`:'')+views[route]();
+  if(partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('#party-roll').replaceWith(partyRoll);
   if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
   document.title=`${routes[route][0]} · Questlog`;
+  cloud.afterRender();
 }
 function renderLanding() {
   return `<section class="landing" aria-labelledby="welcome-title"><div class="landing-masthead"><div class="landing-brand"><span class="brand-mark">${icon('dice')}</span><span class="brand-name">questlog</span></div>${themeSelect('landing-appearance')}</div><div class="landing-intro"><p class="eyebrow">A JOURNAL FOR THE ROAD · 2024 RULES</p><h1 id="welcome-title">Your next adventure starts here.</h1><p>A place for your characters, their gear, and the stories along the way. Choose an adventurer to get started.</p></div><div class="landing-options">${[
@@ -320,7 +324,7 @@ function renderSoundSettings() {
   return `<div class="sound-settings">${slider('master','Master',prefs.volume)}<details><summary>Audio categories</summary>${Object.entries(SOUND_CATEGORIES).map(([key,label])=>slider(key,label,prefs.categories[key])).join('')}</details><div class="sound-preview"><label class="form-field">Sound preview<select id="sound-preview-event">${previews.map(([value,label])=>`<option value="${value}">${label}</option>`).join('')}</select></label>${btn('sound-preview',icon('sound')+'Test sound','btn btn-sm',state.settings.sound?'':'disabled')}</div><p class="form-help">Enable sound, then try a preview. Campfire ambience fades out automatically. Volume preferences stay on this device.</p></div>`;
 }
 function renderSettingsHeader() {
-  const sections=[['account','people','Account'],['preferences','settings','Preferences'],['sound','sound','Sound'],['sources','book','Content sources']];
+  const sections=[['account','people','Account'],['party','people','Party'],['preferences','settings','Preferences'],['sound','sound','Sound'],['sources','book','Content sources']];
   return `<header class="settings-header">${pageHeading('Settings')}<nav class="sheet-section-nav" aria-label="Settings sections">${sections.map(([key,symbol,label])=>btn('settings-jump',icon(symbol)+label,'sheet-section-link',`data-section="${key}"`)).join('')}</nav></header>`;
 }
 function jumpToSettingsSection(key) {
@@ -331,7 +335,7 @@ function jumpToSettingsSection(key) {
   target.focus({preventScroll:true});
   target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
 }
-function renderSettings() {return renderSettingsHeader()+`<div data-settings-section="account" tabindex="-1">${cloud.accountMarkup()}</div>`+`<div class="settings-grid"><section class="panel" data-settings-section="preferences" tabindex="-1"><div class="panel-heading"><h2>${icon('settings')}Your preferences</h2></div><div class="setting-row appearance-setting">${icon('moon')}<div><strong>The light of your adventure</strong><p>The same journal, in daylight or by candlelight.</p>${themeSelect('settings-appearance')}</div></div>${renderDiceColors()}${renderInspirationSettings()}${storageBlocked?`<div class="panel-body">${btn('recover-storage','Enable saving for this sheet','btn btn-danger')}</div>`:''}<div class="setting-row" data-settings-section="sound" tabindex="-1">${icon('sound')}<div><strong>Sound effects</strong><p>Dice, steel, spells, and a moment by the fire.</p></div>${btn('sound','','toggle-switch'+(state.settings.sound?' active':''),`role="switch" aria-checked="${state.settings.sound}" aria-label="Sound effects"`)}</div>${renderSoundSettings()}${renderContentSources()}<div class="setting-row">${icon('people')}<div><strong>Your adventurers</strong><p>${state.characters.length} character${state.characters.length!==1?'s':''} saved in this browser.</p></div>${btn('characters','Manage','btn btn-sm')}</div><div class="setting-row">${icon('book')}<div><strong>Try the 2024 example</strong><p>Add the updated Ranger alongside your saved characters.</p></div>${btn('demo-2024','Add 2024 example','btn btn-sm')}</div><div class="setting-row">${icon('compass')}<div><strong>Take Questlog with you</strong><p>Install on your home screen for easy access.</p></div>${btn('install','How to','btn btn-sm')}</div></section></div>`;}
+function renderSettings() {return renderSettingsHeader()+`<div data-settings-section="account" tabindex="-1">${cloud.accountMarkup()}</div>`+cloud.partySettingsMarkup()+`<div class="settings-grid"><section class="panel" data-settings-section="preferences" tabindex="-1"><div class="panel-heading"><h2>${icon('settings')}Your preferences</h2></div><div class="setting-row appearance-setting">${icon('moon')}<div><strong>The light of your adventure</strong><p>The same journal, in daylight or by candlelight.</p>${themeSelect('settings-appearance')}</div></div>${renderDiceColors()}${renderInspirationSettings()}${storageBlocked?`<div class="panel-body">${btn('recover-storage','Enable saving for this sheet','btn btn-danger')}</div>`:''}<div class="setting-row" data-settings-section="sound" tabindex="-1">${icon('sound')}<div><strong>Sound effects</strong><p>Dice, steel, spells, and a moment by the fire.</p></div>${btn('sound','','toggle-switch'+(state.settings.sound?' active':''),`role="switch" aria-checked="${state.settings.sound}" aria-label="Sound effects"`)}</div>${renderSoundSettings()}${renderContentSources()}<div class="setting-row">${icon('people')}<div><strong>Your adventurers</strong><p>${state.characters.length} character${state.characters.length!==1?'s':''} saved in this browser.</p></div>${btn('characters','Manage','btn btn-sm')}</div><div class="setting-row">${icon('book')}<div><strong>Try the 2024 example</strong><p>Add the updated Ranger alongside your saved characters.</p></div>${btn('demo-2024','Add 2024 example','btn btn-sm')}</div><div class="setting-row">${icon('compass')}<div><strong>Take Questlog with you</strong><p>Install on your home screen for easy access.</p></div>${btn('install','How to','btn btn-sm')}</div></section></div>`;}
 
 // Dialogs keep the on-sheet flows small enough for a thumb and a dice bag.
 function showCharacters() {const c=character();setModal('Characters',`${state.characters.map(x=>`<div class="character-manager-row">${btn('switch-character',`<span class="mini-avatar">${portraitMarkup(x)}</span><div><strong>${esc(x.name)}</strong><small>Level ${x.level} ${esc(x.race)} ${esc(x.class)}</small></div>${icon(x.id===c?.id?'check':'chevron')}`,`character-option${x.id===c?.id?' active':''}`,`data-id="${x.id}"`)}${btn('delete-character',icon('trash')+'Delete','btn btn-sm btn-danger',`data-id="${x.id}" aria-label="Delete ${esc(x.name)}"`)}</div>`).join('')}<div class="modal-actions">${btn('new-character',icon('plus')+'New character','btn btn-primary')}${btn('export',icon('download')+'Download','btn')}${btn('import',icon('upload')+'Import','btn')}</div>${storageBlocked?btn('recover-storage','Enable saving for this sheet','btn btn-danger'):''}${cloud.characterMenuMarkup()}`);}
@@ -568,6 +572,7 @@ function afterRoll(result,callback) {
 function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal}={}) {
   const r={...result,label,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
   if(r.rolls.length)beginDice();
+  cloud.broadcastRoll(r,label).catch(error=>toast('Party roll could not be shared: '+error.message,true));
   let finish;
   Object.defineProperty(r,'finished',{value:new Promise(resolve=>{finish=resolve;})});
   const event=rollSoundEvent(r,label);if(event)sound.play(event);
@@ -676,7 +681,7 @@ document.addEventListener('click',event=>{
       }
       case 'death-counter':c[el.dataset.kind==='success'?'deathSuccess':'deathFailure']=Number(el.dataset.value);commit();break;
       case 'death-roll':{if(c.hp>0||c.deathSuccess>=3||c.deathFailure>=3)break;const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll(`1d20${signed(-exhaustionPenalty(c))}`,'Death saving throw');if(r.natural===20){trackedHP(c,1,'heal');}else if(r.total>=10)c.deathSuccess=Math.min(3,c.deathSuccess+1);else c.deathFailure=Math.min(3,c.deathFailure+(r.natural===1?2:1));commit();if(r.natural===20)afterRoll(r,()=>{toast('Natural 20! You regain 1 HP.');showHPFeedback(before,'heal','.big-die');});break;}
-      case 'rest':showRest(el.dataset.kind);break;
+      case 'rest':if(modal.querySelector('.rest-illustration')||!cloud.requestRest(el.dataset.kind||'short'))showRest(el.dataset.kind);break;
       case 'rest-review':modal.close();if(id)editFeature(id);else if(el.dataset.target==='stats')editCombat();else if(el.dataset.target==='conditions')showConditions();else {navigate(el.dataset.target==='features'?'sheet':el.dataset.target);if(el.dataset.target==='features')document.querySelector('[data-sheet-section="features"]')?.scrollIntoView({block:'start'});}break;
       case 'xp':showXP();break;
       case 'level-up':showLevelUp();break;
@@ -778,7 +783,7 @@ window.addEventListener('beforeinstallprompt',event=>{event.preventDefault();ins
 modal.addEventListener('close',()=>{sound.stopAmbience();clearDice();cloud.deferred();});
 modal.addEventListener('cancel',()=>sound.stopAmbience());
 modal.addEventListener('click',event=>{if(event.target===modal){const r=modal.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)modal.close();}});
-const cloud=createCloudUI({esc,btn,field,actions,setModal,modal,toast,getState:()=>state,setState:(next,{blocked=false,error=''}={})=>{trainingEditingId=null;state=next;storageBlocked=blocked;storageError=error;sound.configure({enabled:state.settings.sound});},render,navigate,persist:()=>persist(),saveRemote:()=>persist({remote:true})});
+const cloud=createCloudUI({esc,btn,field,actions,setModal,modal,toast,getState:()=>state,setState:(next,{blocked=false,error=''}={})=>{trainingEditingId=null;state=next;storageBlocked=blocked;storageError=error;sound.configure({enabled:state.settings.sound});},render,navigate,commit,deleteCharacter,openRest:showRest,roll:performRoll,persist:()=>persist(),saveRemote:()=>persist({remote:true})});
 if(!storageBlocked)persist();
 render();
 cloud.start();
