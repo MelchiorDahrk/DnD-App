@@ -244,6 +244,8 @@ function validateCharacter(c) {
   for (const entries of [c.items,c.features,c.attacks]) entries.forEach(v=>requireThat(v.actionType===undefined||v.actionType===''||Object.hasOwn(ACTION_TYPES,v.actionType),'invalid action type.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
   c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
+  // Optional stable key: older saves need no migration, future keys fall back safely.
+  c.spells.forEach(v=>requireThat(v.spellIconKey===undefined||(string(v.spellIconKey,100)&&/^[a-z0-9-]*$/.test(v.spellIconKey)),'invalid spell icon.'));
   c.notes.forEach(v=>requireThat(string(v.title,200)&&v.title.trim()&&string(v.body,100000)&&string(v.tag,100)&&typeof v.pinned==='boolean'&&string(v.updated,100)&&!Number.isNaN(Date.parse(v.updated)),'invalid note.'));
   c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,999)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&string(v.rollFormula,30)&&(v.rollFormula===''||validDiceFormula(v.rollFormula)),'invalid feature.'));
   c.features.forEach(v=>requireThat(integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));

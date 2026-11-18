@@ -9,7 +9,7 @@ import {promisify} from 'node:util';
 import {deploymentGroups,deploymentOptions} from '../scripts/lib/deploy-suites.mjs';
 
 const root=resolve(import.meta.dirname,'..');
-const required=['sheet-layout','item-icons','magic-items','treasure','dice','themes','portraits','portrait-photos','presets'];
+const required=['sheet-layout','item-icons','magic-items','treasure','dice','themes','portraits','portrait-photos','presets','spell-icons'];
 
 test('CI matrix partitions every required browser suite exactly once and fits the workflow deadline',()=>{
   const {matrix}=deploymentOptions(['--matrix']);

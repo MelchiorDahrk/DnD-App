@@ -4,6 +4,7 @@ export const deploymentGroups={
   // The expanded sheet checks reached their final mobile dialogs at 3 minutes
   // on a shared runner. Allow headroom without removing any functional checks.
   sheet:[['sheet-layout',5],['item-icons',3],['magic-items',3],['treasure',2],['themes',5]],
+  spells:[['spell-icons',3]],
   dice:[['dice',4]],
   portraits:[['portraits',10]],
   'portrait-photos':[['portrait-photos',5]],

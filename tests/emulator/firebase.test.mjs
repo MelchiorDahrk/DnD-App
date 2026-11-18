@@ -278,6 +278,23 @@ test('phase 4: durable offline queue survives restart and deduplicates a lost ac
   assert.equal(restarted.queue.length,0);assert.equal((await a.readCharacter(c.id)).character.hp,c.hp-12);
   clearTimeout(restarted.retry);
 });
+test('spell artwork survives Firestore content edits, renaming, and read-only party sharing',async()=>{
+  const a=storeFor('alice'),b=storeFor('bob'),c=demoCharacter();c.spells[0].spellIconKey='ghost';
+  await create(a,c);assert.equal((await a.readCharacter(c.id)).character.spells[0].spellIconKey,'ghost');
+  const party=await a.createParty('Spell artwork','Alice');await b.join(await a.invite(party),'Bob');await a.share(party,c);
+  assert.equal((await b.readShared(party,`alice_${c.id}`)).sheet.details.spells[0].spellIconKey,'ghost');
+  const changed=copy(c);changed.spells[0].name='A renamed homebrew spell';changed.spells[0].school='Illusion';
+  await a.apply(c.id,op(makeOperation(c,changed)));
+  assert.equal((await a.readCharacter(c.id)).character.spells[0].spellIconKey,'ghost');
+  assert.equal((await b.readShared(party,`alice_${c.id}`)).sheet.details.spells[0].spellIconKey,'ghost');
+  const automatic=copy(changed);automatic.spells[0].spellIconKey='';await a.apply(c.id,op(makeOperation(changed,automatic)));
+  assert.equal((await a.readCharacter(c.id)).character.spells[0].spellIconKey,'');
+  assert.equal((await b.readShared(party,`alice_${c.id}`)).sheet.details.spells[0].spellIconKey,undefined);
+  const elemental=copy(automatic);elemental.spells[0].damageType='cold';await a.apply(c.id,op(makeOperation(automatic,elemental)));
+  const shared=(await b.readShared(party,`alice_${c.id}`)).sheet.details.spells[0];
+  assert.equal(shared.spellIconKey,'snowflake-2');assert.equal(shared.damageType,undefined);
+});
+
 test('phase 4: public sheets larger than one document are chunked and loaded read-only',async()=>{
   const a=storeFor('alice'),b=storeFor('bob'),c=demoCharacter(),template=c.spells[0];
   c.spells=Array.from({length:150},(_,i)=>({...template,id:uid(),name:`Public spell ${i}`,notes:'',school:'s'.repeat(2000),castingTime:'c'.repeat(2000),range:'r'.repeat(2000),duration:'d'.repeat(2000)}));

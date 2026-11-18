@@ -1,6 +1,10 @@
 // Pure synchronization rules, shared by the browser and emulator tests.
 import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS,skillBonus,initiative} from './model.js';
 import {armorClass,armorCheckMode} from './armor-class.js';
+import {selectSpellIcon} from './spell-icons.js';
+// Share the resolved artwork for structured homebrew effects without sharing
+// private effect metadata. Exact names and schools can be resolved by readers.
+const publicSpellIcon=spell=>{const selected=selectSpellIcon(spell);return ['manual','effect'].includes(selected.source)?{spellIconKey:selected.key}:{};};
 export const LIVE_KEYS=['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice'];
 export const copy=value=>value===undefined?undefined:JSON.parse(JSON.stringify(value));
 export const equal=(a,b)=>JSON.stringify(a)===JSON.stringify(b);
@@ -95,7 +99,7 @@ export function publicProjection(character){
   return {initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
     stats:Object.fromEntries(Object.keys(ABILITIES).map(key=>[key,character.stats[key]])),initiativeBonus:character.initiativeBonus,initiativeAdvantage:character.initiativeAdvantage,initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),skills:copy(character.skills),expertise:copy(character.expertise),saves:copy(character.saves),speed:character.speed,hitDie:character.hitDie,spellAbility:character.spellAbility,
     attacks:character.attacks.map(a=>({name:a.name,ability:a.ability,bonus:a.bonus,damage:a.damage,type:a.type,range:a.range})),
-    spells:character.spells.map(s=>({name:s.name,level:s.level,school:s.school,castingTime:s.castingTime,range:s.range,duration:s.duration,concentration:s.concentration,prepared:s.prepared}))
+    spells:character.spells.map(s=>({name:s.name,level:s.level,school:s.school,castingTime:s.castingTime,range:s.range,duration:s.duration,concentration:s.concentration,prepared:s.prepared,...publicSpellIcon(s)}))
   }};
 }
 export function invitationToken(random=globalThis.crypto){
@@ -112,5 +116,5 @@ export function validPublicDetails(d){
     && Array.isArray(d.saves)&&d.saves.length<=30&&d.saves.every(key=>Object.hasOwn(ABILITIES,key))
     && integer(d.speed,0,100000000)&&[6,8,10,12].includes(d.hitDie)
     && Array.isArray(d.attacks)&&d.attacks.length<=2000&&d.attacks.every(a=>a&&text(a.name,200)&&text(a.damage,30)&&text(a.type,100)&&text(a.range,100))
-    && Array.isArray(d.spells)&&d.spells.length<=2000&&d.spells.every(s=>s&&text(s.name,200)&&integer(s.level,0,9)&&['school','castingTime','range','duration'].every(key=>text(s[key],2000))&&typeof s.prepared==='boolean'&&typeof s.concentration==='boolean');
+    && Array.isArray(d.spells)&&d.spells.length<=2000&&d.spells.every(s=>s&&text(s.name,200)&&integer(s.level,0,9)&&['school','castingTime','range','duration'].every(key=>text(s[key],2000))&&typeof s.prepared==='boolean'&&typeof s.concentration==='boolean'&&(s.spellIconKey===undefined||text(s.spellIconKey,100)&&/^[a-z0-9-]*$/.test(s.spellIconKey)));
 }

@@ -1,5 +1,6 @@
 import {mkdir,copyFile,cp,rm} from 'node:fs/promises';
 import {resolve} from 'node:path';
+import './check-spell-icons.mjs';
 const root=resolve(import.meta.dirname,'..');
 const out=resolve(root,'dist');
 // Always package from source so removed files cannot survive a local rebuild.
@@ -33,5 +34,7 @@ await cp(resolve(root,'portrait-maker'),resolve(out,'portrait-maker'),{recursive
 await cp(resolve(root,'assets/gui'),resolve(out,'assets/gui'),{recursive:true});
 await cp(resolve(root,'assets/equipment'),resolve(out,'assets/equipment'),{recursive:true});
 await cp(resolve(root,'assets/status-icons'),resolve(out,'assets/status-icons'),{recursive:true});
+for(const file of ['spell-icons.js','spell-icon-mappings.js','spell-icon-manifest.js','spell-icons.css'])await copyFile(resolve(root,file),resolve(out,file));
+await cp(resolve(root,'assets/spell-icons'),resolve(out,'assets/spell-icons'),{recursive:true});
 await cp(resolve(root,'assets/sfx'),resolve(out,'assets/sfx'),{recursive:true});
 console.log('Questlog built successfully → dist/ (static, GitHub Pages-ready)');

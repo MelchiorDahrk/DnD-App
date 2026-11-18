@@ -136,6 +136,10 @@ The photographed Melchior, Balin and Teyla character data remains available to t
 
 This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of the Coast LLC, available at https://www.dndbeyond.com/srd. The SRD 5.2.1 is licensed under the Creative Commons Attribution 4.0 International License, available at https://creativecommons.org/licenses/by/4.0/legalcode. Rules are summarized and adapted for this tracker.
 
+## Fantasy spell artwork
+
+Spells use locally bundled [Game-icons.net](https://game-icons.net/) artwork by Lorc and Delapouite under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). All 397 catalog spells have deliberate mappings, using 246 distinct icons, with structured effect matching, eight school defaults, muted theme colors, and matching glows. Open **Edit spell → Icon → Browse library** to search, filter, preview, choose artwork, or restore **Automatic**. Choices persist in saves, backups, and cloud/party synchronization. Equipment and actual magic wands keep their LEGO artwork. SVG path geometry is preserved; opaque backgrounds are removed and theme colors applied. [Individual credits](assets/spell-icons/CREDITS.md) are available in Settings and the picker. See the [spell artwork guide](docs/spell-icons.md) for maintenance, homebrew metadata, and verification.
+
 ## Fantasy sound library
 
 **Settings & Backup → Sound effects** enables 60 bundled effects: 55 CC0 sounds and five user-provided clips (under 2 MB with both encodings). Adjust the master slider or individual categories and use **Sound preview → Test sound** to audition cues. Sound remains off by default, and the existing `settings.sound` preference is preserved. Volume preferences use a separate `questlog.audio.v1` browser-storage key; version 2 character backups are unchanged, and volume settings stay on the device.

@@ -8,6 +8,7 @@ import {createSoundManager,AUDIO_PREFERENCES_KEY} from '../sound.js';
 import {SOUND_ASSETS,SOUND_FILES} from '../sound-assets.js';
 import {CONDITION_ICON_FILES} from '../icons.js';
 import {DEFAULT_PORTRAIT_IDS} from '../portrait-defaults.js';
+import {SPELL_ICON_FILES} from '../spell-icon-manifest.js';
 import {SOUND_EVENTS,spellSoundEvent,weaponSoundEvent,rollSoundEvent,equipSoundEvent} from '../sound-events.js';
 import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 import {defaultPartyState} from './helpers/default-party.mjs';
@@ -184,9 +185,10 @@ test('existing version 2 backups retain their settings and round-trip without ne
 });
 test('service worker caches all encodings and sound modules under its own subdirectory',async()=>{
   let assets;const code=(await read('sw.js')).toString().replace(/^import .*;$/gm,'');
-  vm.runInNewContext(code+'\ncapture(ASSETS);',{LDRAW_ICONS:{},SOUND_FILES,CONDITION_ICON_FILES,DEFAULT_PORTRAIT_IDS,self:{addEventListener(){},skipWaiting(){}},capture:urls=>assets=urls,URL,Response});
+  vm.runInNewContext(code+'\ncapture(ASSETS);',{LDRAW_ICONS:{},SOUND_FILES,CONDITION_ICON_FILES,DEFAULT_PORTRAIT_IDS,SPELL_ICON_FILES,self:{addEventListener(){},skipWaiting(){}},capture:urls=>assets=urls,URL,Response});
   for(const path of [...SOUND_FILES,'sound.js','sound-events.js','sound-assets.js','assets/sfx/manifest.json'])assert.ok(assets.includes('./'+path),path);
   for(const path of ['./condition-usage.js',...Object.values(CONDITION_ICON_FILES)])assert.ok(assets.includes(path),path);
   for(const path of ['./portrait-defaults.js','./portrait-default-data.js',...DEFAULT_PORTRAIT_IDS.map(id=>`./portrait-maker/preset-thumbs/${id}.webp`)])assert.ok(assets.includes(path),path);
+  for(const path of ['./spell-icons.js','./spell-icon-mappings.js','./spell-icon-manifest.js','./spell-icons.css',...SPELL_ICON_FILES])assert.ok(assets.includes(path),path);
   assert.ok(assets.every(path=>!/^https?:/.test(path)));
 });
