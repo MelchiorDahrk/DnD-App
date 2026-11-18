@@ -36,6 +36,7 @@ try {
   const button=(action,id)=>`#main [data-action="${action}"][data-id="${id}"]`;
   const use=async id=>{await page.click(button('use-item',id));await page.click('#modal [data-action="confirm-use-item"]');};
   const edit=async(id,values)=>{
+    await page.$eval(button('item',id),node=>node.scrollIntoView({block:'center',behavior:'instant'}));
     await page.click(button('item',id));
     await page.evaluate(values=>{for(const [name,value] of Object.entries(values)){const input=document.querySelector(`#modal [name="${name}"]`);if(input.type==='checkbox')input.checked=value;else input.value=value;}},values);
     await page.click('#modal button[type="submit"]');

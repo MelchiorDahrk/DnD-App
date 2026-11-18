@@ -31,6 +31,7 @@ const paths = {
   leaf: '<path d="M20 3C8 1 0 9 6 16s17 0 14-13ZM4 21l11-11"/>',
   sword: '<path d="m4 20 5-5m-3-3 6 6M8 14 18 3h4v4L11 17M3 17l4 4"/>',
   bow: '<path d="M4 3c17 0 17 17 17 17L4 3Zm0 0v17h17M7 17 19 5m-5 0h5v5"/>',
+  potion: '<path d="M9 3h6M10 3v6l-5 8a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-8V3M7 14h10"/>',
   coin: '<circle cx="12" cy="12" r="9"/><path d="M15 8h-4a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4H9m3-10v12"/>',
   pin: '<path d="m8 3 8 0-1 6 4 4v2H5v-2l4-4-1-6Zm4 12v7"/>',
   sound: '<path d="m11 3-6 5H2v8h3l6 5V3Zm4 5c3 2 3 6 0 8m3-11c5 4 5 10 0 14"/>',

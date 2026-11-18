@@ -39,7 +39,7 @@ function reveal(session) {
     if(hidden===null)node.removeAttribute('aria-hidden');else node.setAttribute('aria-hidden',hidden);
   }
   session.concealed=[];
-  session.faces.hidden=false;
+  session.faces.hidden=false;session.faces.removeAttribute('aria-hidden');
   // Tray insertion and scrolling to Roll can leave a mobile total behind the fixed chrome.
   if(current===session&&session.stage.parentElement?.id==='dice-stage'&&matchMedia('(max-width:760px)').matches) {
     const total=document.querySelector('#tray-die')?.getBoundingClientRect();
@@ -101,9 +101,10 @@ export function presentDice(result,host) {
   heading.append(label,status);
   const surface=document.createElement('div');surface.className='dice-surface';surface.setAttribute('aria-hidden','true');
   const note=document.createElement('p');note.className='dice-stage-note';note.textContent=plan.note;note.hidden=!plan.note;
-  const faces=document.createElement('div');faces.className='dice-stage-faces';faces.hidden=true;faces.setAttribute('aria-label','Individual dice results');
+  const faces=document.createElement('div');faces.className='dice-stage-faces';faces.hidden=true;faces.setAttribute('aria-hidden','true');faces.setAttribute('aria-label','Individual dice results');
   const kept=result.mode==='advantage'?Math.max(...result.rolls):result.mode==='disadvantage'?Math.min(...result.rolls):null;
   const keptIndex=kept===null?-1:result.rolls.indexOf(kept);
+  if(kept!==null){note.hidden=false;note.textContent=`Keep the ${result.mode==='advantage'?'higher':'lower'} result.`;}
   result.rolls.forEach((value,index)=>{
     const face=document.createElement('span');face.textContent=value;
     if(index===keptIndex){face.className='dice-face-kept';face.setAttribute('aria-label',`${value}, kept die`);}

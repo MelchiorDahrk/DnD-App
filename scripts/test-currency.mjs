@@ -92,7 +92,7 @@ try {
   const calmPage=await (calmBrowser||browser).newPage();
   calmPage.on('pageerror',error=>errors.push(error.message));
   if(!isFirefox)await calmPage.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
-  await calmPage.goto(base,{waitUntil:'networkidle0'});
+  await calmPage.goto(`${base}#inventory`,{waitUntil:'networkidle0'});
   await calmPage.evaluate(saved=>localStorage.setItem('questlog.v2',JSON.stringify(saved)),await state());
   await calmPage.reload({waitUntil:'networkidle0'});
   assert.equal(await calmPage.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches),true);

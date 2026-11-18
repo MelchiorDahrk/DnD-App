@@ -4,9 +4,9 @@
 .dice-stage-status{flex-shrink:0;color:var(--text-primary)}
 .dice-surface{height:280px;width:100%;overflow:hidden;pointer-events:none}
 .dice-surface canvas{display:block;width:100%;height:100%}
-.dice-stage-note{margin:0;padding:0 16px 14px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
+.dice-stage-note{min-height:calc(2lh + 14px);margin:0;padding:0 16px 14px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
 .dice-stage-faces{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;padding:0 14px 14px;font:13px var(--mono);color:var(--text-primary)}
-.dice-stage-faces[hidden]{display:none}
+.dice-stage-faces[hidden]{display:flex;visibility:hidden}
 .dice-stage-faces span{min-width:30px;padding:5px 8px;text-align:center;border:1px solid var(--border-subtle);border-radius:5px;background:var(--dice-body);color:var(--dice-numbers)}
 .dice-stage-faces .dice-face-kept{border-color:var(--accent-edge);box-shadow:inset 0 -2px var(--hero-brass)}
 .dice-stage[data-state="loading"] .dice-stage-faces,.dice-stage[data-state="rolling"] .dice-stage-faces{visibility:hidden}

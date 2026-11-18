@@ -33,6 +33,11 @@ try {
   await page.goto(base+'#dice',{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
   phase='custom dice colors';
+  assert.equal(await page.$('[data-dice-color]'),null,'Dice color editing stays in Settings');
+  assert.equal(await page.$('.tray-eyebrow'),null);
+  assert.equal(await page.$eval('.roll-history-empty',node=>node.textContent),'');
+  assert.ok(await page.$('.roll-history-empty>.icon'));
+  await page.goto(base+'#settings',{waitUntil:'networkidle0'});
   const colors={body:'#7c3aed',numbers:'#e6ffb3'};
   const controls=()=>page.$$eval('[data-dice-color]',inputs=>Object.fromEntries(inputs.map(input=>[input.dataset.diceColor,input.value])));
   const setColor=(key,value)=>page.$eval(`[data-dice-color="${key}"]`,(input,value)=>{
@@ -50,7 +55,7 @@ try {
   await setColor('body',colors.body);await setColor('numbers',colors.numbers);
   await page.goto(base+'#dice',{waitUntil:'networkidle0'});
   await page.reload({waitUntil:'networkidle0'});
-  assert.deepEqual(await controls(),colors,'custom colors survive reloading');
+  assert.equal(await page.$('[data-dice-color]'),null,'The roll page remains free of color controls after reloading');
   assert.deepEqual(await page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.dice-colors.v1'))),colors);
   await mkdir(resolve(root,'.tmp'),{recursive:true});
   await page.screenshot({path:resolve(root,'.tmp/dice-color-controls.png'),fullPage:true});
@@ -103,6 +108,7 @@ try {
     },{expression,values});
     if(settled) {
       await page.waitForSelector('.dice-stage[data-state="rolling"]');
+      const rollingHeight=await page.$eval('.dice-tray',node=>node.getBoundingClientRect().height);
       assert.ok(await page.evaluate(()=>{
         const hidden=selector=>getComputedStyle(document.querySelector(selector)).visibility==='hidden';
         return hidden('#tray-die')&&hidden('#roll-detail')&&hidden('.history-row:first-child')&&
@@ -115,6 +121,7 @@ try {
         assert.equal(await page.$('.vfx-canvas'),null,'natural-20 particles must wait for the 3D throw');
       }
       await waitForSettled();
+      assert.ok(Math.abs(await page.$eval('.dice-tray',node=>node.getBoundingClientRect().height)-rollingHeight)<1,'Revealing faces and the total preserves tray height');
       assert.ok(await page.$eval('#tray-die',node=>getComputedStyle(node).visibility==='visible'&&!node.inert&&node.getAttribute('aria-hidden')!=='true'));
       assert.ok(await page.$('.dice-stage canvas'),expression+' has real 3D dice');
       await assertDiceColors();
