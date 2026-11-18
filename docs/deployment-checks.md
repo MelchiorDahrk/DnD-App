@@ -2,6 +2,24 @@
 
 Pages deployment is gated on working functionality: source syntax, a successful build, rules and save validation, loading the built site beneath the Pages subpath, usable images, character and equipment interactions, portrait creation/editing, photo matching, appearance selection/persistence, keyboard dialog focus, and offline operation. Functional failures still stop deployment.
 
+## Guest upload acknowledgment race — November 17, 2026
+
+[Run 44193448569](https://github.com/MelchiorDahrk/DnD-App/actions/runs/44193448569)
+built successfully but the Firebase browser check found an “existing character ID”
+conflict while uploading a guest character. A successful create left the durable
+queue before its metadata read finished. An index callback in that interval could
+mistake the character for an unsaved local sheet and queue a second create with a
+different receipt ID.
+
+Sync now retains the original operation through the metadata refresh, follows a
+newer read when its own read is superseded, and delivers the refreshed sheet after
+the operation leaves the queue. A failed read retains the same durable receipt for
+retry. Controlled unit regressions reproduce the duplicate-create failure with
+the previous implementation, including overlapping reads, and check queued edits
+and confirmed deletions. A Firestore regression delays acknowledgment and requires
+one stored create receipt. The complete two-account browser flow remains required;
+genuine character ID collisions still require explicit resolution.
+
 ## Sheet browser deadline — November 17, 2026
 
 [Run 44017193702](https://github.com/MelchiorDahrk/DnD-App/actions/runs/44017193702)

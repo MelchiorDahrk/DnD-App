@@ -41,6 +41,30 @@ test('phase 2: uploads preserve fields, reject duplicates and deny other account
   await assertFails(sdk.getDoc(sdk.doc(env.unauthenticatedContext().firestore(),alice.path(c.id))));
 });
 
+test('a guest upload stays pending through metadata acknowledgment without a second create',async()=>{
+  const store=storeFor('alice'),c=demoCharacter(),state={characters:[],activeId:null},values=new Map();
+  const storage={get length(){return values.size;},key:i=>[...values.keys()][i],getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key)};
+  const read=store.readCharacter.bind(store),apply=store.apply.bind(store),applied=[];
+  let release,reading=false;
+  const gate=new Promise(resolve=>release=resolve);
+  store.apply=async(id,operation)=>{applied.push(operation);return apply(id,operation);};
+  store.readCharacter=async id=>{const result=await read(id);reading=true;await gate;return result;};
+  const sync=new CharacterSync({store,storage,getState:()=>state,onRemote:()=>{},online:()=>true});
+  let flush;
+  try{
+    sync.loaded=true;state.characters.push(c);sync.observe();clearTimeout(sync.timer);
+    flush=sync.flush();await waitFor(()=>reading);
+    await sync.receiveIndex([]);clearTimeout(sync.timer);
+    release();await flush;
+    assert.equal(sync.conflict,null,'The upload must not conflict with its own acknowledged create.');
+    assert.equal(applied.length,1);assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
+    assert.deepEqual((await read(c.id)).character,c);
+    assert.equal((await sdk.getDocs(sdk.collection(store.db,`${store.path(c.id)}/operations`))).size,1,'Only the original create receipt is stored.');
+  }finally{
+    release();await flush;sync.stopped=true;clearTimeout(sync.timer);clearTimeout(sync.retry);
+  }
+});
+
 test('publishing app rules recovers denied listeners and queued character backups',async()=>{
   const rules=await readFile(new URL('../../firestore.rules',import.meta.url),'utf8');
   const denied=await initializeTestEnvironment({projectId,firestore:{rules:"rules_version = '2'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read, write: if false; } } }"}});

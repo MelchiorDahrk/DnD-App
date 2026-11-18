@@ -147,6 +147,92 @@ test('edits queued while a completed flush releases its browser lock still uploa
   assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
 });
 
+function cloudStorage(){
+  const values=new Map();
+  return {getItem:key=>values.get(key)||null,setItem:(key,value)=>values.set(key,value),removeItem:key=>values.delete(key),key:i=>[...values.keys()][i],get length(){return values.size;}};
+}
+
+for(const superseded of [false,true])test(`a confirmed upload is not created twice while ${superseded?'a newer refresh is pending':'its metadata is loading'}`,async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const c=demoCharacter(),state={characters:[],activeId:null},applied=[],reads=[],delivered=[];
+  let uploaded;
+  const store={uid:'alice',apply:async(id,operation)=>{
+    applied.push(operation);
+    if(uploaded)throw new CloudConflict(['existing character ID']);
+    uploaded=operation.create;
+  },readCharacter:()=>new Promise(resolve=>reads.push(resolve))};
+  const sync=new CharacterSync({store,storage:cloudStorage(),getState:()=>state,onRemote:(id,c)=>delivered.push(c),online:()=>true});
+  t.after(()=>{sync.stopped=true;});
+  sync.loaded=true;state.characters.push(c);sync.observe();
+  const flush=sync.flush();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(reads.length,1);
+  const result={character:c,meta:{revision:1},live:{...splitCharacter(c).live,revision:1}};
+  const index=superseded?sync.receiveIndex([{id:c.id,revision:1}]):Promise.resolve();
+  if(superseded){reads[0](result);await new Promise(resolve=>setImmediate(resolve));}
+  // Firestore may deliver an earlier index snapshot after the create commits.
+  // Its callback must not infer a new upload before metadata is available.
+  await sync.receiveIndex([]);
+  if(superseded){assert.equal(reads.length,2);reads[1](result);}else reads[0](result);
+  await Promise.all([flush,index]);
+  assert.equal(applied.length,1,'Only the original create operation reaches the server.');
+  assert.equal(sync.conflict,null);assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
+  assert.equal(sync.meta.get(c.id).revision,1);
+  assert.equal(delivered.at(-1)?.id,c.id,'The acknowledged remote sheet is delivered after the queue drains.');
+});
+
+test('a failed metadata read retains the acknowledged operation for receipt-safe retry',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const c=demoCharacter(),state={characters:[],activeId:null},applied=[];
+  let failRead=true,created=false;
+  const store={uid:'alice',apply:async(id,operation)=>{
+    applied.push(operation.id);
+    if(created){assert.equal(operation.id,applied[0],'Retry the original receipt instead of creating a new operation.');return {duplicate:true};}
+    created=true;
+  },readCharacter:async()=>{
+    if(failRead)throw new Error('Read temporarily unavailable');
+    return {character:c,meta:{revision:1},live:{...splitCharacter(c).live,revision:1}};
+  }};
+  const storage=cloudStorage(),sync=new CharacterSync({store,storage,getState:()=>state,onRemote:()=>{},online:()=>true});
+  t.after(()=>{sync.stopped=true;});
+  sync.loaded=true;state.characters.push(c);sync.observe();await sync.flush();
+  assert.equal(sync.state,'error');assert.equal(sync.queue.length,1,'A refresh failure cannot erase the durable receipt ID.');
+  assert.ok(storage.getItem(sync.prefix+applied[0]));
+  failRead=false;await sync.flush();
+  assert.deepEqual(applied,[applied[0],applied[0]]);assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
+});
+
+test('an edit made during upload acknowledgment follows the create without restoring stale state',async t=>{
+  t.mock.timers.enable({apis:['setTimeout']});
+  const c=demoCharacter(),state={characters:[],activeId:null},applied=[],delivered=[];
+  let release,uploaded,live;
+  const gate=new Promise(resolve=>release=resolve);
+  const store={uid:'alice',apply:async(id,operation)=>{
+    applied.push(operation);
+    if(operation.create){uploaded=operation.create;live={...splitCharacter(uploaded).live,revision:1};}
+    else live={...applyLive(live,operation),revision:live.revision+1};
+  },readCharacter:async()=>{await gate;return {character:uploaded,meta:{revision:1},live};},readLive:async()=>({meta:{revision:1},live})};
+  const sync=new CharacterSync({store,storage:cloudStorage(),getState:()=>state,onRemote:(id,c)=>delivered.push(c),online:()=>true});
+  t.after(()=>{sync.stopped=true;});
+  sync.loaded=true;state.characters.push(c);sync.observe();
+  const flush=sync.flush();await new Promise(resolve=>setImmediate(resolve));
+  c.hp--;sync.observe(new Map([[c.id,{kind:'damage',amount:1}]]));
+  release();await flush;
+  assert.equal(applied.length,2);assert.equal(applied.filter(op=>op.create).length,1);
+  assert.deepEqual(applied[1].hpAction,{kind:'damage',amount:1});
+  assert.deepEqual(delivered.map(c=>c.hp),[c.hp],'Only the state including the pending edit is delivered.');
+  assert.equal(sync.queue.length,0);assert.equal(sync.state,'synced');
+});
+
+test('a confirmed deletion supersedes an unfinished refresh',async()=>{
+  const c=demoCharacter(),delivered=[];let release;
+  const store={uid:'alice',readCharacter:()=>new Promise(resolve=>release=resolve)};
+  const sync=new CharacterSync({store,storage:cloudStorage(),getState:()=>({characters:[],activeId:null}),onRemote:(id,c)=>delivered.push(c),online:()=>true});
+  const refresh=sync.refresh(c.id);
+  await sync.receiveIndex([{id:c.id,revision:2,deleted:true}]);
+  release({character:c,meta:{revision:1},live:{...splitCharacter(c).live,revision:1}});await refresh;
+  assert.deepEqual(delivered,[null]);assert.equal(sync.remote.get(c.id),null);assert.equal(sync.meta.get(c.id).deleted,true);
+});
+
 for(const conflict of [false,true])test(`concurrent flush requests preserve ${conflict?'conflict resolution':'error retry backoff'}`,async t=>{
   t.mock.timers.enable({apis:['setTimeout']});
   const c=demoCharacter(),state={characters:[c]},storage=new Map();let calls=0;

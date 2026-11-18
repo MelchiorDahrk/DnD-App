@@ -6,7 +6,7 @@ export class CharacterSync {
   constructor({store,storage=localStorage,getState,onRemote,onStatus=()=>{},online=()=>navigator.onLine}){
     Object.assign(this,{store,storage,getState,onRemote,onStatus,online});
     this.key=queueKey(store.uid);this.prefix=this.key+'.op.';this.sequence=0;this.baseline=new Map(getState().characters.map(c=>[c.id,copy(c)]));
-    this.remote=new Map();this.meta=new Map();this.liveRecords=new Map();this.refreshSequence=new Map();this.indexStop=null;this.indexError=null;this.activeStop=null;this.activeId=null;
+    this.remote=new Map();this.meta=new Map();this.liveRecords=new Map();this.refreshSequence=new Map();this.refreshes=new Map();this.indexStop=null;this.indexError=null;this.activeStop=null;this.activeId=null;
     this.queue=[];this.conflict=null;this.running=false;this.stopped=false;this.loaded=false;
     try{const saved=storage.getItem(this.key);if(saved){const data=JSON.parse(saved);if(data.queue){if(!Array.isArray(data.queue))throw new Error('Invalid queue');this.queue=data.queue;this.saveQueue();}}this.reloadQueue();}
     catch{this.blocked=true;this.status('error','Pending cloud operations could not be read. Export a backup; this queue has been preserved.');}
@@ -67,7 +67,7 @@ export class CharacterSync {
       for(const row of rows){
         if(this.stopped)return;
         const old=this.meta.get(row.id);
-        if(row.deleted){this.refreshSequence.set(row.id,(this.refreshSequence.get(row.id)||0)+1);this.meta.set(row.id,row);this.remote.set(row.id,null);this.deliver(row.id,null);continue;}
+        if(row.deleted){this.refreshSequence.set(row.id,(this.refreshSequence.get(row.id)||0)+1);this.refreshes.delete(row.id);this.meta.set(row.id,row);this.remote.set(row.id,null);this.deliver(row.id,null);continue;}
         if(!old||old.revision!==row.revision)await this.refresh(row.id);
       }
       this.loaded=true;
@@ -76,17 +76,24 @@ export class CharacterSync {
       this.observe();this.flush();
     }catch(error){this.fail(error);}
   }
-  async refresh(id){
+  refresh(id){
     const sequence=(this.refreshSequence.get(id)||0)+1;this.refreshSequence.set(id,sequence);
-    const result=await this.store.readCharacter(id);if(this.stopped||sequence!==this.refreshSequence.get(id))return;
-    if(result){
-      if(result.meta.revision<(this.meta.get(id)?.revision||0))return;
-      const latest=this.liveRecords.get(id);
-      if(latest&&latest.revision>result.live.revision){result.live=latest;result.character=joinCharacter(splitCharacter(result.character).content,latest);}
-      else this.liveRecords.set(id,result.live);
-      this.meta.set(id,{...result.meta,liveRevision:result.live.revision});this.remote.set(id,result.character);this.deliver(id,result.character);
-    }
-    else{this.remote.set(id,null);this.deliver(id,null);}
+    const pending=(async()=>{
+      const result=await this.store.readCharacter(id);if(this.stopped)return;
+      // A write acknowledgment must wait for whichever read will actually
+      // install metadata, even when an index update supersedes its own read.
+      if(sequence!==this.refreshSequence.get(id))return this.refreshes.get(id);
+      if(result){
+        if(result.meta.revision<(this.meta.get(id)?.revision||0))return;
+        const latest=this.liveRecords.get(id);
+        if(latest&&latest.revision>result.live.revision){result.live=latest;result.character=joinCharacter(splitCharacter(result.character).content,latest);}
+        else this.liveRecords.set(id,result.live);
+        this.meta.set(id,{...result.meta,liveRevision:result.live.revision});this.remote.set(id,result.character);this.deliver(id,result.character);
+      }
+      else{this.remote.set(id,null);this.deliver(id,null);}
+    })();
+    this.refreshes.set(id,pending);
+    return pending;
   }
   async refreshLive(id){
     const current=this.remote.get(id),meta=this.meta.get(id);
@@ -149,9 +156,13 @@ export class CharacterSync {
           try{await this.store.apply(operation.characterId,operation);}
           catch(error){if(error.code==='questlog/conflict'){this.conflict={...operation,message:error.message};this.status('conflict',error.message);return;}throw error;}
           if(this.stopped)return;
-          this.dropOperations([operation.id]);this.reloadQueue();
+          // Keep the durable operation pending until its cloud state is known.
+          // Otherwise an index callback can queue a second create in this gap.
           if(operation.create||operation.delete||operation.content?.length)await this.refresh(operation.characterId);
           else await this.refreshLive(operation.characterId);
+          if(this.stopped)return;
+          this.dropOperations([operation.id]);this.reloadQueue();
+          if(this.remote.has(operation.characterId))this.deliver(operation.characterId,this.remote.get(operation.characterId));
         }
         this.status('synced');succeeded=true;
       }catch(error){this.fail(error);}
