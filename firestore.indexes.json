@@ -5,6 +5,7 @@
     {"collectionGroup":"sheet","fieldPath":"json","indexes":[]},
     {"collectionGroup":"characters","fieldPath":"sheet","indexes":[]},
     {"collectionGroup":"state","fieldPath":"featureUses","indexes":[]},
+    {"collectionGroup":"stores","fieldPath":"items","indexes":[]},
     {"collectionGroup":"state","fieldPath":"featureMax","indexes":[]}
   ]
 }

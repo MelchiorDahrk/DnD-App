@@ -685,7 +685,7 @@ document.addEventListener('click',event=>{
       }
       case 'death-counter':c[el.dataset.kind==='success'?'deathSuccess':'deathFailure']=Number(el.dataset.value);commit();break;
       case 'death-roll':{if(c.hp>0||c.deathSuccess>=3||c.deathFailure>=3)break;const before={hp:c.hp,tempHp:c.tempHp};const r=performRoll(`1d20${signed(-exhaustionPenalty(c))}`,'Death saving throw');if(r.natural===20){trackedHP(c,1,'heal');}else if(r.total>=10)c.deathSuccess=Math.min(3,c.deathSuccess+1);else c.deathFailure=Math.min(3,c.deathFailure+(r.natural===1?2:1));commit();if(r.natural===20)afterRoll(r,()=>{toast('Natural 20! You regain 1 HP.');showHPFeedback(before,'heal','.big-die');});break;}
-      case 'rest':if(modal.querySelector('.rest-illustration')||!cloud.requestRest(el.dataset.kind||'short'))showRest(el.dataset.kind);break;
+      case 'rest':showRest(el.dataset.kind);break;
       case 'rest-review':modal.close();if(id)editFeature(id);else if(el.dataset.target==='stats')editCombat();else if(el.dataset.target==='conditions')showConditions();else {navigate(el.dataset.target==='features'?'sheet':el.dataset.target);if(el.dataset.target==='features')document.querySelector('[data-sheet-section="features"]')?.scrollIntoView({block:'start'});}break;
       case 'xp':showXP();break;
       case 'level-up':showLevelUp();break;

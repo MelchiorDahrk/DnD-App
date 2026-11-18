@@ -20,7 +20,10 @@ contracts and the JSON backup format.
   Slot/feature limits live here too, so a stale sheet cannot override current caps.
 * `.../operations/{randomId}`: immutable operation receipts, written atomically
   with character changes. Retries after an uncertain connection cannot apply twice.
-* `parties/{id}`: creator and name; `members/{uid}`: membership. Joining requires
+* `parties/{id}`: owner, name, and optional DM assignment; `members/{uid}`:
+  membership. The assignment references a shared character and its controlling
+  account. Firestore resolves the owner as DM when the assignment is invalid or
+  absent. Joining requires
   a valid invitation in the same transaction. Membership cannot be self-created
   using a party ID. Owners manage invitations and remove members; members leave.
 * `invitations/{256-bit token}`: party, creator, expiration, revoked flag.
@@ -33,6 +36,11 @@ contracts and the JSON backup format.
   Its `sheet/{index}` fragments contain allowlisted abilities, skills, attacks and
   spell details. Only opening a read-only sheet loads these fragments. Content
   hashes suppress unchanged projections, and live changes never transfer them.
+* `parties/{id}/stores/{store}`: DM-managed visibility, store policies, and
+  merchandise by catalog ID. Limited stock updates commit with the buyer's sheet
+  and an immutable `shopReceipts/{orderId}` document under that character. The
+  rules validate access and stock arithmetic, and the client applies trading
+  rules to the owner-editable character JSON. See the [party play guide](party-play.md).
 
 Rules deny everything else and validate document keys, types, revisions, owner
 immutability, membership, invitation validity, and sharing links. A removed

@@ -240,7 +240,9 @@ Fantasy catalog and equipment icon maintenance, build requirements, and regressi
 ## Appearance
 
 The live Party table includes shared initiative, spectator dice, accepted item
-and coin transfers, group rest replies, a skill finder, and Session Mode. Party
+and coin transfers, town stores, group rest replies, a skill finder, and Session
+Mode. Party owners can assign a DM to run encounters, call group rests, and
+manage stores. Party
 notification preferences are in **Settings → Party**. See the
 [party play architecture and verification guide](docs/party-play.md); deploy its
 updated Firestore rules alongside the app.

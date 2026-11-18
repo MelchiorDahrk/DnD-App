@@ -8,6 +8,52 @@ service cloud.firestore {
     function afterMember(party) { return signed() && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.auth.uid)); }
     function integer(n, low, high) { return n is int && n >= low && n <= high; }
     function text(s, max) { return s is string && s.size() <= max; }
+    function partyPath(party) { return /databases/$(database)/documents/parties/$(party); }
+    function characterPath(uid,id) { return /databases/$(database)/documents/users/$(uid)/characters/$(id); }
+    function sharedPath(party,id) { return /databases/$(database)/documents/parties/$(party)/characters/$(id); }
+    function memberPath(party,uid) { return /databases/$(database)/documents/parties/$(party)/members/$(uid); }
+    function shopPath(party,shop) { return /databases/$(database)/documents/parties/$(party)/stores/$(shop); }
+    function receiptPath(uid,character,id) { return /databases/$(database)/documents/users/$(uid)/characters/$(character)/shopReceipts/$(id); }
+    function validOrderLine(line,order) {
+      return line.catalogId==order.itemId && integer(line.priceCp,1,100000000) && order.unitCp==line.priceCp
+        && integer(order.quantity,1,99999);
+    }
+    function stockChange(before,after,order) {
+      let id=order.itemId;
+      return before.open==true && (id in before.items) && (id in after.items)
+        && after.diff(before).affectedKeys().hasOnly(['items','lastPurchase','revision'])
+        && after.revision==before.revision+1 && after.items.diff(before.items).affectedKeys().hasOnly([id])
+        && validOrderLine(before.items[id],order) && integer(before.items[id].stock,order.quantity,99999)
+        && after.items[id].diff(before.items[id]).affectedKeys().hasOnly(['stock'])
+        && after.items[id].stock==before.items[id].stock-order.quantity;
+    }
+    function validShop(data) {
+      return data.keys().hasOnly(['name','type','description','multiplier','buyRate','acceptAll','open','items','revision','lastPurchase'])
+        && text(data.name,100) && data.name.size()>0 && text(data.description,2000)
+        && data.type in ['general','blacksmith','armorer','alchemist','arcane','scribe','jeweler','stables','outfitter','magic']
+        && integer(data.multiplier,1,1000) && integer(data.buyRate,0,100)
+        && data.acceptAll is bool && data.open is bool && data.items is map && data.items.size()<=100
+        && integer(data.revision,1,2147483647) && data.lastPurchase==null;
+    }
+    function validDM(party,dm) {
+      return dm is map && dm.keys().hasOnly(['ownerId','characterId','sharedId']) && dm.keys().size()==3
+        && text(dm.ownerId,128) && dm.ownerId.size()>0 && dm.characterId.matches('[a-zA-Z0-9_-]{1,100}')
+        && dm.sharedId==dm.ownerId+'_'+dm.characterId
+        && exists(memberPath(party,dm.ownerId)) && exists(sharedPath(party,dm.sharedId))
+        && get(sharedPath(party,dm.sharedId)).data.ownerId==dm.ownerId
+        && get(sharedPath(party,dm.sharedId)).data.characterId==dm.characterId
+        && exists(characterPath(dm.ownerId,dm.characterId)) && get(characterPath(dm.ownerId,dm.characterId)).data.partyId==party
+        && get(characterPath(dm.ownerId,dm.characterId)).data.deleted==false;
+    }
+    function dungeonMaster(party) {
+      let root=get(partyPath(party)).data;
+      let assignment=root.get('dm',null);
+      return member(party) && request.auth.uid==(validDM(party,assignment)?assignment.ownerId:root.ownerId);
+    }
+    function assignmentCleared(party,key,value) {
+      return !existsAfter(partyPath(party)) || getAfter(partyPath(party)).data.get('dm',{})==null
+        || getAfter(partyPath(party)).data.get('dm',{}).get(key,'')!=value;
+    }
     function manifest(d, uid) {
       return d.keys().hasAll(['ownerId','name','revision','chunks','partyId','deleted'])
         && d.keys().hasOnly(['ownerId','name','revision','chunks','partyId','deleted'])
@@ -41,7 +87,10 @@ service cloud.firestore {
         && request.resource.data.ownerId==resource.data.ownerId
         && request.resource.data.revision==resource.data.revision+1
         && (!resource.data.deleted || request.resource.data.deleted)
-        && (request.resource.data.partyId==resource.data.partyId || request.resource.data.partyId=='' || member(request.resource.data.partyId));
+        && (request.resource.data.partyId==resource.data.partyId || request.resource.data.partyId=='' || member(request.resource.data.partyId))
+        && (resource.data.partyId=='' || (!request.resource.data.deleted && request.resource.data.partyId==resource.data.partyId)
+          || !exists(memberPath(resource.data.partyId,uid)) || !exists(partyPath(resource.data.partyId))
+          || !existsAfter(sharedPath(resource.data.partyId,uid+'_'+id)));
       match /content/{index} {
         allow read: if own(uid);
         allow create, update: if own(uid) && index.matches('[0-9]{1,2}')
@@ -63,6 +112,35 @@ service cloud.firestore {
         allow create: if own(uid) && request.resource.data.keys().hasOnly(['operationId','createdAt'])
           && request.resource.data.operationId==operationId && request.resource.data.createdAt==request.time;
       }
+      match /shopReceipts/{orderId} {
+        function isBuy(order,path) {
+          let shop=get(path).data;
+          return (order.itemId in shop.items) && validOrderLine(shop.items[order.itemId],order)
+            && (shop.items[order.itemId].stock==null || (
+              getAfter(path).data.lastPurchase=={'uid':uid,'characterId':id,'id':orderId}
+              && stockChange(shop,getAfter(path).data,order)));
+        }
+        function shopOrder(order) {
+          let path=shopPath(order.partyId,order.storeId);
+          let previous=get(characterPath(uid,id)).data;
+          let next=getAfter(characterPath(uid,id)).data;
+          let shared=get(sharedPath(order.partyId,uid+'_'+id)).data;
+          return member(order.partyId) && get(path).data.open==true
+            && previous.deleted==false && previous.partyId==order.partyId && next.partyId==previous.partyId
+            && next.deleted==false && next.revision==previous.revision+1
+            && shared.ownerId==uid && shared.characterId==id
+            && (order.kind=='sell' || isBuy(order,path));
+        }
+        allow get: if own(uid);
+        allow create: if own(uid) && orderId.matches('[a-zA-Z0-9_-]{1,100}')
+          && request.resource.data.keys().hasOnly(['partyId','storeId','kind','itemId','quantity','unitCp','createdAt'])
+          && request.resource.data.partyId.matches('[a-zA-Z0-9_-]{1,100}')
+          && request.resource.data.storeId.matches('[a-zA-Z0-9_-]{1,100}')
+          && text(request.resource.data.itemId,200) && request.resource.data.itemId.size()>0
+          && request.resource.data.kind in ['buy','sell']
+          && integer(request.resource.data.quantity,1,99999) && integer(request.resource.data.unitCp,1,100000000)
+          && request.resource.data.createdAt==request.time && shopOrder(request.resource.data);
+      }
     }
     match /users/{uid}/parties/{party} {
       allow read, delete: if own(uid);
@@ -82,10 +160,35 @@ service cloud.firestore {
         && request.resource.data.name.size()>0 && request.resource.data.createdAt==request.time;
       allow update: if creator(party) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
         && text(request.resource.data.name,100) && request.resource.data.name.size()>0;
-      allow update: if creator(party) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerId'])
+      allow update: if creator(party) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['ownerId','dm'])
+        && request.resource.data.ownerId!=resource.data.ownerId
+        && (request.resource.data.get('dm',null)==resource.data.get('dm',null)
+          || (request.resource.data.get('dm',null)==null && !existsAfter(memberPath(party,request.auth.uid))))
         && text(request.resource.data.ownerId,128)
         && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.resource.data.ownerId));
+      allow update: if signed() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['dm'])
+        && ((creator(party) && (request.resource.data.get('dm',null)==null || validDM(party,request.resource.data.dm)))
+          || (request.resource.data.get('dm',null)==null && resource.data.get('dm',null)!=null
+            && resource.data.dm.ownerId==request.auth.uid
+            && (!existsAfter(sharedPath(party,resource.data.dm.sharedId)) || !existsAfter(memberPath(party,request.auth.uid)))));
       allow delete: if creator(party);
+      match /stores/{shop} {
+        function purchase() {
+          let marker=request.resource.data.lastPurchase;
+          let path=receiptPath(request.auth.uid,marker.characterId,marker.id);
+          let order=getAfter(path).data;
+          return marker=={'uid':request.auth.uid,'characterId':marker.characterId,'id':marker.id}
+            && !exists(path) && order.kind=='buy' && order.partyId==party && order.storeId==shop
+            && order.createdAt==request.time && stockChange(resource.data,request.resource.data,order);
+        }
+        allow read: if member(party) && (dungeonMaster(party) || resource.data.open==true);
+        allow create: if dungeonMaster(party) && shop.matches('[a-zA-Z0-9_-]{1,100}')
+          && validShop(request.resource.data) && request.resource.data.revision==1;
+        allow update: if (dungeonMaster(party) && validShop(request.resource.data)
+            && request.resource.data.revision==resource.data.revision+1)
+          || (member(party) && purchase());
+        allow delete: if dungeonMaster(party);
+      }
       match /session/combat {
         function resetCombat() {
           return request.resource.data.scores=={} && request.resource.data.modifiers=={}
@@ -118,10 +221,10 @@ service cloud.firestore {
             && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
         }
         allow read: if member(party);
-        allow create: if member(party) && validCombat() && resetCombat();
+        allow create: if dungeonMaster(party) && validCombat() && resetCombat();
         allow update: if member(party) && validCombat()
-          && ((resetCombat() && (!request.resource.data.active || (!resource.data.active && request.resource.data.encounterId!=resource.data.get('encounterId',''))))
-            || ownInitiative() || advanceCombat());
+          && (ownInitiative() || (dungeonMaster(party) && (advanceCombat()
+            || (resetCombat() && (!request.resource.data.active || (!resource.data.active && request.resource.data.encounterId!=resource.data.get('encounterId','')))))));
       }
       match /activities/{event} {
         allow read: if member(party);
@@ -135,7 +238,7 @@ service cloud.firestore {
       }
       match /rests/{rest} {
         allow read: if member(party);
-        allow create: if member(party) && request.resource.data.keys().hasOnly(['kind','actorId','characterId','createdAt'])
+        allow create: if dungeonMaster(party) && request.resource.data.keys().hasOnly(['kind','actorId','characterId','createdAt'])
           && request.resource.data.kind in ['short','long'] && request.resource.data.actorId==request.auth.uid
           && text(request.resource.data.characterId,100) && request.resource.data.createdAt==request.time;
         match /replies/{uid} {
@@ -182,6 +285,7 @@ service cloud.firestore {
           && (getAfter(/databases/$(database)/documents/parties/$(party)).data.ownerId==uid
               || validInvitation(party,request.resource.data.invitation));
         allow delete: if (own(uid) || creator(party))
+          && assignmentCleared(party,'ownerId',uid)
           && (!existsAfter(/databases/$(database)/documents/parties/$(party))
               || getAfter(/databases/$(database)/documents/parties/$(party)).data.ownerId!=uid);
       }
@@ -204,7 +308,8 @@ service cloud.firestore {
           && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(request.resource.data.characterId)).data.partyId==party
           && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)/characters/$(request.resource.data.characterId)).data.deleted==false
           && (!exists(/databases/$(database)/documents/parties/$(party)/characters/$(sharedId)) || resource.data.ownerId==request.auth.uid);
-        allow delete: if signed() && (resource.data.ownerId==request.auth.uid || creator(party));
+        allow delete: if signed() && (resource.data.ownerId==request.auth.uid || creator(party))
+          && assignmentCleared(party,'sharedId',sharedId);
         match /sheet/{index} {
           allow read: if member(party);
           allow create, update: if member(party) && index.matches('[0-9]{1,2}')

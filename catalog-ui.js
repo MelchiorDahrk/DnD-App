@@ -10,7 +10,7 @@ const characterOptions = name => name==='race'?SPECIES:name==='background'?BACKG
 const featSourceOptions=settings=>'<option value="All">All enabled feat sources</option>'+enabledFeatSources(settings).map(source=>`<option>${esc(source)}</option>`).join('');
 const featureSource=entry=>[entry.source,entry.book].filter(Boolean).join(' · ');
 
-function statPreview(entry,kind) {
+export function statPreview(entry,kind) {
   if(!entry)return '<p>Choose an option to see its stats.</p>';
   let stats=[];
   if(kind==='class')stats=[['Hit die',`d${entry.hitDie}`],['Primary ability',entry.primary],['Saving throws',entry.saves.map(s=>s.toUpperCase()).join(', ')],['Armor training',entry.armor],['Weapons',entry.weapons],[`Skills (choose ${entry.skillCount})`,entry.skills]];

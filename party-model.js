@@ -75,3 +75,12 @@ export function receiveTransfer(character,payload,{refund=false}={}) {
     }
   }else throw new Error('Invalid transfer.');
 }
+export function designatedDM(party) {
+  const assignment=party.dm;
+  if(!assignment||!party.members.some(m=>m.uid===assignment.ownerId))return null;
+  return party.characters.find(c=>c.id===assignment.sharedId&&c.ownerId===assignment.ownerId&&c.characterId===assignment.characterId)||null;
+}
+
+export function effectiveDM(party) {
+  return designatedDM(party)?.ownerId||party.ownerId;
+}

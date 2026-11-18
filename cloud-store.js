@@ -77,7 +77,8 @@ export class CloudStore extends PartyStore {
         }
         const nextLive=applyLive(currentLive,operation);
         const membership=meta.partyId?await tx.get(this.ref(`parties/${meta.partyId}/members/${this.uid}`)):null;
-        const partyExists=membership?.exists()?(await tx.get(this.ref(`parties/${meta.partyId}`))).exists():false;
+        const partyRoot=membership?.exists()?await tx.get(this.ref(`parties/${meta.partyId}`)):null;
+        const partyExists=partyRoot?.exists();
         const sharedPath=meta.partyId?`parties/${meta.partyId}/characters/${this.uid}_${id}`:'';
         const sharedMeta=sharedPath&&partyExists&&(content||operation.delete)?await tx.get(this.ref(sharedPath)):null;
         // Validate the complete merged sheet when content changes. Live-only patches
@@ -89,7 +90,7 @@ export class CloudStore extends PartyStore {
           tx.update(metaRef,{deleted:true,revision:meta.revision+1,name:'Deleted character',chunks:1,partyId:''});
           for(let i=0;i<meta.chunks;i++)tx.delete(this.ref(`${path}/content/${i}`));
           tx.delete(liveRef);
-          if(sharedMeta?.exists()){for(let i=0;i<sharedMeta.data().chunks;i++)tx.delete(this.ref(`${sharedPath}/sheet/${i}`));tx.delete(this.ref(`${sharedPath}/state/live`));tx.delete(this.ref(sharedPath));}
+          if(sharedMeta?.exists())this.removePartyProjection(tx,partyRoot,sharedMeta);
         }else{
           if(contentChanged){
             const chunks=fragments(content);
@@ -195,26 +196,40 @@ export class CloudStore extends PartyStore {
   async unshare(partyId,id){
     const path=this.path(id),shared=`parties/${partyId}/characters/${this.uid}_${id}`;
     await this.s.runTransaction(this.db,async tx=>{
-      const [meta,projection]=await Promise.all([tx.get(this.ref(path)),tx.get(this.ref(shared))]);
+      const [meta,projection,party]=await Promise.all([tx.get(this.ref(path)),tx.get(this.ref(shared)),tx.get(this.ref(`parties/${partyId}`))]);
       if(meta.exists()&&meta.data().partyId===partyId)tx.update(this.ref(path),{partyId:'',revision:meta.data().revision+1});
-      if(projection.exists()){for(let i=0;i<projection.data().chunks;i++)tx.delete(this.ref(`${shared}/sheet/${i}`));tx.delete(this.ref(`${shared}/state/live`));tx.delete(this.ref(shared));}
+      if(projection.exists())this.removePartyProjection(tx,party,projection);
     });
+  }
+  removePartyProjection(tx,party,projection){
+    if(party.data()?.dm?.sharedId===projection.id)tx.update(party.ref,{dm:null});
+    for(let i=0;i<projection.data().chunks;i++)tx.delete(this.ref(`${projection.ref.path}/sheet/${i}`));
+    tx.delete(this.ref(`${projection.ref.path}/state/live`));
+    tx.delete(projection.ref);
   }
   async removeMember(partyId,uid){
     const party=await this.s.getDoc(this.ref(`parties/${partyId}`));
     if(party.exists()&&party.data().ownerId===uid)throw new Error('Transfer party ownership before leaving.');
     // The user's own index is a convenience, never an authorization source.
     const shared=await this.s.getDocs(this.s.query(this.s.collection(this.db,`parties/${partyId}/characters`),this.s.where('ownerId','==',uid)));
-    for(const snapshot of shared.docs){const batch=this.s.writeBatch(this.db);for(let i=0;i<snapshot.data().chunks;i++)batch.delete(this.ref(`${snapshot.ref.path}/sheet/${i}`));batch.delete(this.ref(`${snapshot.ref.path}/state/live`));batch.delete(snapshot.ref);await batch.commit();}
-    await this.s.deleteDoc(this.ref(`parties/${partyId}/members/${uid}`));
+    for(const snapshot of shared.docs)await this.s.runTransaction(this.db,async tx=>{
+      const [root,current]=await Promise.all([tx.get(party.ref),tx.get(snapshot.ref)]);
+      if(current.exists())this.removePartyProjection(tx,root,current);
+    });
+    await this.s.runTransaction(this.db,async tx=>{
+      const root=await tx.get(party.ref);
+      if(root.data()?.dm?.ownerId===uid)tx.update(root.ref,{dm:null});
+      tx.delete(this.ref(`parties/${partyId}/members/${uid}`));
+    });
     if(uid===this.uid)await this.s.deleteDoc(this.ref(`users/${uid}/parties/${partyId}`));
   }
   async transferAndLeave(partyId,newOwner){
-    const batch=this.s.writeBatch(this.db);
-    batch.update(this.ref(`parties/${partyId}`),{ownerId:newOwner});
-    batch.delete(this.ref(`parties/${partyId}/members/${this.uid}`));
-    batch.delete(this.ref(`users/${this.uid}/parties/${partyId}`));
-    await batch.commit();
+    await this.s.runTransaction(this.db,async tx=>{
+      const party=await tx.get(this.ref(`parties/${partyId}`));
+      tx.update(party.ref,{ownerId:newOwner,...(party.data()?.dm?.ownerId===this.uid?{dm:null}:{})});
+      tx.delete(this.ref(`parties/${partyId}/members/${this.uid}`));
+      tx.delete(this.ref(`users/${this.uid}/parties/${partyId}`));
+    });
   }
   async closeParty(partyId){
     // The UI only offers this to a creator who is the final member. Deleting the
