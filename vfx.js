@@ -1,6 +1,7 @@
 // Local, short-lived effects. Nothing is stored with a character.
 import {COINS} from './model.js';
 import {attackIconMarkup,itemIconMarkup} from './item-icons.js';
+import {spellIconMarkup} from './spell-icons.js';
 
 const THEMES = {
   attack: {color:'#dbb777',accent:'#fff0be',symbol:'strike',life:1250,count:30},
@@ -172,22 +173,31 @@ function addStuds(burst,changes,x,y) {
   }
 }
 
-export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,studs=[],weapon=null,items=[],ranged=false,critical=false,miss=false,pack=null,contents=[]}={}) {
-  const theme=THEMES[kind];if(!theme||document.hidden)return;
+export function playEffect(kind,{label='',detail='',target,caption:showCaption=true,sigil:showSigil=true,spell=null,studs=[],weapon=null,items=[],ranged=false,critical=false,miss=false,pack=null,contents=[]}={}) {
+  let theme=THEMES[kind];if(!theme||document.hidden)return;
   mount();
   const calm=reduced();
   const {x,y,node}=position(target,theme.scene);
   const burst=document.createElement('div');
-  burst.className=`vfx-event vfx-${kind}${theme.scene?' vfx-scene':''}${calm?' vfx-calm':''}`;
+  const spellCast=kind==='spell'&&spell;
+  burst.className=`vfx-event vfx-${kind}${spellCast?' vfx-spell-cast':''}${theme.scene?' vfx-scene':''}${calm?' vfx-calm':''}`;
   burst.dataset.effect=kind;
   burst.style.setProperty('--vfx-color',theme.color);burst.style.setProperty('--vfx-accent',theme.accent);
   burst.style.setProperty('--vfx-x',`${x}px`);burst.style.setProperty('--vfx-y',`${y}px`);
   burst.style.setProperty('--vfx-life',`${theme.life}ms`);
+  let spellArtwork;
+  if(spellCast){
+    const sigil=document.createElement('div');sigil.className='vfx-sigil vfx-spell-art';
+    sigil.innerHTML=spellIconMarkup(spell);if(!showSigil)sigil.style.display='none';
+    // Casting is brief; load the same local SVG immediately, even off screen.
+    for(const img of sigil.querySelectorAll('img'))img.loading='eager';
+    spellArtwork=sigil.querySelector('.spell-icon');burst.append(sigil);
+  }
   // Labels come from character names and spells too; keep them as text nodes.
   if(!calm) {
     const aura=document.createElement('div');aura.className='vfx-aura';
-    burst.append(aura);
-    if(showSigil){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
+    burst.prepend(aura);
+    if(showSigil&&!spellCast){const sigil=document.createElement('div');sigil.className='vfx-sigil';sigil.innerHTML=effectGlyph(theme.symbol);burst.append(sigil);}
     if(kind==='money')addStuds(burst,studs,x,y);
     if(kind==='unpack'&&pack) {
       const prop=document.createElement('div');prop.className='vfx-unpack-bag';
@@ -218,6 +228,14 @@ export function playEffect(kind,{label='',detail='',target,caption:showCaption=t
     caption.append(title,subtitle);burst.append(caption);
   }
   layer.append(burst);
+  if(spellArtwork){
+    // Read the shared palette after mounting so light/dark themes, manual
+    // artwork and school/effect fallbacks match the spellbook exactly. Canvas
+    // needs a resolved color, rather than a CSS variable or a duplicate palette.
+    const color=getComputedStyle(spellArtwork).color;
+    theme={...theme,color,accent:color};
+    burst.style.setProperty('--vfx-color',color);burst.style.setProperty('--vfx-accent',color);
+  }
   const entry={node:burst,timer:setTimeout(()=>{
     burst.remove();bursts=bursts.filter(item=>item!==entry);
     if(!bursts.length&&!frame)clearEffects();

@@ -38,6 +38,26 @@ try{
   const edit=()=>page.click('[data-action="spell"][data-id="spell-0"]');
   const key=()=>page.$eval('[data-spell-icon-preview] [data-spell-icon]',node=>node.dataset.spellIcon);
   const search=value=>page.$eval('[data-spell-icon-search]',(node,value)=>{node.value=value;node.dispatchEvent(new Event('input',{bubbles:true}));},value);
+  const castPreview=async(id,expectedKey,{calm=false,screenshot}={})=>{
+    await page.click(`[data-action="cast"][data-id="${id}"]`);await submit();
+    await page.waitForSelector('.vfx-spell-cast .vfx-spell-art');
+    const effect=await page.$eval('.vfx-spell-cast',(burst,id)=>{
+      const artwork=burst.querySelector('.spell-icon'),sigil=burst.querySelector('.vfx-spell-art');
+      const card=document.querySelector(`[data-action="spell"][data-id="${id}"]`).closest('.spell-card');
+      return {key:artwork.dataset.spellIcon,color:getComputedStyle(artwork).color,reference:getComputedStyle(card.querySelector('.spell-icon')).color,
+        glow:burst.style.getPropertyValue('--vfx-color'),accent:burst.style.getPropertyValue('--vfx-accent'),caption:getComputedStyle(burst.querySelector('.vfx-caption strong')).color,
+        generic:!!burst.querySelector('.vfx-glyph-orbit'),loading:artwork.querySelector('img')?.loading,
+        display:getComputedStyle(sigil).display,animation:getComputedStyle(sigil).animationName,canvas:!!burst.parentElement.querySelector('.vfx-canvas')};
+    },id);
+    assert.equal(effect.key,expectedKey);assert.equal(effect.color,effect.reference);assert.equal(effect.glow,effect.color);assert.equal(effect.accent,effect.color);assert.equal(effect.caption,effect.color);
+    assert.equal(effect.generic,false);assert.equal(effect.loading,'eager');assert.notEqual(effect.display,'none');
+    if(calm){assert.equal(effect.animation,'none');assert.equal(effect.canvas,false);}
+    if(screenshot){
+      await page.waitForFunction(()=>{const animation=document.querySelector('.vfx-spell-art')?.getAnimations()[0];return !animation||animation.currentTime>=450;});
+      await mkdir(resolve(root,'.tmp/spell-icons'),{recursive:true});await page.screenshot({path:resolve(root,`.tmp/spell-icons/${screenshot}.png`)});
+    }
+    return effect.color;
+  };
   console.log('RUN spell displays, effect artwork, picker and save persistence');
   assert.equal(await page.$$('.spell-grid .equipment-icon').then(nodes=>nodes.length),0);
   assert.equal(await page.$$eval('.spell-grid [data-spell-icon]',nodes=>nodes.length),names.length+1);
@@ -56,6 +76,8 @@ try{
   await page.focus('[data-spell-icon-search]');await page.keyboard.press('Enter');assert.equal(await page.$eval('#modal',node=>node.open),true);
   await submit();assert.equal((await saved()).characters[0].spells[0].spellIconKey,'ghost');
   assert.equal(parseBackup(JSON.stringify(await saved())).characters[0].spells[0].spellIconKey,'ghost');
+  console.log('RUN casting animation follows manual artwork and effect color');
+  await castPreview('spell-0','ghost');
   await page.reload({waitUntil:'networkidle0'});await edit();assert.equal(await key(),'ghost');
   await page.click('.spell-icon-picker summary');await page.click('.spell-icon-picker .item-icon-auto');assert.equal(await key(),'fireball');await close();
   assert.equal((await saved()).characters[0].spells[0].spellIconKey,'ghost','Cancel preserves the saved override');
@@ -72,8 +94,17 @@ try{
   assert.equal((await saved()).characters[0].spells[0].spellIconKey,'');
   // Casting, slots, preparation, and concentration still use the existing actions.
   const before=(await saved()).characters[0].slots[2].used;
-  await page.click('[data-action="cast"][data-id="spell-0"]');assert.equal(await page.$eval('.spell-cast-title [data-spell-icon]',node=>node.dataset.spellIcon),'fireball');await submit();
-  assert.equal((await saved()).characters[0].slots[2].used,before+1);
+  const colors=[];
+  for(const theme of ['light','dark']){
+    await page.evaluate(theme=>window.QuestlogTheme.set(theme),theme);
+    colors.push(await castPreview('spell-0','fireball',{screenshot:`casting-${theme}`}));
+    if(theme==='light')assert.equal((await saved()).characters[0].slots[2].used,before+1);
+  }
+  assert.notEqual(colors[0],colors[1],'Casting follows the current light/dark palette');
+  const cold=await castPreview('homebrew','snowflake-2');assert.notEqual(cold,colors[1],'Different spell effects have their own animation color');
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+  await castPreview('spell-0','fireball',{calm:true,screenshot:'casting-reduced-motion'});
+  await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
   await page.click('[data-action="prepare"][data-id="spell-0"]');assert.equal((await saved()).characters[0].spells[0].prepared,false);
   await page.click('[data-action="prepare"][data-id="spell-0"]');
   await page.click('[data-action="cast"][data-id="spell-7"]');await submit();assert.equal((await saved()).characters[0].concentration,'Detect Magic');
@@ -112,7 +143,7 @@ try{
   console.log('RUN service worker cache and offline subdirectory reload');
   await page.waitForFunction(async()=>{
     const registration=await navigator.serviceWorker.getRegistration();if(!registration?.active)return false;
-    const cache=await caches.open('questlog-app-v73-spell-artwork');return !!await cache.match('./assets/spell-icons/fireball.svg');
+    const cache=await caches.open('questlog-app-v74-spell-casting');return !!await cache.match('./assets/spell-icons/fireball.svg');
   },{timeout:90000});
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});await page.waitForSelector('.spell-grid [data-spell-icon]');
   const offline=await page.evaluate(async entries=>{

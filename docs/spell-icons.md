@@ -2,7 +2,7 @@
 
 Spell artwork has its own pipeline. Equipment, weapons, magic items, actual wands, and their existing manual artwork choices continue to use `item-icons.js` and the LEGO/LDraw library.
 
-`spell-icons.js` selects and renders artwork in the Spellbook, prepared sheet actions, casting dialog, Compendium links, level-up spell choices, and shared party details. All artwork is local and precached by the service worker. Relative `./assets/spell-icons/` paths work at a GitHub Pages project subdirectory. A missing asset reveals an original built-in arcane star rather than equipment artwork.
+`spell-icons.js` selects and renders artwork in the Spellbook, prepared sheet actions, casting dialog and animation, Compendium links, level-up spell choices, and shared party details. Casting uses the selected artwork and its current theme color for the glow, particles, and caption; reduced-motion mode shows a static icon and confirmation. All artwork is local and precached by the service worker. Relative `./assets/spell-icons/` paths work at a GitHub Pages project subdirectory. A missing asset reveals an original built-in arcane star rather than equipment artwork.
 
 Selection is deterministic:
 
