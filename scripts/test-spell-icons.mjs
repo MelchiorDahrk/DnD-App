@@ -141,10 +141,12 @@ try{
   assert.equal((await page.goto(new URL('./assets/spell-icons/CREDITS.md',base).href)).status(),200);
   await page.goto(`${base}#spells`);
   console.log('RUN service worker cache and offline subdirectory reload');
-  await page.waitForFunction(async()=>{
-    const registration=await navigator.serviceWorker.getRegistration();if(!registration?.active)return false;
-    const cache=await caches.open('questlog-app-v74-spell-casting');return !!await cache.match('./assets/spell-icons/fireball.svg');
-  },{timeout:90000});
+  await page.waitForFunction(()=>navigator.serviceWorker.controller?.state==='activated',{timeout:90000});
+  const cachedFireball=await page.evaluate(async()=>{
+    const cacheName=(await caches.keys()).find(name=>name.startsWith('questlog-app-'));
+    return !!cacheName&&!!await caches.match('./assets/spell-icons/fireball.svg',{cacheName});
+  });
+  assert.ok(cachedFireball,'Fireball artwork is in the app cache');
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});await page.waitForSelector('.spell-grid [data-spell-icon]');
   const offline=await page.evaluate(async entries=>{
     const paths=['./spell-icons.js','./spell-icon-mappings.js','./spell-icon-manifest.js','./spell-icons.css','./assets/spell-icons/CREDITS.md',...entries.map(({key})=>`./assets/spell-icons/${key}.svg`)];
