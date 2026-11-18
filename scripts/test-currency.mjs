@@ -38,14 +38,20 @@ try {
   const open=()=>page.click('[data-action="currency"]');
   const enter=(key,value)=>page.$eval(`#modal [name="${key}"]`,(input,value)=>{input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));},value);
   const submit=()=>page.click('#modal button[type="submit"]');
+  await page.evaluate(()=>window.testCoinImages=[...document.querySelectorAll('.coin-balances .coin-stud')]);
+  const assertCoinImages=async()=>assert.ok(await page.evaluate(()=>window.testCoinImages.every((image,i)=>image===document.querySelectorAll('.coin-balances .coin-stud')[i]&&image.isConnected&&image.complete&&image.naturalWidth>0)),'Closing a coin editor keeps the decoded purse images mounted');
   await open();
   await enter('gold','+10');assert.equal(await page.$eval('#gold-result',node=>node.textContent),'50 GP → 60 GP');
   assert.deepEqual(await balances(),Object.fromEntries(Object.keys(COINS).map(key=>[key,50])));
   await page.click('#modal [data-action="close"]');
+  await assertCoinImages();
+  await page.click('.coin-balance[data-denomination="gold"]');
+  await submit();await assertCoinImages();
   await open();assert.equal(await page.$eval('#modal [name="gold"]',node=>node.value),'50');
   const expressions={copper:'-5',silver:'25+10-5',electrum:'0',gold:'+10',platinum:' + 10 − 5 '};
   for(const [key,value] of Object.entries(expressions))await enter(key,value);
   await submit();
+  await assertCoinImages();
   assert.deepEqual(await balances(),{copper:45,silver:30,electrum:0,gold:60,platinum:55});
   parseBackup(JSON.stringify(await state()));
   await page.waitForFunction(()=>[...document.querySelectorAll('.vfx-stud')].every(img=>img.complete&&img.naturalWidth));
@@ -78,6 +84,7 @@ try {
   await submit();assert.equal((await balances()).gold,55);
   assert.equal(await page.$$eval('.vfx-stud-spend',nodes=>nodes.length),7);
   await open();await submit();
+  await assertCoinImages();
   assert.equal(await page.$$eval('.vfx-money',nodes=>nodes.length),0,'unchanged balances do not animate');
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   const savedBalances=await balances();
