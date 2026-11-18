@@ -87,13 +87,41 @@ service cloud.firestore {
         && existsAfter(/databases/$(database)/documents/parties/$(party)/members/$(request.resource.data.ownerId));
       allow delete: if creator(party);
       match /session/combat {
+        function resetCombat() {
+          return request.resource.data.scores=={} && request.resource.data.modifiers=={}
+            && request.resource.data.current=='' && request.resource.data.round==1
+            && request.resource.data.initiativeCharacter=='';
+        }
+        function ownInitiative() {
+          let id=request.resource.data.initiativeCharacter;
+          return id!='' && request.resource.data.active && resource.data.active
+            && request.resource.data.encounterId==resource.data.get('encounterId','')
+            && request.resource.data.current==resource.data.current && request.resource.data.round==resource.data.round
+            && get(/databases/$(database)/documents/parties/$(party)/characters/$(id)).data.ownerId==request.auth.uid
+            && request.resource.data.scores.diff(resource.data.scores).affectedKeys().hasOnly([id])
+            && integer(request.resource.data.scores[id],-999,999)
+            && request.resource.data.modifiers.diff(resource.data.get('modifiers',{})).affectedKeys().hasOnly([id])
+            && (! (id in request.resource.data.modifiers) || integer(request.resource.data.modifiers[id],-99,99));
+        }
+        function advanceCombat() {
+          return request.resource.data.initiativeCharacter=='' && request.resource.data.active && resource.data.active
+            && request.resource.data.encounterId==resource.data.get('encounterId','')
+            && request.resource.data.scores==resource.data.scores
+            && request.resource.data.modifiers==resource.data.get('modifiers',{});
+        }
+        function validCombat() {
+          return request.resource.data.keys().hasOnly(['scores','modifiers','current','round','active','updatedBy','encounterId','initiativeCharacter'])
+            && request.resource.data.scores is map && request.resource.data.scores.size()<=100
+            && request.resource.data.modifiers is map && request.resource.data.modifiers.size()<=100
+            && text(request.resource.data.current,230) && integer(request.resource.data.round,1,1000000)
+            && text(request.resource.data.encounterId,100) && text(request.resource.data.initiativeCharacter,230)
+            && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
+        }
         allow read: if member(party);
-        allow create, update: if member(party)
-          && request.resource.data.keys().hasOnly(['scores','modifiers','current','round','active','updatedBy'])
-          && request.resource.data.scores is map && request.resource.data.scores.size()<=100
-          && (!('modifiers' in request.resource.data) || (request.resource.data.modifiers is map && request.resource.data.modifiers.size()<=100))
-          && text(request.resource.data.current,230) && integer(request.resource.data.round,1,1000000)
-          && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
+        allow create: if member(party) && validCombat() && resetCombat();
+        allow update: if member(party) && validCombat()
+          && ((resetCombat() && (!request.resource.data.active || (!resource.data.active && request.resource.data.encounterId!=resource.data.get('encounterId',''))))
+            || ownInitiative() || advanceCombat());
       }
       match /activities/{event} {
         allow read: if member(party);

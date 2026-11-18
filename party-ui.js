@@ -8,7 +8,7 @@ import {sound} from './sound.js';
 
 export function createPartyPlay(ui) {
   const {esc,btn,field,actions,setModal,modal,toast,getState,navigate}=ui;
-  let connectedAt=Date.now(),partyId='',seen=new Set(),reactions=new Map(),latestRoll=null,skill='Perception',notification='',prompting='',recovering=false;
+  let connectedAt=Date.now(),partyId='',seen=new Set(),reactions=new Map(),latestRoll=null,skill='Perception',notification='',prompting='',initiativePrompts=new Set(),recovering=false;
   const party=()=>ui.party(),store=()=>ui.store(),user=()=>ui.user();
   const active=()=>getState().characters.find(c=>c.id===getState().activeId);
   const own=()=>party()?.characters.filter(c=>c.ownerId===user()?.uid)||[];
@@ -26,6 +26,8 @@ export function createPartyPlay(ui) {
   }
   function card(c,index){
     const live=c.live,sheet=c.sheet;if(!sheet)return '';
+    const combat=party().combat,hasInitiative=Object.hasOwn(combat.scores||{},c.id),canEnterInitiative=c.ownerId===user()?.uid&&combat.active;
+    const initiativeValue=hasInitiative?esc(combat.scores[c.id]):canEnterInitiative?icon('dice')+'Roll':'—';
     const current=party().combat.active&&party().combat.current===c.id,unconscious=live&&(live.hp===0||live.conditions.includes('Unconscious'));
     const reaction=reactions.get(c.id),effect=reaction?.until>Date.now()?reaction.kind:'';
     const statusButton=(name,content)=>btn('party-status',content,'party-status-icon',`data-status="${esc(name)}" aria-label="${esc(name)}" title="${esc(name)}" aria-haspopup="dialog"`);
@@ -38,7 +40,7 @@ export function createPartyPlay(ui) {
       <div class="party-player-top"><span>${icon('heart')} <strong>${live?esc(live.hp):'…'}</strong><small> / ${live?esc(live.maxHp):'…'} HP${live?.tempHp?` +${esc(live.tempHp)}`:''}</small></span><span title="Armor class">${icon('shield')} <strong>${esc(sheet.ac)}</strong><small> AC</small></span></div>
       <div class="party-portrait-row"><div class="party-portrait-status">${left}</div>${btn('party-member',`<span class="party-portrait${live?.inspiration?' is-inspired':''}">${portraitMarkup(sheet)}<span class="party-heal-sparks" aria-hidden="true">✦ · ✧ · ✦</span></span>`,'party-portrait-button',`data-id="${esc(c.id)}" aria-label="Interact with ${esc(sheet.name)}" aria-haspopup="dialog"`)}<div class="party-portrait-status">${right}</div></div>
       <h2>${esc(sheet.name)}</h2><p>Level ${esc(sheet.level)} ${esc(sheet.class)}${c.ownerId===user()?.uid?' · You':''}</p>
-      <div class="party-player-turn"><span>${current?'CURRENT TURN':party().combat.active?Object.hasOwn(party().combat.scores||{},c.id)?`UP NEXT · ${index}`:'INITIATIVE':'INITIATIVE'}</span>${btn('party-initiative',Object.hasOwn(party().combat.scores||{},c.id)?esc(party().combat.scores[c.id]):icon('dice')+'Roll','btn btn-sm btn-ghost',`data-id="${esc(c.id)}" aria-label="Roll initiative for ${esc(sheet.name)}"`)}</div>
+      <div class="party-player-turn"><span>${current?'CURRENT TURN':combat.active?hasInitiative?`UP NEXT · ${index}`:'INITIATIVE':'INITIATIVE'}</span>${canEnterInitiative?btn('party-initiative',initiativeValue,'btn btn-sm btn-ghost',`data-id="${esc(c.id)}" aria-label="Enter initiative for ${esc(sheet.name)}"`):`<strong aria-label="Initiative for ${esc(sheet.name)}">${initiativeValue}</strong>`}</div>
     </article>`;
   }
   function transferText(offer){try{const payload=JSON.parse(offer.payload);return payload.kind==='money'?`${payload.amount} ${COINS[payload.coin]}`:`${payload.amount} × ${payload.item.name}`;}catch{return 'Invalid offer';}}
@@ -65,7 +67,8 @@ export function createPartyPlay(ui) {
   }
   function staticRoll(event){try{const r=JSON.parse(event.result);return `<div class="party-last-roll"><span>${esc(event.name)} · ${esc(r.label)}</span><strong>${esc(r.total)}</strong><small>${esc(r.expression)} · ${r.rolls.map(v=>esc(v)).join(' + ')}${r.bonus?' '+safeSigned(r.bonus):''}</small></div>`;}catch{return '';}}
   function update(data){
-    if(partyId!==data.id){partyId=data.id;connectedAt=Date.now();seen=new Set();reactions=new Map();latestRoll=null;prompting='';notification='';}
+    if(partyId!==data.id){partyId=data.id;connectedAt=Date.now();seen=new Set();reactions=new Map();latestRoll=null;prompting='';initiativePrompts.clear();notification='';}
+    if(!data.combat.active)initiativePrompts.clear();
     for(const event of [...data.activities].reverse()){
       if(seen.has(event.id))continue;seen.add(event.id);
       if(event.kind==='roll')latestRoll=event;
@@ -92,7 +95,11 @@ export function createPartyPlay(ui) {
     if(ui.route()==='party')notification='';
     const host=document.getElementById('party-roll');
     if(host&&latestRoll&&host.dataset.rollId!==latestRoll.id){host.dataset.rollId=latestRoll.id;host.innerHTML=staticRoll(latestRoll);if(Date.now()-partyTime(latestRoll)<20000){try{presentPartyDice(JSON.parse(latestRoll.result),host);}catch{}}}
-    if(!modal.open&&p){const rest=p.rests.find(r=>r.repliesReady&&r.actorId!==user()?.uid&&!r.replies.some(v=>v.actorId===user()?.uid)&&Date.now()-partyTime(r)<86400000&&prompting!==r.id);if(rest){prompting=rest.id;restDialog(rest);}}
+    if(!modal.open&&p){
+      const pending=p.combat.active&&!p.errors?.combat&&own().find(c=>!Object.hasOwn(p.combat.scores||{},c.id)&&!initiativePrompts.has(`${p.combat.encounterId||'legacy'}:${c.id}`));
+      if(pending){initiativeDialog(pending);return;}
+      const rest=p.rests.find(r=>r.repliesReady&&r.actorId!==user()?.uid&&!r.replies.some(v=>v.actorId===user()?.uid)&&Date.now()-partyTime(r)<86400000&&prompting!==r.id);if(rest){prompting=rest.id;restDialog(rest);}
+    }
   }
   function restDialog(rest){
     const name=party().characters.find(c=>c.characterId===rest.characterId&&c.ownerId===rest.actorId)?.sheet.name||'A companion';
@@ -106,20 +113,26 @@ export function createPartyPlay(ui) {
   async function broadcastRoll(result,label,{characterId,temporaryModifier,inline=false}={}){
     const shared=characterId?party()?.characters.find(c=>c.id===characterId):own().find(s=>s.characterId===active()?.id);
     if(!shared){if(inline)throw new Error('Select a character shared with this party first.');return;}
+    if(shared.ownerId!==user()?.uid)throw new Error('You can only roll for your own characters.');
     const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label};
     const id=uid(),event={id,kind:'roll',actorId:user().uid,characterId:shared.characterId,name:shared.sheet.name,result:JSON.stringify(r)};
     if(inline){latestRoll=event;const host=document.getElementById('party-roll');if(host){host.dataset.rollId=id;host.innerHTML=staticRoll(event);}}
     if(!party().errors?.activities)await store().activity(partyId,{kind:event.kind,characterId:event.characterId,name:event.name,result:event.result},id);
-    if(/^(?:roll for )?initiative$/i.test(label))await store().setInitiative(partyId,shared.id,r.total,{temporaryModifier});
+    if(party().combat.active&&/^(?:roll for )?initiative$/i.test(label))await store().setInitiative(partyId,shared.id,r.total,{temporaryModifier});
   }
   function initiativeDialog(c){
+    if(c.ownerId!==user()?.uid||!party().combat.active)return;
     const local=getState().characters.find(s=>c.ownerId===user().uid&&s.id===c.characterId),details=c.sheet.details;
     const base=local?initiative(local):Number.isFinite(c.sheet.initiative)?c.sheet.initiative-2*(c.live?.exhaustion||0):details?mod(details.stats.dex)+(details.initiativeBonus||0)-2*(c.live?.exhaustion||0):null;
     if(base===null){toast('Loading initiative details. Try again in a moment.',true);return;}
     const mode=local?armorCheckMode(local,'dex',local.initiativeAdvantage):c.sheet.initiativeMode||details?.initiativeMode||'normal';
-    setModal('Roll initiative',`<p><strong>${esc(c.sheet.name)}</strong> · Calculated modifier ${safeSigned(base)}${mode!=='normal'?' · '+mode:''}</p><p class="form-help">Includes Dexterity, recorded feat and class bonuses, and Exhaustion.</p>${field('Temporary initiative modifier','temporaryModifier',party().combat.modifiers?.[c.id]||0,'number','required min="-99" max="99" step="1"')}<p class="form-help">Added for this encounter. Ending the encounter clears this modifier and the roll.</p>${actions('Roll initiative')}`,data=>{
+    initiativePrompts.add(`${party().combat.encounterId||'legacy'}:${c.id}`);
+    setModal('Roll initiative',`<p>An encounter has started. Enter initiative for <strong>${esc(c.sheet.name)}</strong>.</p><p>Calculated modifier ${safeSigned(base)}${mode!=='normal'?' · '+mode:''}</p><p class="form-help">Includes Dexterity, recorded feat and class bonuses, and Exhaustion.</p><label class="form-field">How will you roll?<select name="initiativeMethod" data-initiative-method><option value="app">Roll in the app</option><option value="physical">Enter a physical roll</option></select></label><div data-initiative-app>${field('Temporary initiative modifier','temporaryModifier',party().combat.modifiers?.[c.id]||0,'number','required min="-99" max="99" step="1"')}<p class="form-help">Added for this encounter. Ending the encounter clears this modifier and the roll.</p></div><div data-initiative-physical hidden>${field('Initiative total (including all modifiers)','initiativeTotal','','number','disabled required min="-999" max="999" step="1"')}</div>${actions('Roll initiative')}`,data=>{
+      if(data.get('initiativeMethod')==='physical'){
+        run(async()=>{await store().setInitiative(partyId,c.id,Number(data.get('initiativeTotal')),{temporaryModifier:0});modal.close();ui.refresh();});return;
+      }
       const temporaryModifier=Number(data.get('temporaryModifier'));modal.close();
-      ui.roll(`1d20${signed(base+temporaryModifier)}`,'Initiative',mode,false,null,'',{characterId:c.id,temporaryModifier});
+      ui.roll(`1d20${signed(base+temporaryModifier)}`,'Initiative',mode,ui.route()!=='party',null,'',{characterId:c.id,temporaryModifier});
     });
   }
   function skillsDialog(){setModal('Party skills',`<div id="party-skills-dialog">${skillMarkup()}</div>`);}
@@ -154,7 +167,14 @@ export function createPartyPlay(ui) {
     }
     return true;
   }
-  document.addEventListener('change',event=>{if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;const host=document.getElementById('party-skills-dialog');if(host)host.innerHTML=skillMarkup();}});
+  document.addEventListener('change',event=>{
+    if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;const host=document.getElementById('party-skills-dialog');if(host)host.innerHTML=skillMarkup();}
+    if(event.target.hasAttribute('data-initiative-method')){
+      const physical=event.target.value==='physical';
+      for(const [selector,enabled] of [['[data-initiative-app]',!physical],['[data-initiative-physical]',physical]]){const host=modal.querySelector(selector);host.hidden=!enabled;host.querySelector('input').disabled=!enabled;}
+      modal.querySelector('button[type="submit"]').textContent=physical?'Save initiative':'Roll initiative';
+    }
+  });
   const initiativeModifier=()=>party()?.combat.modifiers?.[own().find(c=>c.characterId===active()?.id)?.id]||0;
   return {markup,settingsMarkup,connectionMarkup,handle,update,mount,requestRest,broadcastRoll,initiativeModifier,reset:()=>{partyId='';latestRoll=null;notification='';reactions.clear();mount();}};
 }

@@ -593,8 +593,12 @@ html{scroll-padding-top:85px;scroll-padding-bottom:25px}button,a,input,select,te
 .list-toolbar .filter-tabs{flex-wrap:nowrap;gap:4px;margin-bottom:12px}
 .list-toolbar .filter-tab{display:inline-flex;align-items:center;justify-content:center;flex:0 1 36px;min-width:0;padding:8px 0}
 .list-toolbar .filter-tab .icon{width:15px;height:15px;flex-shrink:0}
-.inventory-list .action-row{position:relative;padding-right:96px}
+.inventory-list .action-row{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr)}
 .inventory-list .action-info{min-width:0}
+.inventory-list .action-info>strong{display:block;padding-right:80px}
+.inventory-list .item-right{grid-column:1/-1;display:flex;width:100%;min-width:0;padding-left:0;flex-wrap:nowrap;justify-content:space-between;gap:8px}
+.inventory-list .item-right>.btn,.inventory-list .equipped-btn{flex-shrink:0;min-height:40px;white-space:nowrap}
+.inventory-list .quantity-stepper button{width:32px;min-height:40px}
 .inventory-list .inventory-card-actions{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:4px}
 .coin-balance:hover{background:var(--surface-hover);border-color:var(--border-control)}
 .roll-history-empty{display:grid;place-items:center;min-height:180px;color:var(--text-secondary)}

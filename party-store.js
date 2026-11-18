@@ -19,19 +19,23 @@ export class PartyStore {
     return this.s.runTransaction(this.db,async tx=>{
       const snapshot=await tx.get(ref),previous=snapshot.exists()?snapshot.data():{scores:{},current:'',round:1,active:false};
       const next=change(copy(previous));
-      tx.set(ref,{scores:next.scores,modifiers:next.modifiers||{},current:next.current,round:next.round,active:next.active,updatedBy:this.uid});
+      tx.set(ref,{scores:next.scores,modifiers:next.modifiers||{},current:next.current,round:next.round,active:next.active,encounterId:next.encounterId||'',initiativeCharacter:next.initiativeCharacter||'',updatedBy:this.uid});
     });
   }
   async setInitiative(partyId,sharedId,score,{temporaryModifier}={}) {
     if(!Number.isInteger(score)||score< -999||score>999)throw new Error('Initiative must be a whole number from −999 to 999.');
     if(temporaryModifier!==undefined&&(!Number.isInteger(temporaryModifier)||temporaryModifier< -99||temporaryModifier>99))throw new Error('Temporary initiative modifier must be a whole number from −99 to 99.');
-    await this.combat(partyId,state=>{state.scores[sharedId]=score;if(temporaryModifier!==undefined){state.modifiers||={};state.modifiers[sharedId]=temporaryModifier;}return state;});
+    const shared=await this.s.getDoc(this.ref(`parties/${partyId}/characters/${sharedId}`));
+    if(!shared.exists()||shared.data().ownerId!==this.uid)throw new Error('You can only enter initiative for your own characters.');
+    await this.combat(partyId,state=>{if(!state.active)throw new Error('Start an encounter before entering initiative.');state.scores[sharedId]=score;state.initiativeCharacter=sharedId;if(temporaryModifier!==undefined){state.modifiers||={};state.modifiers[sharedId]=temporaryModifier;}return state;});
   }
   async advanceTurn(partyId,characters,{start=false,end=false}={}) {
     return this.combat(partyId,state=>{
+      state.initiativeCharacter='';
       if(end)return {...state,scores:{},modifiers:{},active:false,current:'',round:1};
+      if(start)return state.active?state:{...state,scores:{},modifiers:{},active:true,current:'',round:1,encounterId:uid()};
       const ordered=initiativeOrder(characters,state).filter(c=>Object.hasOwn(state.scores,c.id));
-      if(!ordered.length){if(start)return {...state,active:true,current:'',round:1};throw new Error('Roll initiative for at least one character first.');}
+      if(!ordered.length)throw new Error('Enter initiative for at least one character first.');
       const index=ordered.findIndex(c=>c.id===state.current),next=start||index<0?0:(index+1)%ordered.length;
       return {...state,active:true,current:ordered[next].id,round:start?1:state.round+(next===0&&index>=0?1:0)};
     });

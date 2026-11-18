@@ -15,18 +15,23 @@ the play controls. Dice roll directly in the fixed-size party tray.
 
 `party-model.js` contains row balancing, initiative ordering, skill ranking,
 activity descriptions, and inventory reservation/receipt rules. `party-ui.js`
-owns the table, incoming rest invitations, transfer offers, notifications, and
+owns the table, incoming initiative prompts and rest invitations, transfer offers, notifications, and
 Session Mode. Party preferences live in the account's existing settings and
 round-trip through backups. The selected party stays subscribed across routes.
 
 ## Shared state
 
-- `parties/{party}/session/combat`: rolled initiative scores, temporary modifier
-  map, active character, round, and encounter state. Transactions serialize
-  simultaneous turn changes. Initiative uses the sheet's Dexterity, recorded
+- `parties/{party}/session/combat`: initiative scores, temporary modifier map,
+  active character, round, and encounter ID. Starting an encounter clears prior
+  scores and prompts each owner to roll in the app or enter their physical roll's
+  total, including all modifiers. Prompts appear across pages; dismissed prompts
+  can be reopened from that owner's party card. Other players' scores are
+  read-only. The store and Firestore rules restrict score and modifier changes
+  to the character's owner. Begin turns after players enter their scores.
+  Transactions serialize simultaneous turn changes. App rolls use the sheet's Dexterity, recorded
   feat/class initiative bonus, Exhaustion and roll mode. Temporary modifiers add
   to this calculation for the encounter; ending it clears scores and modifiers
-  and resets the round. The sheet's initiative roll also updates the party.
+  and resets the round. The sheet's initiative roll also updates an active encounter.
 - `activities/{event}`: immutable events with a server timestamp. Character
   changes append damage, healing, unconsciousness, inspiration, condition, and
   concentration events in the same transaction as their live state. Operation

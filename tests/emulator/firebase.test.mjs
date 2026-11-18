@@ -68,8 +68,13 @@ test('competing offers cannot overspend and accepting an item preserves its quan
 test('party session streams initiative, rest votes, exact rolls and damage activity',async()=>{
   const {a,b,c,d,party}=await transferParty();let latest;const stop=b.watchParty(party,data=>latest=data,error=>{throw error;});
   try{
-    await a.setInitiative(party,`alice_${c.id}`,20,{temporaryModifier:4});await b.setInitiative(party,`bob_${d.id}`,10);
     const chars=[{id:`alice_${c.id}`},{id:`bob_${d.id}`}];await a.advanceTurn(party,chars,{start:true});
+    await waitFor(()=>latest?.combat.active);assert.equal(latest.combat.current,'');assert.deepEqual(latest.combat.scores,{});
+    await a.setInitiative(party,`alice_${c.id}`,20,{temporaryModifier:4});await b.setInitiative(party,`bob_${d.id}`,10);
+    await assert.rejects(b.setInitiative(party,`alice_${c.id}`,99),/own characters/);
+    await assertFails(sdk.updateDoc(b.ref(`parties/${party}/session/combat`),{[`scores.alice_${c.id}`]:99,initiativeCharacter:`alice_${c.id}`,updatedBy:'bob'}));
+    await assertFails(sdk.updateDoc(b.ref(`parties/${party}/session/combat`),{[`modifiers.alice_${c.id}`]:99,initiativeCharacter:`bob_${d.id}`,updatedBy:'bob'}));
+    await a.advanceTurn(party,chars);
     await waitFor(()=>latest?.combat.current===`alice_${c.id}`);await b.advanceTurn(party,chars);await waitFor(()=>latest?.combat.current===`bob_${d.id}`);
     await a.advanceTurn(party,chars);await waitFor(()=>latest?.combat.round===2);
     assert.equal(latest.combat.modifiers[`alice_${c.id}`],4);await a.advanceTurn(party,chars,{end:true});await waitFor(()=>latest?.combat.active===false);assert.deepEqual(latest.combat.scores,{});assert.deepEqual(latest.combat.modifiers,{});assert.equal(latest.combat.round,1);
@@ -170,7 +175,7 @@ test('legacy rules preserve party reads when new session listeners are denied, a
     stop();restored=await initializeTestEnvironment({projectId,firestore:{rules:current}});
     latest=null;stop=a.watchParty(id,data=>latest=data,error=>errors.push(error));
     await waitFor(()=>latest?.name==='A party that already exists'&&latest.members.length===1);
-    await a.setInitiative(id,'alice_character',17);await waitFor(()=>latest.combat.scores?.alice_character===17);
+    await a.advanceTurn(id,[],{start:true});await waitFor(()=>latest.combat.active);
     assert.deepEqual(latest.errors,{});assert.deepEqual(errors,[]);
     await sdk.deleteDoc(a.ref(`parties/${id}`));await waitFor(()=>errors.length===1);
     assert.equal(errors[0].code,'questlog/party-access-ended','A deleted party still ends access.');

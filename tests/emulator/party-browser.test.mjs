@@ -18,7 +18,7 @@ test('party browser: table layout, shared rolls, initiative, transfers, rest vot
   // Party snapshots replace cards between resolving a selector and scrolling it
   // into view. Locators re-resolve detached controls before dispatching a click.
   const press=(page,selector)=>page.locator(selector).click();
-  const click=(page,action)=>press(page,`[data-action="${action}"]`);
+  const click=(page,action)=>press(page,action==='close'?'#modal[open] .modal-header [data-action="close"]':`[data-action="${action}"]`);
   const submit=page=>press(page,'#modal button[type="submit"]');
   const text=(page,value)=>page.waitForFunction(value=>document.body.innerText.includes(value),{},value);
   const fill=(page,name,value)=>page.$eval(`#modal [name="${name}"]`,(el,value)=>el.value=value,value);
@@ -58,10 +58,19 @@ test('party browser: table layout, shared rolls, initiative, transfers, rest vot
     await storeCall(alice,'share',[party,a2]);await storeCall(bob,'share',[party,b]);await bob.page.waitForFunction(()=>document.querySelectorAll('.party-player').length===3);
     await bob.page.setViewport({width:390,height:844});assert.equal(await bob.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await bob.page.screenshot({path:resolve(diagnostics,'party-mobile.png'),fullPage:true});await bob.page.setViewport({width:1440,height:1100});
     phase='initiative';
-    for(const [name,temporary] of [['Melchior',60],['Teyla',30],['Jane',0]]){await press(bob.page,`[data-action="party-initiative"][aria-label="Roll initiative for ${name}"]`);await fill(bob.page,'temporaryModifier',String(temporary));await submit(bob.page);await closed(bob.page);await bob.page.waitForFunction(name=>document.querySelector('.party-feed')?.textContent.includes(name+' rolled'),{},name);}
-    await click(bob.page,'party-start-combat');await Promise.all([alice,bob].map(({page})=>page.waitForFunction(()=>document.querySelector('.party-player.is-current h2')?.textContent==='Melchior')));await click(alice.page,'party-next-turn');await bob.page.waitForFunction(()=>document.querySelector('.party-player:first-child h2')?.textContent==='Teyla');
-    await click(bob.page,'party-end-combat');await bob.page.waitForFunction(()=>[...document.querySelectorAll('.party-player-turn button')].every(b=>b.textContent==='Roll'));
-    await press(bob.page,'[data-action="party-initiative"][aria-label="Roll initiative for Melchior"]');assert.equal(await bob.page.$eval('#modal [name="temporaryModifier"]',n=>n.value),'0');await click(bob.page,'close');
+    assert.equal(await bob.page.$('[data-action="party-initiative"]'),null,'Initiative waits for an encounter.');
+    await bob.page.goto(url+'#inventory');await click(alice.page,'party-start-combat');
+    await Promise.all([alice,bob].map(({page})=>page.waitForSelector('#modal[open] [data-initiative-method]')));
+    assert.match(await bob.page.$eval('#modal',n=>n.textContent),/Jane/,'Encounter prompts appear on other pages for the owner.');
+    await bob.page.select('[data-initiative-method]','physical');await fill(bob.page,'initiativeTotal','12');await submit(bob.page);await closed(bob.page);
+    for(const name of ['Melchior','Teyla']){await alice.page.waitForFunction(name=>document.querySelector('#modal[open]')?.textContent.includes(name),{},name);await alice.page.select('[data-initiative-method]','physical');await fill(alice.page,'initiativeTotal',name==='Melchior'?'80':'50');await submit(alice.page);}
+    await closed(alice.page);await bob.page.goto(url+'#party');await bob.page.waitForFunction(()=>document.querySelector('[data-party-character="alice-main"] .party-player-turn')?.textContent.includes('80'));
+    assert.equal(await bob.page.$('[data-party-character="alice-main"] [data-action="party-initiative"]'),null,'Other players’ initiative is read-only.');
+    assert.equal(await alice.page.$('[data-party-character="bob-main"] [data-action="party-initiative"]'),null);
+    await press(bob.page,'[data-action="party-initiative"][aria-label="Enter initiative for Jane"]');await fill(bob.page,'temporaryModifier','0');await submit(bob.page);await closed(bob.page);await bob.page.waitForFunction(()=>document.querySelector('.party-feed')?.textContent.includes('Jane rolled'));
+    await click(alice.page,'party-next-turn');await Promise.all([alice,bob].map(({page})=>page.waitForFunction(()=>document.querySelector('.party-player.is-current h2')?.textContent==='Melchior')));await click(alice.page,'party-next-turn');await bob.page.waitForFunction(()=>document.querySelector('.party-player:first-child h2')?.textContent==='Teyla');
+    await click(bob.page,'party-end-combat');await bob.page.waitForFunction(()=>!document.querySelector('[data-action="party-initiative"]'));
+    await click(bob.page,'party-start-combat');await bob.page.waitForSelector('[data-initiative-method]');assert.equal(await bob.page.$eval('#modal [name="temporaryModifier"]',n=>n.value),'0');await click(bob.page,'close');await alice.page.waitForSelector('[data-initiative-method]');await click(alice.page,'close');await alice.page.waitForFunction(()=>document.querySelector('#modal[open]')?.textContent.includes('Teyla'));await click(alice.page,'close');await click(bob.page,'party-end-combat');
     phase='member sheet';await press(bob.page,`[data-action="party-member"][aria-label="Interact with Melchior"]`);await click(bob.page,'cloud-view');await text(bob.page,'Saving throws');assert.equal(await bob.page.$('#modal [data-action="hp-apply"]'),null);await click(bob.page,'close');
     phase='money acceptance';
     await press(alice.page,'[data-action="party-member"][aria-label="Interact with Jane"]');await click(alice.page,'party-offer-money');await alice.page.waitForSelector('#modal [name="coin"]');await alice.page.select('#modal [name="coin"]','gold');await fill(alice.page,'amount','7');await submit(alice.page);await closed(alice.page);await bob.page.waitForSelector('[data-action="party-transfer-accept"]');
