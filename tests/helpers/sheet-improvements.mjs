@@ -287,6 +287,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   const fixture=structuredClone(original),c=fixture.characters.find(c=>c.id===fixture.activeId);
   c.sheetLayout={collapsed:[],favorites:{}};
   c.hp=c.maxHp-10;
+  c.languages='Common, Elvish';
   const gear={id:'sheet-favorite-item',name:'Favorite keepsake',category:'Gear',qty:1,weight:0,equipped:false,description:'A useful keepsake.',wiki:''};
   c.items.push(gear,{...gear,id:'sheet-equipped-item',name:'Equipped tool',equipped:true},
     {...gear,id:'sheet-potion',name:'Potion of healing',category:'Consumable',equipped:true},
@@ -311,6 +312,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   assert.equal(await page.$$eval('.inventory-list .action-row',n=>n.length),1);
   await page.click('.desktop-nav [data-route="sheet"]');
   assert.equal(await page.$('[data-sheet-section="pack"], [data-sheet-section="journal"]'),null,'Inventory and journal previews are absent');
+  assert.doesNotMatch(await page.$eval('[data-sheet-section="skills"]',n=>n.textContent),/Original training notes/);
   assert.equal(await page.$eval('.heading-actions [data-action="rest"]',n=>n.textContent.trim()),'Rest');
   await page.click('.heading-actions [data-action="rest"]');
   for(const kind of ['long','short']) assert.ok(await page.$(`#modal [data-action="rest"][data-kind="${kind}"]`));
@@ -366,11 +368,17 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('#modal button[type="submit"]');
   assert.equal(active(await state()).slots[0].used,1);
   assert.equal(active(await state()).concentration,'Sheet bonus spell');
-  assert.equal(await page.$eval(`${entry('attacks','sheet-bonus-spell')} .spell-concentration`,n=>n.textContent),'Concentrating');
+  const activeBadge=`${entry('attacks','sheet-bonus-spell')} .spell-concentration.is-active`;
+  const concentrationSummary='.xp-strip .concentration-summary';
+  assert.equal(await page.$eval(activeBadge,n=>n.textContent),'Concentrating');
+  assert.equal(await page.$$eval('.spell-concentration.is-active',nodes=>nodes.length),1);
+  assert.equal(await page.$('[data-sheet-section="attacks"] .concentration-banner'),null);
   await page.reload({waitUntil:'load'});
-  assert.match(await page.$eval('[data-sheet-section="attacks"] .concentration-banner',n=>n.textContent),/Sheet bonus spell/);
-  await page.click('[data-action="end-concentration"]');
+  assert.equal(await page.$eval(`${concentrationSummary} strong`,n=>n.textContent),'Sheet bonus spell');
+  await page.click(`${concentrationSummary} [data-action="end-concentration"]`);
   assert.equal(active(await state()).concentration,'');
+  assert.equal(await page.$(concentrationSummary),null);
+  assert.equal(await page.$(activeBadge),null);
   await page.click(`${entry('attacks',c.attacks[0].id)} [data-action="attack"]`);
   await page.select('#modal [name="actionType"]','bonus');
   await page.click('#modal button[type="submit"]');
@@ -382,6 +390,7 @@ export async function checkSheetImprovements(page,{base,original,root}) {
   await page.click('.condition-tray [data-condition="Prone"]');
   assert.equal(await page.evaluate(key=>JSON.parse(localStorage.getItem(key)).Prone.count,CONDITION_USAGE_KEY),1,'Clearing does not inflate usage');
   await page.click('.condition-more');
+  assert.equal(await page.$eval('#modal-title',n=>n.textContent),'Conditions');
   for(const name of CONDITIONS) {
     const selector=`#modal [data-condition="${name}"]`;
     await waitForImages(page,`${selector} img`);

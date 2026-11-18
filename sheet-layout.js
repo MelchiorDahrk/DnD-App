@@ -231,7 +231,7 @@ export function refreshSheetLayout(root,c) {
     for (const extra of section.querySelectorAll('[data-sheet-extra]')) extra.hidden=collapsed;
     for (const notes of section.querySelectorAll('[data-ac-breakdown]')) notes.hidden=collapsed&&!isSheetFavorite(c,key,'ac');
     if(key==='skills'){
-      for(const extra of section.querySelectorAll('.training-tabs,.training-notes,.skill-controls'))extra.hidden=collapsed;
+      for(const extra of section.querySelectorAll('.training-tabs,.skill-controls'))extra.hidden=collapsed;
       for(const panel of section.querySelectorAll('.training-tab-panel'))panel.hidden=collapsed?!panel.querySelector('[data-sheet-entry]:not([hidden])'):panel.id!==`skills-panel-${c.sheetLayout?.skillsTab==='saves'?'skills':c.sheetLayout?.skillsTab||'skills'}`;
     }
     for (const group of section.querySelectorAll('[data-sheet-group]')) group.hidden=collapsed && !group.querySelector('[data-sheet-entry]:not([hidden])');
