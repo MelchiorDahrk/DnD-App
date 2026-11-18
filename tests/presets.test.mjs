@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import {readFile,writeFile,access} from 'node:fs/promises';
 import {existsSync,readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
-import {pathToFileURL} from 'node:url';
 import {stripTypeScriptTypes} from 'node:module';
 import {compileModule} from 'svelte/compiler';
 import catalog from '../vendor/bricktrait/preset-catalog.json' with {type:'json'};
@@ -14,7 +13,7 @@ import {assembleInventory,resolveExternalPart,resolveExternalColor,parseMPD,flat
 import {buildPresets,applyPresetOverrides} from '../scripts/build-minifigure-presets.mjs';
 import {validPortrait} from '../portrait.js';
 import {makeCharacter,parseBackup,SAVE_VERSION} from '../model.js';
-import {state} from './helpers/bricktrait-state.mjs';
+import {state,stateModuleURL} from './helpers/bricktrait-state.mjs';
 const vendor=resolve(import.meta.dirname,'../vendor/bricktrait');
 
 test('preset discovery retains every theme and leaves parts accessible',async()=>{
@@ -105,10 +104,10 @@ test('deduplication preserves distinct source identities and search metadata',()
   assert.equal(stable.presets[0].id,'z-established','refresh preserves established canonical IDs');
 });
 test('preset application is cloned, undoable as one action, and leaves view/style and saved portraits alone',async()=>{
-  const historyPath=resolve(import.meta.dirname,'../.tmp/bricktrait-history-test.mjs');
-  const text=stripTypeScriptTypes(await readFile(resolve(vendor,'src/lib/history.svelte.ts'),'utf8')).replace("from './state.svelte'",`from '${pathToFileURL(resolve(import.meta.dirname,'../.tmp/bricktrait-state-test.mjs')).href}'`);
+  const historyPath=new URL('./history.mjs',stateModuleURL);
+  const text=stripTypeScriptTypes(await readFile(resolve(vendor,'src/lib/history.svelte.ts'),'utf8')).replace("from './state.svelte'",`from '${stateModuleURL}'`);
   await writeFile(historyPath,compileModule(text,{filename:'history.svelte.js',generate:'server'}).js.code);
-  const history=await import(pathToFileURL(historyPath));
+  const history=await import(historyPath.href);
   Object.assign(state.portrait,structuredClone(state.initial));history.track(state.portrait);
   const before=structuredClone(state.portrait),preset=catalog.presets.find(p=>p.kind==='original');
   history.transaction(()=>state.portrait.figure=presetFigure(preset));

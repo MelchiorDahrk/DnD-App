@@ -128,7 +128,9 @@ jobs:
           name: firebase-failure-diagnostics
           path: |
             .tmp/browser-diagnostics/firebase/
+            .tmp/browser-diagnostics/party/
             firestore-debug.log
+          include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 7
       - name: Run tests including generated matching assets
