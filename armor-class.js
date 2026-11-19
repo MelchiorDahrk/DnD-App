@@ -13,6 +13,13 @@ export function armorCheckMode(c,ability,advantage=false,disadvantage=false,skil
   disadvantage ||= effects.disadvantage&&['str','dex'].includes(ability)||skill==='Stealth'&&effects.stealth;
   return advantage===disadvantage?'normal':advantage?'advantage':'disadvantage';
 }
+export function armorSpeedPenalty(character) {
+  return character.items.some(item=>{
+    if(!equipped(item))return false;
+    const armor=itemDefense(item).armor;
+    return armor?.strength>character.stats.str;
+  })?10:0;
+}
 
 const armorName = name => equipmentName(name).replace(/\+\s*[123]/g,'').replace(/[,()]/g,'').replace(/\barmor\b/g,'').replace(/\s+/g,' ').trim();
 const equipped = item => item.equipped && item.qty>0;

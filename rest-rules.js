@@ -1,6 +1,7 @@
 import {REST_REFERENCES} from './rest-reference-data.js';
 import {SUBCLASS_ALIASES} from './progression-options.js';
 import {referenceURL} from './reference-links.js';
+import {hasResourceful,inspirationPoints} from './model.js';
 
 const normalize=value=>String(value||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const same=(a,b)=>normalize(a)===normalize(b);
@@ -100,7 +101,7 @@ export function restReminders(c,kind='long') {
   if(prepared)add('Prepared spells',c.class==='Wizard'?'You may change your prepared spells using eligible spells in your spellbook. Keep always-prepared spells selected.':'You may change your prepared spells to eligible spells from your class list. Keep always-prepared spells selected.',c.class==='Artificer'?earlier('artificer'):wiki(c.class.toLowerCase()+':main'),{target:'spells'});
   if(['Paladin','Ranger'].includes(c.class))add('Prepared spells',`You may replace one prepared ${c.class} spell with another eligible ${c.class} spell. Keep always-prepared spells selected.`,wiki(c.class.toLowerCase()+':main'),{target:'spells'});
   if(c.class==='Wizard')add('Wizard cantrip','You may replace one cantrip from Wizard Spellcasting with another Wizard cantrip.',wiki('wizard:main'),{target:'spells'});
-  if(same(c.race,'Human'))add('Resourceful',summaries.resourceful,wiki('species:human'));
+  if(same(c.race,'Human')&&!hasResourceful(c))add('Resourceful',summaries.resourceful,wiki('species:human'));
   if(same(c.race,'High Elf')&&!legacyLineage)add('High Elf cantrip',summaries['high elf cantrip'],wiki('species:elf'),{target:'spells'});
   const extraSpecies={
    Kalashtar:'Choose your temporary skill proficiency from Severed from Dreams; the previous choice expires.',
@@ -118,6 +119,7 @@ export function restReminders(c,kind='long') {
   if(speciesRule&&!species[c.race]&&!extraSpecies[c.race]&&!['Human','High Elf','Wood Elf','Drow'].includes(c.race))add(c.race+' traits','Review your species’ rest-based recovery, rest duration, choices, and expiring effects. Update any benefits not already tracked in Features.',speciesRule.wiki);
  }
  for(const feature of recorded) {
+  if(feature.name==='Resourceful'&&hasResourceful(c))continue;
   if(['spellcasting','pact magic','preparing and casting spells'].includes(normalize(feature.name)))continue;
   const rule=referenceFor(feature,'feature',{...c,subclass});
   const text=feature.description||'';
@@ -153,6 +155,7 @@ export function restRefreshes(c,{kind='long',reduceExhaustion=true,skipFeatureId
   add('exhaustion','Exhaustion',c.exhaustion,reduceExhaustion?Math.max(0,c.exhaustion-1):c.exhaustion,reduceExhaustion?'Remove one level if eligible':'Recovery disabled');
   add('concentration','Concentration',c.concentration||'None','None');
   add('death-saves','Death saves',`${c.deathSuccess} successes / ${c.deathFailure} failures`,'0 successes / 0 failures');
+  if(hasResourceful(c))add('resourceful','Heroic Inspiration',inspirationPoints(c),Math.max(1,inspirationPoints(c)),'Resourceful');
  }
  if(long||(c.class==='Warlock'&&c.pactMagic===true))c.slots.forEach((slot,index)=>{if(slot.max)add('slot-'+index,`${c.pactMagic?'Pact Magic · ':''}Level ${index+1} spell slots`,slot.max-slot.used,slot.max);});
  for(const f of c.features) {

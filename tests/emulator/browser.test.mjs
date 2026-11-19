@@ -6,6 +6,7 @@ import {resolve,extname,sep} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {findChromium} from '../../scripts/lib/chromium.mjs';
 import {demoCharacter,uid} from '../../model.js';
+import {fillLevelOne,nextBuilderStep} from '../helpers/character-builder.mjs';
 
 test('browser: guest/offline, account isolation, subdirectory assets and two-account live parties',{timeout:180000},async()=>{
   const root=resolve(import.meta.dirname,'../..'),assetRoot=process.env.QUESTLOG_TEST_BUILD?resolve(root,process.env.QUESTLOG_TEST_BUILD):root,mime={'.html':'text/html','.js':'text/javascript','.css':'text/css','.json':'application/json','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.webmanifest':'application/manifest+json'};
@@ -41,7 +42,13 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
       }
       if(guest&&!localStorage.getItem('questlog.v2'))localStorage.setItem('questlog.v2',JSON.stringify({version:2,characters:[c],activeId:c.id,settings:{sound:false}}));
     },c,guest,disabled,holdSyncLock);
-    await page.goto(url,{waitUntil:'domcontentloaded'});return {context,page,c};
+    await page.goto(url,{waitUntil:'networkidle0'});
+    if(!disabled)await page.waitForFunction(async()=>{
+      const sdk=await import('./firebase-sdk/firebase.js');
+      try {await sdk.getAuth().authStateReady();return true;}
+      catch {return false;}
+    });
+    return {context,page,c};
   }
   async function signup(page,email){
     await click(page,'cloud-signup');await fill(page,'email',email);await fill(page,'password','sword-and-shield-123');await page.click('#modal button[type="submit"]');
@@ -111,6 +118,29 @@ test('browser: guest/offline, account isolation, subdirectory assets and two-acc
     await alice.page.setOfflineMode(false);
     await bob.page.waitForFunction(()=>document.querySelector('.party-player-top strong')?.textContent==='10');
     phase='shared sheet';assert.ok(await bob.page.$eval('.party-player',n=>n.getBoundingClientRect().width>200),'A party viewer without a local character still gets a full-width card');await bob.page.locator('.party-portrait-button').click();await click(bob.page,'cloud-view');await waitText(bob.page,'Strength');assert.equal(await bob.page.$('#modal [data-action="hp-apply"]'),null);await click(bob.page,'close');
+    phase='offline character creation and account sync';
+    await alice.page.setOfflineMode(true);
+    await alice.page.locator('#topbar [data-action="characters"]').click();
+    await alice.page.click('#modal [data-action="new-character"]');
+    await fillLevelOne(alice.page,{name:'Ember Ward',className:'Warlock',species:'Human',background:'Acolyte'});
+    await nextBuilderStep(alice.page);
+    await alice.page.waitForSelector('#modal:not([open])');
+    const created=await alice.page.evaluate(async()=>{
+      const s=await import('./firebase-sdk/firebase.js');
+      return JSON.parse(localStorage.getItem('questlog.v2.account.'+s.getAuth().currentUser.uid)).characters.find(c=>c.name==='Ember Ward');
+    });
+    assert.equal(created.pactMagic,true);
+    assert.ok(created.spells.some(spell=>spell.castingGrants?.length));
+    await alice.page.reload({waitUntil:'load'});await waitText(alice.page,'Ember Ward');
+    await alice.page.setOfflineMode(false);
+    await alice.page.goto(url+'#settings');
+    await alice.page.waitForFunction(()=>document.querySelector('[data-cloud-status]')?.textContent==='Synced');
+    const cloudCreated=await alice.page.evaluate(async id=>{
+      const s=await import('./firebase-sdk/firebase.js'),{CloudStore}=await import('./cloud-store.js');
+      return new CloudStore({sdk:s,db:s.getFirestore()},s.getAuth().currentUser.uid).readCharacter(id);
+    },created.id);
+    assert.deepEqual(cloudCreated.character,created);
+    assert.doesNotMatch(await bob.page.$eval('#main',el=>el.textContent),/Ember Ward/,'Creating a character does not share it with the party.');
     phase='account isolation';await alice.page.goto(url+'#settings');await click(alice.page,'cloud-signout');await waitText(alice.page,'Continue without an account');
     assert.equal(await alice.page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')).characters[0].hp),24,'guest original preserved');
     await click(alice.page,'cloud-email');await fill(alice.page,'email',bobEmail);await fill(alice.page,'password','sword-and-shield-123');await alice.page.click('#modal button[type="submit"]');

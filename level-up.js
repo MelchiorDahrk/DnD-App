@@ -2,7 +2,7 @@ import {levelUp,uid,mod,SKILLS,ABILITIES,wikiURL,subclassURL,parseBackup,SAVE_VE
 import {FEATURE_CATALOG,featureFields,featureMatchesCharacter,isFeat} from './feature-catalog.js';
 import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
-import {trainingFor,ensureTraining,trainingKey} from './training-rules.js';
+import {trainingFor,ensureTraining,trainingKey,TOOL_NAMES,LANGUAGE_GROUPS} from './training-rules.js';
 import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
 
 export const normalized=s=>String(s||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]/g,'');
@@ -59,7 +59,7 @@ function classEntries(c,level){
     return entry?{...entry,level}:{...reference(name,c.class,level,c.class==='Artificer'?'2014':'2024'),className:c.class,group:'Class features'};
   });
 }
-function eligibleFeat(f,c){
+export function eligibleFeat(f,c){
   if(!isFeat(f)||f.group==='Fighting styles'||f.campaignGift||f.level>c.level||!featureMatchesCharacter(f,c))return false;
   if((f.published?hasFeat(c,f.name):has(c,f.name))&&f.name!=='Ability Score Improvement'&&!f.repeatable)return false;
   if(f.name.startsWith('Boon of Siberys')&&hasFeat(c,'Boon of Siberys'))return false;
@@ -88,20 +88,31 @@ function eligibleFeat(f,c){
   if(f.name==='Moderately Armored'&&!/light/i.test(armor))return false;
   if(f.name==='Shield Master'&&!/shield/i.test(armor))return false;
   if(f.name==='Squat Nimbleness'&&!featureMatchesCharacter({species:['Dwarf']},c)){
-    const size=SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size;
+    const size=c.size||SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size;
     if(size&&!size.includes('Small'))return false;
   }
   return true;
 }
-export function levelUpPlan(character,{subclass=character.subclass,race=character.race,choices:choiceSelections={},land=character.circleLand||'Temperate',abilities={}}={}){
+export function levelUpPlan(character,selection={}){
   if(character.level>=20)throw new Error('You’ve reached level 20.');
-  const c={...character,level:character.level+1,subclass:canonicalSubclass(subclass),race},level=c.level;
+  return progressionPlan(character,character.level+1,selection);
+}
+const startingBaseline={slots:Array(9).fill(0),cantrips:0,prepared:0,specific:{}};
+export function levelOnePlan(character){
+  if(character.level!==1||character.subclass)throw new Error('Initialize progression on a level 1 character without a subclass.');
+  return progressionPlan(character,1);
+}
+function progressionPlan(character,level,{subclass=character.subclass,race=character.race,choices:choiceSelections={},land=character.circleLand||'Temperate',abilities={}}={}){
+  const starting=level===1;
+  const c={...character,level,subclass:canonicalSubclass(subclass),race};
   const knownSubclass=LEVEL_SUBCLASSES.find(s=>s.name===c.subclass);
   if(knownSubclass&&knownSubclass.className!==c.class)throw new Error('That subclass is not available to your class.');
-  const before=classProgression(character),after=classProgression(c);
+  const before=starting?startingBaseline:classProgression(character),after=classProgression(c);
   if(c.class==='Artificer')after.prepared=Math.max(1,Math.floor(level/2)+mod(c.stats.int+Number(abilities.int||0)));
   const known=new Set(c.features.map(f=>normalized(f.name)));
-  const species=FEATURE_CATALOG.filter(f=>f.group==='Species traits'&&featureMatchesCharacter(f,c));
+  const selectedGiant=c.trainingOrigins&&c.race==='Goliath'&&c.features.find(f=>f.name==='Giant Ancestry')?.description;
+  const species=FEATURE_CATALOG.filter(f=>f.group==='Species traits'&&featureMatchesCharacter(f,c)&&
+    (!selectedGiant||!/(Jaunt|Burn|Chill|Tumble|Endurance|Thunder)$/.test(f.name)||f.name===selectedGiant));
   const all=[...Array.from({length:level},(_,i)=>classEntries(c,i+1)).flat(),...subclassEntries(c),...species];
   const unique=new Map();for(const f of all)if(f.level<=level)unique.set(f.id,f);
   const fresh=[...unique.values()].filter(f=>f.level===level&&!known.has(normalized(f.name))&&!['Colossus Slayer','Horde Breaker'].includes(f.name));
@@ -120,12 +131,13 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   const toolOptions=EQUIPMENT.filter(e=>e.toolAbility&&!trainingFor(c).tools.includes(e.id)).map(e=>({id:e.name,label:e.name}));
   const artisanNames=new Set(EQUIPMENT.filter(e=>e.group==='Tools').slice(0,17).map(e=>e.name));
   const baseSkills=CLASS_OPTIONS.find(o=>o.name===c.class);
-  if(c.skills.length<baseSkills.skillCount)add('classSkills','Earlier class skill proficiencies',baseSkills.skillCount-c.skills.length,skillOptions(baseSkills.skills),'skills');
+  if(!starting&&c.skills.length<baseSkills.skillCount)add('classSkills','Earlier class skill proficiencies',baseSkills.skillCount-c.skills.length,skillOptions(baseSkills.skills),'skills');
   const expertOptions=()=>[...new Set([...c.skills,...(choiceSelections.classSkills||[])])].filter(s=>!c.expertise.includes(s));
   if((c.class==='Bard'&&[2,9].includes(level))||(c.class==='Rogue'&&level===6))add('expertise','Skill Expertise',2,expertOptions(),'expertise');
   if(c.class==='Ranger'&&[2,9].includes(level))add('expertise','Skill Expertise',level===2?1:2,expertOptions(),'expertise');
-  if(c.class==='Wizard'&&level===2)add('expertise','Scholar Expertise',1,expertOptions().filter(s=>['Arcana','History','Investigation','Nature','Religion'].includes(s)),'expertise');
-  if(c.class==='Rogue'&&level<6&&c.expertise.length<2)add('expertise','Earlier skill Expertise',2-c.expertise.length,expertOptions(),'expertise');
+  if(c.class==='Ranger'&&level===2&&c.trainingOrigins)add('deftLanguages','Deft Explorer languages',2,[...LANGUAGE_GROUPS.Standard,...LANGUAGE_GROUPS.Rare].filter(language=>!trainingFor(c).languages.includes(language)),'language');
+  if(c.class==='Wizard'&&level===2)add('expertise','Scholar Expertise',1,expertOptions().filter(s=>['Arcana','History','Investigation','Medicine','Nature','Religion'].includes(s)),'expertise');
+  if(c.class==='Rogue'&&level<6&&c.expertise.length<2)add('expertise',starting?'Expertise':'Earlier skill Expertise',2-c.expertise.length,expertOptions(),'expertise');
   if(c.class==='Barbarian'&&level===3)add('skills','Primal Knowledge skill',1,skillOptions(CLASS_OPTIONS.find(o=>o.name===c.class).skills),'skills');
   if(c.subclass==='College of Lore'&&level===3)add('skills','Bonus Proficiencies',3,skillOptions(),'skills');
   if(c.subclass==='Battle Master'&&level===3)add('skills','Student of War skill',1,skillOptions(['History','Insight','Investigation','Persuasion','Performance']),'skills');
@@ -138,16 +150,17 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   if(c.subclass==='Samurai'&&level===3)add('skills','Samurai proficiency',1,[...skillOptions(['History','Insight','Performance','Persuasion']),...['One language (record in Languages)']],'training');
   if(asiLevels(c.class).includes(level))add('feat',level===19&&c.class!=='Artificer'?'Epic Boon or feat':'Feat or Ability Score Improvement',1,FEATURE_CATALOG.filter(f=>eligibleFeat(f,c)).map(f=>({id:f.id,label:f.name,entry:f})),'feat');
   const featureOptions=group=>FEATURE_CATALOG.filter(f=>f.group===group&&f.level<=level&&!known.has(normalized(f.name)));
-  if((['Paladin','Ranger'].includes(c.class)&&level===2)||(c.subclass==='Champion'&&level===7)){
+  if((starting&&c.class==='Fighter')||(['Paladin','Ranger'].includes(c.class)&&level===2)||(c.subclass==='Champion'&&level===7)){
     const options=featureOptions('Fighting styles');
     if(level===2)options.push(FEATURE_CATALOG.find(f=>f.className===c.class&&f.name===(c.class==='Paladin'?'Blessed Warrior':'Druidic Warrior')));
     add('style','Fighting Style',1,options.map(f=>({id:f.id,label:f.name,entry:f})));
   }
   if(c.class==='Sorcerer'&&[2,10,17].includes(level))add('metamagic','Metamagic',2,featureOptions('Metamagic').map(f=>({id:f.id,label:f.name,entry:f})));
-  if(c.class==='Warlock')add('invocations','Eldritch Invocations',after.specific.eldritch_invocations-before.specific.eldritch_invocations,featureOptions('Eldritch invocations').map(f=>({id:f.id,label:f.name,entry:f})));
+  if(c.class==='Warlock')add('invocations','Eldritch Invocations',after.specific.eldritch_invocations-(before.specific.eldritch_invocations||0),featureOptions('Eldritch invocations').map(f=>({id:f.id,label:f.name,entry:f})));
   if(c.subclass==='Battle Master'&&[3,7,10,15].includes(level))add('maneuvers','Battle Master maneuvers',level===3?3:2,featureOptions('Maneuvers').map(f=>({id:f.id,label:f.name,entry:f})));
-  const mastery=(after.specific.weapon_mastery||0)-(before.specific.weapon_mastery||0);
-  if(mastery>0)add('mastery','Additional Weapon Mastery',mastery,WEAPONS.filter(w=>c.class!=='Barbarian'||w.family.includes('melee')).map(w=>({id:w.name,label:`${w.name} (${w.mastery})`})),'mastery');
+  const masteryCount=row=>row.specific.weapon_mastery||(['Rogue','Ranger','Paladin'].includes(c.class)&&row!==startingBaseline?2:0);
+  const mastery=masteryCount(after)-masteryCount(before);
+  if(mastery>0)add('mastery',starting?'Weapon Mastery':'Additional Weapon Mastery',mastery,WEAPONS.filter(w=>(!starting||trainingFor(c).weapons.includes(w.id))&&(c.class!=='Barbarian'||w.family.includes('melee'))).map(w=>({id:w.name,item:w,label:`${w.name} (${w.mastery})`})),'mastery');
   const chooseEffect=(id,label,options)=>add(id,label,1,options);
   if(c.subclass==='Hunter'&&level===3)chooseEffect('prey','Hunter’s Prey',['Colossus Slayer','Horde Breaker']);
   if(c.subclass==='Hunter'&&level===7)chooseEffect('defense','Defensive Tactics',['Escape the Horde','Multiattack Defense']);
@@ -169,7 +182,7 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   if(c.class==='Cleric'&&level===7)chooseEffect('blessed','Blessed Strikes',['Divine Strike','Potent Spellcasting']);
   if(c.class==='Druid'&&level===7)chooseEffect('fury','Elemental Fury',['Primal Strike','Potent Spellcasting']);
   const feat=choices.find(ch=>ch.id==='feat')?.options.find(o=>o.id===choiceSelections.feat?.[0]);
-  if(feat?.label==='Squat Nimbleness'&&!featureMatchesCharacter({species:['Dwarf']},c)&&SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size!=='Small')add('featSize','Squat Nimbleness size prerequisite',1,[{id:'Small',label:'My character is Small'}]);
+  if(feat?.label==='Squat Nimbleness'&&!featureMatchesCharacter({species:['Dwarf']},c)&&(c.size||SPECIES.find(s=>normalized(s.name)===normalized(c.race))?.size)!=='Small')add('featSize','Squat Nimbleness size prerequisite',1,[{id:'Small',label:'My character is Small'}]);
   if(feat?.label==='Skill Expert'){
     add('featSkills','Skill Expert proficiency',1,skillOptions(),'skills');
     add('featExpertise','Skill Expert Expertise',1,[...new Set([...expertOptions(),...(choiceSelections.featSkills||[])])],'expertise');
@@ -183,16 +196,12 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   if(feat?.label==='Metamagic Adept')add('featMetamagic','Metamagic Adept options',2,featureOptions('Metamagic').map(f=>({id:f.id,label:f.name,entry:f})));
   if(feat?.label==='Fighting Initiate')add('featStyle','Fighting Initiate style',1,featureOptions('Fighting styles').map(f=>({id:f.id,label:f.name,entry:f})));
   if(feat?.label==='Eldritch Adept')add('featInvocation','Eldritch Adept invocation',1,featureOptions('Eldritch invocations').filter(f=>c.class==='Warlock'||['Armor of Shadows','Eldritch Mind','Fiendish Vigor','Mask of Many Faces','Misty Visions','Otherworldly Leap'].includes(f.name)).map(f=>({id:f.id,label:f.name,entry:f})));
-  if(feat?.label==='Skilled')add('featSkills','Skilled proficiencies',3,[...skillOptions(),...toolOptions],'training');
-  if(feat?.label==='Crafter')add('featTools','Crafter tools',3,toolOptions.filter(o=>artisanNames.has(o.id)),'tool');
-  if(feat?.label==='Musician')add('featTools','Musician instruments',3,EQUIPMENT.filter(e=>e.group==='Musical instruments').map(e=>e.name),'tool');
+  if(feat)choices.push(...originFeatChoices(feat.entry,c));
   if(feat?.label==='Resilient')add('resilient','Resilient saving throw proficiency',1,Object.keys(ABILITIES).filter(a=>!c.saves.includes(a)).map(a=>({id:a,label:ABILITIES[a]})),'save');
   const extraSpells=(id,label,count,filter)=>add(id,label,count,SPELL_CATALOG.filter(filter).map(s=>({id:s.id,label:s.name,spell:s})),'spell');
-  const magicInitiate=feat?.label.match(/^Magic Initiate \((\w+)\)/)?.[1];
   const style=choices.find(ch=>ch.id==='style')?.options.find(o=>o.id===choiceSelections.style?.[0]);
   const warrior=style?.label==='Blessed Warrior'?'Cleric':style?.label==='Druidic Warrior'?'Druid':'';
-  if(magicInitiate||warrior)extraSpells('bonusCantrips',`${feat?.label||style.label} cantrips`,2,s=>s.level===0&&s.classes.includes(magicInitiate||warrior));
-  if(magicInitiate)extraSpells('bonusSpell','Magic Initiate level 1 spell',1,s=>s.level===1&&s.classes.includes(magicInitiate));
+  if(warrior)extraSpells('bonusCantrips',`${style.label} cantrips`,2,s=>s.level===0&&s.classes.includes(warrior));
   if(feat?.label==='Artificer Initiate'){
     extraSpells('bonusCantrips','Artificer Initiate cantrip',1,s=>s.level===0&&artificerSpells.has(s.id));
     extraSpells('bonusSpell','Artificer Initiate spell',1,s=>s.level===1&&artificerSpells.has(s.id));
@@ -254,21 +263,54 @@ export function levelUpPlan(character,{subclass=character.subclass,race=characte
   const arcanum=c.class==='Warlock'&&[11,13,15,17].includes(level)?(level+1)/2:0;
   const arcanumOptions=arcanum?SPELL_CATALOG.filter(s=>s.level===arcanum&&permitted(s)):[];
   return {character:c,before,after,fresh,catchup,updates,choices,grant,available,maxSpellLevel,arcanum,arcanumOptions,land,
-    cantripGain:Math.max(0,after.cantrips-before.cantrips),spellGain:c.class==='Wizard'?2:Math.max(0,after.prepared-before.prepared),
+    cantripGain:Math.max(0,after.cantrips-before.cantrips),spellGain:c.class==='Wizard'?(starting?6:2):Math.max(0,after.prepared-before.prepared),
     hpBonus:(/dwarf/i.test(c.race)?1:0)+(has(c,'Tough')?2:0),
     warnings:[...(!LEVEL_SUBCLASSES.some(s=>s.name===c.subclass&&s.className===c.class)&&level>=3?['This subclass has no bundled progression. Add its unlocks below using your book.']:[]),...(!species.length&&!LEGACY_LINEAGE_SPELLS[c.race]?['This species has no bundled progression. Add its unlocks below using your book.']:[])]};
 }
-function addFeature(c,entry){
+export function originFeatChoices(entry,c){
+  const tools=TOOL_NAMES.filter(name=>!trainingFor(c).tools.includes(trainingKey(name)));
+  const options=names=>names.map(id=>({id,label:id}));
+  const choice=(id,label,count,kind,options)=>({id,label,count,kind,options});
+  if(entry.name==='Skilled')return [choice('featSkills','Skilled proficiencies',3,'training',options([...Object.keys(SKILLS).filter(s=>!c.skills.includes(s)),...tools]))];
+  const group=entry.name==='Crafter'?'Tools':entry.name==='Musician'?'Musical instruments':'';
+  if(group){
+    const eligible=EQUIPMENT.filter(e=>e.group===group);
+    const names=new Set((group==='Tools'?eligible.slice(0,17):eligible).map(e=>e.name));
+    return [choice('featTools',`${entry.name} proficiencies`,3,'tool',options(tools.filter(name=>names.has(name))))];
+  }
+  const list=entry.name.match(/^Magic Initiate \((\w+)\)/)?.[1];
+  if(!list)return [];
+  const spells=level=>SPELL_CATALOG.filter(s=>s.level===level&&s.classes.includes(list)).map(s=>({id:s.id,label:s.name,spell:s}));
+  return [choice('bonusCantrips',`${entry.name} cantrips`,2,'spell',spells(0)),choice('bonusSpell',`${entry.name} level 1 spell`,1,'spell',spells(1))];
+}
+export function addProgressionFeature(c,entry,origin=''){
   if(!entry.repeatable&&c.features.some(f=>{
     if(normalized(f.name)!==normalized(entry.name))return false;
     const previous=f.catalogId&&featureById.get(f.catalogId);
     return !previous||isFeat(previous)===isFeat(entry);
   }))return;
-  c.features.push({id:uid(),used:0,...featureFields(entry,c),catalogId:entry.id});
+  const feature={id:uid(),used:0,...featureFields(entry,c),catalogId:entry.id,...(origin?{origin}:{})};
+  c.features.push(feature);
+  return feature;
 }
+export function addProgressionSpell(c,spell,origin='',prepared=true){
+  const existing=c.spells.find(s=>spellKey(s.name)===spell.id);
+  if(existing){
+    if(prepared)existing.prepared=true;
+    if(origin){existing.origins=[...new Set([...(existing.origins||[]),...(existing.origin?[existing.origin]:[]),origin])];existing.origin=existing.origin||origin;}
+    return existing;
+  }
+  const {classes,id,source,ritual,at,...fields}=spell;
+  const stored={...fields,id:uid(),prepared,origin,notes:`${origin?origin+'\n\n':''}${spell.notes}`};
+  c.spells.push(stored);
+  return stored;
+}
+export const isClassSpell=s=>s.classPrepared!==undefined||!s.origin;
+export const isClassPrepared=s=>s.classPrepared??s.prepared;
 export function applyLevelUp(character,selection={}){
   const plan=levelUpPlan(character,selection),c=structuredClone(character),chosen=selection.choices||{};
   if(!Number.isInteger(selection.hpGain)||selection.hpGain<1||selection.hpGain>999)throw new Error('Enter HP gained from your Hit Die, including Constitution (1–999).');
+  if(selection.requireFullProgression&&selection.hpGain>Math.max(1,c.hitDie+mod(c.stats.con)))throw new Error('HP gain exceeds your Hit Die plus Constitution modifier.');
   if(c.level===2&&!plan.character.subclass)throw new Error('Choose a subclass for level 3.');
   if(['Elf','Gnome','Tiefling'].includes(plan.character.race))throw new Error('Choose your species lineage to unlock its magic.');
   const picked=[];
@@ -301,10 +343,11 @@ export function applyLevelUp(character,selection={}){
   if(c.class==='Monk'&&plan.character.level===20)for(const a of ['dex','wis'])c.stats[a]=Math.min(25,c.stats[a]+4);
   const hpExtra=plan.hpBonus+(mod(c.stats.con)-beforeCon)*plan.character.level;
   levelUp(c,selection.hpGain);c.maxHp=Math.min(9999,c.maxHp+hpExtra);c.hp=Math.min(c.maxHp,c.hp+hpExtra);
-  const grantIds=new Set(selection.featureIds??plan.fresh.map(f=>f.id));
-  for(const id of grantIds){const entry=[...plan.fresh,...plan.catchup].find(f=>f.id===id);if(!entry)throw new Error('That feature is not available at this level.');addFeature(c,entry);}
+  const fixedIds=plan.fresh.map(f=>f.id);
+  const grantIds=new Set(selection.requireFullProgression?[...fixedIds,...(selection.featureIds||[])]:selection.featureIds??fixedIds);
+  for(const id of grantIds){const entry=[...plan.fresh,...plan.catchup].find(f=>f.id===id);if(!entry)throw new Error('That feature is not available at this level.');addProgressionFeature(c,entry,c.trainingOrigins?`${entry.group==='Species traits'?'Species':'Class'} · ${entry.owner}`:'');}
   const resourceEntries=[...FEATURE_CATALOG,...subclassEntries(c),...c.features.filter(f=>c.subclass==='Rune Knight'&&f.name.startsWith('Rune: ')&&f.catalogId).map(f=>({...reference(f.name,'Rune Knight',c.level,'2014'),id:f.catalogId,resource:'rune'}))];
-  if(selection.updateResources!==false)for(const f of c.features){
+  if(selection.requireFullProgression||selection.updateResources!==false)for(const f of c.features){
     const entry=resourceEntries.find(e=>featureMatchesCharacter(e,c)&&((f.catalogId&&f.catalogId===e.id)||normalized(f.name)===normalized(e.name)));
     if(!entry)continue;
     const old=featureFields(entry,character),next=featureFields(entry,c);
@@ -315,24 +358,41 @@ export function applyLevelUp(character,selection={}){
     if(choice.kind==='skills')c.skills.push(option.id);
     else if(choice.kind==='training'&&Object.hasOwn(SKILLS,option.id))c.skills.push(option.id);
     else if(choice.kind==='tool'||choice.kind==='training'){const tools=ensureTraining(c).tools,id=trainingKey(option.id);if(!tools.includes(id))tools.push(id);c.toolProficiencies=[c.toolProficiencies,option.id].filter(Boolean).join('; ');}
+    else if(choice.kind==='language'){
+      const training=ensureTraining(c);
+      if(!training.languages.includes(option.id))training.languages.push(option.id);
+      c.languages=training.languages.join(', ');
+    }
     else if(choice.kind==='knowledge'){c.skills.push(option.id);c.expertise.push(option.id);}
     else if(choice.kind==='save')c.saves.push(option.id);
     else if(choice.kind==='expertise')c.expertise.push(option.id);
-    else if(choice.kind==='mastery')addFeature(c,{...reference(`Weapon Mastery: ${option.label}`,c.class,c.level),details:`Selected mastery: ${option.label}. Apply the mastery property when using this weapon.`});
-    else if(option.entry&&option.label!=='Ability Score Improvement')addFeature(c,option.entry);
-    else if(!option.entry&&choice.kind!=='spell')addFeature(c,reference(`${choice.label}: ${option.label}`,c.subclass||c.class,c.level));
+    else if(choice.kind==='mastery')addProgressionFeature(c,{...reference(`Weapon Mastery: ${option.label}`,c.class,c.level),details:`Selected mastery: ${option.label}. Apply the mastery property when using this weapon.`});
+    else if(option.entry&&option.label!=='Ability Score Improvement')addProgressionFeature(c,option.entry,c.trainingOrigins?`${choice.kind==='feat'?'Feat':'Class'} · ${c.class}`:'');
+    else if(!option.entry&&choice.kind!=='spell')addProgressionFeature(c,reference(`${choice.label}: ${option.label}`,c.subclass||c.class,c.level));
     if(choice.id==='genie')c.genieKind=option.id;
+    if(c.trainingOrigins){
+      const isSkill=Object.hasOwn(SKILLS,option.id);
+      const group=choice.kind==='save'?'saves':choice.kind==='language'?'languages':
+        choice.kind==='training'?(isSkill?'skills':'tools'):choice.kind==='tool'?'tools':
+        ['skills','expertise'].includes(choice.kind)?choice.kind:'';
+      if(group){
+        const source=choice.id.startsWith('feat')&&feat?`Feat · ${feat.label}`:`Class · ${c.class}`;
+        const origins=(c.trainingOrigins[group]??={})[group==='tools'?trainingKey(option.id):option.id]??=[];
+        if(!origins.includes(source))origins.push(source);
+      }
+    }
   }
-  for(const choice of pending)addFeature(c,{...reference(`Pending choice: ${choice.label}`,c.class,c.level),details:`Choose ${choice.count} option(s) for ${choice.label}. The sheet has too few eligible recorded proficiencies/options. Review your book and fill in the missing selections and sheet entries.`});
+  for(const choice of pending)addProgressionFeature(c,{...reference(`Pending choice: ${choice.label}`,c.class,c.level),details:`Choose ${choice.count} option(s) for ${choice.label}. The sheet has too few eligible recorded proficiencies/options. Review your book and fill in the missing selections and sheet entries.`});
   if(feat?.label==='Tough'){c.maxHp+=2*c.level;c.hp+=2*c.level;}
   if(c.class==='Monk'&&c.level===14)c.saves=Object.keys(ABILITIES);
   if(c.class==='Rogue'&&c.level===15)c.saves=[...new Set([...c.saves,'wis','cha'])];
   if(c.subclass==='Scout'&&c.level===3)for(const skill of ['Nature','Survival']){if(!c.skills.includes(skill))c.skills.push(skill);if(!c.expertise.includes(skill))c.expertise.push(skill);}
   const oldKeys=new Set(character.spells.map(s=>spellKey(s.name)));
+  const classKeys=c.trainingOrigins?new Set(character.spells.filter(isClassSpell).map(s=>spellKey(s.name))):oldKeys;
   const swaps=[];
   for(const [oldField,newField,cantrip] of [['replaceSpellId','replacementSpellId',false],['replaceCantripId','replacementCantripId',true]]){
     const oldId=selection[oldField],newId=selection[newField];if(!oldId&&!newId)continue;
-    const old=character.spells.find(s=>s.id===oldId&&!s.origin&&(s.level===0)===cantrip&&!plan.grant.some(g=>g.id===spellKey(s.name))&&plan.available.some(a=>a.id===spellKey(s.name)));
+    const old=character.spells.find(s=>s.id===oldId&&isClassSpell(s)&&(s.level===0)===cantrip&&!plan.grant.some(g=>g.id===spellKey(s.name))&&plan.available.some(a=>a.id===spellKey(s.name)));
     const next=plan.available.find(s=>s.id===newId&&(s.level===0)===cantrip&&!oldKeys.has(s.id));
     if(!cantrip&&!['Bard','Sorcerer','Warlock'].includes(c.class)||!old||!next)throw new Error('Choose both an eligible old spell and a new replacement, or leave both replacement fields blank.');
     swaps.push({old,next});
@@ -342,44 +402,75 @@ export function applyLevelUp(character,selection={}){
   if(new Set(ids).size!==ids.length)throw new Error('Choose each spell once.');
   const available=[...plan.available,...plan.arcanumOptions];
   const spells=ids.map(id=>{const s=available.find(s=>s.id===id);if(!s)throw new Error('That spell is not available to this class at this level.');return s;});
-  const newCantrips=spells.filter(s=>s.level===0&&!oldKeys.has(s.id));
+  const newCantrips=spells.filter(s=>s.level===0&&!classKeys.has(s.id));
   // Missing older selections can be filled now; existing species/feat spells do
   // not consume the class allowance when their origin is known.
-  const classCantrips=character.spells.filter(s=>s.level===0&&!s.origin&&plan.available.some(a=>a.id===spellKey(s.name))).length;
+  const classCantrips=character.spells.filter(s=>s.level===0&&isClassSpell(s)&&plan.available.some(a=>a.id===spellKey(s.name))).length;
   if(newCantrips.length>Math.max(plan.cantripGain,plan.after.cantrips-classCantrips))throw new Error('Too many new class cantrips selected.');
   const ordinary=spells.filter(s=>s.level>0&&s.level<=plan.maxSpellLevel);
   const grantedKeys=new Set(plan.grant.map(s=>s.id));
-  const existingClass=character.spells.filter(s=>s.level>0&&!s.origin&&!grantedKeys.has(spellKey(s.name))&&plan.available.some(a=>a.id===spellKey(s.name)));
-  if(['Bard','Sorcerer','Warlock'].includes(c.class)&&ordinary.filter(s=>!oldKeys.has(s.id)).length>Math.max(plan.spellGain,plan.after.prepared-existingClass.length))throw new Error('Too many new class spells selected.');
+  const existingClass=character.spells.filter(s=>s.level>0&&isClassSpell(s)&&(s.classPrepared!==undefined||!grantedKeys.has(spellKey(s.name)))&&plan.available.some(a=>a.id===spellKey(s.name)));
+  const newOrdinary=ordinary.filter(s=>!classKeys.has(s.id));
+  if(['Bard','Sorcerer','Warlock'].includes(c.class)&&newOrdinary.length>Math.max(plan.spellGain,plan.after.prepared-existingClass.length))throw new Error('Too many new class spells selected.');
   const wizardSpecial=picked.filter(p=>p.choice.id==='signature'||p.choice.id.startsWith('spellMastery')).map(p=>p.option.spell);
-  if(c.class==='Wizard'&&new Set([...ordinary,...wizardSpecial].filter(s=>!oldKeys.has(s.id)).map(s=>s.id)).size>2)throw new Error('A Wizard adds two spells to their spellbook when gaining a level, in addition to Savant spells.');
+  if(c.class==='Wizard'&&new Set([...ordinary,...wizardSpecial].filter(s=>!classKeys.has(s.id)).map(s=>s.id)).size>2)throw new Error('A Wizard adds two spells to their spellbook when gaining a level, in addition to Savant spells.');
   if(picked.some(p=>p.choice.id==='savant'&&ids.includes(p.option.id)))throw new Error('Choose different spells for Savant and your ordinary spellbook additions.');
-  const prepared=selection.preparedIds??existingClass.filter(s=>s.prepared).map(s=>s.id);
+  const prepared=selection.preparedIds??existingClass.filter(isClassPrepared).map(s=>s.id);
   if(!Array.isArray(prepared)||prepared.some(id=>!existingClass.some(s=>s.id===id)))throw new Error('Choose valid prepared spells.');
   const alreadyPrepared=new Set(existingClass.filter(s=>prepared.includes(s.id)).map(s=>spellKey(s.name)));
-  const newPrepared=new Set([...(c.class==='Wizard'&&selection.prepareNewSpells!==true?[]:[...ordinary.map(s=>s.id),...picked.filter(p=>p.choice.id==='savant').map(p=>p.option.id)]).filter(id=>!oldKeys.has(id)),...picked.filter(p=>p.choice.id.startsWith('spellMastery')).map(p=>p.option.id).filter(id=>!alreadyPrepared.has(id))]).size;
+  const savantIds=picked.filter(p=>p.choice.id==='savant').map(p=>p.option.id);
+  const preparable=[...newOrdinary.map(s=>s.id),...savantIds].filter(id=>!classKeys.has(id));
+  const prepareNewIds=selection.prepareNewIds;
+  if(prepareNewIds!==undefined&&(!Array.isArray(prepareNewIds)||prepareNewIds.some(id=>!preparable.includes(id))))throw new Error('Choose only newly learned spells in new spell preparations.');
+  const prepareNew=id=>c.class!=='Wizard'||(prepareNewIds?prepareNewIds.includes(id):selection.prepareNewSpells===true);
+  const newPrepared=new Set([...preparable.filter(prepareNew),...picked.filter(p=>p.choice.id.startsWith('spellMastery')).map(p=>p.option.id).filter(id=>!alreadyPrepared.has(id))]).size;
+  if(selection.requireFullProgression){
+    if(newCantrips.length!==plan.cantripGain)throw new Error(`Choose ${plan.cantripGain} new class cantrip(s).`);
+    if(['Wizard','Bard','Sorcerer','Warlock'].includes(c.class)){
+      const required=c.class==='Wizard'?2:plan.spellGain;
+      if(newOrdinary.length!==required)throw new Error(`Choose ${required} new class spell(s).`);
+    }
+    if(['Cleric','Druid','Paladin','Ranger','Wizard','Artificer'].includes(c.class)&&prepared.length+newPrepared!==plan.after.prepared)throw new Error(`Prepare ${plan.after.prepared} class spells before continuing.`);
+  }
   if(['Cleric','Druid','Paladin','Ranger','Wizard','Artificer'].includes(c.class)&&prepared.length+newPrepared>plan.after.prepared)throw new Error(`Prepare at most ${plan.after.prepared} class spells. Uncheck earlier preparations to make room.`);
-  for(const spell of existingClass)c.spells.find(s=>s.id===spell.id).prepared=prepared.includes(spell.id);
+  for(const spell of existingClass){
+    const stored=c.spells.find(s=>s.id===spell.id),ready=prepared.includes(spell.id);
+    if(stored.classPrepared!==undefined)stored.classPrepared=ready;
+    stored.prepared=ready||!!stored.origin;
+  }
   const arcanum=spells.filter(s=>plan.arcanum&&s.level===plan.arcanum);
   if(plan.arcanum&&arcanum.length!==1)throw new Error(`Choose one level ${plan.arcanum} Mystic Arcanum spell.`);
-  const addSpell=(spell,origin='',prepared=true)=>{
-    const existing=c.spells.find(s=>spellKey(s.name)===spell.id);
-    if(existing){if(origin){existing.prepared=true;existing.origins=[...new Set([...(existing.origins||[]),...(existing.origin?[existing.origin]:[]),origin])];existing.origin=existing.origin||origin;}return;}
-    const {classes,id,source,ritual,at,...fields}=spell;
-    c.spells.push({...fields,id:uid(),prepared,origin,notes:`${origin?origin+'\n\n':''}${spell.notes}`});
+  const addSpell=(spell,origin='',prepared=true)=>addProgressionSpell(c,spell,origin,prepared);
+  const addClassSpell=(spell,ready)=>{
+    const stored=addSpell(spell,'',ready);
+    if(c.trainingOrigins){
+      stored.classPrepared=ready;
+      stored.origins=[...new Set([...(stored.origins||(stored.origin?[stored.origin]:[])),c.class])];
+    }
   };
-  for(const spell of spells)addSpell(spell,spell.level>plan.maxSpellLevel?'Mystic Arcanum':'',spell.level===0||c.class!=='Wizard'||selection.prepareNewSpells===true);
-  for(const {old,next} of swaps){c.spells=c.spells.filter(s=>s.id!==old.id);addSpell(next);}
+  for(const spell of spells){
+    if(spell.level>plan.maxSpellLevel)addSpell(spell,'Mystic Arcanum');
+    else addClassSpell(spell,spell.level===0||prepareNew(spell.id));
+  }
+  for(const {old,next} of swaps){
+    if(old.classPrepared!==undefined&&old.origin){
+      const stored=c.spells.find(s=>s.id===old.id);
+      delete stored.classPrepared;
+      if(stored.origins)stored.origins=stored.origins.filter(origin=>origin!==c.class);
+    }else c.spells=c.spells.filter(s=>s.id!==old.id);
+    addClassSpell(next,true);
+  }
   for(const {choice,option} of picked)if(choice.kind==='spell'){
     const mastery=choice.id.startsWith('spellMastery');
-    addSpell(option.spell,choice.id==='savant'||mastery?'':choice.label,choice.id!=='savant'||selection.prepareNewSpells===true);
+    if(choice.id==='savant'||mastery)addClassSpell(option.spell,mastery||prepareNew(option.id));
+    else addSpell(option.spell,choice.label);
     if(mastery)c.spells.find(s=>spellKey(s.name)===option.id).prepared=true;
   }
-  for(const {choice,option} of picked)if(choice.id==='signature'||choice.id.startsWith('spellMastery'))addFeature(c,{...reference(`${choice.label}: ${option.label}`,'Wizard',c.level),details:`Selected ${option.label}. ${choice.id==='signature'?'One free level 3 casting per Short or Long Rest.':'Eligible at-will casting while prepared; consult Spell Mastery restrictions.'}`,resource:choice.id==='signature'?'one-short':undefined});
+  for(const {choice,option} of picked)if(choice.id==='signature'||choice.id.startsWith('spellMastery'))addProgressionFeature(c,{...reference(`${choice.label}: ${option.label}`,'Wizard',c.level),details:`Selected ${option.label}. ${choice.id==='signature'?'One free level 3 casting per Short or Long Rest.':'Eligible at-will casting while prepared; consult Spell Mastery restrictions.'}`,resource:choice.id==='signature'?'one-short':undefined});
   for(const spell of plan.grant)addSpell(spell,spell.origin);
   if(arcanum.length){const resource=c.features.find(f=>f.name===`Mystic Arcanum (${plan.arcanum}th-level spell)`);if(resource)resource.description+=`\nSelected spell: ${arcanum[0].name}.`;
   }
-  if(plan.after.prepared&&selection.updateSlots!==false){
+  if(plan.after.prepared&&(selection.requireFullProgression||selection.updateSlots!==false)){
     const spent=c.slots.reduce((sum,s)=>sum+s.used,0);
     c.slots.forEach((s,i)=>{s.max=plan.after.slots[i];s.used=Math.min(s.used,s.max);});
     if(c.class==='Warlock'){const slot=c.slots.find(s=>s.max>0);if(slot)slot.used=Math.min(slot.max,spent);}
@@ -389,12 +480,19 @@ export function applyLevelUp(character,selection={}){
   for(const spell of plan.grant.filter(s=>s.level>0&&(/lineage|free casting/.test(s.origin))&&!/at will/.test(s.origin))){
     const lineage=spell.origin.includes('lineage'),owner=lineage?c.race:spell.origin.split(' (')[0],name=`${owner}: ${spell.name}`;
     if(!c.features.some(f=>f.maxUses>0&&(normalized(f.name)===normalized(name)||!lineage&&normalized(f.name)===normalized(owner)||lineage&&normalized(f.name).includes(normalized(spell.name))&&/\(lineage\)/.test(f.name)))){
-      addFeature(c,{...reference(name,owner,c.level),details:`${spell.origin}. Free ${spell.name} casting; choose No slot in Spellbook and spend a use here.`,resource:c.race==='Forest Gnome'&&lineage?'pb-long':/Short or Long/.test(spell.origin)?'one-short':'one-long'});
+      addProgressionFeature(c,{...reference(name,owner,c.level),details:`${spell.origin}. Free ${spell.name} casting; choose No slot in Spellbook and spend a use here.`,resource:c.race==='Forest Gnome'&&lineage?'pb-long':/Short or Long/.test(spell.origin)?'one-short':'one-long'});
+    }
+    if(lineage&&c.lineageAbility){
+      const stored=c.spells.find(s=>spellKey(s.name)===spell.id);
+      const feature=c.features.find(f=>f.name===name||f.name===`${spell.name} (lineage)`);
+      if(feature&&!stored.castingGrants?.some(g=>g.origin===spell.origin)){
+        (stored.castingGrants??=[]).push({origin:spell.origin,ability:c.lineageAbility,mode:'free',featureId:feature.id});
+      }
     }
   }
   for(const line of String(selection.customFeatures||'').split('\n').map(s=>s.trim()).filter(Boolean)){
     if(line.length>200)throw new Error('Keep each custom feature name within 200 characters.');
-    addFeature(c,reference(line,c.subclass||c.race,c.level,'2014'));
+    addProgressionFeature(c,reference(line,c.subclass||c.race,c.level,'2014'));
   }
   for(const line of String(selection.customSpells||'').split('\n').map(s=>s.trim()).filter(Boolean)){
     const match=line.match(/^([0-9])\s*\|\s*(.{1,200})$/);

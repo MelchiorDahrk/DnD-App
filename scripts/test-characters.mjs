@@ -8,6 +8,7 @@ import {STORAGE_KEY,parseBackup} from '../model.js';
 import {initialState} from '../default-characters.js';
 import {defaultPartyState} from '../tests/helpers/default-party.mjs';
 import {linkWeaponActions} from '../inventory.js';
+import {chooseBuilderValue,fillLevelOne,nextBuilderStep} from '../tests/helpers/character-builder.mjs';
 
 const root=resolve(import.meta.dirname,'..'),port=process.env.CHARACTER_TEST_PORT||'4194';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/chromium'].find(existsSync);
@@ -56,16 +57,83 @@ try{
   await page.evaluate((key,s)=>localStorage.setItem(key,JSON.stringify(s)),STORAGE_KEY,initialState());
   await page.reload({waitUntil:'networkidle0'});
   await page.focus('[data-action="new-character"]');await page.keyboard.press('Enter');
-  await page.type('#modal [name="name"]','A new adventurer');
-  await page.select('#modal [name="class"]','Wizard');
-  await page.click('#modal button[type="submit"]');
+  await nextBuilderStep(page);
+  assert.match(await page.$eval('#modal .character-builder [role="alert"]',n=>n.textContent),/Enter a character name/);
+  assert.deepEqual(await saved(),initialState(),'Failed builder validation writes nothing');
+  await fillLevelOne(page,{background:'Sage',onStep:async step=>{
+    if(step===3){
+      await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
+      await chooseBuilderValue(page,'method','roll');
+      await page.click('[data-builder-roll]');
+      assert.equal(await page.$$eval('.builder-rolls li',items=>items.length),6);
+      assert.equal(await page.$$eval('.builder-rolls s',items=>items.length),6);
+      await chooseBuilderValue(page,'method','array');
+      assert.equal(await page.$eval('[name="assignments.str"]',n=>n.value),'0');
+    }
+    if(step===4){
+      await page.click('[data-builder-back]');
+      assert.equal(await page.$eval('[name="assignments.str"]',n=>n.value),'0');
+      assert.equal(await page.$eval('[name="bonuses.con"]',n=>n.value),'2');
+      await nextBuilderStep(page);
+      assert.equal(await page.$eval('[name="choice-classSkills"]',n=>!!n.value),true);
+    }
+    if(step===8) {
+      for(const [theme,width] of [['light',390],['dark',320]]){
+        await page.evaluate(theme=>window.QuestlogTheme.set(theme),theme);
+        await page.setViewport({width,height:900});
+        assert.ok(await fits(),`Builder review fits ${theme} at ${width}px`);
+        await page.screenshot({path:resolve(root,`.tmp/builder-${theme}-${width}.png`)});
+      }
+      assert.deepEqual(await saved(),initialState(),'Review is still a draft');
+    }
+  }});
+  await nextBuilderStep(page);
+  await page.waitForSelector('#modal:not([open])');
   assert.equal((await saved()).characters.length,1);
   assert.equal((await saved()).characters[0].class,'Wizard');
   assert.equal((await saved()).characters[0].name,'A new adventurer');
+  assert.equal((await saved()).characters[0].spells.filter(s=>s.level===1&&s.classPrepared!==undefined).length,6);
   parseBackup(JSON.stringify(await saved()));
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$eval('.hero h2',n=>n.textContent),'A new adventurer');
+  const grantedSpell=(await saved()).characters[0].spells.find(s=>s.castingGrants?.some(grant=>grant.mode==='free'));
+  const featureId=grantedSpell.castingGrants[0].featureId;
+  await page.evaluate(()=>{location.hash='spells';});
+  await page.locator(`[data-action="cast"][data-id="${grantedSpell.id}"]`).click();
+  const free=await page.$eval('#modal [name="slot"]',field=>[...field.options].find(o=>o.value.startsWith('Free ·')).value);
+  await page.select('#modal [name="slot"]',free);
+  assert.match(await page.$eval('[data-spell-casting-ability]',n=>n.textContent),/DC \d+/);
+  await page.click('#modal button[type="submit"]');
+  const afterCasting=(await saved()).characters[0];
+  assert.equal(afterCasting.features.find(f=>f.id===featureId).used,1);
+  assert.ok(afterCasting.slots.every(s=>s.used===0));
   console.log('PASS creating the first character with class choices saves and survives reload');
+
+  await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
+  await page.setOfflineMode(true);
+  await page.reload({waitUntil:'networkidle0'});
+  const beforeOffline=await saved();
+  await manage();await page.click('#modal [data-action="new-character"]');
+  await fillLevelOne(page,{name:'Offline Vanguard',className:'Fighter',species:'Human',level:3});
+  await nextBuilderStep(page);
+  await page.waitForSelector('.level-up-preview');
+  await page.click('#modal button[type="submit"]');
+  await page.waitForSelector('[data-builder-step="8"]');
+  await nextBuilderStep(page);
+  await page.select('[name="levelSubclass"]','Champion');
+  await page.click('#modal button[type="submit"]');
+  await page.waitForSelector('[data-builder-step="8"]');
+  assert.deepEqual(await saved(),beforeOffline,'Intervening levels remain in the draft');
+  await nextBuilderStep(page);
+  await page.waitForSelector('#modal:not([open])');
+  const offline=(await saved()).characters.find(c=>c.name==='Offline Vanguard');
+  assert.equal(offline.level,3);
+  assert.ok(offline.features.some(f=>f.name==='Action Surge'));
+  assert.ok(offline.features.some(f=>f.name==='Improved Critical'));
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal(await page.$eval('.hero h2',n=>n.textContent),'Offline Vanguard');
+  await page.setOfflineMode(false);
+  console.log('PASS offline draft progression and creation survive a reload');
 
   await page.evaluate((key,s)=>localStorage.setItem(key,JSON.stringify(s)),STORAGE_KEY,initialState());
   await page.reload({waitUntil:'networkidle0'});
@@ -167,7 +235,10 @@ try{
   await page.reload({waitUntil:'networkidle0'});
   assert.match(await page.$eval('.storage-warning',n=>n.textContent),/Saving is paused/);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),STORAGE_KEY),'unreadable save');
-  await page.click('[data-action="new-character"]');await page.type('#modal [name="name"]','Temporary adventurer');await page.click('#modal button[type="submit"]');
+  await page.click('[data-action="new-character"]');
+  await fillLevelOne(page,{name:'Temporary adventurer',className:'Fighter'});
+  await nextBuilderStep(page);
+  assert.match(await page.$eval('#form-error',n=>n.textContent),/Saving is paused/);
   assert.equal(await page.evaluate(key=>localStorage.getItem(key),STORAGE_KEY),'unreadable save','Onboarding never overwrites unreadable saves');
   assert.deepEqual(errors,[]);
   console.log('PASS unreadable saves remain protected through onboarding; no browser errors');

@@ -37,6 +37,7 @@ export const proficiency = level => 2 + Math.floor((level - 1) / 4);
 export const clamp = (n, min, max) => Math.min(max, Math.max(min, n));
 // Earlier version 2 saves store Inspiration as an on/off flag.
 export const inspirationPoints = c => Number(c.inspiration);
+export const hasResourceful = c => c.features?.some(f=>f.name==='Resourceful'&&f.origin==='Species · Human') || false;
 export const inspirationLimit = (settings={}) => settings.inspirationLimit ?? 1;
 export function gainInspiration(c,settings={}) {
   const points=inspirationPoints(c);
@@ -49,12 +50,18 @@ export function spendInspiration(c) {
   c.inspiration=points-1;return true;
 }
 export const exhaustionPenalty = c => 2 * c.exhaustion;
-export const walkingSpeed = c => Math.max(0,c.speed - 5 * c.exhaustion);
+export const walkingSpeed = (c,armorPenalty=0) => Math.max(0,c.speed - armorPenalty - 5 * c.exhaustion);
 export const abilityCheckBonus = (c,ability) => mod(c.stats[ability]) - exhaustionPenalty(c);
 export const saveBonus = (c,ability) => abilityCheckBonus(c,ability) + (c.saves.includes(ability) ? proficiency(c.level) : 0);
 export const attackBonus = (c,a) => abilityCheckBonus(c,a.ability) + a.bonus + (attackIsProficient(c,a) ? proficiency(c.level) : 0);
-export function skillBonus(c, skill) { return abilityCheckBonus(c,SKILLS[skill]) + (c.expertise.includes(skill) ? 2 : c.skills.includes(skill) ? 1 : 0) * proficiency(c.level); }
-export const initiative = c => abilityCheckBonus(c,'dex') + c.initiativeBonus;
+export function skillBonus(c, skill) {
+  const order=c.features?.some(feature=>feature.origin&&(skill==='Arcana'||skill==='Religion')&&feature.name==='Divine Order'&&feature.description.startsWith('Thaumaturge')) ||
+    c.features?.some(feature=>feature.origin&&(skill==='Arcana'||skill==='Nature')&&feature.name==='Primal Order'&&feature.description.startsWith('Magician'));
+  return abilityCheckBonus(c,SKILLS[skill]) + (c.expertise.includes(skill) ? 2 : c.skills.includes(skill) ? 1 : 0) * proficiency(c.level)
+    + (order ? Math.max(1,mod(c.stats.wis)) : 0);
+}
+export const initiative = c => abilityCheckBonus(c,'dex') + c.initiativeBonus
+  + (c.features?.some(f=>f.origin&&f.catalogId==='origin-feats-origin-alert') ? proficiency(c.level) : 0);
 export const passivePerception = c => 10 + skillBonus(c,'Perception') + c.passivePerceptionBonus;
 export function validDiceFormula(value) {
   if (typeof value!=='string') return false;
@@ -169,6 +176,7 @@ export function longRest(c,{reduceExhaustion=true,skipFeatureIds=[]}={}) {
   if (reduceExhaustion) c.exhaustion=Math.max(0,c.exhaustion-1);
   c.slots.forEach(s=>s.used=0);c.concentration='';c.deathSuccess=0;c.deathFailure=0;
   c.features.filter(f=>f.reset!=='manual'&&!skipFeatureIds.includes(f.id)).forEach(f=>f.used=0);
+  if(!inspirationPoints(c)&&hasResourceful(c))gainInspiration(c);
 }
 export function shortRest(c,count=0,roller=randomDie,{skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Short Rest.');
@@ -201,6 +209,17 @@ function validateCharacter(c) {
   requireThat(c.portrait===undefined||validPortrait(c.portrait),'invalid character portrait.');
   requireThat(c.sheetLayout===undefined||validSheetLayout(c.sheetLayout),'invalid character sheet layout.');
   requireThat(c.training===undefined||validTraining(c.training),'invalid training selections.');
+  requireThat(c.size===undefined||['Small','Medium'].includes(c.size),'invalid character size.');
+  requireThat(c.lineageAbility===undefined||['int','wis','cha'].includes(c.lineageAbility),'invalid lineage casting ability.');
+  if(c.trainingOrigins!==undefined){
+    const map=value=>value&&typeof value==='object'&&!Array.isArray(value);
+    requireThat(map(c.trainingOrigins)&&Object.entries(c.trainingOrigins).every(([group,origins])=>
+      ['skills','saves','expertise','armor','weapons','tools','languages'].includes(group)
+      &&map(origins)&&Object.keys(origins).length<=100&&Object.entries(origins).every(([name,sources])=>
+        string(name,100)&&Array.isArray(sources)&&sources.length>0&&sources.length<=20&&sources.every(source=>string(source,500))
+      )
+    ),'invalid training sources.');
+  }
   for (const key of Object.keys(SHEET_TEXT)) requireThat(string(c[key]),`invalid ${key}.`);
   for (const key of ['electrum','platinum']) requireThat(integerIn(c[key],0,100000000),`invalid ${key}.`);
   for (const key of ['initiativeBonus','passivePerceptionBonus']) requireThat(integerIn(c[key],-99,99),`invalid ${key}.`);
@@ -244,12 +263,19 @@ function validateCharacter(c) {
   for (const entries of [c.items,c.features,c.attacks]) entries.forEach(v=>requireThat(v.actionType===undefined||v.actionType===''||Object.hasOwn(ACTION_TYPES,v.actionType),'invalid action type.'));
   c.spells.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&integerIn(v.level,0,9)&&['school','castingTime','range','duration','notes','wiki'].every(k=>string(v[k],k==='notes'?20000:2000))&&typeof v.concentration==='boolean'&&typeof v.prepared==='boolean','invalid spell.'));
   c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
+  c.spells.forEach(v=>requireThat(
+    (v.classPrepared===undefined||typeof v.classPrepared==='boolean') &&
+    (v.castingGrants===undefined||Array.isArray(v.castingGrants)&&v.castingGrants.length<=30&&v.castingGrants.every(g=>
+      g&&string(g.origin,500)&&Object.hasOwn(ABILITIES,g.ability)&&['free','at-will','slot'].includes(g.mode)
+      &&(g.featureId===undefined||string(g.featureId,100)&&/^[a-zA-Z0-9_-]+$/.test(g.featureId))
+    )),'invalid spell casting grants.'));
   // Optional stable key: older saves need no migration, future keys fall back safely.
   c.spells.forEach(v=>requireThat(v.spellIconKey===undefined||(string(v.spellIconKey,100)&&/^[a-z0-9-]*$/.test(v.spellIconKey)),'invalid spell icon.'));
   c.notes.forEach(v=>requireThat(string(v.title,200)&&v.title.trim()&&string(v.body,100000)&&string(v.tag,100)&&typeof v.pinned==='boolean'&&string(v.updated,100)&&!Number.isNaN(Date.parse(v.updated)),'invalid note.'));
   c.features.forEach(v=>requireThat(string(v.name,200)&&v.name.trim()&&string(v.description)&&string(v.wiki,2000)&&integerIn(v.maxUses,0,999)&&integerIn(v.used,0,v.maxUses)&&['short','long','manual'].includes(v.reset)&&string(v.rollFormula,30)&&(v.rollFormula===''||validDiceFormula(v.rollFormula)),'invalid feature.'));
   c.features.forEach(v=>requireThat(integerIn(v.shortRestRecovery,0,v.maxUses),'invalid short-rest recovery.'));
   c.features.forEach(v=>requireThat(v.catalogId===undefined||string(v.catalogId,200),'invalid feature catalog reference.'));
+  c.features.forEach(v=>requireThat(v.origin===undefined||string(v.origin,500),'invalid feature origin.'));
   const linkedItems=new Set();
   c.attacks.forEach(v=>{
     requireThat(string(v.name,200)&&v.name.trim()&&Object.hasOwn(ABILITIES,v.ability)&&integerIn(v.bonus,-99,99)&&typeof v.proficient==='boolean'&&string(v.damage,30)&&string(v.type,100)&&string(v.range,100),'invalid attack.');

@@ -133,14 +133,20 @@ export const equipmentDescription = item => [item.magic?`Rules: ${item.edition||
 export const equipmentFields = item => ({catalogId:item.id,name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...defaultItemUses(item),usesLeft:defaultItemUses(item).maxUses,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
 export const itemFromEquipment = item => ({id:uid(),qty:1,equipped:false,...equipmentFields(item)});
 export function attackFromWeapon(weapon,character) {
-  const ability=weapon.properties.includes('Finesse')?(character.stats.dex>character.stats.str?'dex':'str'):weapon.family.endsWith('ranged')?'dex':'str';
+  const monkWeapon=character.trainingOrigins&&character.class==='Monk'&&weapon.family.endsWith('melee')
+    &&(weapon.family.startsWith('Simple')||weapon.properties.includes('Light'))
+    &&!character.items.some(item=>item.equipped&&item.category==='Armor');
+  const ability=weapon.properties.includes('Finesse')||monkWeapon?(character.stats.dex>character.stats.str?'dex':'str'):weapon.family.endsWith('ranged')?'dex':'str';
   const modifier=mod(character.stats[ability]);
   const proficient=hasWeaponTraining(character,weapon);
   const heavyDisadvantage=weapon.properties.includes('Heavy')&&character.stats[weapon.family.endsWith('ranged')?'dex':'str']<13;
   const distance=weapon.properties.match(/\d+\/\d+ ft\./)?.[0],reach=weapon.properties.includes('Reach')?'10 ft.':'5 ft.';
   const range=weapon.family.endsWith('melee')?reach+(distance?`; thrown ${distance}`:''):distance||reach;
   const mastery=character.features.some(f=>/^weapon mastery\b/i.test(f.name)&&f.description.toLowerCase().includes(`${weapon.name} (${weapon.mastery})`.toLowerCase()))?weapon.mastery:'';
-  return {name:weapon.name,weaponId:weapon.id,mastery,ability,bonus:0,proficient,rollMode:heavyDisadvantage?'disadvantage':'normal',damage:weapon.damage==='1'?String(Math.max(0,1+modifier)):weapon.damage+(modifier?signed(modifier):''),type:weapon.type,range,notes:weapon.details};
+  const martialArts=character.features.find(feature=>feature.name==='Martial Arts')?.rollFormula;
+  const dice=monkWeapon&&martialArts&&Number(martialArts.split('d')[1])>Number(weapon.damage.split('d')[1]||0)?martialArts:weapon.damage;
+  const archery=weapon.family.endsWith('ranged')&&character.features.some(f=>f.origin&&f.name==='Fighting Style: Archery');
+  return {name:weapon.name,weaponId:weapon.id,mastery,ability,bonus:archery?2:0,proficient,rollMode:heavyDisadvantage?'disadvantage':'normal',damage:dice==='1'?String(Math.max(0,1+modifier)):dice+(modifier?signed(modifier):''),type:weapon.type,range,notes:weapon.details};
 }
 
 export function attackFromEquipment(item,character,weaponId) {
@@ -150,6 +156,16 @@ export function attackFromEquipment(item,character,weaponId) {
   const name=(base||item.name).toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
   const weapon=weaponId!==undefined?WEAPONS.find(w=>w.id===weaponId):WEAPONS.find(w=>w.id===entry?.id)||[...WEAPONS].sort((a,b)=>b.name.length-a.name.length).find(w=>` ${name} `.includes(` ${w.name.toLowerCase()} `));
   const attack=weapon?attackFromWeapon(weapon,character):{weaponId:'',mastery:'',ability:'str',bonus:0,proficient:false,rollMode:'normal',damage:'',type:'',range:'',notes:''};
+  if(weapon&&character.trainingOrigins&&item.name.endsWith(' (Pact Weapon)')&&character.features.some(f=>f.name==='Pact of the Blade')){
+    attack.proficient=true;
+    attack.proficiencyMode='proficient';
+    if(character.stats.cha>character.stats[attack.ability]){
+      attack.ability='cha';
+      const modifier=mod(character.stats.cha);
+      attack.damage=weapon.damage+(modifier?signed(modifier):'');
+    }
+    attack.notes+='\nPact Weapon: you can change the weapon’s damage type when you hit. Apply that change when resolving damage.';
+  }
   if(entry?.magic){
     // Only a single stated potency is automatic; variable or conditional effects
     // remain in the notes, alongside their dice and activation requirements.
@@ -176,7 +192,7 @@ const classRows = [
   ['Rogue','Dexterity','dex,int','Light','Simple weapons; Martial weapons with Finesse or Light','Expertise, Sneak Attack (1d6), Thieves’ Cant, Weapon Mastery.','Acrobatics, Athletics, Deception, Insight, Intimidation, Investigation, Perception, Persuasion, Sleight of Hand, Stealth'],
   ['Sorcerer','Charisma','con,cha','None','Simple weapons','Spellcasting (Charisma), Innate Sorcery.','Arcana, Deception, Insight, Intimidation, Persuasion, Religion'],
   ['Warlock','Charisma','wis,cha','Light','Simple weapons','Eldritch Invocations, Pact Magic (Charisma). Pact slots return after a Short or Long Rest.','Arcana, Deception, History, Intimidation, Investigation, Nature, Religion'],
-  ['Wizard','Intelligence','int,wis','None','Simple weapons','Spellcasting (Intelligence), Ritual Adept, Arcane Recovery.','Arcana, History, Insight, Investigation, Medicine, Religion']
+  ['Wizard','Intelligence','int,wis','None','Simple weapons','Spellcasting (Intelligence), Ritual Adept, Arcane Recovery.','Arcana, History, Insight, Investigation, Medicine, Nature, Religion']
 ];
 export const CLASS_OPTIONS = classRows.map(([name,primary,saves,armor,weapons,details,skills])=>({name,hitDie:CLASSES[name],primary,saves:saves.split(','),armor,weapons,details,skills,skillCount:name==='Rogue'?4:['Bard','Ranger'].includes(name)?3:2,wiki:wikiURL(name)}));
 
