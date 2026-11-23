@@ -1,4 +1,5 @@
-import {EQUIPMENT,MAGIC_ITEMS,itemFromEquipment} from './catalog.js';
+import {EQUIPMENT,MAGIC_ITEMS,MAGIC_ITEM_VERSIONS,MAGIC_VARIANT_EQUIPMENT,findEquipment,itemFromEquipment} from './catalog.js';
+import {readCoinPrice} from './magic-item-prices.js';
 import {contentEnabled} from './content-sources.js';
 import {defaultItemUses,equipmentName,itemUses} from './inventory-rules.js';
 import {linkWeaponActions,sameStack} from './inventory.js';
@@ -9,10 +10,9 @@ export const STORE_LIMIT=100;
 export const PRICE_LIMIT=100000000;
 const STOCK_LIMIT=99999;
 const COIN_VALUES={platinum:1000,gold:100,electrum:50,silver:10,copper:1};
-const ABBREVIATIONS={platinum:'pp',gold:'gp',electrum:'ep',silver:'sp',copper:'cp'};
-const catalog=new Map(EQUIPMENT.map(entry=>[entry.id,entry]));
+export const SHOP_EQUIPMENT=[...EQUIPMENT,...MAGIC_VARIANT_EQUIPMENT];
 const itemKey=item=>item.category+'/'+equipmentName(item.name);
-const catalogNames=new Map([...EQUIPMENT].reverse().map(entry=>[itemKey(entry),entry]));
+const catalogNames=new Map([...SHOP_EQUIPMENT].reverse().map(entry=>[itemKey(entry),entry]));
 const inGroups=(...groups)=>entry=>groups.includes(entry.group);
 const hasId=(...ids)=>entry=>ids.includes(entry.id);
 const adventuring=inGroups('Adventuring gear','Equipment packs','Ammunition');
@@ -78,11 +78,8 @@ const stockMagic={
 };
 export const matchesShopMagic=(entry,storeType)=>Object.hasOwn(stockMagic,storeType)&&stockMagic[storeType](entry);
 export function parsePrice(value) {
-  const match=/^(\d+|\d{1,3}(?:,\d{3})+)\s+(cp|sp|ep|gp|pp)$/i.exec(String(value??'').trim());
-  if(!match)return null;
-  const denomination=Object.keys(ABBREVIATIONS).find(coin=>ABBREVIATIONS[coin]===match[2].toLowerCase());
-  const copper=Number(match[1].replaceAll(',',''))*COIN_VALUES[denomination];
-  return Number.isSafeInteger(copper)&&copper>0&&copper<=PRICE_LIMIT?copper:null;
+  const copper=readCoinPrice(value);
+  return copper!==null&&copper<=PRICE_LIMIT?copper:null;
 }
 export function formatPrice(copper) {
   if(copper==null)return 'Price pending';
@@ -123,9 +120,10 @@ const scaledPrice=(price,multiplier)=>{
   const scaled=Math.max(1,Math.round(price*multiplier/100));
   return scaled<=PRICE_LIMIT?scaled:null;
 };
-export const merchandiseEntry=line=>line?.custom?{...line.custom,id:line.catalogId,group:line.custom.category}:catalog.get(line?.catalogId);
+export const merchandiseEntry=line=>line?.custom?{...line.custom,id:line.catalogId,group:line.custom.category}:findEquipment(line?.catalogId);
 export const merchandiseLine=(entry,stock=entry.magic?1:null)=>({catalogId:entry.id,priceOverride:null,sellOverride:null,stock});
-export const purchasePrice=(entry,line,multiplier)=>line.priceOverride??scaledPrice(parsePrice(entry?.cost),multiplier);
+const catalogPrice=entry=>entry?.priceCp??parsePrice(entry?.cost);
+export const purchasePrice=(entry,line,multiplier)=>line.priceOverride??scaledPrice(catalogPrice(entry),multiplier);
 
 export function defaultMerchandise(type,settings) {
   const {defaults,limit}=STORE_TYPES[type];
@@ -137,7 +135,7 @@ export function newShop(type='general',settings={}) {
 export function randomMerchandise({rarity,type,count,storeType='magic'},items,settings,random=Math.random) {
   if(!MAGIC_RARITIES.includes(rarity)||!Object.hasOwn(MAGIC_TYPES,type)||!Object.hasOwn(STORE_TYPES,storeType)||!integer(count,1,STORE_LIMIT))throw new Error('Choose a rarity, item type, and valid quantity.');
   const types=MAGIC_TYPES[type],names=new Set(Object.values(items).map(line=>equipmentName(merchandiseEntry(line)?.name)));
-  const pool=MAGIC_ITEMS.filter(entry=>{
+  const pool=MAGIC_ITEMS.flatMap(entry=>MAGIC_ITEM_VERSIONS.get(entry.id)?.choices.map(choice=>choice.entry)||[entry]).filter(entry=>{
     const rarities=entry.id==='potion-of-healing'?['Common']:entry.rarities;
     return !Object.hasOwn(items,entry.id)&&!rareOrUnique(entry)&&rarities.includes(rarity)
       &&matchesShopMagic(entry,storeType)&&(!types.length||types.includes(entry.itemType))&&contentEnabled(entry,settings);
@@ -174,14 +172,14 @@ export function quoteSale(shop,character,item) {
   if(item.equipped||item.attuned||item.containerId||character.items.some(i=>i.containerId===item.id))return {error:'Unequip, unattune, or unpack this item first.'};
   const uses=itemUses(item);
   if(uses.maxUses&&uses.usesLeft<uses.maxUses)return {error:'Only unused items or full bundles can be sold.'};
-  const catalogEntry=catalog.get(item.catalogId)||catalogNames.get(itemKey(item));
+  const catalogEntry=findEquipment(item.catalogId)||catalogNames.get(itemKey(item));
   const id=Object.hasOwn(shop.items,item.catalogId)?item.catalogId:catalogEntry?.id;
   const listed=Object.hasOwn(shop.items,id)?shop.items[id]:null;
   const entry=merchandiseEntry(listed)||catalogEntry;
   if(entry&&defaultItemUses(entry).maxUses>uses.maxUses)return {error:'This store buys full catalog bundles only.'};
   if(listed?.sellOverride)return {unitCp:listed.sellOverride};
   if(!shop.acceptAll&&!listed&&(!entry||!STORE_TYPES[shop.type]?.accept(entry)))return {error:'This store does not buy this kind of item.'};
-  const basis=listed?listed.priceCp:scaledPrice(parsePrice(entry?.cost),shop.multiplier);
+  const basis=listed?listed.priceCp:scaledPrice(catalogPrice(entry),shop.multiplier);
   if(basis==null)return {error:'This item needs a resale price from the DM.'};
   const isTreasure=entry&&inGroups('Gemstones','Art objects & jewelry','Trade goods','Trade bars')(entry);
   const unitCp=isTreasure?basis:Math.floor(basis*shop.buyRate/100);

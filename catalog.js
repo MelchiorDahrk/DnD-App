@@ -5,9 +5,10 @@ import {hasWeaponTraining} from './training-rules.js';
 import {CLASSES, wikiURL, subclassURL, mod, signed, uid} from './model.js';
 import {MAGIC_ITEMS as CURRENT_MAGIC_ITEMS} from './magic-item-data.js';
 import {LEGACY_MAGIC_ITEMS} from './legacy-magic-item-data.js';
+import {priceMagicItem} from './magic-item-prices.js';
+import {buildMagicItemVariants} from './magic-item-variants.js';
 import {TREASURES} from './treasure-data.js';
 import {defaultItemUses,PACK_CONTENTS,equipmentName} from './inventory-rules.js';
-export const MAGIC_ITEMS = [...CURRENT_MAGIC_ITEMS,...LEGACY_MAGIC_ITEMS];
 
 const slug = value => value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const equipmentURL=(name,group)=>{
@@ -125,11 +126,17 @@ const ships = [
 const spellbook = equipment('Spellbook','Adventuring gear',3,'50 GP','A Wizard’s 100-page spellbook. Contains your recorded Wizard spells; record individual spells in your spellbook view.');
 
 export const BASIC_EQUIPMENT = [...WEAPONS,...ARMOR,...gear,spellbook,...tools,...instruments,...gaming,...ammunition,...focuses,...tack,...mounts,...ships,...TREASURES];
+const rawMagicItems=[...CURRENT_MAGIC_ITEMS,...LEGACY_MAGIC_ITEMS];
+const priceItem=item=>priceMagicItem(item,BASIC_EQUIPMENT);
+export const MAGIC_ITEMS=rawMagicItems.map(priceItem);
+export const MAGIC_ITEM_VERSIONS=buildMagicItemVariants(rawMagicItems,priceItem);
+export const MAGIC_VARIANT_EQUIPMENT=[...MAGIC_ITEM_VERSIONS.values()].flatMap(family=>family.choices.map(choice=>choice.entry));
 // Healing is both adventuring gear and a magic item; expose one shared preset.
 export const EQUIPMENT = [...BASIC_EQUIPMENT.filter(item=>!MAGIC_ITEMS.some(magic=>magic.id===item.id)),...MAGIC_ITEMS];
 export const EQUIPMENT_GROUPS = [...new Set(EQUIPMENT.map(item=>item.group))];
-export const findEquipment = id => EQUIPMENT.find(item=>item.id===id);
-export const equipmentDescription = item => [item.magic?`Rules: ${item.edition||'2024'}. ${item.typeDetails}\nRarity: ${item.rarity}. Attunement: ${item.attunement}.\nSource: ${item.source}.`:'',item.details,...(item.tables||[]).map(rows=>rows.map(cells=>cells.join(' | ')).join('\n')),`Cost: ${item.cost}.${item.carried===false?' Weight excluded from carried gear.':item.weightStatus?` Weight: ${item.weight} lb. · ${item.weightStatus}.`:` Weight: ${item.weight} lb.${item.weight===0?' (negligible)':''}`}`].filter(Boolean).join('\n\n');
+const equipmentById=new Map([...EQUIPMENT,...MAGIC_VARIANT_EQUIPMENT].map(item=>[item.id,item]));
+export const findEquipment = id => equipmentById.get(id);
+export const equipmentDescription = item => [item.magic?`Rules: ${item.edition||'2024'}. ${item.typeDetails}\nRarity: ${item.rarity}. Attunement: ${item.attunement}.\nSource: ${item.source}.`:'',item.details,...(item.tables||[]).map(rows=>rows.map(cells=>cells.join(' | ')).join('\n')),`Cost: ${item.cost}.${item.priceNote?` ${item.priceNote}.`:''}${item.carried===false?' Weight excluded from carried gear.':item.weightStatus?` Weight: ${item.weight} lb. · ${item.weightStatus}.`:` Weight: ${item.weight} lb.${item.weight===0?' (negligible)':''}`}`].filter(Boolean).join('\n\n');
 export const equipmentFields = item => ({catalogId:item.id,name:item.name,category:item.category,weight:item.weight,description:equipmentDescription(item),wiki:item.wiki,...defaultItemUses(item),usesLeft:defaultItemUses(item).maxUses,...(item.iconKey?{iconKey:item.iconKey}:{}),...(item.magic?{actionType:item.actionType||''}:{})});
 export const itemFromEquipment = item => ({id:uid(),qty:1,equipped:false,...equipmentFields(item)});
 export function attackFromWeapon(weapon,character) {

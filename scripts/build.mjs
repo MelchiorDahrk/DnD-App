@@ -24,7 +24,7 @@ for(const file of ['portrait-defaults.js','portrait-default-data.js'])await copy
 await copyFile(resolve(root,'published-feat-data.js'),resolve(out,'published-feat-data.js'));
 for(const file of ['inventory-rules.js','inventory.js','armor-class.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['training-data.js','training-rules.js','training-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
-await copyFile(resolve(root,'magic-item-data.js'),resolve(out,'magic-item-data.js'));
+for(const file of ['magic-item-data.js','magic-item-prices.js','magic-item-variants.js'])await copyFile(resolve(root,file),resolve(out,file));
 await copyFile(resolve(root,'treasure-data.js'),resolve(out,'treasure-data.js'));
 for(const file of ['legacy-magic-item-data.js','magic-item-icon-names.js'])await copyFile(resolve(root,file),resolve(out,file));
 for(const file of ['reference-links.js','reference-pages.js','attack-rules.js','attack-ui.js','level-up.js','level-up-ui.js','progression-data.js','progression-options.js','spell-slots.js','character-creation.js','character-creation-ui.js','character-creation-equipment.js','rest-rules.js','rest-reference-data.js','portrait-scan.js','portrait-photo-ui.js','portrait-image-analysis.js','portrait-match.js','portrait-match-worker.js'])await copyFile(resolve(root,file),resolve(out,file));

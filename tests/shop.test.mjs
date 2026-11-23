@@ -96,6 +96,19 @@ test('fixed prices, overrides, and stock constraints survive saving',()=>{
   assert.equal(saved.items.spellbook,undefined);
 });
 
+test('a dealer can price and trade a magic item’s specific version',()=>{
+  const draft=shop('magic');
+  const ids=['magic-quaal-s-feather-token-anchor','magic-quaal-s-feather-token-whip','magic-2014-blood-spear','magic-goading-ammunition'];
+  for(const id of ids)draft.items[id]=merchandiseLine(findEquipment(id));
+  const store=prepareShop(draft),character=makeCharacter({gold:3000});
+  assert.deepEqual(ids.map(id=>store.items[id].priceCp),[20000,200000,40100,20005]);
+  for(const id of ids.slice(0,2))buy(store,character,id,1);
+  assert.equal(character.items.length,2);
+  assert.deepEqual(character.items.map(item=>item.catalogId),ids.slice(0,2));
+  assert.match(character.items[1].description,/floating whip/);
+  assert.equal(quoteSale(store,character,character.items[1]).unitCp,100000);
+});
+
 test('orders use all denominations, make change, and preserve bundle and weapon behavior',()=>{
   const character=makeCharacter({gold:1,electrum:1,silver:3,copper:20,platinum:1});
   const store=prepareShop(shop('outfitter'));

@@ -1,4 +1,4 @@
-import {EQUIPMENT,EQUIPMENT_GROUPS} from './catalog.js';
+import {EQUIPMENT_GROUPS,findEquipment} from './catalog.js';
 import {filterEquipment,statPreview} from './catalog-ui.js';
 import {contentEnabled} from './content-sources.js';
 import {COINS,uid} from './model.js';
@@ -8,7 +8,7 @@ import {effectiveDM} from './party-model.js';
 import {sound} from './sound.js';
 import {
   STORE_TYPES,STORE_LIMIT,PRICE_LIMIT,MAGIC_RARITIES,MAGIC_TYPES,newShop,defaultMerchandise,
-  merchandiseEntry,merchandiseLine,randomMerchandise,matchesShopMagic,quoteSale,purchasePrice,formatPrice,walletTotal
+  SHOP_EQUIPMENT,merchandiseEntry,merchandiseLine,randomMerchandise,matchesShopMagic,quoteSale,purchasePrice,formatPrice,walletTotal
 } from './shop-model.js';
 
 export function createShopUI(ui) {
@@ -223,7 +223,7 @@ export function createShopUI(ui) {
   function renderCatalog() {
     const form=modal.querySelector('form'),query=form.elements.catalogSearch.value,group=form.elements.catalogGroup.value;
     const {type,items}=view.draft;
-    const matches=filterEquipment(EQUIPMENT,{query,group,settings:settings()})
+    const matches=filterEquipment(SHOP_EQUIPMENT,{query,group,settings:settings()})
       .filter(item=>!Object.hasOwn(items,item.id)&&(!item.magic||matchesShopMagic(item,type)));
     put('[data-shop-catalog]',matches.slice(0,40).map(entry=>`<div class="shop-catalog-row"><div class="shop-item-art">${itemIconMarkup(entry)}</div><span><strong>${esc(entry.name)}</strong><small>${esc(entry.group)} · ${esc(entry.cost)}</small></span>${action('add','Add','btn btn-sm',dataId(entry.id)+` aria-label="Add ${esc(entry.name)}"`)}</div>`).join('')
       +(matches.length>40?status(`Showing 40 of ${matches.length}. Search to narrow the list.`):matches.length?'':status('No matching catalog items.')));
@@ -231,7 +231,7 @@ export function createShopUI(ui) {
   function renderMagicTypes() {
     const field=modal.querySelector('[name="magicType"]');
     const selected=field.value,type=view.draft.type;
-    const available=new Set(EQUIPMENT.filter(entry=>entry.magic&&matchesShopMagic(entry,type)&&contentEnabled(entry,settings(),'item')).map(entry=>entry.itemType));
+    const available=new Set(SHOP_EQUIPMENT.filter(entry=>entry.magic&&matchesShopMagic(entry,type)&&contentEnabled(entry,settings(),'item')).map(entry=>entry.itemType));
     field.innerHTML=Object.entries(MAGIC_TYPES).filter(([,types])=>!types.length||types.some(itemType=>available.has(itemType)))
       .map(([name])=>option(name,name,name===selected)).join('');
   }
@@ -262,7 +262,7 @@ export function createShopUI(ui) {
         case 'party-shop-defaults':editMerchandise(items=>{for(const key of Object.keys(items))delete items[key];Object.assign(items,defaultMerchandise(view.draft.type,settings()));});break;
         case 'party-shop-remove':editMerchandise(items=>delete items[id]);break;
         case 'party-shop-add':editMerchandise(items=>{
-          const entry=EQUIPMENT.find(i=>i.id===id);
+          const entry=findEquipment(id);
           if(entry&&contentEnabled(entry,settings(),'item')&&(!entry.magic||matchesShopMagic(entry,view.draft.type))&&!Object.hasOwn(items,id))addLine(items,entry);
         });break;
         case 'party-shop-random':editMerchandise((items,fields)=>{

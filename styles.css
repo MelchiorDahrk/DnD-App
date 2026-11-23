@@ -52,6 +52,11 @@ dialog{border:1px solid var(--border-subtle);background:var(--paper);border-radi
 .catalog-preview dl>div{display:grid;grid-template-columns:minmax(90px,1fr) minmax(0,2fr);gap:12px}
 .catalog-preview dt{color:var(--text-secondary);font-size:11px}.catalog-preview dd{margin:0}
 .catalog-preview p{margin:8px 0}.catalog-preview p:first-child{margin-top:0}.catalog-preview p:last-child{margin-bottom:0}
+.catalog-versions{margin-top:12px}
+.catalog-version-controls{display:flex;flex-wrap:wrap;align-items:end;gap:8px}
+.catalog-version-controls .form-field{flex:1 1 13rem;min-width:0}
+.catalog-version-controls select{width:100%;min-width:0}
+.catalog-versions output:empty{display:none}
 .character-choice{min-width:0;grid-column:1/-1}.character-choice .catalog-preview{margin-top:8px}
 .character-choice .custom-choice{margin-top:12px}.custom-choice[hidden]{display:none}
 .form-grid>.catalog-preview.full{grid-column:1/-1;margin-top:0}

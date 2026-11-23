@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {LEGACY_MAGIC_ITEMS,LEGACY_MAGIC_ITEM_AUDIT} from '../legacy-magic-item-data.js';
 import {MAGIC_ITEMS as CURRENT} from '../magic-item-data.js';
-import {MAGIC_ITEMS,EQUIPMENT,equipmentFields,equipmentDescription,itemFromEquipment} from '../catalog.js';
+import {MAGIC_ITEMS,EQUIPMENT,findEquipment,equipmentFields,equipmentDescription,itemFromEquipment} from '../catalog.js';
 import {LDRAW_ICONS,equipmentIconURL} from '../equipment-icons.js';
 import {filterEquipment,catalogPicker} from '../catalog-ui.js';
 import {actionTiming} from '../sheet-actions.js';
@@ -20,14 +20,16 @@ test('every 2014 source item is represented once by an earlier-only item or its 
   assert.deepEqual([...legacyPaths,...sharedPaths].sort(),expected);
   assert.equal(new Set([...legacyPaths,...sharedPaths]).size,sourceIndex.length);
   assert.deepEqual(LEGACY_MAGIC_ITEM_AUDIT.sourcePaths,expected);
-  assert.deepEqual(new Set(MAGIC_ITEMS),new Set([...CURRENT,...LEGACY_MAGIC_ITEMS]));
+  assert.deepEqual(MAGIC_ITEMS.map(item=>item.id),[...CURRENT,...LEGACY_MAGIC_ITEMS].map(item=>item.id));
   assert.ok(MAGIC_ITEMS.every(item=>EQUIPMENT.includes(item)));
 });
 
 test('2024 stats and descriptions always win shared names and reviewed renamed equivalents',()=>{
   for(const reference of LEGACY_MAGIC_ITEM_AUDIT.sharedItems){
     const current=currentById.get(reference.currentId);assert.ok(current,reference.name);
-    assert.equal(current.edition,'2024');assert.ok(MAGIC_ITEMS.includes(current));
+    const preset=findEquipment(current.id);
+    assert.equal(preset.edition,'2024');assert.equal(preset.details,current.details);
+    assert.deepEqual(preset.tables,current.tables);
     assert.equal(LEGACY_MAGIC_ITEMS.some(i=>new URL(i.wiki).pathname===reference.path),false,reference.name);
   }
   const names=new Set(CURRENT.map(i=>norm(i.name)));

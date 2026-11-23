@@ -1,5 +1,8 @@
 import {LEVEL_SUBCLASSES} from './level-up.js';
-import {EQUIPMENT,MAGIC_ITEMS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,EQUIPMENT_GROUPS,equipmentFields,attackFromWeapon,attackFromEquipment} from './catalog.js';
+import {EQUIPMENT,MAGIC_ITEMS,MAGIC_ITEM_VERSIONS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,EQUIPMENT_GROUPS,findEquipment,equipmentFields,attackFromWeapon,attackFromEquipment} from './catalog.js';
+import {variantForRoll} from './magic-item-variants.js';
+import {randomDie} from './model.js';
+import {equipmentName} from './inventory-rules.js';
 import {FEATURE_CATALOG,FEATURE_GROUPS,FEAT_GROUPS,isFeat,filterFeatures,featureFields,featureRequirements} from './feature-catalog.js';
 import {itemIconMarkup} from './item-icons.js';
 import {contentEnabled,visibleContent,enabledFeatSources} from './content-sources.js';
@@ -18,9 +21,27 @@ export function statPreview(entry,kind) {
   if(kind==='race')stats=[['Size',entry.size],['Speed',`${entry.speed} ft.`],['Senses',entry.senses||'No special senses']];
   if(kind==='background')stats=[['Ability choices',entry.abilities],['Origin feat',entry.feat],['Skills',entry.skills],['Tool',entry.tool]];
   if(kind==='subclass')stats=[['Class',entry.className],['Subclass level',entry.level],['Source',entry.book||entry.source]];
-  if(kind==='item'||kind==='attack')stats=[['Category',entry.group],['Cost',entry.cost.replace(/^B\s*\+/,'Base item + ')],['Weight',entry.carried===false?'Not counted as carried gear':entry.weightStatus?`${entry.weight} lb. · ${entry.weightStatus}`:`${entry.weight} lb.${entry.weight===0?' (negligible)':''}`]];
+  if(kind==='item'||kind==='attack')stats=[['Category',entry.group],['Cost',entry.cost.replace(/^B\s*\+/,'Base item + ')+(entry.priceNote?' · '+entry.priceNote:'')],['Weight',entry.carried===false?'Not counted as carried gear':entry.weightStatus?`${entry.weight} lb. · ${entry.weightStatus}`:`${entry.weight} lb.${entry.weight===0?' (negligible)':''}`]];
   if(entry.magic)stats.push(['Rules',entry.edition||'2024'],['Rarity',entry.rarity],['Attunement',entry.attunement],['Type',entry.typeDetails],['Source',entry.source]);
-  return `${kind==='item'?`<div class="catalog-item-art">${itemIconMarkup(entry)}</div>`:''}<strong>${esc(entry.name)}</strong>${stats.length?`<dl>${stats.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`:''}<p class="catalog-rules">${esc(entry.details)}</p>${(entry.tables||[]).map(rows=>`<div class="catalog-table-scroll" tabindex="0" role="region" aria-label="${esc(entry.name)} stats"><table>${rows.map((cells,i)=>`<tr>${cells.map(cell=>`<${i?'td':'th'}>${esc(cell)}</${i?'td':'th'}>`).join('')}</tr>`).join('')}</table></div>`).join('')}${entry.magic?'<p class="form-help">AC from supported defensive items updates when equipped and attuned. Configure base armor and other AC bonuses in the item editor; manage charges, spells, and other effects at the table. B in a price means the base item cost.</p>':''}<a href="${esc(entry.wiki)}" target="_blank" rel="noopener noreferrer" class="text-btn">Read the rules ↗</a>`;
+  return `${kind==='item'?`<div class="catalog-item-art">${itemIconMarkup(entry)}</div>`:''}<strong>${esc(entry.name)}</strong>${stats.length?`<dl>${stats.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`:''}<p class="catalog-rules">${esc(entry.details)}</p>${(entry.tables||[]).map(rows=>`<div class="catalog-table-scroll" tabindex="0" role="region" aria-label="${esc(entry.name)} stats"><table>${rows.map((cells,i)=>`<tr>${cells.map(cell=>`<${i?'td':'th'}>${esc(cell)}</${i?'td':'th'}>`).join('')}</tr>`).join('')}</table></div>`).join('')}${entry.magic?'<p class="form-help">AC from supported defensive items updates when equipped and attuned. Configure base armor and other AC bonuses in the item editor. Manage charges, spells, and other effects at the table.</p>':''}<a href="${esc(entry.wiki)}" target="_blank" rel="noopener noreferrer" class="text-btn">Read the rules ↗</a>`;
+}
+
+function versionPicker(parentId,selected='',required=false) {
+  const family=MAGIC_ITEM_VERSIONS.get(parentId);
+  if(!family)return '';
+  return `<div class="catalog-versions" data-item-versions="${esc(parentId)}"><div class="catalog-version-controls"><label class="form-field">Item version<select data-item-version ${required?'required':''}><option value="" ${selected?'':'selected'} ${required?'disabled':''}>Choose a version…</option>${family.choices.map(({label,entry})=>`<option value="${esc(entry.id)}" ${entry.id===selected?'selected':''}>${esc(label)} · ${esc(entry.cost)}</option>`).join('')}</select></label>${family.sides?`<button type="button" class="btn" data-action="catalog-variant-roll">Roll d${family.sides}</button>`:''}</div><output class="form-help" data-item-version-result aria-live="polite"></output></div>`;
+}
+
+export function rollCatalogVariant(button) {
+  const panel=button.closest('[data-item-versions]'),family=MAGIC_ITEM_VERSIONS.get(panel.dataset.itemVersions);
+  const total=randomDie(family.sides),choice=variantForRoll(family,total);
+  if(!choice)return;
+  const select=panel.querySelector('[data-item-version]');
+  if(select.value!==choice.entry.id){
+    select.value=choice.entry.id;
+    select.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  panel.querySelector('[data-item-version-result]').textContent=`d${family.sides} rolled ${total} · ${choice.label}`;
 }
 
 function featureOptions(entries,selected='') {
@@ -83,12 +104,18 @@ function pickerOptions(entries,selected,kind,allowCustom=true) {
     return items.length?`<optgroup label="${esc(group)}">${items.map(entry=>`<option value="${entry.id}" ${entry.id===selected?'selected':''}>${esc(entry.name)} · ${esc(entry.magic?(entry.edition||'2024')+' · '+entry.rarity+' · ':'')}${esc(entry.cost)}</option>`).join('')}</optgroup>`:'';
   }).join('');
 }
-export function catalogPicker(kind,character={},settings={}) {
+export function catalogPicker(kind,character={},settings={},item={}) {
   if(kind==='feat')return featurePicker(character,settings);
-  const entries=visibleContent(pickerEntries(kind),settings,'item');
+  const saved=kind==='item'&&item.name
+    ?findEquipment(item.catalogId)||MAGIC_ITEMS.find(entry=>equipmentName(entry.name)===equipmentName(item.name))
+    :null;
+  const parentId=saved?.parentId||saved?.id;
+  const family=MAGIC_ITEM_VERSIONS.has(parentId)?findEquipment(parentId):null;
+  const entries=pickerEntries(kind).filter(entry=>entry===family||contentEnabled(entry,settings,'item'));
   const label=kind==='attack'?'Weapon preset':'Equipment, treasure & magic items';
   const itemFilters=kind==='item'?`<label class="form-field">Equipment type<select data-catalog-group="item"><option>All</option>${EQUIPMENT_GROUPS.map(group=>`<option>${esc(group)}</option>`).join('')}</select></label><label class="form-field">Rarity<select data-catalog-rarity="item">${rarityOptions()}</select></label><label class="form-field">Attunement<select data-catalog-attunement="item"><option value="All">Any attunement</option><option value="Required">Required</option><option value="Not required">Not required</option></select></label>`:'';
-  return `<section class="catalog-picker" aria-label="${label}"><div class="catalog-picker-heading"><strong>${label}</strong><span class="badge">${kind==='item'?'2014 + 2024':'2024'}</span></div><div class="form-grid">${itemFilters}${kind==='item'?`<label class="form-field">Rules version<select data-catalog-edition="item">${editionOptions()}</select></label>`:''}<label class="form-field ${kind==='item'?'':'full'}">Find ${kind==='attack'?'a weapon':'equipment'}<input type="search" data-catalog-search="${kind}" placeholder="${kind==='item'?'Name, effect, rarity, or source…':'Search by name…'}" autocomplete="off"></label><label class="form-field full">${label}<select data-catalog-pick="${kind}">${pickerOptions(entries,'',kind)}</select></label></div><div class="catalog-preview" data-catalog-preview="${kind}" aria-live="polite"><p>${kind==='item'?'Choose equipment, treasure, or a magic item to fill its name, category, weight, cost, stats, and LEGO icon.':'Choose a weapon to fill damage, ability, range, and mastery notes.'} You can edit every field before saving.</p></div><p class="form-help" data-catalog-count="${kind}">${entries.length} presets available from enabled sources. Existing notes change only when you select a preset.</p></section>`;
+  const preview=family?statPreview(saved,kind):`<p>${kind==='item'?'Choose equipment, treasure, or a magic item to fill its name, category, weight, cost, stats, and LEGO icon.':'Choose a weapon to fill damage, ability, range, and mastery notes.'} You can edit every field before saving.</p>`;
+  return `<section class="catalog-picker" aria-label="${label}"><div class="catalog-picker-heading"><strong>${label}</strong><span class="badge">${kind==='item'?'2014 + 2024':'2024'}</span></div><div class="form-grid">${itemFilters}${kind==='item'?`<label class="form-field">Rules version<select data-catalog-edition="item">${editionOptions()}</select></label>`:''}<label class="form-field ${kind==='item'?'':'full'}">Find ${kind==='attack'?'a weapon':'equipment'}<input type="search" data-catalog-search="${kind}" placeholder="${kind==='item'?'Name, effect, rarity, or source…':'Search by name…'}" autocomplete="off"></label><label class="form-field full">${label}<select data-catalog-pick="${kind}">${pickerOptions(entries,family?.id||'',kind)}</select></label></div>${kind==='item'?`<div data-catalog-versions>${versionPicker(family?.id,saved?.parentId?saved.id:'',!!saved?.parentId)}</div>`:''}<div class="catalog-preview" data-catalog-preview="${kind}" aria-live="polite">${preview}</div><p class="form-help" data-catalog-count="${kind}">${entries.length} presets available from enabled sources. Existing notes change only when you select a preset.</p></section>`;
 }
 
 export function handleCatalogFilter(root,target,character={},settings={}) {
@@ -97,12 +124,35 @@ export function handleCatalogFilter(root,target,character={},settings={}) {
   const entries=filteredEntries(root,kind,character,settings),select=root.querySelector(`[data-catalog-pick="${kind}"]`),previous=select.value;
   select.innerHTML=pickerOptions(entries,previous,kind);
   root.querySelector(`[data-catalog-count="${kind}"]`).textContent=kind==='feat'?`${featureCount(entries)}${entries.length?'':' Try another search, category, or Show filter.'}`:`${entries.length} preset${entries.length===1?'':'s'} found. ${entries.length?'Select one to fill the fields below.':'Try another search or equipment type.'}`;
-  if(!select.value)root.querySelector(`[data-catalog-preview="${kind}"]`).innerHTML='<p>Choose a preset to see its stats. Your current fields are kept.</p>';
+  if(!select.value){
+    root.querySelector(`[data-catalog-preview="${kind}"]`).innerHTML='<p>Choose a preset to see its stats. Your current fields are kept.</p>';
+    if(kind==='item')root.querySelector('[data-catalog-versions]').innerHTML='';
+  }
   if(kind==='feat'&&!select.value){root.querySelector('[data-feature-level-field]').hidden=true;root.querySelector('[data-feature-level]').disabled=true;}
   return true;
 }
 
+function fillItemPreset(root,entry,character) {
+  const attack=entry.category==='Weapon'?attackFromEquipment(entry,character):{};
+  fillFields(root,{...attack,...equipmentFields(entry),actionType:entry.actionType||''});
+}
+
+export function handleCatalogVariant(root,target,character) {
+  const panel=target.closest('[data-item-versions]');
+  if(!panel)return false;
+  const parent=findEquipment(panel.dataset.itemVersions),entry=findEquipment(target.value);
+  const preview=root.querySelector(character?'[data-catalog-preview="item"]':'[data-reference-preview]');
+  preview.innerHTML=statPreview(entry||parent,'item');
+  panel.querySelector('[data-item-version-result]').textContent='';
+  if(character&&entry){
+    target.options[0].disabled=true;
+    fillItemPreset(root,entry,character);
+  }
+  return true;
+}
+
 export function handleCatalogChoice(root,target,character,settings={}) {
+  if(target.hasAttribute('data-item-version'))return handleCatalogVariant(root,target,character);
   if(target.dataset.catalogGroup||target.dataset.catalogScope||target.dataset.catalogSource||target.dataset.catalogRarity||target.dataset.catalogAttunement||target.dataset.catalogEdition)return handleCatalogFilter(root,target,character,settings);
   if(target.hasAttribute('data-feature-level')){
     const entry=FEATURE_CATALOG.find(option=>option.id===root.querySelector('[data-catalog-pick="feat"]').value);
@@ -121,9 +171,10 @@ export function handleCatalogChoice(root,target,character,settings={}) {
     }
     const kind=target.dataset.catalogPick,entry=pickerEntries(kind).find(option=>(option.id||option.name)===target.value);
     root.querySelector(`[data-catalog-preview="${kind}"]`).innerHTML=statPreview(entry,kind);
+    if(kind==='item')root.querySelector('[data-catalog-versions]').innerHTML=versionPicker(entry?.id,'',true);
     if(!entry)return true;
-    const values=kind==='item'?{...equipmentFields(entry),...(entry.category==='Weapon'?attackFromEquipment(entry,character):{}),actionType:entry.actionType||''}:attackFromWeapon(entry,character);
-    fillFields(root,values);
+    if(kind==='attack')fillFields(root,attackFromWeapon(entry,character));
+    else if(!MAGIC_ITEM_VERSIONS.has(entry.id))fillItemPreset(root,entry,character);
     return true;
   }
   if(target.dataset.characterChoice){
@@ -146,7 +197,7 @@ export function handleCatalogChoice(root,target,character,settings={}) {
 }
 
 export function catalogBrowser(settings={}) {
-  return `<section class="panel catalog-browser"><div class="panel-heading"><h2>Equipment, treasure, magic items & character options</h2><span class="badge">OFFLINE</span></div><div class="panel-body"><p class="modal-intro">Browse stats here, or use the dropdowns when adding equipment, attacks, features, or character details. Shared magic items use their 2024 rules; earlier-only items are labeled 2014.</p><div class="form-grid"><label class="form-field">Browse<select data-reference-kind>${['Equipment','Magic items','Classes','Species / races','Backgrounds','Subclasses','Origin feats','Feats','Features & resources'].map(name=>`<option>${name}</option>`).join('')}</select></label><label class="form-field" data-reference-search-filter>Find an entry<input type="search" data-reference-search placeholder="Name, effect, rarity, or source…" autocomplete="off"></label><label class="form-field" data-reference-item-filter>Rarity<select data-reference-rarity>${rarityOptions()}</select></label><label class="form-field" data-reference-item-filter>Rules version<select data-reference-edition>${editionOptions()}</select></label><label class="form-field" data-reference-feature-filter hidden>Category<select data-reference-feature-group><option value="All">All categories</option>${FEATURE_GROUPS.map(group=>`<option>${esc(group)}</option>`).join('')}</select></label><label class="form-field" data-reference-feature-filter hidden>Feat source<select data-reference-feature-source>${featSourceOptions(settings)}</select></label><label class="form-field full">Choose an entry<select data-reference-entry></select></label></div><p class="form-help" data-reference-count aria-live="polite"></p><div class="catalog-preview" data-reference-preview aria-live="polite"></div></div></section>`;
+  return `<section class="panel catalog-browser"><div class="panel-heading"><h2>Equipment, treasure, magic items & character options</h2><span class="badge">OFFLINE</span></div><div class="panel-body"><p class="modal-intro">Browse stats here, or use the dropdowns when adding equipment, attacks, features, or character details. Shared magic items use their 2024 rules; earlier-only items are labeled 2014.</p><div class="form-grid"><label class="form-field">Browse<select data-reference-kind>${['Equipment','Magic items','Classes','Species / races','Backgrounds','Subclasses','Origin feats','Feats','Features & resources'].map(name=>`<option>${name}</option>`).join('')}</select></label><label class="form-field" data-reference-search-filter>Find an entry<input type="search" data-reference-search placeholder="Name, effect, rarity, or source…" autocomplete="off"></label><label class="form-field" data-reference-item-filter>Rarity<select data-reference-rarity>${rarityOptions()}</select></label><label class="form-field" data-reference-item-filter>Rules version<select data-reference-edition>${editionOptions()}</select></label><label class="form-field" data-reference-feature-filter hidden>Category<select data-reference-feature-group><option value="All">All categories</option>${FEATURE_GROUPS.map(group=>`<option>${esc(group)}</option>`).join('')}</select></label><label class="form-field" data-reference-feature-filter hidden>Feat source<select data-reference-feature-source>${featSourceOptions(settings)}</select></label><label class="form-field full">Choose an entry<select data-reference-entry></select></label></div><p class="form-help" data-reference-count aria-live="polite"></p><div data-reference-versions></div><div class="catalog-preview" data-reference-preview aria-live="polite"></div></div></section>`;
 }
 export function updateCatalogBrowser(root,reset=false,settings={}) {
   const kind=root.querySelector('[data-reference-kind]')?.value;if(!kind)return;
@@ -169,5 +220,8 @@ export function updateCatalogBrowser(root,reset=false,settings={}) {
   const select=root.querySelector('[data-reference-entry]');
   if(reset){const previous=select.value;select.innerHTML=previewKind==='item'?pickerOptions(entries,previous,'item',false):previewKind==='feature'?featureOptions(entries,previous):options(entries,previous);}
   const entry=entries.find(entry=>(entry.id||entry.name)===select.value);
-  root.querySelector('[data-reference-preview]').innerHTML=previewKind==='feature'?(entry?`<strong>${esc(entry.name)}</strong><p>${esc(entry.group)} · ${esc(featureSource(entry))}</p><p>${esc(featureRequirements(entry))}</p><p>${esc(entry.details)}</p><a class="text-btn" href="${esc(entry.wiki)}" target="_blank" rel="noopener noreferrer">Read the rules ↗</a>`:'<p>Choose a feature or resource. Use Add feature on your sheet for character-specific defaults.</p>'):statPreview(entry,previewKind);
+  const versions=root.querySelector('[data-reference-versions]'),versionId=previewKind==='item'&&MAGIC_ITEM_VERSIONS.has(entry?.id)?entry.id:undefined;
+  if(versions.querySelector('[data-item-versions]')?.dataset.itemVersions!==versionId)versions.innerHTML=versionPicker(versionId);
+  const version=findEquipment(versions.querySelector('[data-item-version]')?.value);
+  root.querySelector('[data-reference-preview]').innerHTML=previewKind==='feature'?(entry?`<strong>${esc(entry.name)}</strong><p>${esc(entry.group)} · ${esc(featureSource(entry))}</p><p>${esc(featureRequirements(entry))}</p><p>${esc(entry.details)}</p><a class="text-btn" href="${esc(entry.wiki)}" target="_blank" rel="noopener noreferrer">Read the rules ↗</a>`:'<p>Choose a feature or resource. Use Add feature on your sheet for character-specific defaults.</p>'):statPreview(version||entry,previewKind);
 }

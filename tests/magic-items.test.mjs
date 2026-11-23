@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {MAGIC_ITEMS,MAGIC_ITEM_AUDIT} from '../magic-item-data.js';
-import {EQUIPMENT,equipmentFields,equipmentDescription,itemFromEquipment} from '../catalog.js';
+import {EQUIPMENT,MAGIC_ITEMS as catalogMagicItems,MAGIC_ITEM_VERSIONS,MAGIC_VARIANT_EQUIPMENT,findEquipment,equipmentFields,equipmentDescription,itemFromEquipment} from '../catalog.js';
+import {variantForRoll} from '../magic-item-variants.js';
 import {PAGES_2024} from '../reference-pages.js';
 import {LDRAW_ICONS,equipmentIconURL} from '../equipment-icons.js';
 import {filterEquipment,catalogPicker,catalogBrowser} from '../catalog-ui.js';
@@ -70,4 +71,43 @@ test('complete magic catalog round-trips in existing version 2 backups with inde
   const cloak=MAGIC_ITEMS.find(i=>i.name==='Cloak of Protection');
   assert.equal(cloak.weight,3);
   assert.match(equipmentDescription(cloak),/Estimated cloak; adjust to actual item/);
+});
+
+test('missing prices use stated rarity, item consumption and the default base equipment',()=>{
+  assert.ok(catalogMagicItems.every(item=>!/^Unlisted$|^Unlisted \(|^Varies$|^B\s*\+/i.test(item.cost)));
+  assert.equal(findEquipment('magic-2014-blood-spear').cost,'401 GP');
+  assert.equal(findEquipment('magic-2014-feather-token').cost,'50 GP');
+  assert.equal(findEquipment('magic-2014-all-purpose-tool').cost,'400–40,000 GP');
+  assert.match(findEquipment('magic-2014-blood-spear').priceNote,/rarity guideline.*Spear/);
+  assert.equal(findEquipment('magic-2014-ring-of-winter').cost,'Priceless');
+  assert.equal(findEquipment('magic-2014-tearulai').cost,'DM sets price');
+  assert.equal(findEquipment('magic-armor-of-invulnerability').cost,'201,500 GP');
+  assert.equal(findEquipment('magic-repeating-shot').cost,'450 GP');
+  assert.equal(findEquipment('magic-goading-ammunition').cost,'200 GP 5 CP');
+  assert.equal(findEquipment('magic-spell-scroll-level-7').cost,'25,000 GP');
+  assert.equal(findEquipment('magic-bag-of-holding').cost,'400 GP');
+});
+
+test('version rolls cover each die face once and keep acquired versions distinct through a backup',()=>{
+  const ids=[...EQUIPMENT,...MAGIC_VARIANT_EQUIPMENT].map(item=>item.id);
+  assert.equal(new Set(ids).size,ids.length);
+  for(const family of MAGIC_ITEM_VERSIONS.values()){
+    for(let total=1;total<=family.sides;total++){
+      assert.equal(family.choices.filter(choice=>total>=choice.min&&total<=choice.max).length,1);
+    }
+  }
+  assert.equal(MAGIC_ITEM_VERSIONS.has('magic-wand-of-wonder'),false);
+  assert.equal(MAGIC_ITEM_VERSIONS.get('magic-bag-of-tricks').sides,undefined);
+  const tokens=MAGIC_ITEM_VERSIONS.get('magic-quaal-s-feather-token');
+  assert.deepEqual([1,20,21,35,36,50,51,65,66,90,91,100].map(n=>variantForRoll(tokens,n).label),
+    ['Anchor','Anchor','Bird','Bird','Fan','Fan','Swan Boat','Swan Boat','Tree','Tree','Whip','Whip']);
+  const anchor=variantForRoll(tokens,1).entry,whip=variantForRoll(tokens,100).entry;
+  assert.equal(anchor.cost,'200 GP');assert.equal(whip.cost,'2,000 GP');
+  assert.equal(whip.category,'Consumable');
+  const c=makeCharacter();c.items=[anchor,whip].map(itemFromEquipment);
+  const state={version:SAVE_VERSION,characters:[c],activeId:c.id,settings:{sound:false}};
+  const items=parseBackup(JSON.stringify(state)).characters[0].items;
+  assert.deepEqual(items,c.items);assert.equal(findEquipment(items[1].catalogId),whip);
+  assert.match(items[1].description,/1d6 \+ 5 Force damage/);
+  assert.doesNotMatch(items[1].description,/Swan Boat/);
 });
