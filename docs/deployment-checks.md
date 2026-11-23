@@ -2,6 +2,21 @@
 
 Pages deployment is gated on working functionality: source syntax, a successful build, rules and save validation, loading the built site beneath the Pages subpath, usable images, character and equipment interactions, portrait creation/editing, photo matching, appearance selection/persistence, keyboard dialog focus, and offline operation. Functional failures still stop deployment.
 
+## Encounter browser and Pages artifact failures — November 23, 2026
+
+The [encounter run](https://github.com/MelchiorDahrk/DnD-App/actions/runs/45286889149)
+timed out between closing a player's initiative prompt and opening the DM's
+creature panel. The scenario now waits for the DM's rendered turn order and
+both creature cards, opens a named instance, and verifies the combat panel
+before editing it.
+
+The [following run](https://github.com/MelchiorDahrk/DnD-App/actions/runs/45289312748)
+passed all checks. Its Pages step began immediately after uploading the Pages
+artifact and could not find the upload in GitHub's artifact listing. Packaging
+now uploads the deployment artifact before the browser jobs run. Publication
+still waits for all required checks. Retrying just the deploy job reuses the
+artifact from the successful packaging job for as long as it is retained.
+
 ## Guest upload acknowledgment race — November 17, 2026
 
 [Run 44193448569](https://github.com/MelchiorDahrk/DnD-App/actions/runs/44193448569)
@@ -81,8 +96,8 @@ Total runner usage can increase because each group installs its test dependencie
 
 Every group downloads the same `production-app` artifact, including generated
 portrait defaults and the preset catalog used by the tests. Browser jobs never
-rebuild. Pages downloads and publishes that artifact only after the build and
-**all five groups** succeed. The matrix comes from the same suite registry as the
+rebuild. Packaging uploads the same `dist/` to Pages as a deployable artifact.
+Publication waits for the build and **every browser group** to succeed. The matrix comes from the same suite registry as the
 local runner, so a required suite cannot disappear through a second hand-maintained
 CI list. The existing `build` check aggregates packaging and all browser groups,
 preserving its meaning for branch protection. Each group records per-suite durations in the Actions job summary and

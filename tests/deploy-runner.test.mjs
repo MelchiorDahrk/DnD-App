@@ -39,6 +39,17 @@ test('matrix output works without a build, browser or preview server',()=>{
   assert.deepEqual(JSON.parse(result.stdout.trim().replace(/^matrix=/,'')),deploymentOptions(['--matrix']).matrix);
 });
 
+test('Pages publishes the artifact uploaded by packaging after the required checks',()=>{
+  const workflow=readFileSync(resolve(root,'.github/workflows/deploy.yml'),'utf8').replaceAll('\r\n','\n');
+  const [,packaging,deploy]=workflow.match(/\n  package:\n([\s\S]+?)\n  browser:[\s\S]+?\n  deploy:\n([\s\S]+)$/);
+  assert.match(packaging,/pages-artifact: \$\{\{ steps\.pages-artifact\.outputs\.name \}\}/);
+  assert.match(packaging,/github-pages-\$\{GITHUB_RUN_ATTEMPT\}/);
+  assert.match(packaging,/uses: actions\/upload-pages-artifact@v\d+\s+with:\s+name: \$\{\{ steps\.pages-artifact\.outputs\.name \}\}\s+path: dist/);
+  assert.match(deploy,/needs: \[build, package\]/);
+  assert.match(deploy,/artifact_name: \$\{\{ needs\.package\.outputs\.pages-artifact \}\}/);
+  assert.doesNotMatch(deploy,/upload-pages-artifact/);
+});
+
 test('invalid or empty group selections fail before checking the site',()=>{
   for(const args of [['--group'],['--group',''],['--group','unknown'],['--group','constructor'],['--group','dice','--matrix'],['--typo']]) {
     assert.throws(()=>deploymentOptions(args),/Usage:/);

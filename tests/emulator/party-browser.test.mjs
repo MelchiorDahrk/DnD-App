@@ -259,10 +259,19 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       assert.doesNotMatch(await page.$eval('.encounter-section',node=>node.textContent),/Goblin|ambush|scout/);
     }
 
-    phase='encounter combat, visibility, and targeted damage';
-    const first=await alice.page.$eval('.encounter-card [data-action="encounter-creature"]',node=>node.dataset.id);
+    phase='open creature after initiative sync';
+    await alice.page.waitForFunction(()=>{
+      const scores=Array.from(document.querySelectorAll('.encounter-turns > li'),row=>row.textContent);
+      return scores.join('|')==='Melchior · 20|Jane · 12|Mira · 8|Teyla · 5' &&
+        document.querySelectorAll('.encounter-card [data-action="encounter-creature"]').length===2;
+    });
+    const first=await alice.page.$$eval('.encounter-card [data-action="encounter-creature"]',nodes=>
+      nodes.find(node=>node.querySelector('strong')?.textContent==='Goblin Warrior #1').dataset.id);
     const firstCard=`.encounter-card [data-action="encounter-creature"][data-id="${first}"]`;
-    await press(alice.page,firstCard);await click(alice.page,'encounter-setup');
+    await press(alice.page,firstCard);
+    await alice.page.waitForSelector('#modal[open] [data-encounter-dialog="combat"]');
+    phase='reveal creature';
+    await press(alice.page,'[data-encounter-dialog="combat"] [data-action="encounter-setup"]');
     await alice.page.select('#modal [name="visibility"]','unknown');
     await fill(alice.page,'publicName','Cloaked scout');await fill(alice.page,'initiative','17');
     await submit(alice.page);await closed(alice.page);
@@ -272,13 +281,16 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       assert.match(await page.$eval(firstCard+' img',node=>node.src),/silhouette\.svg$/);
       assert.equal(await page.$$eval('.encounter-card',cards=>cards.length),1);
     }
+    phase='advance mixed encounter turns';
     await click(alice.page,'party-next-turn');
     await bob.page.waitForSelector('.party-player.is-current');
+    await alice.page.waitForSelector('.party-player.is-current');
     await click(alice.page,'party-next-turn');
     await bob.page.waitForSelector('.encounter-card.is-current');
     await bob.page.waitForSelector('#party-session-header .session-member.is-current[data-action="encounter-creature"]');
     assert.equal(await bob.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await bob.page.screenshot({path:resolve(diagnostics,'encounter-playing-mobile.png'),fullPage:true});
+    phase='creature damage and targeted notice';
     await press(alice.page,firstCard);await fill(alice.page,'amount','6');await click(alice.page,'encounter-damage');
     await bob.page.waitForFunction(()=>document.querySelector('.encounter-card')?.textContent.includes('Bloodied'));
     await click(alice.page,'encounter-record');

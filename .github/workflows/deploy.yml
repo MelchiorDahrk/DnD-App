@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 110
     outputs:
       browser-matrix: ${{ steps.browser-matrix.outputs.matrix }}
+      pages-artifact: ${{ steps.pages-artifact.outputs.name }}
     permissions:
       contents: read
     env:
@@ -149,6 +150,18 @@ jobs:
           include-hidden-files: true
           if-no-files-found: error
           retention-days: 1
+      - name: Name the Pages artifact for this build attempt
+        if: github.event_name != 'pull_request'
+        id: pages-artifact
+        run: echo "name=github-pages-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+      # Upload before the browser jobs so the artifact can become visible to
+      # Pages while they run. A deploy-only retry reuses this same upload.
+      - name: Upload the GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          name: ${{ steps.pages-artifact.outputs.name }}
+          path: dist
   browser:
     name: Browser checks (${{ matrix.group }})
     needs: package
@@ -221,7 +234,7 @@ jobs:
           test "$BROWSER_RESULT" = success
   deploy:
     # A failure in any required group prevents publication of the shared build.
-    needs: build
+    needs: [build, package]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -236,13 +249,9 @@ jobs:
       group: pages
       cancel-in-progress: false
     steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: production-app
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: dist
       - uses: actions/configure-pages@v5
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: ${{ needs.package.outputs.pages-artifact }}
