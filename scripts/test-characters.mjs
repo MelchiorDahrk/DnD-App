@@ -60,15 +60,25 @@ try{
   await nextBuilderStep(page);
   assert.match(await page.$eval('#modal .character-builder [role="alert"]',n=>n.textContent),/Enter a character name/);
   assert.deepEqual(await saved(),initialState(),'Failed builder validation writes nothing');
-  await fillLevelOne(page,{background:'Sage',onStep:async step=>{
+  assert.equal(await page.$('[name="targetLevel"]'),null);
+  await fillLevelOne(page,{species:'Tiefling',background:'Sage',onStep:async step=>{
     if(step===3){
-      await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
       await chooseBuilderValue(page,'method','roll');
       await page.click('[data-builder-roll]');
       assert.equal(await page.$$eval('.builder-rolls li',items=>items.length),6);
       assert.equal(await page.$$eval('.builder-rolls s',items=>items.length),6);
+      assert.ok(await page.$eval('.builder-rolls',rolls=>getComputedStyle(rolls).visibility==='visible'));
+      assert.ok(await page.$eval('.character-builder',builder=>getComputedStyle(builder).visibility==='visible'));
+      for(const row of await page.$$eval('.builder-rolls li',rows=>rows.map(row=>({dice:[...row.querySelectorAll('b')].map(die=>Number(die.textContent)),total:Number(row.lastElementChild.textContent)})))){
+        assert.equal(row.dice.reduce((sum,value)=>sum+value,0),row.total);
+      }
       await chooseBuilderValue(page,'method','array');
       assert.equal(await page.$eval('[name="assignments.str"]',n=>n.value),'0');
+    }
+    if(step===5)assert.match(await page.$eval('[data-builder-step="5"]',node=>node.innerText),/Background Origin feat[\s\S]*Magic Initiate \(Wizard\)/);
+    if(step===6){
+      await page.click('[data-wizard-spells]');
+      assert.equal(await page.$eval('[name="choice-classSpells"]',field=>field.value),'detectmagic');
     }
     if(step===4){
       await page.click('[data-builder-back]');
@@ -91,6 +101,8 @@ try{
   await page.waitForSelector('#modal:not([open])');
   assert.equal((await saved()).characters.length,1);
   assert.equal((await saved()).characters[0].class,'Wizard');
+  assert.equal((await saved()).characters[0].level,1);
+  assert.equal((await saved()).characters[0].spellSlotMode,'auto');
   assert.equal((await saved()).characters[0].name,'A new adventurer');
   assert.equal((await saved()).characters[0].spells.filter(s=>s.level===1&&s.classPrepared!==undefined).length,6);
   parseBackup(JSON.stringify(await saved()));
@@ -107,6 +119,26 @@ try{
   const afterCasting=(await saved()).characters[0];
   assert.equal(afterCasting.features.find(f=>f.id===featureId).used,1);
   assert.ok(afterCasting.slots.every(s=>s.used===0));
+  await page.click('[data-action="slots"]');
+  assert.match(await page.$eval('[data-calculated-slots]',node=>node.textContent),/level 1 × 2/);
+  await page.type('[name="slot0"]','3');
+  await page.click('#modal button[type="submit"]');
+  await page.reload({waitUntil:'networkidle0'});
+  assert.equal((await saved()).characters[0].slots[0].max,3);
+  await page.click('[data-action="slots"]');
+  await page.click('[data-action="clear-slot-overrides"]');
+  await page.click('#modal button[type="submit"]');
+  assert.equal((await saved()).characters[0].slots[0].max,2);
+  await page.click('.slot-panel [data-action="slot"][data-level="0"]');
+  await page.evaluate(()=>{location.hash='sheet';});
+  await page.locator('[data-action="rest"][data-kind="long"]').click();
+  await page.click('#modal [data-action="rest"][data-kind="short"]');
+  await page.$eval('[name="recoverSlot1"]',input=>{input.value='1';});
+  await page.click('#modal button[type="submit"]');
+  const recovered=(await saved()).characters[0];
+  assert.equal(recovered.slots[0].used,0);
+  assert.equal(recovered.features.find(f=>f.name==='Arcane Recovery').used,1);
+  await close();
   console.log('PASS creating the first character with class choices saves and survives reload');
 
   await page.waitForFunction(()=>!!navigator.serviceWorker.controller);
@@ -114,26 +146,18 @@ try{
   await page.reload({waitUntil:'networkidle0'});
   const beforeOffline=await saved();
   await manage();await page.click('#modal [data-action="new-character"]');
-  await fillLevelOne(page,{name:'Offline Vanguard',className:'Fighter',species:'Human',level:3});
-  await nextBuilderStep(page);
-  await page.waitForSelector('.level-up-preview');
-  await page.click('#modal button[type="submit"]');
-  await page.waitForSelector('[data-builder-step="8"]');
-  await nextBuilderStep(page);
-  await page.select('[name="levelSubclass"]','Champion');
-  await page.click('#modal button[type="submit"]');
-  await page.waitForSelector('[data-builder-step="8"]');
-  assert.deepEqual(await saved(),beforeOffline,'Intervening levels remain in the draft');
+  await fillLevelOne(page,{name:'Offline Vanguard',className:'Fighter',species:'Aarakocra'});
+  assert.deepEqual(await saved(),beforeOffline,'Review stays in the draft');
   await nextBuilderStep(page);
   await page.waitForSelector('#modal:not([open])');
   const offline=(await saved()).characters.find(c=>c.name==='Offline Vanguard');
-  assert.equal(offline.level,3);
-  assert.ok(offline.features.some(f=>f.name==='Action Surge'));
-  assert.ok(offline.features.some(f=>f.name==='Improved Critical'));
+  assert.equal(offline.level,1);
+  assert.ok(offline.features.some(f=>f.name==='Flight'));
+  assert.ok(offline.attacks.some(a=>a.name==='Talons'));
   await page.reload({waitUntil:'networkidle0'});
   assert.equal(await page.$eval('.hero h2',n=>n.textContent),'Offline Vanguard');
   await page.setOfflineMode(false);
-  console.log('PASS offline draft progression and creation survive a reload');
+  console.log('PASS offline level-one Aarakocra creation survives a reload');
 
   await page.evaluate((key,s)=>localStorage.setItem(key,JSON.stringify(s)),STORAGE_KEY,initialState());
   await page.reload({waitUntil:'networkidle0'});

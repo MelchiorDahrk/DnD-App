@@ -3,12 +3,13 @@ import {FEATURE_CATALOG,featureFields,featureMatchesCharacter,isFeat} from './fe
 import {CLASS_OPTIONS,SUBCLASSES,SPECIES,WEAPONS,EQUIPMENT} from './catalog.js';
 import {CLASS_LEVELS,SPELL_CATALOG} from './progression-data.js';
 import {trainingFor,ensureTraining,trainingKey,TOOL_NAMES,LANGUAGE_GROUPS} from './training-rules.js';
-import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
+import {classSlotMaximums,isThirdCaster,syncSpellSlots} from './spell-slots.js';
+import {SUBCLASS_ALIASES,SUBCLASS_ROWS,LEGACY_SUBCLASSES,SUPPLEMENTAL_SUBCLASSES,SUBCLASS_SPELLS,LINEAGE_SPELLS,LAND_SPELLS,LEGACY_EXPANDED_SPELLS,LEGACY_LINEAGE_SPELLS,GENIE_SPELLS} from './progression-options.js';
 
 export const normalized=s=>String(s||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]/g,'');
 export function spellKey(s){const n=normalized(s).replace(/^(bigbys|drawmijs|evards|leomunds|melfs|mordenkainens|nystuls|otilukes|ottos|rarys|tashas|tensers)/,'');return ({brandingsmite:'shiningsmite',feeblemind:'befuddlement',hand:'arcanehand',sword:'arcanesword',magicaura:'arcanistsmagicaura'})[n]||n;}
 export function canonicalSubclass(name){return Object.entries(SUBCLASS_ALIASES).find(([key])=>normalized(key)===normalized(name))?.[1]||name;}
-export const LEVEL_SUBCLASSES=[...SUBCLASSES.map(s=>({...s,source:s.className==='Artificer'?'2014':'2024'})),...LEGACY_SUBCLASSES];
+export const LEVEL_SUBCLASSES=[...SUBCLASSES.map(s=>({...s,source:s.className==='Artificer'?'2014':'2024'})),...SUPPLEMENTAL_SUBCLASSES,...LEGACY_SUBCLASSES];
 const spellByName=name=>SPELL_CATALOG.find(s=>s.id===spellKey(name));
 const has=(c,name)=>c.features.some(f=>normalized(f.name)===normalized(name)||normalized(f.name)===normalized(`${name} (Origin feat)`));
 export const FEAT_ABILITIES={Actor:['cha'],Athlete:['str','dex'],Charger:['str','dex'],Chef:['con','wis'],'Crossbow Expert':['dex'],Crusher:['str','con'],'Defensive Duelist':['dex'],'Dual Wielder':['str','dex'],Durable:['con'],'Elemental Adept':['int','wis','cha'],'Fey-Touched':['int','wis','cha'],Grappler:['str','dex'],'Great Weapon Master':['str'],'Heavily Armored':['con','str'],'Heavy Armor Master':['con','str'],'Inspiring Leader':['wis','cha'],'Keen Mind':['int'],'Lightly Armored':['str','dex'],'Mage Slayer':['str','dex'],'Martial Weapon Training':['str','dex'],'Medium Armor Master':['str','dex'],'Moderately Armored':['str','dex'],'Mounted Combatant':['str','dex','wis'],Observant:['int','wis'],Piercer:['str','dex'],Poisoner:['dex','int'],'Polearm Master':['str','dex'],Resilient:Object.keys(ABILITIES),'Ritual Caster':['int','wis','cha'],Sentinel:['str','dex'],'Shadow-Touched':['int','wis','cha'],Sharpshooter:['dex'],'Shield Master':['str'], 'Skill Expert':Object.keys(ABILITIES),Skulker:['dex'],Slasher:['str','dex'],Speedy:['dex','con'],'Spell Sniper':['int','wis','cha'],Telekinetic:['int','wis','cha'],Telepathic:['int','wis','cha'],'War Caster':['int','wis','cha'],'Weapon Master':['str','dex']};
@@ -29,12 +30,11 @@ const spellList=names=>new Set(names.split('|').map(spellKey));
 const artificerSpells=spellList('Acid Splash|Guidance|Light|Mage Hand|Mending|Message|Poison Spray|Prestidigitation|Ray of Frost|Resistance|Shocking Grasp|Spare the Dying|Thorn Whip|Alarm|Cure Wounds|Detect Magic|Disguise Self|Expeditious Retreat|Faerie Fire|False Life|Feather Fall|Grease|Identify|Jump|Longstrider|Purify Food and Drink|Sanctuary|Aid|Alter Self|Arcane Lock|Blur|Continual Flame|Darkvision|Enhance Ability|Enlarge/Reduce|Heat Metal|Invisibility|Lesser Restoration|Levitate|Magic Mouth|Magic Weapon|Protection from Poison|Rope Trick|See Invisibility|Spider Climb|Web|Blink|Catnap|Create Food and Water|Dispel Magic|Elemental Weapon|Flame Arrows|Fly|Glyph of Warding|Haste|Protection from Energy|Revivify|Tiny Servant|Water Breathing|Water Walk|Arcane Eye|Elemental Bane|Fabricate|Freedom of Movement|Leomund’s Secret Chest|Mordenkainen’s Faithful Hound|Mordenkainen’s Private Sanctum|Otiluke’s Resilient Sphere|Stone Shape|Stoneskin|Animate Objects|Bigby’s Hand|Creation|Greater Restoration|Skill Empowerment|Transmute Rock|Wall of Stone');
 export function classProgression(c,level=c.level){
   if(c.class==='Artificer'){
-    const slots=CLASS_LEVELS.find(r=>r.className==='Paladin'&&r.level===level).slots;
+    const slots=classSlotMaximums(c.class,level);
     return {className:c.class,level,slots,cantrips:level>=14?4:level>=10?3:2,prepared:Math.max(1,Math.floor(level/2)+mod(c.stats.int)),specific:{},features:FEATURE_CATALOG.filter(f=>f.className===c.class&&!f.subclass&&f.level===level).map(f=>f.name)};
   }
-  if(((c.class==='Fighter'&&canonicalSubclass(c.subclass)==='Eldritch Knight')||(c.class==='Rogue'&&canonicalSubclass(c.subclass)==='Arcane Trickster'))&&level>=3){
-    const tier=level>=19?4:level>=13?3:level>=7?2:1;
-    const slots=Array(9).fill(0);slots[0]=level>=7?4:level>=4?3:2;if(tier>=2)slots[1]=level>=10?3:2;if(tier>=3)slots[2]=level>=16?3:2;if(tier>=4)slots[3]=1;
+  if(isThirdCaster(c.class,canonicalSubclass(c.subclass))&&level>=3){
+    const slots=classSlotMaximums(c.class,level,canonicalSubclass(c.subclass));
     const prepared=[0,0,0,3,4,4,4,5,6,6,7,8,8,9,10,10,11,11,11,12,13][level];
     return {...CLASS_LEVELS.find(r=>r.className===c.class&&r.level===level),slots,cantrips:(c.subclass==='Arcane Trickster'?3:2)+(level>=10?1:0),prepared,specific:{}};
   }
@@ -46,9 +46,14 @@ function reference(name,owner,level,source='2024'){
 }
 function subclassEntries(c){
   const subclass=canonicalSubclass(c.subclass),option=LEVEL_SUBCLASSES.find(s=>s.name===subclass&&s.className===c.class);
-  const rows=SUBCLASS_ROWS[subclass]||LEGACY_SUBCLASSES.find(s=>s.name===subclass)?.rows||[];
+  const rows=option?.rows||SUBCLASS_ROWS[subclass]||[];
   const existing=FEATURE_CATALOG.filter(f=>f.group==='Subclass features'&&f.subclass===subclass&&f.name!==subclass);
-  const added=rows.flatMap(([level,...names])=>names.filter(name=>!existing.some(e=>normalized(e.name)===normalized(name)&&e.level===level)).map(name=>({...reference(name,subclass,level,option?.source),className:c.class,subclass})));
+  const added=rows.flatMap(([level,...names])=>names.filter(name=>!existing.some(e=>normalized(e.name)===normalized(name)&&e.level===level)).map(name=>({
+    ...reference(name,subclass,level,option?.source),className:c.class,subclass,wiki:option?.wiki,
+    ...(option?.book?{book:option.book}:{}),
+    ...(subclass==='Bladesinger'&&name==='Bladesong'?{resource:'int-long'}:{}),
+    ...(subclass==='Arcane Archer'&&name==='Arcane Shot'?{resource:'int-short'}:{})
+  })));
   return [...existing,...added].filter(f=>!(option?.source==='2014'&&c.class==='Cleric'&&['Divine Strike','Potent Spellcasting'].includes(f.name)));
 }
 const classNameAliases={'Font of Magic':'Font of Magic / Sorcery Points','Paladin’s Smite':'Paladin’s Smite'};
@@ -143,7 +148,16 @@ function progressionPlan(character,level,{subclass=character.subclass,race=chara
   if(c.subclass==='Battle Master'&&level===3)add('skills','Student of War skill',1,skillOptions(['History','Insight','Investigation','Persuasion','Performance']),'skills');
   if(c.subclass==='Battle Master'&&level===3)add('tools','Student of War tool',1,toolOptions.filter(o=>artisanNames.has(o.id)),'tool');
   if(c.subclass==='Fey Wanderer'&&level===3)add('skills','Otherworldly Glamour skill',1,skillOptions(['Deception','Performance','Persuasion']),'skills');
-  if(c.subclass==='Knowledge Domain'&&level===3)add('knowledge','Blessings of Knowledge (proficiency and Expertise)',2,skillOptions(['Arcana','History','Nature','Religion']),'knowledge');
+  if(c.subclass==='Knowledge Domain'&&level===3){
+    add('knowledge','Blessings of Knowledge (proficiency and Expertise)',2,['Arcana','History','Nature','Religion'].filter(skill=>!c.expertise.includes(skill)),'knowledge');
+    add('knowledgeTool','Blessings of Knowledge artisan’s tool',1,toolOptions.filter(tool=>artisanNames.has(tool.label)),'tool');
+  }
+  if(c.subclass==='Bladesinger'&&level===3)add('bladesingerSkill','Training in War and Song skill',1,skillOptions(['Acrobatics','Athletics','Performance','Persuasion']),'skills');
+  if(c.subclass==='Enchanter'&&level===3)add('enchanterSkill','Enchanting Conversationalist skill',1,skillOptions(['Deception','Intimidation','Persuasion']),'skills');
+  if(c.subclass==='Vestige Patron'&&level===3){
+    add('vestigeForm','Vestige Companion form',1,['Celestial','Fiend','Undead']);
+    add('vestigeDomain','Vestige Spells domain',1,['Life Domain','Light Domain','Trickery Domain','War Domain']);
+  }
   if(c.subclass==='Nature Domain'&&level===3)add('skills','Acolyte of Nature skill',1,skillOptions(['Animal Handling','Nature','Survival']),'skills');
   if(c.subclass==='Order Domain'&&level===3)add('skills','Order Domain skill',1,skillOptions(['Intimidation','Persuasion']),'skills');
   if(c.subclass==='Peace Domain'&&level===3)add('skills','Implement of Peace skill',1,skillOptions(['Insight','Performance','Persuasion']),'skills');
@@ -174,7 +188,7 @@ function progressionPlan(character,level,{subclass=character.subclass,race=chara
   if(c.subclass==='Path of the Storm Herald'&&level===3)chooseEffect('storm','Storm Aura environment',['Desert','Sea','Tundra']);
   if(c.subclass==='Rune Knight'&&[3,7,10,15].includes(level))add('runes','Rune Carver runes',level===3?2:1,['Cloud','Fire','Frost','Stone',...(level>=7?['Hill','Storm']:[])].filter(name=>!has(c,`Rune: ${name}`)).map(name=>({id:name,label:name,entry:{...reference(`Rune: ${name}`,'Rune Knight',level,'2014'),resource:'rune'}})));
   if(c.subclass==='Arcane Archer'&&[3,7,10,15,18].includes(level))chooseArcaneShots();
-  function chooseArcaneShots(){add('arcaneShots','Arcane Shot options',level===3?2:1,['Banishing','Beguiling','Bursting','Enfeebling','Grasping','Piercing','Seeking','Shadow'].filter(name=>!has(c,`Arcane Shot: ${name}`)).map(name=>({id:name,label:name,entry:reference(`Arcane Shot: ${name}`,'Arcane Archer',level,'2014')})));}
+  function chooseArcaneShots(){add('arcaneShots','Arcane Shot options',level===3?2:1,['Banishing','Beguiling','Bursting','Enfeebling','Grasping','Piercing','Seeking','Shadow'].filter(name=>!has(c,`Arcane Shot: ${name}`)).map(name=>({id:name,label:name,entry:{...reference(`Arcane Shot: ${name}`,'Arcane Archer',level),book:'Arcana Unleashed'}})));}
   if(c.subclass==='Cavalier'&&level===3)add('skills','Cavalier proficiency',1,skillOptions(['Animal Handling','History','Insight','Performance','Persuasion']),'skills');
   if(c.subclass==='Phantom'&&level===3)add('phantomTraining','Whispers of the Dead proficiency',1,[...skillOptions(),...toolOptions],'training');
   if(c.subclass==='Divine Soul'&&level===3)chooseEffect('affinity','Divine Magic affinity',['Good','Evil','Law','Chaos','Neutrality']);
@@ -211,21 +225,34 @@ function progressionPlan(character,level,{subclass=character.subclass,race=chara
   if(feat?.label==='Fey-Touched')extraSpells('bonusSpell','Fey-Touched level 1 spell',1,s=>s.level===1&&['Divination','Enchantment'].includes(s.school));
   if(feat?.label==='Shadow-Touched')extraSpells('bonusSpell','Shadow-Touched level 1 spell',1,s=>s.level===1&&['Illusion','Necromancy'].includes(s.school));
   if(c.subclass==='Nature Domain'&&level===3)extraSpells('natureCantrip','Acolyte of Nature cantrip',1,s=>s.level===0&&s.classes.includes('Druid'));
-  if(c.subclass==='Arcana Domain'&&level===3)extraSpells('arcanaCantrips','Arcane Initiate cantrips',2,s=>s.level===0&&s.classes.includes('Wizard'));
+  if(c.subclass==='Arcana Domain'&&level===3){
+    add('arcanaSkill','Student of Arcana skill',1,skillOptions(['Arcana',...baseSkills.skills.split(', ')]),'skills');
+    extraSpells('arcanaCantrips','Student of Arcana cantrips',2,s=>s.level===0&&s.classes.includes('Wizard'));
+  }
   if(c.subclass==='Death Domain'&&level===3)extraSpells('reaper','Reaper cantrip',1,s=>s.level===0&&s.school==='Necromancy');
-  if(c.subclass==='Arcane Archer'&&level===3){add('skills','Arcane Archer Lore skill',1,skillOptions(['Arcana','Nature']),'skills');extraSpells('archerCantrip','Arcane Archer Lore cantrip',1,s=>['druidcraft','prestidigitation'].includes(s.id));}
+  if(c.subclass==='Arcane Archer'&&level===3){
+    const lore=['Arcana','Nature'];
+    add('archerSkill','Arcane Archer Lore replacement skills',lore.filter(skill=>c.skills.includes(skill)).length,skillOptions(baseSkills.skills),'skills');
+    extraSpells('archerCantrip','Arcane Archer Lore cantrip',1,s=>['druidcraft','prestidigitation'].includes(s.id));
+  }
   if(c.subclass==='College of Lore'&&level===6)extraSpells('loreSecrets','Magical Discoveries',2,s=>s.level>0&&s.level<=3&&s.classes.some(cls=>['Cleric','Druid','Wizard'].includes(cls)));
-  if(c.subclass==='Arcana Domain'&&level===17)for(const tier of [6,7,8,9])extraSpells(`arcaneMastery${tier}`,`Arcane Mastery level ${tier} spell`,1,s=>s.level===tier&&s.classes.includes('Wizard'));
+  if(c.subclass==='Arcana Domain'&&level===17)for(const tier of [6,7,8,9])extraSpells(`arcaneMastery${tier}`,`Magical Mastery level ${tier} spell`,1,s=>s.level===tier&&s.classes.includes('Wizard'));
   if(c.class==='Wizard'&&level===18)for(const tier of [1,2])extraSpells(`spellMastery${tier}`,`Spell Mastery level ${tier} spell`,1,s=>s.level===tier&&s.classes.includes('Wizard')&&/^(1 )?action$/i.test(s.castingTime));
   if(c.class==='Wizard'&&level===20)extraSpells('signature','Signature Spells',2,s=>s.level===3&&s.classes.includes('Wizard'));
   if(c.race==='High Elf'&&!c.spells.some(s=>(s.origin||'').includes('High Elf')))extraSpells('elfCantrip','High Elf cantrip',1,s=>s.level===0&&s.classes.includes('Wizard'));
   if(feat?.label==='Ritual Caster'||has(c,'Ritual Caster')&&Math.floor((level-1)/4)>Math.floor((character.level-1)/4))extraSpells('rituals','Ritual Caster spells',feat?.label==='Ritual Caster'?2+Math.floor((level-1)/4):1,s=>s.level===1&&s.ritual&&s.classes.some(cls=>['Cleric','Druid','Wizard'].includes(cls))&&!c.spells.some(old=>spellKey(old.name)===s.id));
-  const savant={Abjurer:'Abjuration',Diviner:'Divination',Evoker:'Evocation',Illusionist:'Illusion'}[c.subclass];
+  const savant={Abjurer:'Abjuration',Conjurer:'Conjuration',Diviner:'Divination',Enchanter:'Enchantment',Evoker:'Evocation',Illusionist:'Illusion',Necromancer:'Necromancy',Transmuter:'Transmutation'}[c.subclass];
   const newSpellTier=after.slots.findLastIndex(n=>n>0)>before.slots.findLastIndex(n=>n>0);
   if(savant&&(level===3||newSpellTier))extraSpells('savant',`${savant} Savant spellbook additions`,level===3?2:1,s=>s.level>0&&s.level<=(after.slots.findLastIndex(n=>n>0)+1)&&s.classes.includes('Wizard')&&s.school===savant&&!c.spells.some(old=>spellKey(old.name)===s.id));
   const grant=[];
   const addSpell=(name,origin,at)=>{const spell=spellByName(name);if(!spell)throw new Error(`Missing spell data: ${name}`);grant.push({...spell,origin,at});};
   for(const [at,...names] of SUBCLASS_SPELLS[c.subclass]||[])if(at<=level)for(const name of names)addSpell(name,`${c.subclass} (always prepared)`,at);
+  if(c.subclass==='Vestige Patron'){
+    const domain=choiceSelections.vestigeDomain?.[0]||c.features.find(f=>f.name.startsWith('Vestige Spells domain: '))?.name.split(': ')[1];
+    if(['Life Domain','Light Domain','Trickery Domain','War Domain'].includes(domain)){
+      for(const [at,...names] of SUBCLASS_SPELLS[domain])if(at<=level)for(const name of names)addSpell(name,`Vestige Spells · ${domain} (always prepared)`,at);
+    }
+  }
   if(c.subclass==='Circle of the Land')for(const [at,...names] of LAND_SPELLS[land]||[])if(at<=level)for(const name of names)addSpell(name,`Circle of the Land: ${land} (always prepared)`,at);
   for(const [at,...names] of LINEAGE_SPELLS[c.race]||[])if(at<=level)for(const name of names)addSpell(name,`${c.race} lineage`,at);
   for(const [at,...names] of LEGACY_LINEAGE_SPELLS[c.race]||[])if(at<=level)for(const name of names)addSpell(name,`${c.race} lineage (2014 rules)${c.race==='Yuan-ti'&&name==='Animal Friendship'?' · at will, snakes only':''}`,at);
@@ -258,7 +285,8 @@ function progressionPlan(character,level,{subclass=character.subclass,race=chara
   const expanded=new Set((LEGACY_EXPANDED_SPELLS[c.subclass]||[]).filter(([at])=>at<=level).flatMap(([, ...names])=>names.map(spellKey)));
   const genie=choiceSelections.genie?.[0]||c.genieKind||'Dao';
   if(c.subclass==='Genie Patron')for(const [at,...names] of GENIE_SPELLS[genie]||[])if(at<=level)for(const name of names)expanded.add(spellKey(name));
-  const permitted=s=>c.class==='Artificer'?artificerSpells.has(s.id):s.classes.includes(['Eldritch Knight','Arcane Trickster'].includes(c.subclass)?'Wizard':c.class)||(c.class==='Sorcerer'&&c.subclass==='Divine Soul'&&s.classes.includes('Cleric'))||expanded.has(s.id)||(c.class==='Bard'&&level>=10&&s.classes.some(cls=>['Cleric','Druid','Wizard'].includes(cls)));
+  const spellClass=isThirdCaster(c.class,c.subclass)?c.class==='Monk'?'Sorcerer':'Wizard':c.class;
+  const permitted=s=>c.class==='Artificer'?artificerSpells.has(s.id):s.classes.includes(spellClass)||(c.class==='Sorcerer'&&c.subclass==='Divine Soul'&&s.classes.includes('Cleric'))||expanded.has(s.id)||(c.class==='Bard'&&level>=10&&s.classes.some(cls=>['Cleric','Druid','Wizard'].includes(cls)));
   const available=SPELL_CATALOG.filter(s=>s.level<=maxSpellLevel&&permitted(s));
   const arcanum=c.class==='Warlock'&&[11,13,15,17].includes(level)?(level+1)/2:0;
   const arcanumOptions=arcanum?SPELL_CATALOG.filter(s=>s.level===arcanum&&permitted(s)):[];
@@ -308,6 +336,7 @@ export function addProgressionSpell(c,spell,origin='',prepared=true){
 export const isClassSpell=s=>s.classPrepared!==undefined||!s.origin;
 export const isClassPrepared=s=>s.classPrepared??s.prepared;
 export function applyLevelUp(character,selection={}){
+  if(character.multiclass?.length)throw new Error('Update the total level in Character details and class levels in Spellbook for this multiclass character.');
   const plan=levelUpPlan(character,selection),c=structuredClone(character),chosen=selection.choices||{};
   if(!Number.isInteger(selection.hpGain)||selection.hpGain<1||selection.hpGain>999)throw new Error('Enter HP gained from your Hit Die, including Constitution (1–999).');
   if(selection.requireFullProgression&&selection.hpGain>Math.max(1,c.hitDie+mod(c.stats.con)))throw new Error('HP gain exceeds your Hit Die plus Constitution modifier.');
@@ -363,7 +392,7 @@ export function applyLevelUp(character,selection={}){
       if(!training.languages.includes(option.id))training.languages.push(option.id);
       c.languages=training.languages.join(', ');
     }
-    else if(choice.kind==='knowledge'){c.skills.push(option.id);c.expertise.push(option.id);}
+    else if(choice.kind==='knowledge'){if(!c.skills.includes(option.id))c.skills.push(option.id);c.expertise.push(option.id);}
     else if(choice.kind==='save')c.saves.push(option.id);
     else if(choice.kind==='expertise')c.expertise.push(option.id);
     else if(choice.kind==='mastery')addProgressionFeature(c,{...reference(`Weapon Mastery: ${option.label}`,c.class,c.level),details:`Selected mastery: ${option.label}. Apply the mastery property when using this weapon.`});
@@ -387,6 +416,7 @@ export function applyLevelUp(character,selection={}){
   if(c.class==='Monk'&&c.level===14)c.saves=Object.keys(ABILITIES);
   if(c.class==='Rogue'&&c.level===15)c.saves=[...new Set([...c.saves,'wis','cha'])];
   if(c.subclass==='Scout'&&c.level===3)for(const skill of ['Nature','Survival']){if(!c.skills.includes(skill))c.skills.push(skill);if(!c.expertise.includes(skill))c.expertise.push(skill);}
+  if(c.subclass==='Arcane Archer'&&c.level===3)for(const skill of ['Arcana','Nature'])if(!c.skills.includes(skill))c.skills.push(skill);
   const oldKeys=new Set(character.spells.map(s=>spellKey(s.name)));
   const classKeys=c.trainingOrigins?new Set(character.spells.filter(isClassSpell).map(s=>spellKey(s.name))):oldKeys;
   const swaps=[];
@@ -452,6 +482,7 @@ export function applyLevelUp(character,selection={}){
     if(spell.level>plan.maxSpellLevel)addSpell(spell,'Mystic Arcanum');
     else addClassSpell(spell,spell.level===0||prepareNew(spell.id));
   }
+  if(c.subclass==='Necromancer'&&c.level===3&&!classKeys.has('findfamiliar')&&!ordinary.some(spell=>spell.id==='findfamiliar'))addClassSpell(spellByName('Find Familiar'),false);
   for(const {old,next} of swaps){
     if(old.classPrepared!==undefined&&old.origin){
       const stored=c.spells.find(s=>s.id===old.id);
@@ -470,15 +501,17 @@ export function applyLevelUp(character,selection={}){
   for(const spell of plan.grant)addSpell(spell,spell.origin);
   if(arcanum.length){const resource=c.features.find(f=>f.name===`Mystic Arcanum (${plan.arcanum}th-level spell)`);if(resource)resource.description+=`\nSelected spell: ${arcanum[0].name}.`;
   }
-  if(plan.after.prepared&&(selection.requireFullProgression||selection.updateSlots!==false)){
-    const spent=c.slots.reduce((sum,s)=>sum+s.used,0);
-    c.slots.forEach((s,i)=>{s.max=plan.after.slots[i];s.used=Math.min(s.used,s.max);});
-    if(c.class==='Warlock'){const slot=c.slots.find(s=>s.max>0);if(slot)slot.used=Math.min(slot.max,spent);}
+  if(plan.after.prepared&&!c.spellSlotMode){
+    if(selection.updateSlots===false&&!selection.requireFullProgression) c.spellSlotMode='manual';
+    else {
+      if(c.class==='Warlock')c.pactMagic=true;
+      c.spellSlotMode='auto';
+    }
   }
-  if(c.class==='Warlock')c.pactMagic=true;
+  syncSpellSlots(c);
   if(['Eldritch Knight','Arcane Trickster'].includes(c.subclass)&&c.spellAbility==='auto')c.spellAbility='int';
   for(const spell of plan.grant.filter(s=>s.level>0&&(/lineage|free casting/.test(s.origin))&&!/at will/.test(s.origin))){
-    const lineage=spell.origin.includes('lineage'),owner=lineage?c.race:spell.origin.split(' (')[0],name=`${owner}: ${spell.name}`;
+    const lineage=spell.origin.includes('lineage'),owner=lineage?c.race:spell.origin.split(' (')[0],name=c.race==='Aarakocra'&&lineage?'Wind Caller':`${owner}: ${spell.name}`;
     if(!c.features.some(f=>f.maxUses>0&&(normalized(f.name)===normalized(name)||!lineage&&normalized(f.name)===normalized(owner)||lineage&&normalized(f.name).includes(normalized(spell.name))&&/\(lineage\)/.test(f.name)))){
       addProgressionFeature(c,{...reference(name,owner,c.level),details:`${spell.origin}. Free ${spell.name} casting; choose No slot in Spellbook and spend a use here.`,resource:c.race==='Forest Gnome'&&lineage?'pb-long':/Short or Long/.test(spell.origin)?'one-short':'one-long'});
     }

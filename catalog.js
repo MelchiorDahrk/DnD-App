@@ -198,6 +198,7 @@ export const CLASS_OPTIONS = classRows.map(([name,primary,saves,armor,weapons,de
 
 const species = (name,size,speed,senses,details) => ({name,size,speed,senses,details,wiki:wikiURL(name,'species')});
 export const SPECIES = [
+  {...species('Aarakocra','Medium',30,'','Fly at your walking speed unless wearing Medium or Heavy armor. Talons deal 1d6 slashing damage plus Strength. Wind Caller grants Gust of Wind at level 3.'),book:'Mordenkainen Presents: Monsters of the Multiverse',wiki:wikiURL('Aarakocra','species','2014')},
   species('Aasimar','Small or Medium',30,'Darkvision 60 ft.','Celestial Resistance (necrotic and radiant), Healing Hands, Light Bearer. Celestial Revelation at level 3. Core-book option.'),
   species('Dragonborn','Medium',30,'Darkvision 60 ft.','Choose draconic ancestry for damage resistance and Breath Weapon (Dex save, DC 8 + Con modifier + proficiency; uses = proficiency / Long Rest). Draconic Flight at level 5.'),
   species('Dwarf','Medium',30,'Darkvision 120 ft.','Dwarven Resilience: poison resistance and advantage against Poisoned. Dwarven Toughness: +1 HP per level. Stonecunning grants temporary Tremorsense.'),

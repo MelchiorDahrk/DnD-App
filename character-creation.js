@@ -8,11 +8,17 @@ import {contentEnabled, visibleContent} from './content-sources.js';
 import {armorClass, itemDefense, setItemEquipped} from './armor-class.js';
 import {linkWeaponActions} from './inventory.js';
 import {parsePrice} from './shop-model.js';
+import {syncSpellSlots} from './spell-slots.js';
 import {artisanTools, instruments, gamingSets, holySymbols, simpleWeapons, classEquipment, backgroundEquipment} from './character-creation-equipment.js';
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
 export const POINT_COST = {8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9};
 export const CREATION_STEPS = ['Identity and class', 'Species and background', 'Ability scores', 'Training', 'Features and feats', 'Starting spells', 'Starting equipment', 'Review'];
+export const WIZARD_STARTER_SPELLS = {
+  classCantrips:['light','magehand','rayoffrost'],
+  classSpells:['detectmagic','featherfall','magearmor','magicmissile','sleep','thunderwave'],
+  wizardPrepared:['featherfall','magearmor','magicmissile','sleep']
+};
 export const LINEAGES = {
   Elf: ['Drow', 'High Elf', 'Wood Elf'],
   Gnome: ['Forest Gnome', 'Rock Gnome'],
@@ -113,7 +119,7 @@ export function creationPlan(draft, settings = {}, through = 7) {
   if (!name || name.length>120) errors[0].push('Enter a character name of 1–120 characters.');
   if (!cls) errors[0].push('Choose an enabled class.');
   if (String(draft.playerName || '').length>120 || String(draft.campaign || '').length>500) errors[0].push('Keep the player name within 120 characters and campaign within 500.');
-  if (!Number.isInteger(targetLevel) || targetLevel<1 || targetLevel>20) errors[0].push('Choose a starting level from 1 to 20.');
+  if (targetLevel!==1) errors[0].push('New characters must start at level 1.');
 
   const choose = (step,id,label,count,options,details='') => {
     if (!count || step>through) return [];
@@ -138,7 +144,7 @@ export function creationPlan(draft, settings = {}, through = 7) {
     SPECIES.filter(row => LINEAGES[draft.species].includes(row.name) && contentEnabled(row,settings,'race')).map(row => ({id:row.name,label:row.name,entry:row})));
   const lineage = SPECIES.find(row => row.name===lineageName) || speciesRow;
   const sizeOptions = lineage?.size.split(' or ') || ['Small','Medium'];
-  const size = sizeOptions.length===1 && !customSpecies ? sizeOptions[0] : one(1,'size','Size',1,sizeOptions);
+  const size = sizeOptions.length===1 && !customSpecies ? sizeOptions[0] : (lineage || customSpecies) && one(1,'size','Size',1,sizeOptions);
   if ((!customSpecies && !speciesRow) || (!customBackground && !background)) errors[1].push('Choose an enabled species and background, or enter a table-approved option.');
   const race = customSpecies ? customName('customSpecies','species') : lineage?.name || '';
   const backgroundName = customBackground ? customName('customBackground','background') : background?.name || '';
@@ -279,11 +285,10 @@ export function creationPlan(draft, settings = {}, through = 7) {
   const originFeats = FEATURE_CATALOG.filter(f => f.group==='Origin feats' && eligibleFeat(f,c));
   const featChoices = originFeats.map(entry => ({id:entry.id,label:entry.name,entry}));
   let firstFeat = originFeats.find(f => f.name===background?.feat);
-  if (background && (!firstFeat || !contentEnabled(firstFeat,settings)) && through>=4) errors[4].push(`${background.feat} is required by this background and must be enabled.`);
-  if (customBackground) {
+  if (customBackground || background && draft.originFeatMode==='table') {
     const id = one(4,'backgroundFeat','Background Origin feat',1,featChoices);
     firstFeat = originFeats.find(f => f.id===id);
-  }
+  } else if (background && (!firstFeat || !contentEnabled(firstFeat,settings)) && through>=4) errors[4].push(`${background.feat} is required by this background and must be enabled.`);
   const humanFeatId = draft.species==='Human' && one(4,'humanFeat','Human Origin feat',1,
     featChoices.filter(f => f.id!==firstFeat?.id || f.entry.repeatable));
   const humanFeat = originFeats.find(f => f.id===humanFeatId);
@@ -331,8 +336,8 @@ export function creationPlan(draft, settings = {}, through = 7) {
     grants.push({spell,source,ability,mode});
   };
   if (plan && through>=5) {
-    const lineageAbility = !customSpecies && (plan.grant.some(spell => spell.origin.includes('lineage')) || c.race==='High Elf')
-      ? c.race==='Aasimar' ? 'cha' : one(5,'lineageAbility','Species spellcasting ability',1,mental) : '';
+    const lineageAbility = !customSpecies && (plan.grant.some(spell => spell.origin.includes('lineage')) || ['High Elf','Aarakocra'].includes(c.race))
+      ? c.race==='Aasimar' ? 'cha' : one(5,'lineageAbility','Species spellcasting ability',1,mental,c.race==='Aarakocra'?'Wind Caller grants Gust of Wind at level 3.':'') : '';
     if (lineageAbility) c.lineageAbility=lineageAbility;
     const lookup = name => SPELL_CATALOG.find(s => s.id===spellKey(name));
     for (const spell of plan.grant) {
@@ -380,8 +385,8 @@ export function creationPlan(draft, settings = {}, through = 7) {
         ['tomeRituals','Pact of the Tome rituals',2,available.filter(s => s.level===1 && s.ritual)]
       ]) for (const picked of choose(5,id,label,count,pool.map(spellOption))) addSpell(picked.spell,invocation,{ability:'cha',mode:picked.spell.level?'slot':'at-will'});
     }
-    c.slots=plan.after.slots.map(max => ({max,used:0}));
-    if (c.class==='Warlock') c.pactMagic=true;
+    c.spellSlotMode='auto';
+    syncSpellSlots(c);
   }
   const manualSpells = customSpecies || customBackground || featSpells.some(({feat})=>feat.published);
   if (manualSpells && through>=5) for (const line of String(draft.customSpells || '').split('\n').filter(line => line.trim())) {
@@ -484,12 +489,17 @@ export function creationPlan(draft, settings = {}, through = 7) {
     const unarmedStyle = fightingStyle==='Fighting Style: Unarmed Fighting';
     const handsOccupied = c.items.some(item=>item.equipped&&(item.category==='Weapon'||itemDefense(item).armor?.family==='Shield'));
     const dice = unarmedStyle?(handsOccupied?'1d6':'1d8'):monk?'1d6':tavern?'1d4':'';
-    c.attacks.push({
+    const unarmed = {
       id:uid(),name:'Unarmed Strike',weaponId:'',mastery:'',ability,bonus:0,proficient:true,rollMode:'normal',
       damage:dice ? dice+(modifier>0?`+${modifier}`:modifier<0?String(modifier):'') : String(Math.max(0,1+modifier)),
       type:'Bludgeoning',range:'5 ft.',notes:unarmedStyle
         ? 'Unarmed Fighting uses a d6 while holding a weapon or Shield, or a d8 with neither. Resolve grapple damage separately.'
         : 'Damage option. Grapple and Shove use their saving throw rules.'
+    };
+    c.attacks.push(unarmed);
+    if (c.race==='Aarakocra') c.attacks.push({
+      ...unarmed,id:uid(),name:'Talons',type:'Slashing',damage:`1d6${modifier>0?`+${modifier}`:modifier||''}`,
+      notes:'Aarakocra Unarmed Strike using talons.'
     });
   }
   const names = ids => ids.map(id => BASIC_EQUIPMENT.find(i => i.id===id)?.name || id);
@@ -500,7 +510,7 @@ export function creationPlan(draft, settings = {}, through = 7) {
   if (featSpells.some(({feat}) => feat.name==='Tough')) c.maxHp+=2;
   c.hp=c.maxHp;
   c.ac=armorClass(c);
-  return {character:c,classes,species,backgrounds,cls,lineage,background,groups,errors,abilities,eligible,grants,featSpells,manualSpells,targetLevel,shop};
+  return {character:c,classes,species,backgrounds,cls,lineage,background,groups,errors,abilities,eligible,grants,featSpells,manualSpells,shop};
 }
 
 export function finishLevelOne(draft,settings = {}) {

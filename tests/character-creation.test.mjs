@@ -4,7 +4,7 @@ import {ABILITIES, SAVE_VERSION, initiative, longRest, mod, parseBackup, skillBo
 import {CLASS_OPTIONS, BACKGROUNDS} from '../catalog.js';
 import {FEATURE_CATALOG} from '../feature-catalog.js';
 import {classProgression, applyLevelUp, levelOnePlan, levelUpPlan, spellKey} from '../level-up.js';
-import {armorClass,armorSpeedPenalty} from '../armor-class.js';
+import {aarakocraFlyingSpeed,armorClass,armorSpeedPenalty} from '../armor-class.js';
 import {emptyState, publicProjection, splitCharacter, joinCharacter} from '../cloud-model.js';
 import {creationPlan, finishLevelOne, newCharacterDraft, rollStartingScores, startingAbilities} from '../character-creation.js';
 
@@ -195,6 +195,37 @@ test('variant and mandatory choices, spell legality, and sources reject invalid 
   assert.throws(()=>finishLevelOne(invalid),/Wizard cantrips/);
 });
 
+test('Tiefling Wizards can use a table-approved Origin feat and every build starts at level one',()=>{
+  const draft=completeDraft('Wizard','Tiefling','Sage',{
+    lineage:['Infernal Tiefling'],lineageAbility:['cha'],backgroundFeat:[featureId('Tough')]
+  },{originFeatMode:'table'});
+  const character=finishLevelOne(draft);
+  assert.ok(find(character,'Tough'));
+  assert.equal(find(character,'Magic Initiate (Wizard)'),undefined);
+  assert.equal(character.slots[0].max,2);
+  assert.deepEqual(character.spells.filter(s=>s.castingGrants?.some(g=>g.origin.includes('lineage'))).map(s=>s.name),['Thaumaturgy','Fire Bolt']);
+  assert.throws(()=>finishLevelOne({...draft,targetLevel:2}),/start at level 1/);
+});
+
+test('Aarakocra get Flight and Talons at level one and Wind Caller at level three',()=>{
+  const draft=completeDraft('Fighter','Aarakocra','Soldier',{lineageAbility:['wis']});
+  const character=finishLevelOne(draft);
+  assert.ok(find(character,'Flight'));
+  assert.ok(character.attacks.some(attack=>attack.name==='Talons'&&attack.type==='Slashing'));
+  assert.equal(character.spells.length,0);
+  assert.equal(aarakocraFlyingSpeed(character),0);
+  character.items.find(item=>item.equipped&&item.category==='Armor').equipped=false;
+  assert.equal(aarakocraFlyingSpeed(character),30);
+  applyLevelUp(character,{hpGain:7});
+  applyLevelUp(character,{hpGain:7,subclass:'Champion'});
+  const wind=find(character,'Wind Caller');
+  assert.equal(wind.maxUses,1);
+  assert.deepEqual(character.spells.find(s=>s.name==='Gust of Wind').castingGrants,[{
+    origin:'Aarakocra lineage (2014 rules)',ability:'wis',mode:'free',featureId:wind.id
+  }]);
+  assert.ok(character.slots.every(slot=>slot.max===0));
+});
+
 test('gear alternatives and purchases respect the wallet and equipment choice',()=>{
   const draft=completeDraft('Fighter','Dwarf','Soldier',{classPackage:['2'],backgroundPackage:['1']},
     {purchases:[{id:'chain-mail',quantity:1},{id:'shield',quantity:1},{id:'longsword',quantity:1}]});
@@ -227,7 +258,7 @@ test('repeatable Skilled and manual species selections keep independent provenan
   assert.ok(custom.spells.some(s=>s.name==='Light'&&s.castingGrants[0].ability==='wis'));
 });
 
-test('sequential higher-level starts apply actual progression and v2/cloud round trips preserve private data',()=>{
+test('advancement after creation applies progression and backup round trips preserve private data',()=>{
   const c=finishLevelOne(completeDraft('Fighter','Human','Soldier',{humanFeat:[featureId('Tough')]}));
   const hp=c.hp;
   applyLevelUp(c,{hpGain:7,requireFullProgression:true});

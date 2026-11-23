@@ -63,7 +63,7 @@ service cloud.firestore {
     }
     function live(d) {
       return d.keys().hasAll(['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice','slotUses','slotMax','featureUses','featureMax','revision'])
-        && d.keys().hasOnly(['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice','slotUses','slotMax','featureUses','featureMax','revision'])
+        && d.keys().hasOnly(['hp','maxHp','tempHp','conditions','exhaustion','deathSuccess','deathFailure','inspiration','concentration','hitDice','slotUses','slotMax','pactSlot','featureUses','featureMax','revision'])
         && integer(d.maxHp,1,9999) && integer(d.hp,0,d.maxHp) && integer(d.tempHp,0,9999)
         && integer(d.exhaustion,0,6) && integer(d.deathSuccess,0,3) && integer(d.deathFailure,0,3)
         && integer(d.inspiration,0,999) && text(d.concentration,500) && integer(d.hitDice,0,20)
@@ -77,6 +77,8 @@ service cloud.firestore {
         && integer(d.slotUses[0],0,d.slotMax[0]) && integer(d.slotUses[1],0,d.slotMax[1]) && integer(d.slotUses[2],0,d.slotMax[2])
         && integer(d.slotUses[3],0,d.slotMax[3]) && integer(d.slotUses[4],0,d.slotMax[4]) && integer(d.slotUses[5],0,d.slotMax[5])
         && integer(d.slotUses[6],0,d.slotMax[6]) && integer(d.slotUses[7],0,d.slotMax[7]) && integer(d.slotUses[8],0,d.slotMax[8])
+        && (!('pactSlot' in d) || (d.pactSlot is map && d.pactSlot.keys().hasOnly(['level','max','used'])
+          && integer(d.pactSlot.level,1,9) && integer(d.pactSlot.max,0,99) && integer(d.pactSlot.used,0,d.pactSlot.max)))
         && d.featureUses is map && d.featureUses.size()<=2000 && d.featureMax is map && d.featureMax.size()<=2000 && integer(d.revision,1,2147483647);
     }
     match /users/{uid}/characters/{id} {

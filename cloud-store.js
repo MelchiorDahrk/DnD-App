@@ -98,10 +98,7 @@ export class CloudStore extends PartyStore {
             for(let i=chunks.length;i<oldChunks.length;i++)tx.delete(this.ref(`${path}/content/${i}`));
             tx.update(metaRef,{name:content.name,revision:meta.revision+1,chunks:chunks.length});
           }
-          if(!equal(currentLive,nextLive)){
-            const changed=Object.fromEntries(Object.entries(nextLive).filter(([key,value])=>key!=='revision'&&!equal(value,currentLive[key])));
-            tx.update(liveRef,{...changed,revision:currentLive.revision+1});
-          }
+          if(!equal(currentLive,nextLive))tx.set(liveRef,{...nextLive,revision:currentLive.revision+1});
           if(meta.partyId){
             // Only sharing after membership is checked by the same transaction.
             // If removed, detach privately so local/cloud saves can continue.

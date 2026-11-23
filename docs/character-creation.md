@@ -1,6 +1,6 @@
 # Character creation
 
-New Character opens an eight-step builder. The roster and existing sheet remain open to the same saved data until the player confirms a complete build. Use Back to revise prior choices and Cancel to discard the draft.
+New Character opens an eight-step builder and creates a level 1 character. Use Back to revise prior choices and Cancel to discard the draft. The identity step previews subclasses for the chosen class. Choose your subclass when you reach level 3 through Level up.
 
 ## Architecture audit
 
@@ -13,15 +13,23 @@ New Character opens an eight-step builder. The roster and existing sheet remain 
 | Inventory | Item catalog, linked weapon actions, and automatic AC | Catalog-backed packages, in-package choices, coin alternatives and purchases using existing price parsing |
 | Storage | Version-2 JSON, private Firestore content fragments, and service-worker pre-cache | Optional validated fields and an explicit build/cache entry for each new module |
 
-The rules module evaluates the same choices for preview and finalization. Assignments are indexed by roll or array entry so equal totals can be used independently. Wizard spellbook entries have their own class preparation status. An independent grant can keep a spell ready even when the Wizard has it unprepared. Always-prepared class spells such as the Ranger’s Hunter’s Mark have separate allowances.
+The rules module evaluates the same choices for preview and finalization. Choose the standard array, 27-point buy, manual scores, or six 4d6 rolls. The builder shows each dropped die alongside its three kept dice and total. Assignments are indexed by roll or array entry so equal totals can be used independently.
 
-New private records can carry `size`, `lineageAbility`, `trainingOrigins`, feature `origin`, and spell `classPrepared` and `castingGrants`. These fields are optional in version-2 backups. The party projection still publishes its existing allowlisted data. Firebase stores the same completed character as the local journal. If the cloud queue is unavailable after a local save, the local character remains intact.
+Pick class skill proficiencies alongside training granted by your species and background. The Features and feats step shows the background’s Origin feat and its choices. A custom or earlier-book background lets you select an Origin feat. A table-approved replacement can be selected for a built-in background.
+
+A level 1 Wizard chooses three class cantrips, six level 1 spellbook entries, and four prepared spells. Suggested selections can fill those choices in one click. Species and feat spells have their own sources, casting abilities, and free-use counters where applicable.
+
+## Spell slots
+
+New sheets calculate slot maximums by class, level, and spellcasting subclass. In **Spellbook → Edit slots**, record additional class levels for multiclass spellcasting or enter a per-level override. Pact Magic has separate expenditure and Short Rest recovery when the character also has regular slots. Existing sheets can adopt automatic calculation in the same editor.
+
+Use the Short Rest dialog to choose slots to recover with Arcane Recovery. A held, attuned Arcane Grimoire increases its budget. Spell Recall rolls for qualifying casts. A Sorcerer can spend tracked Sorcery Points in Spellbook to add a temporary slot that expires on a Long Rest. Other item charges, recovery effects, and table adjustments can be recorded with the slot and item controls.
 
 ## Supported editions and table decisions
 
-- Core choices cover the twelve 2024 classes, the ten 2024 species and their lineages, all sixteen 2024 backgrounds, and the core Origin feats. Half-Elf and Half-Orc use their earlier species traits with 2024 background ability increases. Artificer uses the app’s existing Tasha-era progression and equipment.
+- Core choices cover the twelve 2024 classes, the ten 2024 species and their lineages, all sixteen 2024 backgrounds, and the core Origin feats. Aarakocra uses its Monsters of the Multiverse traits. Half-Elf and Half-Orc use their earlier species traits with 2024 background ability increases. Artificer uses the app’s Tasha-era progression and equipment.
 - Table-approved species and backgrounds can provide manual traits, chosen skills and tools, languages, and spell references. The book’s original effects and extra gear must be reviewed at the table. Other supplemental Origin feats require the player to record their selections and table-managed effects.
-- Higher-level starts run each single-class level through the existing guide. Multiclass starts, table-awarded treasure, and supplemental subclasses or features without structured progression require manual handling. Conditional effects, combat decisions, and temporary changes still use the sheet’s existing controls or are resolved at the table.
+- Level up guides single-class advancement. Enter multiclass advancement through Character details and Spellbook. Supplemental features include linked rules and named unlocks, with table-managed effects recorded in Features.
 - Starting purchases use priced, enabled mundane equipment. Firearms and firearm ammunition are table-controlled. Ammunition in packages is stored in the inventory’s existing bundles, including the count of individual shots per bundle.
 
 ## Rules references

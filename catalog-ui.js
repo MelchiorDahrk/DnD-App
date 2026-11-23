@@ -1,4 +1,5 @@
-import {EQUIPMENT,MAGIC_ITEMS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,SUBCLASSES,EQUIPMENT_GROUPS,equipmentFields,attackFromWeapon,attackFromEquipment} from './catalog.js';
+import {LEVEL_SUBCLASSES} from './level-up.js';
+import {EQUIPMENT,MAGIC_ITEMS,WEAPONS,CLASS_OPTIONS,SPECIES,BACKGROUNDS,EQUIPMENT_GROUPS,equipmentFields,attackFromWeapon,attackFromEquipment} from './catalog.js';
 import {FEATURE_CATALOG,FEATURE_GROUPS,FEAT_GROUPS,isFeat,filterFeatures,featureFields,featureRequirements} from './feature-catalog.js';
 import {itemIconMarkup} from './item-icons.js';
 import {contentEnabled,visibleContent,enabledFeatSources} from './content-sources.js';
@@ -16,7 +17,7 @@ export function statPreview(entry,kind) {
   if(kind==='class')stats=[['Hit die',`d${entry.hitDie}`],['Primary ability',entry.primary],['Saving throws',entry.saves.map(s=>s.toUpperCase()).join(', ')],['Armor training',entry.armor],['Weapons',entry.weapons],[`Skills (choose ${entry.skillCount})`,entry.skills]];
   if(kind==='race')stats=[['Size',entry.size],['Speed',`${entry.speed} ft.`],['Senses',entry.senses||'No special senses']];
   if(kind==='background')stats=[['Ability choices',entry.abilities],['Origin feat',entry.feat],['Skills',entry.skills],['Tool',entry.tool]];
-  if(kind==='subclass')stats=[['Class',entry.className],['Subclass level',entry.level]];
+  if(kind==='subclass')stats=[['Class',entry.className],['Subclass level',entry.level],['Source',entry.book||entry.source]];
   if(kind==='item'||kind==='attack')stats=[['Category',entry.group],['Cost',entry.cost.replace(/^B\s*\+/,'Base item + ')],['Weight',entry.carried===false?'Not counted as carried gear':entry.weightStatus?`${entry.weight} lb. · ${entry.weightStatus}`:`${entry.weight} lb.${entry.weight===0?' (negligible)':''}`]];
   if(entry.magic)stats.push(['Rules',entry.edition||'2024'],['Rarity',entry.rarity],['Attunement',entry.attunement],['Type',entry.typeDetails],['Source',entry.source]);
   return `${kind==='item'?`<div class="catalog-item-art">${itemIconMarkup(entry)}</div>`:''}<strong>${esc(entry.name)}</strong>${stats.length?`<dl>${stats.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join('')}</dl>`:''}<p class="catalog-rules">${esc(entry.details)}</p>${(entry.tables||[]).map(rows=>`<div class="catalog-table-scroll" tabindex="0" role="region" aria-label="${esc(entry.name)} stats"><table>${rows.map((cells,i)=>`<tr>${cells.map(cell=>`<${i?'td':'th'}>${esc(cell)}</${i?'td':'th'}>`).join('')}</tr>`).join('')}</table></div>`).join('')}${entry.magic?'<p class="form-help">AC from supported defensive items updates when equipped and attuned. Configure base armor and other AC bonuses in the item editor; manage charges, spells, and other effects at the table. B in a price means the base item cost.</p>':''}<a href="${esc(entry.wiki)}" target="_blank" rel="noopener noreferrer" class="text-btn">Read the rules ↗</a>`;
@@ -131,14 +132,14 @@ export function handleCatalogChoice(root,target,character,settings={}) {
     input.type=custom?'text':'hidden';input.required=custom&&target.required;
     if(!custom)input.value=target.value;
     else {input.value='';input.focus();}
-    const entries=name==='subclass'?SUBCLASSES.filter(entry=>entry.className===root.querySelector('[name="class"]').value):characterOptions(name);
+    const entries=name==='subclass'?LEVEL_SUBCLASSES.filter(entry=>entry.className===root.querySelector('[name="class"]').value):characterOptions(name);
     wrapper.querySelector('[data-option-preview]').innerHTML=statPreview(entries.find(entry=>entry.name===target.value),name);
     return true;
   }
   if(target.name==='class'&&root.querySelector('[data-option-preview="class"]')){
     root.querySelector('[data-option-preview="class"]').innerHTML=statPreview(CLASS_OPTIONS.find(entry=>entry.name===target.value),'class');
     const wrapper=root.querySelector('[data-character-choice="subclass"]').closest('.character-choice');
-    wrapper.outerHTML=characterChoice('Subclass','subclass','',{entries:SUBCLASSES.filter(entry=>entry.className===target.value),settings});
+    wrapper.outerHTML=characterChoice('Subclass','subclass','',{entries:LEVEL_SUBCLASSES.filter(entry=>entry.className===target.value),settings});
     return true;
   }
   return false;
@@ -149,7 +150,7 @@ export function catalogBrowser(settings={}) {
 }
 export function updateCatalogBrowser(root,reset=false,settings={}) {
   const kind=root.querySelector('[data-reference-kind]')?.value;if(!kind)return;
-  let [entries,previewKind]=['Features & resources','Feats','Origin feats'].includes(kind)?[FEATURE_CATALOG.filter(entry=>kind==='Feats'?isFeat(entry):kind==='Origin feats'?entry.group==='Origin feats':true),'feature']:kind==='Classes'?[CLASS_OPTIONS,'class']:kind==='Species / races'?[SPECIES,'race']:kind==='Backgrounds'?[BACKGROUNDS,'background']:kind==='Subclasses'?[SUBCLASSES,'subclass']:kind==='Magic items'?[MAGIC_ITEMS,'item']:[EQUIPMENT,'item'];
+  let [entries,previewKind]=['Features & resources','Feats','Origin feats'].includes(kind)?[FEATURE_CATALOG.filter(entry=>kind==='Feats'?isFeat(entry):kind==='Origin feats'?entry.group==='Origin feats':true),'feature']:kind==='Classes'?[CLASS_OPTIONS,'class']:kind==='Species / races'?[SPECIES,'race']:kind==='Backgrounds'?[BACKGROUNDS,'background']:kind==='Subclasses'?[LEVEL_SUBCLASSES,'subclass']:kind==='Magic items'?[MAGIC_ITEMS,'item']:[EQUIPMENT,'item'];
   entries=visibleContent(entries,settings,previewKind);
   const total=entries.length;
   root.querySelectorAll('[data-reference-item-filter]').forEach(node=>node.hidden=previewKind!=='item');

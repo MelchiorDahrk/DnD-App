@@ -1,9 +1,9 @@
 import {ABILITIES, COINS, castingAbility, initiative, mod, signed, walkingSpeed} from './model.js';
-import {armorClassDetails,armorSpeedPenalty} from './armor-class.js';
+import {aarakocraFlyingSpeed,armorClassDetails,armorSpeedPenalty} from './armor-class.js';
 import {BASIC_EQUIPMENT} from './catalog.js';
-import {contentSourceTitles} from './content-sources.js';
-import {openLevelUp} from './level-up-ui.js';
-import {CREATION_STEPS, POINT_COST, STANDARD_ARRAY, creationPlan, finishLevelOne, newCharacterDraft, rollStartingScores} from './character-creation.js';
+import {contentSourceTitles,visibleContent} from './content-sources.js';
+import {LEVEL_SUBCLASSES} from './level-up.js';
+import {CREATION_STEPS, POINT_COST, STANDARD_ARRAY, WIZARD_STARTER_SPELLS, creationPlan, finishLevelOne, newCharacterDraft, rollStartingScores} from './character-creation.js';
 
 const esc = value => String(value ?? '').replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ruleLink = (url,label='Read the rules') => /^https:\/\//.test(url || '') ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(label)}&nbsp;↗</a>` : '';
@@ -33,7 +33,7 @@ function choiceGroup(group,selected) {
 
 function abilityStep(draft,{abilities,eligible}) {
   const pool = draft.method==='array' ? STANDARD_ARRAY : draft.rolls.map(roll => roll.total);
-  const rolls = draft.method==='roll' ? `<button type="button" class="btn" data-builder-roll>${draft.rolls.length?'Roll all six again':'Roll 4d6 six times'}</button><div data-builder-dice></div>${draft.rolls.length?`<ol class="builder-rolls" aria-label="Ability score rolls">${draft.rolls.map((roll,index)=>`<li><strong>Roll ${index+1}</strong><span>${roll.dice.map((die,i)=>i===roll.dropped?`<s aria-label="${die}, dropped">${die}</s>`:`<b>${die}</b>`).join(' ')}</span><strong>${roll.total}</strong></li>`).join('')}</ol>`:''}` : '';
+  const rolls = draft.method==='roll' ? `<button type="button" class="btn" data-builder-roll>${draft.rolls.length?'Roll all six again':'Roll 4d6 six times'}</button>${draft.rolls.length?`<ol class="builder-rolls" aria-label="Ability score rolls">${draft.rolls.map((roll,index)=>`<li><strong>Roll ${index+1}</strong><span>${roll.dice.map((die,i)=>i===roll.dropped?`<s aria-label="${die}, dropped">${die}</s>`:`<b>${die}</b>`).join('')}</span><strong aria-label="Kept total ${roll.total}">${roll.total}</strong></li>`).join('')}</ol>`:''}` : '';
   return `${select('Score method','method',[{id:'array',label:'Standard array'},{id:'roll',label:'Roll 4d6, drop the lowest'},{id:'points',label:'27-point buy'},{id:'manual',label:'Manual base scores'}],draft.method,'','')}
     ${rolls}
     ${draft.method==='points'?`<p class="form-help" aria-live="polite">${abilities.spent} of 27 points spent. Score costs are shown beside each option.</p>`:''}
@@ -55,25 +55,26 @@ const spellAvailability = spell => spell.level===0?'Cantrip'
   : `Level ${spell.level} · ${spell.classPrepared===false
     ? `In class spellbook${spell.prepared?' · ready from another source':''}`
     : spell.prepared?'Prepared':'In spellbook'}`;
-function review(c, plan) {
+function review(c) {
   const ac = armorClassDetails(c);
   const training = c.training;
+  const flight = aarakocraFlyingSpeed(c);
   const itemName = id => BASIC_EQUIPMENT.find(item=>item.id===id)?.name || id;
   const table = (label,entries) => `<div><dt>${label}</dt><dd>${list(entries)}</dd></div>`;
   return `<div class="builder-review">
     <div class="catalog-preview"><strong>${esc(c.name)}</strong><p>Level ${c.level} ${esc([c.class,c.subclass,c.race,c.background].filter(Boolean).join(' · '))}${c.size?` · ${esc(c.size)}`:''}</p></div>
     <div class="builder-review-stats">${Object.entries(c.stats).map(([id,score])=>`<div><span>${esc(ABILITIES[id])}</span><strong>${score}</strong><small>${signed(mod(score))}</small></div>`).join('')}</div>
     <dl class="builder-review-facts">${table('Hit points',[`${c.hp} / ${c.maxHp}`])}${table('Armor Class',[`${ac.total} · ${ac.summary}`])}${table('Walking speed',[`${walkingSpeed(c,c.trainingOrigins?armorSpeedPenalty(c):0)} ft.`])}${table('Initiative',[signed(initiative(c))])}${table('Hit Dice',[`${c.hitDice}d${c.hitDie}`])}${table('Saving throws',c.saves.map(id=>ABILITIES[id]))}${table('Skills',c.skills.map(skill=>c.expertise.includes(skill)?`${skill} (Expertise)`:skill))}${table('Languages',training.languages)}${table('Tools',training.tools.map(itemName))}${table('Weapon training',training.weapons.map(itemName))}${table('Armor training',training.armor)}</dl>
+    ${flight===null?'':`<p class="form-help">Flying speed <strong>${flight} ft.</strong></p>`}
     <section><h3>Features and feats</h3><ul>${c.features.map(f=>`<li>${ruleLink(f.wiki,f.name)||esc(f.name)}${f.origin?` · ${esc(f.origin)}`:''}${f.maxUses?` · ${f.maxUses} uses / ${f.reset==='short'?'Short or Long Rest':f.reset==='long'?'Long Rest':'manual recovery'}`:''}<small>${esc(f.description)}</small></li>`).join('')}</ul></section>
     <section><h3>Spells</h3>${c.slots.some(s=>s.max)?`<p>${c.pactMagic?'Pact Magic':'Class spellcasting'} · ${ABILITIES[castingAbility(c)]} · ${c.slots.map((slot,index)=>slot.max?`${slot.max} level-${index+1} slot${slot.max===1?'':'s'}`:'').filter(Boolean).join(', ')}</p>`:''}${c.spells.length?`<ul>${c.spells.map(spell=>`<li>${ruleLink(spell.wiki,spell.name)||esc(spell.name)} · ${spellAvailability(spell)}${spell.origins?.length?` · ${esc(spell.origins.join(', '))}`:spell.origin?` · ${esc(spell.origin)}`:''}${spell.castingGrants?.length?`<small>${esc(spell.castingGrants.map(g=>`${g.origin} · ${ABILITIES[g.ability]}${g.mode==='free'?' · free casting available':g.mode==='at-will'&&spell.level?' · no slot required':''}`).join('; '))}</small>`:''}</li>`).join('')}</ul>`:'<p>No starting spells.</p>'}</section>
     <section><h3>Equipment and coins</h3>${c.items.length?`<ul>${c.items.map(item=>`<li>${item.qty} × ${esc(item.name)}${item.equipped?' (equipped)':''}${item.category==='Gear'&&item.usesLeft?` · ${item.usesLeft} uses per bundle`:''}</li>`).join('')}</ul>`:'<p>No starting items.</p>'}<p>${Object.entries(COINS).filter(([key])=>c[key]).map(([key,label])=>`${c[key]} ${label.toUpperCase()}`).join(', ')||'0 GP'}</p></section>
-    ${plan.targetLevel>1?`<p class="form-help">Starting level ${plan.targetLevel}. Apply each intervening level before creating the character. Ask your DM about any extra gear for higher-level starts.</p>`:''}
   </div>`;
 }
 
-export function openCharacterBuilder({setModal,onComplete,settings={},animateRoll}) {
+export function openCharacterBuilder({setModal,onComplete,settings={},onRoll}) {
   const draft = newCharacterDraft();
-  let step=0, advanced=null, resumeAdvance=null, showErrors=false;
+  let step=0, showErrors=false;
   const assignmentsByMethod = {};
   const saveFields = form => {
     const selections = {};
@@ -89,7 +90,7 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
     }
     Object.assign(draft.choices,selections);
   };
-  const draw = focus => {
+  const draw = (focus, liveForm) => {
     const plan = creationPlan(draft,settings,step);
     const groups = plan.groups[step].map(group=>choiceGroup(group,draft.choices[group.id] || [])).join('');
     const byName = rows=>rows.map(row=>({id:row.name,label:row.name}));
@@ -105,18 +106,33 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
       'Review the sheet before you create your character.'
     ];
     let body = groups;
-    if (step===0) body = `<div class="form-grid">${input('Character name','name',draft.name,'maxlength="120" autocomplete="off"')}${select('Class','class',byName(plan.classes),draft.class)}${input('Player name (optional)','playerName',draft.playerName,'maxlength="120"')}${input('Campaign (optional)','campaign',draft.campaign,'maxlength="100"')}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],draft.alignment || 'Unaligned','','')}${input('Starting level','targetLevel',draft.targetLevel,'type="number" min="1" max="20" step="1"')}</div>${preview(plan.cls,'class',plan.cls?`${plan.cls.details} Primary ability: ${plan.cls.primary}. Hit die: d${plan.cls.hitDie}.`:'')}`;
-    if (step===1) body = `<div class="form-grid">${select('Species','species',[...byName(plan.species),{id:'custom',label:'Custom or earlier-book species'}],draft.species)}${select('Background','background',[...byName(plan.backgrounds),{id:'custom',label:'Custom or earlier-book background'}],draft.background)}
+    let dependent = '';
+    if (step===0) {
+      const subclasses = visibleContent(LEVEL_SUBCLASSES.filter(row=>row.className===draft.class),settings,'subclass').sort((a,b)=>a.name.localeCompare(b.name));
+      dependent = `${preview(plan.cls,'class',plan.cls?`${plan.cls.details} Primary ability: ${plan.cls.primary}. Hit die: d${plan.cls.hitDie}.`:'')}
+        ${subclasses.length?`<details class="level-choice"><summary>Subclasses available at level 3 (${subclasses.length})</summary><ul>${subclasses.map(row=>`<li>${ruleLink(row.wiki,row.name)||esc(row.name)} · ${esc(contentSourceTitles(row,'subclass').join(' · '))}</li>`).join('')}</ul></details>`:''}`;
+      body = `<div class="form-grid">${input('Character name','name',draft.name,'maxlength="120" autocomplete="off"')}${select('Class','class',byName(plan.classes),draft.class)}${input('Player name (optional)','playerName',draft.playerName,'maxlength="120"')}${input('Campaign (optional)','campaign',draft.campaign,'maxlength="500"')}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],draft.alignment || 'Unaligned','','')}<p class="form-help">Starting level <strong>1</strong></p></div>`;
+    }
+    if (step===1) {
+      body = `<div class="form-grid">${select('Species','species',[...byName(plan.species),{id:'custom',label:'Custom or earlier-book species'}],draft.species)}${select('Background','background',[...byName(plan.backgrounds),{id:'custom',label:'Custom or earlier-book background'}],draft.background)}</div>`;
+      dependent = `<div class="form-grid">
       ${draft.species==='custom'?`${input('Species name','customSpecies',draft.customSpecies,'maxlength="120"')}${input('Walking speed (ft.)','customSpeed',draft.customSpeed ?? 30,'type="number" min="0" max="999" step="1"')}${input('Senses (optional)','customSenses',draft.customSenses,'maxlength="500"')}`:''}
-      ${draft.background==='custom'?input('Background name','customBackground',draft.customBackground,'maxlength="120"'):''}</div>${groups}${preview(plan.lineage,'race')}${preview(plan.background,'background',plan.background?`${plan.background.skills} · ${plan.background.tool} · ${plan.background.feat}. Eligible abilities: ${plan.background.abilities}.`:'')}`;
+      ${draft.background==='custom'?input('Background name','customBackground',draft.customBackground,'maxlength="120"'):''}</div>${groups}${preview(plan.lineage,'race')}${preview(plan.background,'background',plan.background?`Skills: ${plan.background.skills}. Tool: ${plan.background.tool}. Origin feat: ${plan.background.feat}. Eligible abilities: ${plan.background.abilities}.`:'')}`;
+    }
     if (step===2) body = abilityStep(draft,plan);
     if (step===3) body = `<p class="form-help">Granted so far: ${list([...scope.skills,...scope.training.languages])}.</p>
       ${draft.species==='custom'?`<div class="form-grid">${select('Species skill choices','customSkillCount',['0','1','2','3','4','5','6'],draft.customSkillCount || '0','','')}${select('Species tool choices','customToolCount',['0','1','2','3','4','5','6'],draft.customToolCount || '0','','')}</div>`:''}
       ${groups}${draft.species==='custom'||draft.background==='custom'?input('Additional table-approved languages (comma separated)','customLanguages',draft.customLanguages,'maxlength="500"'):''}`;
-    if (step===4) body = `${groups}${plan.featSpells.map(({prefix,feat})=>feat.published?textarea(`${feat.name} choices from your book`,`${prefix}FeatNotes`,draft[`${prefix}FeatNotes`],2000):'').join('')}
+    if (step===4) body = `${plan.background?`<section class="level-choice"><h3>Background Origin feat</h3>
+      ${select('Feat source','originFeatMode',[{id:'background',label:`${plan.background.name} grants ${plan.background.feat}`},{id:'table',label:'Choose a table-approved replacement'}],draft.originFeatMode || 'background','','')}
+      ${draft.originFeatMode!=='table'?preview(plan.featSpells.find(row=>row.prefix==='background')?.feat,'feature'):''}</section>`:''}${groups}${plan.featSpells.map(({prefix,feat})=>feat.published?textarea(`${feat.name} choices from your book`,`${prefix}FeatNotes`,draft[`${prefix}FeatNotes`],2000):'').join('')}
       ${draft.species==='custom'||draft.background==='custom'||scope.class==='Artificer'?`<p class="form-help">${scope.class==='Artificer'?'Artificer uses the app’s Tasha-era progression. Record variant rules or table choices here.':'Record any table-approved features. Resolve conditional effects during play.'}</p>${textarea('Custom features, one per line (name | notes)','customFeatures',draft.customFeatures)}`:''}
       ${scope.features.length?`<details class="level-choice"><summary>Features already granted</summary><ul>${scope.features.map(f=>`<li>${ruleLink(f.wiki,f.name)||esc(f.name)} · ${esc(f.origin)}${f.maxUses?` · ${f.maxUses} uses`:''}</li>`).join('')}</ul></details>`:''}`;
-    if (step===5) body = `${groups}${plan.grants.length?`<p class="form-help">Also granted: ${plan.grants.map(g=>`${esc(g.spell.name)} (${esc(g.source)})`).join(', ')}.</p>`:''}${plan.manualSpells?textarea('Custom spells, one per line (level | name | ability, e.g. 0 | Light | cha)','customSpells',draft.customSpells):''}${!groups&&!plan.grants.length&&!plan.manualSpells?'<p>No spell selections for this build.</p>':''}`;
+    if (step===5) {
+      const recommended = scope.class==='Wizard' && ['classCantrips','classSpells'].every(id=>
+        WIZARD_STARTER_SPELLS[id].every(spell=>plan.groups[5].find(group=>group.id===id)?.options.some(row=>row.id===spell)));
+      body = `${recommended?'<button type="button" class="btn" data-wizard-spells>Use suggested Wizard spells</button>':''}${groups}${plan.grants.length?`<p class="form-help">Also granted: ${plan.grants.map(g=>`${esc(g.spell.name)} (${esc(g.source)})`).join(', ')}.</p>`:''}${plan.manualSpells?textarea('Custom spells, one per line (level | name | ability, e.g. 0 | Light | cha)','customSpells',draft.customSpells):''}${!groups&&!plan.grants.length&&!plan.manualSpells?'<p>No spell selections for this build.</p>':''}`;
+    }
     if (step===6) {
       const gearOptions = plan.shop.map(row=>({...row,label:`${row.label} · ${row.price>=100?`${row.price/100} GP`:`${row.price} CP`}`}));
       const equipmentPreview = scope.items.length ? `<p class="form-help">In your starting pack: ${list(scope.items.map(item=>`${item.qty} × ${item.name}`))}.</p>` : '';
@@ -128,20 +144,23 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
         </div><button type="button" class="btn btn-sm" data-remove-purchase="${index}">Remove item ${index+1}</button></div>`).join('')}
         ${plan.shop.length&&(draft.purchases?.length || 0)<20?'<button type="button" class="btn" data-add-purchase>Add equipment</button>':''}</details>`;
     }
-    if (step===7) body = review(advanced || scope,plan);
-    const c = advanced || scope;
-    const advancing = step===7 && c.level<plan.targetLevel;
-    const submit = step<7 ? 'Next' : advancing ? `Advance to level ${c.level+1}` : 'Create character';
+    if (step===7) body = review(scope);
+    const submit = step<7 ? 'Next' : 'Create character';
     const messages = step===7?plan.errors.flat():plan.errors[step];
     const validation = showErrors&&messages.length ? `<div class="form-error" role="alert"><strong>Complete these choices to continue.</strong><ul>${messages.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>` : '';
+    if (liveForm) {
+      liveForm.querySelector('[data-builder-dependent]').innerHTML=dependent;
+      liveForm.querySelector('[data-builder-validation]').innerHTML=validation;
+      return;
+    }
     setModal(step===7?'Review your character':CREATION_STEPS[step],`
       <div class="character-builder" data-builder-step="${step+1}">
         <div class="builder-progress"><strong>Character builder</strong><span>Step ${step+1} of ${CREATION_STEPS.length}</span></div>
         <progress aria-label="Character builder progress" max="${CREATION_STEPS.length}" value="${step+1}"></progress>
         <p class="modal-intro">${descriptions[step]} ${ruleLink(rules,'2024 character creation')}</p>
-        ${body}${validation}
+        ${body}${step<2?`<div data-builder-dependent>${dependent}</div>`:''}<div data-builder-validation>${validation}</div>
         <div class="modal-actions"><button type="button" class="btn btn-ghost" data-action="close">Cancel</button>
-        ${step>0?`<button type="button" class="btn" data-builder-back>${advanced?'Back to level 1':'Back'}</button>`:''}
+        ${step>0?'<button type="button" class="btn" data-builder-back>Back</button>':''}
         <button type="submit" class="btn btn-primary">${submit}</button></div>
       </div>`,()=>{
       saveFields(document.querySelector('#modal-form'));
@@ -150,30 +169,17 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
       if (first>=0) {step=first;showErrors=true;draw();return;}
       showErrors=false;
       if (step<7) {step++;draw();return;}
-      if (advancing) {
-        const next = structuredClone(advanced || finishLevelOne(draft,settings));
-        if (resumeAdvance) {resumeAdvance();return;}
-        resumeAdvance=openLevelUp(next,{setModal,settings,creationMode:true,onBack:()=>draw(),onComplete:()=>{
-          next.ac=armorClassDetails(next).total;
-          advanced=next;
-          resumeAdvance=null;
-          draw();
-        }});
-        return;
-      }
-      onComplete(advanced || finishLevelOne(draft,settings));
+      onComplete(finishLevelOne(draft,settings));
     });
     const form = document.querySelector('#modal-form');
     form.noValidate=true;
     if (focus) {
-      form.querySelectorAll(`[name="${CSS.escape(focus.name)}"]`)[focus.index ?? 0]?.focus({preventScroll:true});
+      if (focus.name) form.querySelectorAll(`input[name="${CSS.escape(focus.name)}"]`)[focus.index ?? 0]?.focus({preventScroll:true});
       form.closest('dialog').scrollTop=focus.scroll ?? 0;
     }
     form.querySelector('[data-builder-back]')?.addEventListener('click',()=>{
       saveFields(form);
-      resumeAdvance=null;
-      if (advanced) advanced=null;
-      else step--;
+      step--;
       showErrors=false;
       draw();
     });
@@ -181,8 +187,15 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
       saveFields(form);
       draft.rolls=rollStartingScores();
       draft.assignments={};
-      draw();
-      animateRoll?.(draft.rolls[0],document.querySelector('[data-builder-dice]'));
+      draw({scroll:form.closest('dialog').scrollTop});
+      document.querySelector('[data-builder-roll]').focus({preventScroll:true});
+      onRoll?.();
+    });
+    form.querySelector('[data-wizard-spells]')?.addEventListener('click',()=>{
+      saveFields(form);
+      Object.assign(draft.choices,structuredClone(WIZARD_STARTER_SPELLS));
+      draw({scroll:form.closest('dialog').scrollTop});
+      document.querySelector('[data-wizard-spells]').focus({preventScroll:true});
     });
     form.querySelector('[data-add-purchase]')?.addEventListener('click',()=>{
       saveFields(form);
@@ -203,7 +216,13 @@ export function openCharacterBuilder({setModal,onComplete,settings={},animateRol
         assignmentsByMethod[method]=draft.assignments;
         draft.assignments=assignmentsByMethod[draft.method] || {};
       }
-      if (field.name==='background') draft.bonuses={};
+      if (field.name==='background') {
+        draft.bonuses={};
+        delete draft.originFeatMode;
+        delete draft.choices.backgroundFeat;
+      }
+      if (field.name==='alignment') return;
+      if (['class','species','background'].includes(field.name)) {draw(null,form);return;}
       draw({name:field.name,index:Number(field.dataset.choiceIndex ?? 0),scroll:form.closest('dialog').scrollTop});
     });
   };

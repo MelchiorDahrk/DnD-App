@@ -9,6 +9,7 @@ export async function chooseBuilderValue(page,name,value,index=0) {
     field.value=value;
     if(field.value!==value)throw new Error(`Option not available: ${value}`);
     field.dispatchEvent(new Event('change',{bubbles:true}));
+    if(['class','alignment','species','background'].includes(field.name)&&!field.isConnected)throw new Error(`Builder replaced the active ${field.name} select`);
   },value,index);
 }
 
@@ -27,10 +28,10 @@ async function fillChoiceGroups(page) {
   throw new Error('Builder choices did not settle');
 }
 
-export async function fillLevelOne(page,{name='A new adventurer',className='Wizard',species='Dwarf',background='Soldier',level=1,onStep}={}) {
+export async function fillLevelOne(page,{name='A new adventurer',className='Wizard',species='Dwarf',background='Soldier',onStep}={}) {
   await page.type(selector('name'),name);
   await chooseBuilderValue(page,'class',className);
-  if(level>1)await chooseBuilderValue(page,'targetLevel',String(level));
+  await chooseBuilderValue(page,'alignment','Chaotic Good');
   await nextBuilderStep(page);
   await chooseBuilderValue(page,'species',species);
   await chooseBuilderValue(page,'background',background);

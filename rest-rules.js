@@ -2,6 +2,7 @@ import {REST_REFERENCES} from './rest-reference-data.js';
 import {SUBCLASS_ALIASES} from './progression-options.js';
 import {referenceURL} from './reference-links.js';
 import {hasResourceful,inspirationPoints} from './model.js';
+import {spellSlotPlan} from './spell-slots.js';
 
 const normalize=value=>String(value||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const same=(a,b)=>normalize(a)===normalize(b);
@@ -34,7 +35,7 @@ const summaries={
  'arcane ward':'The previous Arcane Ward ends. You can create a new ward when you next cast an eligible Abjuration spell; it does not refill merely by resting.',
  'overchannel':'Reset the escalating self-damage from Overchannel; your next qualifying use is the first use since resting.',
  'spell mastery':'You may replace one mastered spell with an eligible spell of the same level from your spellbook.',
- 'font of magic':'Restore Sorcery Points from the tracked pool. Spell slots created by Flexible Casting disappear; remove any extra slots from your slot maximums.',
+ 'font of magic':'Restore Sorcery Points from the tracked pool. Tracked Flexible Casting slots expire at the end of a Long Rest.',
  'pact of the tome':'You may conjure a new Book of Shadows, choosing three cantrips and two level 1 Ritual spells you do not already have prepared.',
  'resourceful':'Gain Heroic Inspiration. Turn it on in the character sheet if you do not already have it.',
  'high elf cantrip':'You may replace your lineage cantrip with a different Wizard cantrip. This applies to the 2024 High Elf trait.',
@@ -157,7 +158,13 @@ export function restRefreshes(c,{kind='long',reduceExhaustion=true,skipFeatureId
   add('death-saves','Death saves',`${c.deathSuccess} successes / ${c.deathFailure} failures`,'0 successes / 0 failures');
   if(hasResourceful(c))add('resourceful','Heroic Inspiration',inspirationPoints(c),Math.max(1,inspirationPoints(c)),'Resourceful');
  }
- if(long||(c.class==='Warlock'&&c.pactMagic===true))c.slots.forEach((slot,index)=>{if(slot.max)add('slot-'+index,`${c.pactMagic?'Pact Magic · ':''}Level ${index+1} spell slots`,slot.max-slot.used,slot.max);});
+ const baseMaxima=long&&c.temporarySlots ? spellSlotPlan(c).maxima : null;
+ if(long||c.pactMagic===true)c.slots.forEach((slot,index)=>{
+  if(!slot.max)return;
+  const after=baseMaxima ? c.slotOverrides?.[index] ?? baseMaxima[index] : slot.max;
+  add('slot-'+index,`${c.pactMagic?'Pact Magic · ':''}Level ${index+1} spell slots`,slot.max-slot.used,after,after<slot.max?'Temporary slots expire':'');
+ });
+ if(c.pactSlot?.max){const {level,max,used}=c.pactSlot;add('pact-slot',`Pact Magic · Level ${level} spell slots`,max-used,max);}
  for(const f of c.features) {
   if(!f.maxUses||f.reset==='manual'||(!long&&f.reset!=='short'&&!f.shortRestRecovery))continue;
   const used=skipFeatureIds.includes(f.id)?f.used:long||f.reset==='short'?0:Math.max(0,f.used-f.shortRestRecovery);

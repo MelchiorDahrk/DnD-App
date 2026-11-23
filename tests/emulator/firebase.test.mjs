@@ -10,6 +10,7 @@ import {CharacterSync} from '../../cloud-sync.js';
 import {demoCharacter,uid,changeHP} from '../../model.js';
 import {makeOperation,queueKey,copy,splitCharacter} from '../../cloud-model.js';
 import {newShop,walletTotal} from '../../shop-model.js';
+import {syncSpellSlots} from '../../spell-slots.js';
 
 const projectId='demo-questlog';let env;
 before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:await readFile(new URL('../../firestore.rules',import.meta.url),'utf8')}});});
@@ -64,6 +65,26 @@ test('competing offers cannot overspend and accepting an item preserves its quan
   await b.answerTransfer(party,id,true);await b.answerTransfer(party,id,true);
   assert.equal((await a.readCharacter(c.id)).character.items.find(i=>i.id===arrows.id).qty,16);
   assert.equal((await b.readCharacter(d.id)).character.items.filter(i=>i.name==='Arrows').reduce((n,i)=>n+i.qty,0),24);
+});
+
+test('multiclass Pact slots sync to the party and can be removed from live state',async()=>{
+  const {a,b,c,party}=await transferParty();
+  const multiclass={...copy(c),class:'Wizard',level:5,spellSlotMode:'auto',multiclass:[{class:'Warlock',level:3,subclass:''}]};
+  syncSpellSlots(multiclass);
+  await a.apply(c.id,op(makeOperation(c,multiclass)));
+  const sharedId=`alice_${c.id}`;
+  assert.deepEqual((await b.readShared(party,sharedId)).live.pactSlot,{level:2,max:2,used:0});
+  const spent=copy(multiclass);
+  spent.pactSlot.used++;
+  await a.apply(c.id,op(makeOperation(multiclass,spent)));
+  assert.equal((await a.readCharacter(c.id)).character.pactSlot.used,1);
+  assert.equal((await b.readShared(party,sharedId)).live.pactSlot.used,1);
+  const single=copy(spent);
+  delete single.multiclass;
+  syncSpellSlots(single);
+  await a.apply(c.id,op(makeOperation(spent,single)));
+  assert.equal((await a.readCharacter(c.id)).live.pactSlot,undefined);
+  assert.equal((await b.readShared(party,sharedId)).live.pactSlot,undefined);
 });
 
 test('party session streams initiative, rest votes, exact rolls and damage activity',async()=>{

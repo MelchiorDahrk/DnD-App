@@ -18,6 +18,7 @@ export function splitCharacter(character){
   live.slotUses=content.slots.map(slot=>slot.used);
   live.slotMax=content.slots.map(slot=>slot.max);
   content.slots.forEach(slot=>{delete slot.used;delete slot.max;});
+  if(content.pactSlot){live.pactSlot=content.pactSlot;delete content.pactSlot;}
   live.featureUses=Object.fromEntries(content.features.map(feature=>[feature.id,feature.used]));
   live.featureMax=Object.fromEntries(content.features.map(feature=>[feature.id,feature.maxUses]));
   content.features.forEach(feature=>{delete feature.used;delete feature.maxUses;});
@@ -26,6 +27,7 @@ export function splitCharacter(character){
 export function joinCharacter(content,live){
   const c={...copy(content),...Object.fromEntries(LIVE_KEYS.map(key=>[key,copy(live[key])]))};
   c.slots=c.slots.map((slot,i)=>({...slot,max:live.slotMax[i]??0,used:live.slotUses[i]??0}));
+  if(live.pactSlot)c.pactSlot=copy(live.pactSlot);
   c.features=c.features.map(feature=>({...feature,maxUses:live.featureMax[feature.id]??0,used:live.featureUses[feature.id]??0}));
   // Apply the same validation/defaults as version 2 JSON import.
   return parseBackup(JSON.stringify({...emptyState(),characters:[c],activeId:c.id})).characters[0];

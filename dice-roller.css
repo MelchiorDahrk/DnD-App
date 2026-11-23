@@ -25,7 +25,7 @@
 .dice-notation{min-width:0;text-align:left}
 .dice-notation summary{cursor:pointer;color:var(--text-secondary);font-size:11px;padding:8px 0}
 .dice-notation input{display:block;width:100%;min-width:0;max-width:12em;font-size:16px}
-.dice-pending #tray-die,.dice-pending #roll-detail,.dice-pending .history-row:first-child,.dice-pending .modal-body>:not(.dice-stage){visibility:hidden}
+.dice-pending #tray-die,.dice-pending #roll-detail,.dice-pending .history-row:first-child,.dice-pending .modal-body:has(>.dice-stage)>:not(.dice-stage){visibility:hidden}
 .dice-stage-host:has(.dice-stage)~.big-die,.modal-body:has(>.dice-stage) .roll-modal .big-die{width:auto;height:auto;margin:0 auto 20px;background:none;border:0;box-shadow:none;transform:none;color:var(--text-primary)}
 .dice-stage-host:has(.dice-stage)~.big-die>.icon,.modal-body:has(>.dice-stage) .roll-modal .big-die>.icon{display:none}
 .dice-stage-host:has(.dice-stage)~.big-die strong,.modal-body:has(>.dice-stage) .roll-modal .big-die strong{position:static;font-size:46px;transform:none}

@@ -41,7 +41,10 @@ export function createCloudUI(ui){
     const sheet=c.sheet,live=c.live;if(!sheet)return '';
     const hp=live?.hp??0,max=live?.maxHp??1,temp=live?.tempHp||0,scale=Math.max(max,hp+temp);
     const resource=(label,remaining,total)=>`<div class="party-resource"><span>${esc(label)}</span><strong>${esc(remaining)} <small>/ ${esc(total)}</small></strong></div>`;
-    const resources=live?sheet.slots.map((slot,i)=>live.slotMax[i]?resource(`Level ${i+1} slots`,Math.max(0,live.slotMax[i]-(live.slotUses[i]||0)),live.slotMax[i]):'').join('')+sheet.features.map(f=>resource(f.name,Math.max(0,(live.featureMax[f.id]||0)-(live.featureUses[f.id]||0)),live.featureMax[f.id]||0)).join(''):'';
+    const pact=live?.pactSlot;
+    const resources=live?sheet.slots.map((slot,i)=>live.slotMax[i]?resource(`Level ${i+1} slots`,Math.max(0,live.slotMax[i]-(live.slotUses[i]||0)),live.slotMax[i]):'').join('')
+      +(pact?.max?resource(`Pact Magic · Level ${pact.level} slots`,pact.max-pact.used,pact.max):'')
+      +sheet.features.map(f=>resource(f.name,Math.max(0,(live.featureMax[f.id]||0)-(live.featureUses[f.id]||0)),live.featureMax[f.id]||0)).join(''):'';
     return `<article class="panel party-character${detail?' party-character-detail':''}">
       ${characterHero({...sheet,inspiration:live?.inspiration,concentration:live?.concentration},{compact:true})}
       <div class="party-card-body">${live?`

@@ -79,7 +79,7 @@ const classRows={
     [11,'Mystic Arcanum (6th-level spell)','One casting of your selected level 6 arcanum.','one-long'],[13,'Mystic Arcanum (7th-level spell)','One casting of your selected level 7 arcanum.','one-long'],[15,'Mystic Arcanum (8th-level spell)','One casting of your selected level 8 arcanum.','one-long'],[17,'Mystic Arcanum (9th-level spell)','One casting of your selected level 9 arcanum.','one-long'],[20,'Eldritch Master','Magical Cunning restores all Pact Magic slots.']
   ],
   Wizard:[
-    [1,'Spellcasting','Intelligence spellcasting; manage your spellbook, prepared spells, and slots.'],[1,'Ritual Adept','Cast eligible rituals from your spellbook.'],[1,'Arcane Recovery','Recover qualifying spell slots during a Short Rest, once per Long Rest. Update slots separately.','one-long'],[2,'Scholar','Choose Expertise in an eligible Intelligence skill.'],[5,'Memorize Spell','Change a prepared spell after a Short Rest.'],[18,'Spell Mastery','Choose eligible spells for at-will casting.'],[20,'Signature Spells','Choose two spells; each has its own free casting. Create a separate resource for each chosen spell.']
+    [1,'Spellcasting','Intelligence spellcasting; manage your spellbook, prepared spells, and slots.'],[1,'Ritual Adept','Cast eligible rituals from your spellbook.'],[1,'Arcane Recovery','Choose expended spell slots to restore in the Short Rest dialog, once per Long Rest.','one-long'],[2,'Scholar','Choose Expertise in an eligible Intelligence skill.'],[5,'Memorize Spell','Change a prepared spell after a Short Rest.'],[18,'Spell Mastery','Choose eligible spells for at-will casting.'],[20,'Signature Spells','Choose two spells; each has its own free casting. Create a separate resource for each chosen spell.']
   ],
   Artificer:[[1,'Magical Tinkering','Supplemental Artificer reference; use your table’s book and rules version.'],[1,'Spellcasting','Supplemental Artificer spellcasting; manage spells and slots manually.'],[2,'Infuse Item','Record selected infusions and active items; review the table’s Artificer version.'],[3,'The Right Tool for the Job','Create a tool set using the supplemental class rules.'],[6,'Tool Expertise','Update tool proficiency notes.'],[7,'Flash of Genius','Reaction bonus; review the table’s Artificer version.','int-long'],[10,'Magic Item Adept','Crafting and attunement benefits; record manually.'],[11,'Spell-Storing Item','Record the chosen spell and review the item’s uses manually.'],[14,'Magic Item Savant','Expanded magic-item use and attunement.'],[18,'Magic Item Master','Expanded attunement.'],[20,'Soul of Artifice','Capstone reference; resolve attunement-based effects manually.']]
 };
@@ -128,6 +128,11 @@ const speciesRows={
   Tiefling:[[1,'Fiendish Legacy','Choose Abyssal, Chthonic, or Infernal legacy and its magic.'],[1,'Otherworldly Presence','Record Thaumaturgy in Spellbook.'],[1,'Darkvision','Record Darkvision 60 ft. in senses.']]
 };
 for(const [species,rows] of Object.entries(speciesRows))add('Species traits',species,rows,{species:[species],wiki:wikiURL(species,'species')});
+add('Species traits','Aarakocra',[
+  [1,'Flight','Your flying speed equals your walking speed. You cannot use this flying speed in Medium or Heavy armor.'],
+  [1,'Talons','Your talons can make an Unarmed Strike for 1d6 plus your Strength modifier in slashing damage.'],
+  [3,'Wind Caller','Cast Gust of Wind once per Long Rest without a slot. You can also cast it with an appropriate spell slot.','one-long']
+],{species:['Aarakocra'],book:'Mordenkainen Presents: Monsters of the Multiverse',wiki:wikiURL('Aarakocra','species','2014')});
 for(const [lineage,cantrip,first,second] of [
   ['Drow','Dancing Lights','Faerie Fire','Darkness'],['High Elf','Wizard cantrip (changeable)','Detect Magic','Misty Step'],['Wood Elf','Druidcraft','Longstrider','Pass without Trace'],
   ['Abyssal Tiefling','Poison Spray','Ray of Sickness','Hold Person'],['Chthonic Tiefling','Chill Touch','False Life','Ray of Enfeeblement'],['Infernal Tiefling','Fire Bolt','Hellish Rebuke','Darkness']
@@ -236,7 +241,7 @@ export function featureFields(entry,character={},classLevel=character.level||1) 
   if(resource==='healing-light'){maxUses=level+1;rollFormula='1d6';}
   if(resource==='martial-adept'){maxUses=1;reset='short';rollFormula='1d6';}
   if(resource==='pb-long'||resource==='pb-short'){maxUses=pb;if(resource==='pb-short')reset='short';}
-  if(['wis-long','int-long','con-long','cha-long','wis-short'].includes(resource)){maxUses=ability(resource.slice(0,3));if(resource==='wis-short')reset='short';}
+  if(['wis-long','int-long','con-long','cha-long','wis-short','int-short'].includes(resource)){maxUses=ability(resource.slice(0,3));if(resource.endsWith('-short'))reset='short';}
   if(resource==='rage'){maxUses=tier(level,[[1,2],[3,3],[6,4],[12,5],[17,6]]);shortRestRecovery=1;}
   if(resource==='second-wind'){maxUses=tier(level,[[1,2],[4,3],[10,4]]);shortRestRecovery=1;rollFormula=`1d10+${level}`;}
   if(resource==='action-surge'){maxUses=level>=17?2:1;reset='short';}

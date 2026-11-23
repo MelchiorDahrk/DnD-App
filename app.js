@@ -13,11 +13,12 @@ import {campArt} from './art.js';
 import {characterHero} from './character-hero.js';
 import {portraitMarkup} from './portrait.js';
 import {openPortraitMaker} from './portrait-ui.js';
-import {SUBCLASSES,WEAPONS,ARMOR,attackFromEquipment} from './catalog.js';
+import {WEAPONS,ARMOR,attackFromEquipment} from './catalog.js';
 import {characterChoice,classPreview,catalogPicker,handleCatalogFilter,handleCatalogChoice,catalogBrowser,updateCatalogBrowser} from './catalog-ui.js';
 import {playEffect,clearEffects,hpFeedback,effectGlyph} from './vfx.js';
 import {openLevelUp} from './level-up-ui.js';
-import {addProgressionSpell,spellKey} from './level-up.js';
+import {addProgressionSpell,spellKey,LEVEL_SUBCLASSES,canonicalSubclass} from './level-up.js';
+import {arcaneRecoveryPlan,flexibleCastingOptions,spellSlotPlan,syncSpellSlots,validSlotSettings} from './spell-slots.js';
 import {SPELL_CATALOG} from './progression-data.js';
 import {openCharacterBuilder} from './character-creation-ui.js';
 import {restRefreshes,restReminders} from './rest-rules.js';
@@ -29,7 +30,7 @@ import {sound,SOUND_CATEGORIES,playRollSound,playRollFeedback} from './sound.js'
 import {spellSoundEvent,equipSoundEvent} from './sound-events.js';
 import {itemUses,removeEmptyItems,setItemQuantity,spendItemUse} from './inventory-rules.js';
 import {packContents,unpackItem,itemAttack,saveItemAttack,linkWeaponActions,itemTool,addToolToInventory,toolCheck} from './inventory.js';
-import {armorClass,armorSpeedPenalty,armorClassDetails,itemDefense,setItemEquipped,armorTrainingEffects,armorCheckMode} from './armor-class.js';
+import {aarakocraFlyingSpeed,armorClass,armorSpeedPenalty,armorClassDetails,itemDefense,setItemEquipped,armorTrainingEffects,armorCheckMode} from './armor-class.js';
 import {CONTENT_SOURCES,contentEnabled} from './content-sources.js';
 import {createCloudUI} from './cloud-ui.js';
 
@@ -157,7 +158,7 @@ function renderSheetActions(c) {
       return `<div class="action-row sheet-spell" ${sheetEntry(s.id,s.name)}><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><strong>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</strong>${timingBadge(s,'spell')}<small>${s.level===0?'Cantrip':'Level '+s.level}${s.range?' · '+esc(s.range):''} · ${esc(s.castingTime)||'Casting time not set'}</small>${s.concentration?`<small class="spell-concentration${concentrating?' is-active':''}">${icon('spark')}${concentrating?'Concentrating':'Requires concentration'}</small>`:''}</div>${btn('cast',icon('spark')+'Cast','btn btn-sm',`data-id="${s.id}" aria-label="Cast ${esc(s.name)}"`)}</div>`;
     }).join('')+
     (!c.attacks.length&&!spells.length?empty('sword','Your next move','Add a weapon attack or ready a spell in your spellbook.','attack','Add attack'):'')+
-    (c.slots.some(s=>s.max)?`<div class="spell-peek" ${sheetEntry('spell-slots','Spell slots')}>${icon('spark')}Spell slots <strong>Level ${c.slots.findIndex(s=>s.max)+1}</strong>${slotDots(c.slots.find(s=>s.max),c.slots.findIndex(s=>s.max))}</div>`:'');
+    (slotEntries(c).length?`<div class="spell-peek" ${sheetEntry('spell-slots','Spell slots')}>${icon('spark')}Spell slots ${slotEntries(c).filter((entry,index)=>index===0||entry.secondary).map(slotRow).join('')}</div>`:'');
 }
 const coinName = key => key[0].toUpperCase()+key.slice(1);
 const coinStud = key => `<img class="coin-stud" src="./assets/equipment/coin-${key}.webp" alt="" aria-hidden="true" width="160" height="160" decoding="sync">`;
@@ -229,7 +230,19 @@ function renderLanding() {
     ['new-character','plus','Create a new character','Start a fresh sheet and make the adventurer your own.']
   ].map(([action,symbol,title,copy])=>btn(action,`<span class="landing-option-icon">${icon(symbol)}</span><strong>${title}</strong><span class="landing-option-copy">${copy}</span><span class="landing-option-arrow" aria-hidden="true">${icon('chevron')}</span>`,'landing-option')).join('')}</div><p class="landing-note">${icon('shield')}Saved in this browser. No account needed. Export a backup to keep a copy.</p></section>`;
 }
-function slotDots(slot,level,small=false) {return `<div class="slot-dots">${Array.from({length:slot.max},(_,i)=>btn('slot','',`slot-dot${i<slot.used?' used':''}`,`aria-pressed="${i<slot.used}" data-level="${level}" data-used="${i<slot.used?i:i+1}" aria-label="${i<slot.used?'Restore':'Use'} level ${level+1} spell slot ${i+1}" title="${i<slot.used?'Restore':'Use'} a spell slot"`)).join('')}</div>`;}
+function slotEntries(c) {
+  const entries=c.slots.map((slot,index)=>({slot,level:index+1,pact:c.pactMagic===true}));
+  if(c.pactSlot)entries.push({slot:c.pactSlot,level:c.pactSlot.level,pact:true,secondary:true});
+  return entries.filter(entry=>entry.slot.max>0);
+}
+function slotRow({slot,level,pact,secondary}) {
+  const label=`${pact?'Pact Magic · ':''}Level ${level}`;
+  const dots=Array.from({length:slot.max},(_,index)=>{
+    const used=index<slot.used;
+    return btn('slot','',`slot-dot${used?' used':''}`,`aria-pressed="${used}" data-level="${level-1}" ${secondary?'data-pact-slot':''} data-used="${used?index:index+1}" aria-label="${used?'Restore':'Use'} level ${level} ${pact?'Pact Magic':'spell'} slot ${index+1}"`);
+  }).join('');
+  return `<div class="slot-level">${label}<div class="slot-dots">${dots}</div></div>`;
+}
 function renderHero(c) {return characterHero(c,{editable:true});}
 
 function renderSheetHeader(c) {
@@ -277,7 +290,7 @@ function renderInspiration(c) {
 }
 function renderCombat(c) {
   const hpScale=Math.max(c.maxHp,c.hp+c.tempHp),ac=armorClassDetails(c);
-  return `<div class="combat-grid" data-sheet-group><div class="hp-block" ${sheetEntry('hp','Hit points')}><button type="button" class="hp-manage" data-action="hp" aria-label="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}. Apply damage, healing, or temporary HP" aria-haspopup="dialog"><span class="tiny-label hp-title">${icon('heart')}HIT POINTS${c.tempHp?` <span>+${c.tempHp} TEMP</span>`:''}</span><span class="hp-numbers"><strong>${c.hp}</strong><span>/ ${c.maxHp}</span></span><span class="hp-track${c.hp/c.maxHp<.3?' low':''}" role="progressbar" aria-label="Hit points" aria-valuemin="0" aria-valuemax="${c.maxHp}" aria-valuenow="${c.hp}" aria-valuetext="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}"><span class="hp-current" style="width:${c.hp/hpScale*100}%"></span>${c.tempHp?`<span class="hp-temp" style="width:${c.tempHp/hpScale*100}%"></span>`:''}</span></button></div><div class="combat-stat" ${sheetEntry('ac','Armor class')}><span class="tiny-label">ARMOR CLASS</span>${icon('shield')}<strong>${ac.total}</strong><small>${c.acOverride===undefined?'Automatic':'Override'}</small></div>${btn('initiative',`<span class="tiny-label">INITIATIVE</span>${icon('bolt')}<strong>${signed(initiative(c))}</strong><small>Tap to roll</small>`,'combat-stat',sheetEntry('initiative','Initiative'))}<div class="combat-stat" ${sheetEntry('speed','Speed')}><span class="tiny-label">SPEED</span>${icon('boot')}<strong>${walkingSpeed(c,c.trainingOrigins?armorSpeedPenalty(c):0)}<span style="font-size:10px"> ft.</span></strong><small>Walking</small></div></div><div class="combat-notes" data-ac-breakdown aria-live="polite"><span>${esc(ac.summary)}${ac.warnings.map(warning=>`<br>${esc(warning)}`).join('')}</span></div><div class="status-row" data-sheet-group>${btn('conditions',icon(c.conditions.length||c.exhaustion?'flag':'check')+esc([...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])].join(', ')||'No conditions.'),'btn btn-sm condition-summary',`${sheetEntry('conditions','Conditions')} aria-haspopup="dialog"`)}${renderConditionControls(c)}${renderInspiration(c)}</div>${c.defenses?`<div class="combat-notes" ${sheetEntry('defenses',SHEET_TEXT.defenses)}><span>${esc(c.defenses)}</span></div>`:''}${c.hp===0?`<div class="death-saves" ${sheetEntry('death-saves','Death saving throws')}><div class="death-counter">Success ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathSuccess?'active':'',`data-kind="success" data-value="${i<c.deathSuccess?i:i+1}" aria-label="Set ${i+1} death save successes"`)).join('')}</div><div class="death-counter">Failure ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathFailure?'active':'',`data-kind="failure" data-value="${i<c.deathFailure?i:i+1}" aria-label="Set ${i+1} death save failures"`)).join('')}</div>${btn('death-roll',icon('dice')+'Death save','btn btn-sm',`${c.deathSuccess>=3||c.deathFailure>=3?'disabled':''}`)}${c.deathSuccess>=3||c.deathFailure>=3?`<div class="death-message">${c.deathFailure>=3?'Three failures. Check with your DM.':'Stable. You’re still at 0 HP.'}</div>`:''}</div>`:''}`;
+  return `<div class="combat-grid" data-sheet-group><div class="hp-block" ${sheetEntry('hp','Hit points')}><button type="button" class="hp-manage" data-action="hp" aria-label="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}. Apply damage, healing, or temporary HP" aria-haspopup="dialog"><span class="tiny-label hp-title">${icon('heart')}HIT POINTS${c.tempHp?` <span>+${c.tempHp} TEMP</span>`:''}</span><span class="hp-numbers"><strong>${c.hp}</strong><span>/ ${c.maxHp}</span></span><span class="hp-track${c.hp/c.maxHp<.3?' low':''}" role="progressbar" aria-label="Hit points" aria-valuemin="0" aria-valuemax="${c.maxHp}" aria-valuenow="${c.hp}" aria-valuetext="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}"><span class="hp-current" style="width:${c.hp/hpScale*100}%"></span>${c.tempHp?`<span class="hp-temp" style="width:${c.tempHp/hpScale*100}%"></span>`:''}</span></button></div><div class="combat-stat" ${sheetEntry('ac','Armor class')}><span class="tiny-label">ARMOR CLASS</span>${icon('shield')}<strong>${ac.total}</strong><small>${c.acOverride===undefined?'Automatic':'Override'}</small></div>${btn('initiative',`<span class="tiny-label">INITIATIVE</span>${icon('bolt')}<strong>${signed(initiative(c))}</strong><small>Tap to roll</small>`,'combat-stat',sheetEntry('initiative','Initiative'))}<div class="combat-stat" ${sheetEntry('speed','Speed')}><span class="tiny-label">SPEED</span>${icon('boot')}<strong>${walkingSpeed(c,c.trainingOrigins?armorSpeedPenalty(c):0)}<span style="font-size:10px"> ft.</span></strong><small>Walking${c.race==='Aarakocra'?` · Flying ${aarakocraFlyingSpeed(c)} ft.`:''}</small></div></div><div class="combat-notes" data-ac-breakdown aria-live="polite"><span>${esc(ac.summary)}${ac.warnings.map(warning=>`<br>${esc(warning)}`).join('')}</span></div><div class="status-row" data-sheet-group>${btn('conditions',icon(c.conditions.length||c.exhaustion?'flag':'check')+esc([...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])].join(', ')||'No conditions.'),'btn btn-sm condition-summary',`${sheetEntry('conditions','Conditions')} aria-haspopup="dialog"`)}${renderConditionControls(c)}${renderInspiration(c)}</div>${c.defenses?`<div class="combat-notes" ${sheetEntry('defenses',SHEET_TEXT.defenses)}><span>${esc(c.defenses)}</span></div>`:''}${c.hp===0?`<div class="death-saves" ${sheetEntry('death-saves','Death saving throws')}><div class="death-counter">Success ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathSuccess?'active':'',`data-kind="success" data-value="${i<c.deathSuccess?i:i+1}" aria-label="Set ${i+1} death save successes"`)).join('')}</div><div class="death-counter">Failure ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathFailure?'active':'',`data-kind="failure" data-value="${i<c.deathFailure?i:i+1}" aria-label="Set ${i+1} death save failures"`)).join('')}</div>${btn('death-roll',icon('dice')+'Death save','btn btn-sm',`${c.deathSuccess>=3||c.deathFailure>=3?'disabled':''}`)}${c.deathSuccess>=3||c.deathFailure>=3?`<div class="death-message">${c.deathFailure>=3?'Three failures. Check with your DM.':'Stable. You’re still at 0 HP.'}</div>`:''}</div>`:''}`;
 }
 function renderAttack(c,a) {const hit=attackBonus(c,a);return `<div class="action-row" ${sheetEntry(a.id,a.name)}><div class="item-symbol">${attackIconMarkup(a,undefined,c.items)}</div><div class="action-info">${btn('attack',esc(a.name),'',`data-id="${a.id}" style="padding:0;text-align:left;font-size:11px;font-weight:600;margin-bottom:5px" aria-label="Edit ${esc(a.name)}"`)}<small style="display:block">${esc(a.type)}${a.range?' · '+esc(a.range):''}${a.rollMode!=='normal'?' · '+esc(a.rollMode):''}</small>${timingBadge(a,'attack')}${a.notes?`<small class="attack-notes">${esc(a.notes)}</small>`:''}</div><div class="action-rolls">${btn('attack-roll',icon('dice')+signed(hit),'roll-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} to hit"`)}${btn('damage-roll',esc(a.damage),'roll-button damage-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} damage"`)}</div></div>`;}
 function searchToolbar(placeholder,action='',label='') {return `<div class="toolbar"><label class="search-field">${icon('search')}<input id="search" type="search" placeholder="${placeholder}" aria-label="${placeholder}" value="${esc(query)}"></label>${action?btn(action,icon('plus')+label,'btn btn-primary'):''}</div>`;}
@@ -323,8 +336,8 @@ function renderSpells() {
   const c=character(),ability=castingAbility(c),spells=c.spells.filter(s=>matchesFilters(f=>f==='Ready'?s.prepared:f==='Cantrips'?s.level===0:f==='Concentration'&&s.concentration)&&(s.name+' '+s.school).toLowerCase().includes(query.toLowerCase()));
   return pageHeading('Spellbook',btn('spell',icon('plus')+'Add spell','btn btn-primary'))+
   `<div class="summary-grid"><div class="summary-card">${icon('spark')}<div><strong>${8+proficiency(c.level)+mod(c.stats[ability])}</strong><small>Spell save DC · ${ability.toUpperCase()}</small></div></div><div class="summary-card">${icon('bolt')}<div><strong>${signed(proficiency(c.level)+abilityCheckBonus(c,ability))}</strong><small>Spell attack bonus</small></div></div><div class="summary-card">${icon('book')}<div><strong>${c.spells.filter(s=>s.prepared).length}</strong><small>Prepared spells</small></div></div></div>`+
-  `<section class="panel slot-panel"><strong>Spell slots</strong>${c.slots.some(s=>s.max)?c.slots.map((s,i)=>s.max?`<div class="slot-level">Level ${i+1}${slotDots(s,i)}</div>`:'').join(''):'<span style="font-size:11px;color:var(--muted)">Set your available spell slots.</span>'}${btn('slots','Edit slots','btn btn-sm')}</section>`+renderConcentration(c,'concentration-banner')+
-  listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${s.prepared?'Prepared':'Not readied'}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Slots are tracked manually so this works with your table’s class and multiclass rules. Warlocks can restore pact slots manually after a short rest. Readying a spell is a tracking aid, without enforcing class limits.</p>`;
+  `<section class="panel slot-panel"><strong>Spell slots</strong>${slotEntries(c).map(slotRow).join('')||'<span class="form-help">No spell slots available.</span>'}${btn('slots','Edit slots','btn btn-sm')}${flexibleCastingOptions(c).options.length?btn('flexible-casting','Create slot','btn btn-sm'):''}</section>`+renderConcentration(c,'concentration-banner')+
+  listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${s.prepared?'Prepared':'Not readied'}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Spell slots follow class progression after enabling calculation in Edit slots. Pact Magic refreshes on a Short or Long Rest. Use Edit slots for table overrides.</p>`;
 }
 function renderDice() {return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray"><div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div><div class="dice-selection">${[4,6,8,10,12,20,100].map(d=>btn('select-die',icon('dice')+`d${d}`,`dice-select${diceExpression===`1d${d}`?' active':''}`,`data-sides="${d}"`)).join('')}</div><form id="dice-form" class="dice-form dice-controls-form">${diceControlsMarkup(diceExpression)}<button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button><details class="dice-notation"><summary>Dice formula</summary><input id="dice-expression" name="expression" value="${esc(diceExpression)}" aria-label="Dice formula, for example 2d6 plus 3" maxlength="30" autocomplete="off" spellcheck="false"></details></form><div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}"`)).join('')}</div><p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Choose your dice and roll.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section><section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;}
 const wikiEntries=[['Classes','2024 progression & features.','people','classes'],['Spells','Revised spell descriptions.','spark','spells'],['Weapons','Properties & Weapon Mastery.','sword','weapons'],['Armor','Armor training & equipment.','shield','armor'],['Adventuring gear','Potions, tools, and supplies.','bag','adventuring-gear'],['Magic items','Current item rules.','star','wondrous-items'],['Backgrounds','Ability increases & Origin feats.','journal','backgrounds'],['Feats','Origin, General, and more.','bolt','feats'],['Species','Your character’s heritage.','leaf','species'],['Rules glossary','Conditions, rests, and actions.','compass','rules']];
@@ -415,10 +428,7 @@ function createCharacter() {
   const accountKey=cloud.storageKey();
   openCharacterBuilder({
     setModal,settings:state.settings,
-    animateRoll:(roll,host)=>{
-      sound.play('dice.multiple');
-      presentDice({expression:'4d6',rolls:roll.dice,total:roll.dice.reduce((sum,die)=>sum+die,0),bonus:0,mode:'normal',label:'Ability scores · first roll'},host);
-    },
+    onRoll:()=>sound.play('dice.multiple'),
     onComplete:c=>{
       if(storageBlocked)throw new Error('Saving is paused to protect the existing backup. Enable saving in Settings to create a character.');
       if(accountKey!==cloud.storageKey())throw new Error('The active account changed. Start a new build on this account.');
@@ -441,9 +451,11 @@ function createCharacter() {
 function editCharacter() {
   const c=character();
   const classes=Object.keys(CLASSES).filter(name=>name===c.class||contentEnabled({name},state.settings,'class'));
-  setModal('Meet your adventurer.',`<p class="modal-intro">The little details make a character your own.</p><div class="form-grid">${field('Character name','name',c.name,'text','required maxlength="120" data-full placeholder="What shall we call you?"')}${field('Player name','playerName',c.playerName,'text','maxlength="120"')}${field('Level','level',c.level,'number','required min="1" max="20" step="1"')}${field('Experience points','xp',c.xp,'number','required min="0" max="100000000" step="1"')}${characterChoice('Species / race','race',c.race,{required:true,settings:state.settings})}${select('Class','class',classes.length?classes:[''],c.class,'required')}${classPreview(c.class)}${characterChoice('Subclass','subclass',c.subclass,{entries:SUBCLASSES.filter(option=>option.className===c.class),settings:state.settings})}${characterChoice('Background','background',c.background,{settings:state.settings})}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],c.alignment)}${field('Campaign','campaign',c.campaign,'text','maxlength="100"')}</div><p class="form-help">Dropdown previews show 2024 options; custom and earlier-book entries are supported. Changing an option doesn’t rebuild your existing stats, notes, or equipment. Edit hit die size, scores, spells, and features as needed. Set level and XP here when copying a sheet, or use Level up to gain HP as you advance.</p>${btn('portrait',icon('edit')+'Make or edit portrait','btn portrait-details-action')}${actions('Save character',btn('delete-character',icon('trash')+'Delete character','btn btn-danger left-action'))}`,data=>{
-    c.playerName=textValue(data,'playerName');c.level=num(data,'level');c.xp=num(data,'xp');c.hitDice=Math.min(c.hitDice,c.level);c.name=textValue(data,'name');c.race=textValue(data,'race');c.class=textValue(data,'class');c.subclass=textValue(data,'subclass');c.background=textValue(data,'background');c.alignment=textValue(data,'alignment');c.campaign=textValue(data,'campaign');
-    modal.close();route='sheet';location.hash='sheet';commit('Character updated.');
+  setModal('Meet your adventurer.',`<p class="modal-intro">The little details make a character your own.</p><div class="form-grid">${field('Character name','name',c.name,'text','required maxlength="120" data-full placeholder="What shall we call you?"')}${field('Player name','playerName',c.playerName,'text','maxlength="120"')}${field('Level','level',c.level,'number','required min="1" max="20" step="1"')}${field('Experience points','xp',c.xp,'number','required min="0" max="100000000" step="1"')}${characterChoice('Species / race','race',c.race,{required:true,settings:state.settings})}${select('Class','class',classes.length?classes:[''],c.class,'required')}${classPreview(c.class)}${characterChoice('Subclass','subclass',c.subclass,{entries:LEVEL_SUBCLASSES.filter(option=>option.className===c.class),settings:state.settings})}${characterChoice('Background','background',c.background,{settings:state.settings})}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],c.alignment)}${field('Campaign','campaign',c.campaign,'text','maxlength="100"')}</div><p class="form-help">Dropdown previews include core and supplemental options. Changing an option doesn’t rebuild your existing stats, notes, or equipment. Edit hit die size, scores, spells, and features as needed. Set level and XP here when copying a sheet, or use Level up to gain HP as you advance.</p>${btn('portrait',icon('edit')+'Make or edit portrait','btn portrait-details-action')}${actions('Save character',btn('delete-character',icon('trash')+'Delete character','btn btn-danger left-action'))}`,data=>{
+    const level=num(data,'level'), nextClass=textValue(data,'class');
+    if(!validSlotSettings({...c,level,class:nextClass},Object.keys(CLASSES)))throw new Error('Update additional class levels in Spellbook before changing the primary class or total level.');
+    c.playerName=textValue(data,'playerName');c.level=level;c.xp=num(data,'xp');c.hitDice=Math.min(c.hitDice,c.level);c.name=textValue(data,'name');c.race=textValue(data,'race');c.class=textValue(data,'class');c.subclass=textValue(data,'subclass');c.background=textValue(data,'background');c.alignment=textValue(data,'alignment');c.campaign=textValue(data,'campaign');
+    syncSpellSlots(c);modal.close();route='sheet';location.hash='sheet';commit('Character updated.');
   });
 }
 function editAbilities() {
@@ -488,13 +500,24 @@ function restRefreshList(rows,complete=false) {
 function restReminderList(reminders,complete=false,reviewed=[]) {
   return `<ul class="rest-reminder-list">${reminders.map(row=>`<li><label class="rest-reminder-check"><input type="checkbox" name="reviewedReminder" value="${esc(row.key)}" ${reviewed.includes(row.key)?'checked':''} aria-label="Reviewed ${esc(row.title)}"><span><strong>${esc(row.title)}</strong><span class="rest-reminder-detail">${esc(row.detail)}</span></span></label><div class="rest-reminder-links">${row.wiki?ext(row.wiki,'Rules '+icon('external')):''}${complete?btn('rest-review','Edit '+(row.featureId?'feature':row.target==='spells'?'spellbook':row.target==='inventory'?'inventory':row.target==='stats'?'stats':row.target==='conditions'?'conditions':'features'),'text-btn',`data-target="${esc(row.target)}" ${row.featureId?`data-id="${esc(row.featureId)}"`:''}`):''}</div></li>`).join('')}</ul>`;
 }
+function arcaneRecoveryFields(recovery) {
+  if(!recovery)return '';
+  return `<fieldset class="level-choice"><legend>Arcane Recovery</legend>
+    <p class="form-help">Restore expended spell slots totaling up to ${recovery.budget} ${recovery.budget===1?'level':'levels'}.${recovery.grimoire?' This includes one extra level from your Arcane Grimoire.':''}</p>
+    <div class="form-grid">${recovery.slots.map(({slot,level})=>field(`Level ${level} slots to restore`,`recoverSlot${level}`,0,'number',`min="0" max="${slot.used}" step="1"`)).join('')}</div></fieldset>`;
+}
 function showRest(kind='short') {
   const c=character();
   if(c.hp<1) {toast('You need at least 1 HP to start a rest.',true);return;}
   const reminders=restReminders(c,kind),initial=restRefreshes(c,{kind}),defaultSkips=initial.filter(row=>row.cooldown).map(row=>row.featureId);
   const preview=restRefreshes(c,{kind,skipFeatureIds:defaultSkips});
-  setModal(kind==='long'?'A well-earned night’s rest.':'Catch your breath.',`<div class="rest-illustration rest-${kind}"><div class="rest-sky" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>${campArt()}<span class="rest-moon" aria-hidden="true">${effectGlyph(kind==='long'?'moon':'camp')}</span><span class="rest-scene-label">${kind==='long'?'UNDER A QUIET SKY':'A MOMENT BY THE FIRE'}</span></div><div class="choice-buttons">${btn('rest','Short rest',`btn${kind==='short'?' btn-primary':''}`,'data-kind="short"')}${btn('rest','Long rest',`btn${kind==='long'?' btn-primary':''}`,'data-kind="long"')}</div>${kind==='long'?`<p class="form-help">A Long Rest normally takes 8 hours. Wait at least 16 hours after the previous Long Rest before starting another. Finish once your DM confirms the rest qualifies.</p><label class="check-field"><input name="reduceExhaustion" type="checkbox" checked>Remove one Exhaustion level if eligible</label><p class="form-help">Uncheck recovery when an effect prevents it, including unresolved dehydration or malnutrition.</p>`:`<p class="modal-intro" style="margin-top:18px">A Short Rest takes at least 1 hour. You have ${c.hitDice} d${c.hitDie} available, with ${signed(mod(c.stats.con))} Constitution per die.</p>${field('Hit dice to spend','dice',0,'number',`required min="0" max="${c.hitDice}" step="1"`)}`}<section class="rest-section" aria-labelledby="rest-refresh-title"><h3 id="rest-refresh-title">What will refresh</h3><p>Available amounts before → after this rest. Uncheck a resource if another rule blocks its recovery.</p><div id="rest-refresh-preview" aria-live="polite">${preview.length?restRefreshList(preview):'<p>No tracked resources to refresh.</p>'}</div></section>${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">${kind==='long'?'Long Rest reminders':'Short Rest reminders'}</h3><p>Review choices and effects for this character. These changes are yours to apply; checking a reminder marks it reviewed.</p>${restReminderList(reminders)}</section>`:''}${actions(kind==='long'?'Finish long rest':'Finish short rest')}`,data=>{
+  const recovery=kind==='short' ? arcaneRecoveryPlan(c) : null;
+  setModal(kind==='long'?'A well-earned night’s rest.':'Catch your breath.',`<div class="rest-illustration rest-${kind}"><div class="rest-sky" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>${campArt()}<span class="rest-moon" aria-hidden="true">${effectGlyph(kind==='long'?'moon':'camp')}</span><span class="rest-scene-label">${kind==='long'?'UNDER A QUIET SKY':'A MOMENT BY THE FIRE'}</span></div><div class="choice-buttons">${btn('rest','Short rest',`btn${kind==='short'?' btn-primary':''}`,'data-kind="short"')}${btn('rest','Long rest',`btn${kind==='long'?' btn-primary':''}`,'data-kind="long"')}</div>${kind==='long'?`<p class="form-help">A Long Rest normally takes 8 hours. Wait at least 16 hours after the previous Long Rest before starting another. Finish once your DM confirms the rest qualifies.</p><label class="check-field"><input name="reduceExhaustion" type="checkbox" checked>Remove one Exhaustion level if eligible</label><p class="form-help">Uncheck recovery when an effect prevents it, including unresolved dehydration or malnutrition.</p>`:`<p class="modal-intro" style="margin-top:18px">A Short Rest takes at least 1 hour. You have ${c.hitDice} d${c.hitDie} available, with ${signed(mod(c.stats.con))} Constitution per die.</p>${field('Hit dice to spend','dice',0,'number',`required min="0" max="${c.hitDice}" step="1"`)}`}<section class="rest-section" aria-labelledby="rest-refresh-title"><h3 id="rest-refresh-title">What will refresh</h3><p>Available amounts before → after this rest. Uncheck a resource if another rule blocks its recovery.</p><div id="rest-refresh-preview" aria-live="polite">${preview.length?restRefreshList(preview):'<p>No tracked resources to refresh.</p>'}</div></section>${arcaneRecoveryFields(recovery)}${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">${kind==='long'?'Long Rest reminders':'Short Rest reminders'}</h3><p>Review choices and effects for this character. These changes are yours to apply; checking a reminder marks it reviewed.</p>${restReminderList(reminders)}</section>`:''}${actions(kind==='long'?'Finish long rest':'Finish short rest')}`,data=>{
     const beforeHP=c.hp,beforeDice=c.hitDice;
+    const currentRecovery=recovery && arcaneRecoveryPlan(c);
+    const counts=recovery?.slots.map(({level})=>({level,count:num(data,`recoverSlot${level}`)})) || [];
+    const total=counts.reduce((sum,row)=>sum+row.count*row.level,0);
+    if(counts.some(({level,count})=>!Number.isInteger(count)||count<0||count>(currentRecovery?.slots.find(row=>row.level===level)?.slot.used||0))||total>(currentRecovery?.budget||0))throw new Error('Choose expended slots within your Arcane Recovery budget.');
     let hitDiceRoll=null;
     const skipFeatureIds=initial.filter(row=>row.featureId&&!data.getAll('restoreFeature').includes(row.featureId)).map(row=>row.featureId);
     const refreshed=restRefreshes(c,{kind,reduceExhaustion:data.has('reduceExhaustion'),skipFeatureIds});
@@ -502,6 +525,14 @@ function showRest(kind='short') {
     else {
       const rolls=[];
       const healing=shortRest(c,num(data,'dice'),sides=>{const value=randomDie(sides);rolls.push(value);return value;},{skipFeatureIds});
+      if(total){
+        currentRecovery.feature.used++;
+        for(const {level,count} of counts.filter(row=>row.count)){
+          const slot=c.slots[level-1],before=slot.max-slot.used;
+          slot.used-=count;
+          refreshed.push({key:`arcane-recovery-${level}`,title:`Arcane Recovery · Level ${level} slots`,before,after:slot.max-slot.used});
+        }
+      }
       if(rolls.length) {
         const bonus=healing-rolls.reduce((sum,value)=>sum+value,0);
         hitDiceRoll=recordRoll({expression:`${rolls.length}d${c.hitDie}${bonus?signed(bonus):''}`,rolls,total:healing,bonus,mode:'normal',natural:null},'Short Rest · Hit Dice');
@@ -523,7 +554,10 @@ function showRest(kind='short') {
   });
 }
 function showXP() {const c=character();setModal('A little experience goes a long way.',`<p class="modal-intro">Currently ${fmt(c.xp)} XP. ${c.level<20?`Level ${c.level+1} starts at ${fmt(XP[c.level+1])} XP.`:'You’re a level 20 legend.'} Level up whenever your DM gives the word.</p><div class="form-grid">${field('Experience to add','amount',100,'number','required min="0" max="10000000" step="1"')}${field('Or set total XP','total','','number','min="0" max="100000000" step="1" placeholder="Leave blank to add"')}</div>${actions('Update experience')}`,data=>{const before=c.xp;c.xp=data.get('total')!==''?num(data,'total'):Math.min(100000000,c.xp+num(data,'amount'));modal.close();commit('Experience updated. Keep that adventure going.');if(c.xp>before){sound.play('progression.xp');playEffect('xp',{label:`+${fmt(c.xp-before)} XP`,detail:'EVERY CHAPTER COUNTS',target:'.xp-strip'});}});}
-function showLevelUp() {openLevelUp(character(),{setModal,settings:state.settings,onComplete:()=>{persist();render();celebrate();}});}
+function showLevelUp() {
+  if(character().multiclass?.length){toast('For multiclass advancement, update total level in Character details and class levels in Spellbook.');return;}
+  openLevelUp(character(),{setModal,settings:state.settings,onComplete:()=>{persist();render();celebrate();}});
+}
 function celebrate() {
   const c=character();
   setModal('A new chapter unlocked.',`<div class="celebration celebration-ascend"><div class="ascension-stage"><div class="ascension-sigil" aria-hidden="true">${effectGlyph('star')}</div><span class="ascension-kicker">THE ADVENTURE CONTINUES</span><div class="avatar-frame">${portraitMarkup(c)}<span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></div><span class="ascension-level">LEVEL ${String(c.level).padStart(2,'0')}</span></div><h2>LEVEL UP!</h2><p>The road has changed you, ${esc(c.name.split(' ')[0])}.<br>And there’s still so much story left.</p><span class="badge">LEVEL ${c.level} ${esc(c.class).toUpperCase()} · ${c.maxHp} MAX HP</span><p>Check your class progression for new abilities, spells, and choices.</p>${ext(wikiURL(c.class),'View class progression '+icon('external'),'btn')}</div><div class="modal-actions">${btn('close','Onward, adventurer. '+icon('arrow'),'btn btn-primary')}</div>`);
@@ -624,7 +658,77 @@ function editFeature(id) {
 }
 
 function editSpell(id) {modal.dataset.spellId=id||'';const c=character(),existing=c.spells.find(s=>s.id===id),s=existing||{name:'',level:1,school:'Evocation',castingTime:'1 action',range:'',duration:'Instantaneous',concentration:false,prepared:true,notes:'',wiki:''};setModal(existing?'A little spellcraft.':'A new spark of magic.',`<div class="form-grid">${field('Spell name','name',s.name,'text','required maxlength="200" data-full')}${field('Spell level (0 = cantrip)','level',s.level,'number','required min="0" max="9" step="1"')}${select('School','school',['Abjuration','Conjuration','Divination','Enchantment','Evocation','Illusion','Necromancy','Transmutation','Other'],s.school)}${field('Casting time','castingTime',s.castingTime,'text','maxlength="100"')}${field('Range','range',s.range,'text','maxlength="100"')}${field('Duration','duration',s.duration,'text','maxlength="100"')}${field('2024 reference link (blank = Wikidot spell reference)','wiki',s.wiki,'url','maxlength="2000"')}${textarea('Spell notes','notes',s.notes,4)}</div><label class="check-field"><input name="concentration" type="checkbox" ${s.concentration?'checked':''}>Requires concentration</label><label class="check-field"><input name="prepared" type="checkbox" ${s.prepared?'checked':''}>Prepared and ready to cast</label>${spellIconPicker(s)}${actions('Save spell',existing?btn('delete-entry',icon('trash'),'btn btn-danger left-action',`data-type="spells" data-id="${id}" aria-label="Delete spell"`):'')}`,data=>{const name=textValue(data,'name'),spell={id:existing?.id||uid(),name,level:num(data,'level'),school:textValue(data,'school'),spellIconKey:textValue(data,'spellIconKey'),castingTime:textValue(data,'castingTime'),range:textValue(data,'range'),duration:textValue(data,'duration'),concentration:data.has('concentration'),prepared:data.has('prepared'),notes:textValue(data,'notes'),wiki:textValue(data,'wiki')||wikiURL(name,'spell')};if(existing){if(c.concentration===existing.name)c.concentration=spell.name;if(existing.classPrepared!==undefined)existing.classPrepared=spell.prepared;Object.assign(existing,spell);}else c.spells.push(spell);modal.close();commit('A little more magic in your spellbook.');});}
-function editSlots() {const c=character();setModal('Magic for the road ahead.',`<p class="modal-intro">Enter maximum slots for each spell level. Used slots are kept up to the new maximum. Tap slot squares in your spellbook to spend or restore them.</p><div class="form-grid">${select('Spellcasting ability (auto = class default)','spellAbility',['auto','int','wis','cha','str','dex','con'],c.spellAbility)}${c.slots.map((s,i)=>field('Level '+(i+1)+' maximum','slot'+i,s.max,'number','required min="0" max="20" step="1"')).join('')}</div><p class="form-help">Use the 2024 class rules to check your spell progression, including multiclass and pact magic rules.</p>${actions('Save slots')}`,data=>{c.spellAbility=textValue(data,'spellAbility');c.slots.forEach((s,i)=>{s.max=num(data,'slot'+i);s.used=Math.min(s.used,s.max);});modal.close();commit('Spell slots updated.');});}
+function editSlots() {
+  const c=character(), previous=spellSlotPlan(c);
+  const extras=(c.multiclass || []).map(row=>[row.class,row.level,row.subclass].filter(Boolean).join(' | ')).join('\n');
+  const parseClasses=value=>value.split('\n').filter(line=>line.trim()).map(line=>{
+    const [name,level,subclass='',extra]=line.split('|').map(part=>part.trim());
+    const className=Object.keys(CLASSES).find(nameInRules=>nameInRules.toLowerCase()===name.toLowerCase());
+    const selected=canonicalSubclass(subclass), option=LEVEL_SUBCLASSES.find(row=>row.name.toLowerCase()===selected.toLowerCase());
+    if(!className||!/^\d+$/.test(level)||extra!==undefined||option&&option.className!==className)throw new Error('Enter a valid class, level, and optional subclass on each line.');
+    return {class:className,level:Number(level),subclass:option?.name ?? selected};
+  });
+  const overrides=c.spellSlotMode==='auto' ? c.slotOverrides || [] : c.slots.map((slot,index)=>slot.max===previous.maxima[index] ? null : slot.max);
+  const limit='min="0" max="99" step="1" data-slot-override';
+  setModal('Spell slot settings',`<p class="modal-intro">Slot maximums follow your class levels and subclass. Enter an override for any level to keep a custom maximum. Leave it blank to use the calculated number.</p>
+    ${select('Spellcasting ability','spellAbility',['auto','int','wis','cha','str','dex','con'],c.spellAbility)}
+    <details class="level-choice"${extras?' open':''}><summary>Multiclass levels</summary>
+      <p class="form-help">Enter each additional class as Class | level | optional subclass. Example: Fighter | 3 | Eldritch Knight. The remaining levels belong to ${esc(c.class)}.</p>
+      ${textarea('Additional classes','multiclass',extras,3,1000)}
+    </details>
+    <p class="form-help" data-calculated-slots role="status"></p>
+    <div class="form-grid">${c.slots.map((_,i)=>field('Level '+(i+1)+' maximum override','slot'+i,overrides[i]??'','number',limit)).join('')}</div>
+    <div data-pact-override${previous.pactSlot?'':' hidden'}>${field('Pact Magic maximum override','pactOverride',c.pactSlotOverride??'','number',limit)}</div>
+    <p class="form-help">Free castings from species and feats use their own resources. Items that restore slots can be recorded by restoring a spent slot. Use an override for temporary extra slots or table rules.</p>
+    ${btn('clear-slot-overrides','Clear overrides','btn btn-sm')}${actions('Save slots')}`,data=>{
+    const next=settingsFrom(data);
+    const values=c.slots.map((_,index)=>data.get('slot'+index)===''?null:num(data,'slot'+index));
+    next.spellSlotMode='auto';
+    next.spellAbility=textValue(data,'spellAbility');
+    if(values.some(value=>value!==null))next.slotOverrides=values;else delete next.slotOverrides;
+    if(spellSlotPlan(next).pactSlot&&data.get('pactOverride')!=='')next.pactSlotOverride=num(data,'pactOverride');else delete next.pactSlotOverride;
+    if(!validSlotSettings(next,Object.keys(CLASSES)))throw new Error('Enter valid spell slot overrides.');
+    syncSpellSlots(next);
+    Object.assign(c,next);
+    for(const key of ['slotOverrides','pactSlotOverride','pactMagic','pactSlot','multiclass'])if(!Object.hasOwn(next,key))delete c[key];
+    modal.close();commit('Spell slots updated.');
+  });
+  function settingsFrom(data){
+    const next=structuredClone(c), multiclass=parseClasses(textValue(data,'multiclass'));
+    if(multiclass.length)next.multiclass=multiclass;else delete next.multiclass;
+    if(!validSlotSettings(next,Object.keys(CLASSES)))throw new Error(`Use each class once and leave at least one level for ${c.class}.`);
+    return next;
+  }
+  const form=modal.querySelector('form');
+  const preview=()=>{
+    const label=form.querySelector('[data-calculated-slots]');
+    try {
+      const plan=spellSlotPlan(settingsFrom(new FormData(form)));
+      const rows=plan.maxima.flatMap((max,i)=>max?[`level ${i+1} × ${max}`]:[]);
+      label.textContent=(rows.length?`${plan.pactMagic?'Calculated Pact Magic':'Calculated spell slots'} · ${rows.join(', ')}.`:'No calculated spell slots.')+
+        (plan.pactSlot?` Pact Magic · level ${plan.pactSlot.level} × ${plan.pactSlot.max}.`:'');
+      form.querySelector('[data-pact-override]').hidden=!plan.pactSlot;
+    } catch(error){label.textContent=error.message;}
+  };
+  form.querySelector('[name="multiclass"]').addEventListener('input',preview);
+  form.querySelector('[data-action="clear-slot-overrides"]').addEventListener('click',()=>form.querySelectorAll('[data-slot-override]').forEach(field=>{field.value='';}));
+  preview();
+}
+function showFlexibleCasting() {
+  const c=character(),{options}=flexibleCastingOptions(c);
+  const label=({level,cost})=>`Level ${level} · ${cost} Sorcery Points`;
+  if(!options.length)return;
+  setModal('Create a spell slot',`<p class="modal-intro">Spend Sorcery Points to create one slot. The extra slot expires when you finish a Long Rest.</p>
+    ${select('Slot level','flexibleSlot',options.map(label),label(options[0]))}${actions('Create slot')}`,data=>{
+    const {feature,options:current}=flexibleCastingOptions(c);
+    const choice=current.find(row=>label(row)===data.get('flexibleSlot'));
+    if(!choice)throw new Error('You do not have enough Sorcery Points for that slot.');
+    (c.temporarySlots ??= Array(5).fill(0))[choice.level-1]++;
+    feature.used+=choice.cost;
+    syncSpellSlots(c);
+    modal.close();commit(`Created a level ${choice.level} spell slot.`);
+  });
+}
 function castSpell(id) {
   const c=character(),s=c.spells.find(spell=>spell.id===id);
   if(!s)return;
@@ -633,10 +737,10 @@ function castSpell(id) {
   const manual='No slot (ritual / item / feature)';
   const classAbility=castingAbility(c);
   const abilityLabel=ability=>`${ABILITIES[ability]} · DC ${8+mod(c.stats[ability])+proficiency(c.level)} · spell attack ${signed(mod(c.stats[ability])+proficiency(c.level))}`;
-  const available=c.slots.map((slot,i)=>({slot,level:i+1})).filter(({slot,level})=>level>=s.level&&slot.used<slot.max);
-  const addSlots=(source,ability)=>available.forEach(({level})=>options.set(`Level ${level}${source?` · ${source} (${ABILITIES[ability]})`:''}`,{slot:level-1,ability}));
+  const available=slotEntries(c).filter(({slot,level})=>level>=s.level&&slot.used<slot.max);
+  const addSlots=(source,ability)=>available.forEach(({level,pact,secondary})=>options.set(`${pact?'Pact Magic · ':''}Level ${level}${source?` · ${source} (${ABILITIES[ability]})`:''}`,{slot:level-1,secondary,ability}));
   if(s.level){
-    if(!castingGrants.length||s.classPrepared)addSlots('',classAbility);
+    if(s.classPrepared===true||s.classPrepared===undefined&&!castingGrants.length)addSlots('',classAbility);
     for(const grant of castingGrants){
       const {origin,ability,mode,featureId}=grant;
       if(mode==='free'){
@@ -656,10 +760,15 @@ function castSpell(id) {
     if(armorTrainingEffects(c).blocksCasting)throw new Error('Remove armor without training before casting.');
     const choice=options.get(data.get('slot')||labels[0]);
     if(!choice)throw new Error('Choose an available casting.');
+    let recallMessage='';
     if(choice.slot!==undefined){
-      const slot=c.slots[choice.slot];
-      if(!slot||slot.used>=slot.max)throw new Error('That slot is no longer available.');
-      slot.used++;
+      const slot=choice.secondary?c.pactSlot:c.slots[choice.slot];
+      if(!slot||slot.used>=slot.max||choice.secondary&&slot.level!==choice.slot+1)throw new Error('That slot is no longer available.');
+      const level=choice.slot+1;
+      const recall=level<=4&&c.features.some(f=>f.catalogId==='epic-boons-boon-boon-of-spell-recall'||!f.catalogId&&f.name==='Boon of Spell Recall'&&!f.wiki?.includes('dnd5e.wikidot.com'));
+      const die=recall?randomDie(4):0;
+      if(die!==level)slot.used++;
+      if(recall)recallMessage=` Spell Recall rolled ${die}. ${die===level?'Slot retained.':'Slot spent.'}`;
     }
     if(choice.feature){
       if(choice.feature.used>=choice.feature.maxUses)throw new Error('That free casting is no longer available.');
@@ -667,7 +776,7 @@ function castSpell(id) {
     }
     if(s.concentration)c.concentration=s.name;
     modal.close();
-    commit(`${s.name} cast.${s.concentration?' You’re concentrating.':''}`);
+    commit(`${s.name} cast.${s.concentration?' You’re concentrating.':''}${recallMessage}`);
     sound.play(spellSoundEvent(s),{variant:s.name.length});
     playEffect('spell',{spell:s,label:s.name,detail:s.concentration?'CONCENTRATION BEGINS':'SPELL CAST',target:route==='sheet'?`[data-sheet-entry="${CSS.escape(s.id)}"]`:'.concentration-banner, .spell-grid'});
   });
@@ -834,7 +943,8 @@ document.addEventListener('click',event=>{
         commit();break;
       }
       case 'slots':editSlots();break;
-      case 'slot':{const index=Number(el.dataset.level),slot=c.slots[index],before=slot.used;slot.used=clamp(Number(el.dataset.used),0,slot.max);commit();if(slot.used<before)sound.play('resource.restore');if(slot.used!==before)playEffect('spell',{label:`Level ${index+1} slot`,detail:slot.used>before?'MAGIC EXPENDED':'MAGIC RESTORED',target:'.slot-panel, .spell-peek'});break;}
+      case 'flexible-casting':showFlexibleCasting();break;
+      case 'slot':{const index=Number(el.dataset.level),slot=el.hasAttribute('data-pact-slot')?c.pactSlot:c.slots[index];if(!slot)break;const before=slot.used;slot.used=clamp(Number(el.dataset.used),0,slot.max);commit();if(slot.used<before)sound.play('resource.restore');if(slot.used!==before)playEffect('spell',{label:`Level ${index+1} slot`,detail:slot.used>before?'MAGIC EXPENDED':'MAGIC RESTORED',target:'.slot-panel, .spell-peek'});break;}
       case 'cast':castSpell(id);break;
       case 'end-concentration':c.concentration='';commit('Concentration ended.');break;
       case 'filter':{const value=el.dataset.filter;if(value==='All')filters.clear();else if(filters.has(value))filters.delete(value);else filters.add(value);render();[...document.querySelectorAll('.list-toolbar [data-filter]')].find(node=>node.dataset.filter===value)?.focus({preventScroll:true});break;}

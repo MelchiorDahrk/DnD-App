@@ -1,6 +1,6 @@
 import {ARMOR,EQUIPMENT,WEAPONS,findEquipment} from './catalog.js';
 import {equipmentName} from './inventory-rules.js';
-import {mod} from './model.js';
+import {mod,walkingSpeed} from './model.js';
 import {hasArmorTraining} from './training-rules.js';
 
 export function armorTrainingEffects(character) {
@@ -19,6 +19,11 @@ export function armorSpeedPenalty(character) {
     const armor=itemDefense(item).armor;
     return armor?.strength>character.stats.str;
   })?10:0;
+}
+export function aarakocraFlyingSpeed(character) {
+  if(character.race!=='Aarakocra')return null;
+  const restricted=character.items.some(item=>equipped(item)&&['Medium','Heavy'].includes(itemDefense(item).armor?.family));
+  return restricted ? 0 : walkingSpeed(character);
 }
 
 const armorName = name => equipmentName(name).replace(/\+\s*[123]/g,'').replace(/[,()]/g,'').replace(/\barmor\b/g,'').replace(/\s+/g,' ').trim();

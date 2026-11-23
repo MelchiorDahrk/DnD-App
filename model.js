@@ -4,6 +4,7 @@ import {ACTION_TYPES} from './sheet-actions.js';
 import {itemUses,removeEmptyItems} from './inventory-rules.js';
 import {wikiURL} from './reference-links.js';
 import {attackIsProficient,validTraining} from './training-rules.js';
+import {syncSpellSlots,validSlotSettings} from './spell-slots.js';
 export {RULES_URL,wikiURL,subclassURL,referenceURL,safeURL} from './reference-links.js';
 
 export const SAVE_VERSION = 2;
@@ -174,7 +175,9 @@ export function longRest(c,{reduceExhaustion=true,skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Long Rest.');
   c.hp=c.maxHp;c.tempHp=0;c.hitDice=c.level;
   if (reduceExhaustion) c.exhaustion=Math.max(0,c.exhaustion-1);
-  c.slots.forEach(s=>s.used=0);c.concentration='';c.deathSuccess=0;c.deathFailure=0;
+  c.slots.forEach(s=>s.used=0);if(c.pactSlot)c.pactSlot.used=0;
+  if(c.temporarySlots){delete c.temporarySlots;syncSpellSlots(c);}
+  c.concentration='';c.deathSuccess=0;c.deathFailure=0;
   c.features.filter(f=>f.reset!=='manual'&&!skipFeatureIds.includes(f.id)).forEach(f=>f.used=0);
   if(!inspirationPoints(c)&&hasResourceful(c))gainInspiration(c);
 }
@@ -183,7 +186,8 @@ export function shortRest(c,count=0,roller=randomDie,{skipFeatureIds=[]}={}) {
   if (!Number.isInteger(count)||count<0||count>c.hitDice) throw new Error('Choose an available number of Hit Dice.');
   const healing=Array.from({length:count},()=>Math.max(0,roller(c.hitDie)+mod(c.stats.con))).reduce((a,b)=>a+b,0);
   changeHP(c,healing,'heal');c.hitDice-=count;
-  if(c.class==='Warlock'&&c.pactMagic===true)c.slots.forEach(s=>s.used=0);
+  if(c.pactMagic===true)c.slots.forEach(s=>s.used=0);
+  if(c.pactSlot)c.pactSlot.used=0;
   for (const f of c.features) {
     if(skipFeatureIds.includes(f.id))continue;
     if (f.reset==='short') f.used=0;
@@ -241,6 +245,7 @@ function validateCharacter(c) {
   for (const [key,values] of [['skills',Object.keys(SKILLS)],['expertise',Object.keys(SKILLS)],['saves',Object.keys(ABILITIES)],['conditions',CONDITIONS]]) requireThat(Array.isArray(c[key])&&c[key].length<=30&&c[key].every(v=>values.includes(v)),`invalid ${key}.`);
   requireThat(integerIn(c.exhaustion,0,6)&&integerIn(c.deathSuccess,0,3)&&integerIn(c.deathFailure,0,3),'invalid condition counters.');
   requireThat(Array.isArray(c.slots)&&c.slots.length===9&&c.slots.every(s=>s&&integerIn(s.max,0,99)&&integerIn(s.used,0,s.max)),'invalid spell slots.');
+  requireThat(validSlotSettings(c,Object.keys(CLASSES)),'invalid spell slot settings or class levels.');
   for (const key of ['items','spells','notes','features','attacks']) {
     requireThat(Array.isArray(c[key])&&c[key].length<=2000,`invalid ${key}.`);
     const ids = new Set();
@@ -299,7 +304,7 @@ export function parseBackup(text) {
   try {data=JSON.parse(text);} catch {throw new Error('This file isn’t valid JSON. Choose a Questlog backup.');}
   requireThat(data?.version===SAVE_VERSION,`only version ${SAVE_VERSION} Questlog saves are supported. Older saves cannot be loaded or imported.`);
   requireThat(Array.isArray(data.characters)&&data.characters.length<=100,'expected 0–100 characters.');
-  data.characters.forEach(validateCharacter);
+  data.characters.forEach(character=>{validateCharacter(character);syncSpellSlots(character);});
   data.characters.forEach(removeEmptyItems);
   requireThat(new Set(data.characters.map(c=>c.id)).size===data.characters.length,'duplicate character IDs.');
   requireThat(data.characters.length?data.characters.some(c=>c.id===data.activeId):data.activeId===null,'active character is missing.');

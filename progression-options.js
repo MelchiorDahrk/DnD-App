@@ -7,9 +7,32 @@ export const SUBCLASS_ALIASES={
   'Way of the Open Hand':'Warrior of the Open Hand','Open Hand':'Warrior of the Open Hand','Way of Shadow':'Warrior of Shadow','Way of the Four Elements':'Warrior of the Elements','Way of Mercy':'Warrior of Mercy',
   Devotion:'Oath of Devotion',Draconic:'Draconic Sorcery','Draconic Bloodline':'Draconic Sorcery','Wild Magic':'Wild Magic Sorcery','Aberrant Mind':'Aberrant Sorcery','Clockwork Soul':'Clockwork Sorcery',
   Archfey:'Archfey Patron','The Archfey':'Archfey Patron',Fiend:'Fiend Patron','The Fiend':'Fiend Patron','The Great Old One':'Great Old One Patron','The Celestial':'Celestial Patron',
-  'School of Abjuration':'Abjurer','School of Divination':'Diviner','School of Evocation':'Evoker',Evocation:'Evoker','School of Illusion':'Illusionist'
+  'School of Abjuration':'Abjurer','School of Divination':'Diviner','School of Evocation':'Evoker',Evocation:'Evoker','School of Illusion':'Illusionist',
+  'School of Conjuration':'Conjurer','School of Enchantment':'Enchanter','School of Necromancy':'Necromancer','School of Transmutation':'Transmuter',
+  Bladesinging:'Bladesinger','Purple Dragon Knight':'Banneret'
 };
-Object.assign(SUBCLASS_ALIASES,{Hexblade:'Hexblade Patron','The Hexblade':'Hexblade Patron',Fathomless:'Fathomless Patron','The Fathomless':'Fathomless Patron',Genie:'Genie Patron','The Genie':'Genie Patron',Undead:'Undead Patron','The Undead':'Undead Patron',Undying:'Undying Patron','The Undying':'Undying Patron',Banneret:'Purple Dragon Knight'});
+Object.assign(SUBCLASS_ALIASES,{Hexblade:'Hexblade Patron','The Hexblade':'Hexblade Patron',Fathomless:'Fathomless Patron','The Fathomless':'Fathomless Patron',Genie:'Genie Patron','The Genie':'Genie Patron',Undead:'Undead Patron','The Undead':'Undead Patron',Undying:'Undying Patron','The Undying':'Undying Patron'});
+const faerun='Forgotten Realms: Heroes of Faerûn';
+const arcana='Arcana Unleashed';
+export const SUPPLEMENTAL_SUBCLASSES = [
+  [faerun,'Bard','College of the Moon',[[3,'Moon’s Inspiration','Primal Lore'],[6,'Blessing of Moonlight'],[14,'Eventide’s Splendor']]],
+  [faerun,'Cleric','Knowledge Domain',[[3,'Blessings of Knowledge','Knowledge Domain Spells','Mind Magic'],[6,'Unfettered Mind'],[17,'Divine Foreknowledge']]],
+  [faerun,'Fighter','Banneret',[[3,'Knightly Envoy','Group Recovery'],[7,'Team Tactics'],[10,'Rallying Surge'],[15,'Shared Resilience'],[18,'Inspiring Commander']]],
+  [faerun,'Paladin','Oath of the Noble Genies',[[3,'Elemental Smite','Genie Spells','Genie’s Splendor'],[7,'Aura of Elemental Shielding'],[15,'Elemental Rebuke'],[20,'Noble Scion']]],
+  [faerun,'Ranger','Winter Walker',[[3,'Frigid Explorer','Hunter’s Rime','Winter Walker Spells'],[7,'Fortifying Soul'],[11,'Chilling Retribution'],[15,'Frozen Haunt']]],
+  [faerun,'Rogue','Scion of the Three',[[3,'Bloodthirst','Dread Allegiance'],[9,'Strike Fear'],[13,'Aura of Malevolence'],[17,'Dread Incarnate']]],
+  [faerun,'Sorcerer','Spellfire Sorcery',[[3,'Spellfire Burst','Spellfire Spells'],[6,'Absorb Spells'],[14,'Honed Spellfire'],[18,'Crown of Spellfire']]],
+  [faerun,'Wizard','Bladesinger',[[3,'Bladesong','Training in War and Song'],[6,'Extra Attack'],[10,'Song of Defense'],[14,'Song of Victory']]],
+  [arcana,'Cleric','Arcana Domain',[[3,'Arcana Domain Spells','Modify Magic','Student of Arcana'],[6,'Dispelling Recovery'],[17,'Magical Mastery']]],
+  [arcana,'Fighter','Arcane Archer',[[3,'Arcane Archer Lore','Arcane Shot'],[7,'Curving Shot','Magical Ammunition'],[10,'Ever-Ready Shot'],[15,'Indomitable Teleport'],[18,'Masterful Shots']]],
+  [arcana,'Monk','Warrior of the Mystic Arts',[[3,'Spellcasting'],[6,'Mystic Fighting Style','Mystic Focus'],[11,'Focused Strike'],[17,'Improved Mystic Fighting Style']]],
+  [arcana,'Warlock','Vestige Patron',[[3,'Vestige Companion','Vestige Spells'],[6,'Vestige Power'],[10,'Vestige Recovery'],[14,'Semblance of Life']]],
+  [arcana,'Wizard','Conjurer',[[3,'Benign Transposition','Conjuration Savant'],[6,'Distant Transposition','Durable Summons'],[10,'Focused Conjuration'],[14,'Splintered Summons']]],
+  [arcana,'Wizard','Enchanter',[[3,'Enchanting Conversationalist','Enchantment Savant','Hypnotic Presence'],[6,'Split Enchantment'],[10,'Instinctive Charm'],[14,'Alter Memories']]],
+  [arcana,'Wizard','Necromancer',[[3,'Necromancy Savant','Necromancy Spellbook'],[6,'Grave Power','Undead Thralls'],[10,'Harvest Undead'],[14,'Death’s Master']]],
+  [arcana,'Wizard','Transmuter',[[3,'Transmutation Savant','Transmuter’s Stone','Wondrous Alteration'],[6,'Empowered Transmutation'],[10,'Potent Stone','Shape-Shifter'],[14,'Master Transmuter']]]
+].map(([book,className,name,rows])=>({book,className,name,rows,level:3,source:'2024',wiki:subclassURL(name,className)}));
+const replacedSubclasses=new Set(SUPPLEMENTAL_SUBCLASSES.map(s=>s.name));
 export const SUBCLASS_ROWS={
   'Path of the Wild Heart':[[3,'Animal Speaker','Rage of the Wilds'],[6,'Aspect of the Wilds'],[10,'Nature Speaker'],[14,'Power of the Wilds']],
   'Path of the World Tree':[[3,'Vitality of the Tree'],[6,'Branches of the Tree'],[10,'Battering Roots'],[14,'Travel along the Tree']],
@@ -119,7 +142,8 @@ export const LEGACY_SUBCLASSES=[
   ['Wizard','Graviturgy Magic',[[3,'Adjust Density'],[6,'Gravity Well'],[10,'Violent Attraction'],[14,'Event Horizon']]],
   ['Wizard','Order of Scribes',[[3,'Wizardly Quill','Awakened Spellbook'],[6,'Manifest Mind'],[10,'Master Scrivener'],[14,'One with the Word']]],
   ['Wizard','War Magic',[[3,'Arcane Deflection','Tactical Wit'],[6,'Power Surge'],[10,'Durable Magic'],[14,'Deflecting Shroud']]]
-].map(([className,name,rows])=>({className,name,rows,source:'2014',wiki:subclassURL(name,className,'2014')}));
+].filter(([,name])=>!replacedSubclasses.has(SUBCLASS_ALIASES[name]||name))
+  .map(([className,name,rows])=>({className,name,rows,level:3,source:'2014',wiki:subclassURL(name,className,'2014')}));
 // Each row: character/class level, always-prepared spells. These never consume
 // the class's ordinary prepared-spell allowance.
 export const SUBCLASS_SPELLS={
@@ -142,10 +166,15 @@ export const SUBCLASS_SPELLS={
   'Celestial Patron':[[3,'Aid','Cure Wounds','Guiding Bolt','Lesser Restoration','Light','Sacred Flame'],[5,'Daylight','Revivify'],[7,'Guardian of Faith','Wall of Fire'],[9,'Greater Restoration','Summon Celestial']],
   'Fiend Patron':[[3,'Burning Hands','Command','Scorching Ray','Suggestion'],[5,'Fireball','Stinking Cloud'],[7,'Fire Shield','Wall of Fire'],[9,'Geas','Insect Plague']],
   'Great Old One Patron':[[3,'Detect Thoughts','Dissonant Whispers','Phantasmal Force','Tasha’s Hideous Laughter'],[5,'Clairvoyance','Hunger of Hadar'],[7,'Confusion','Summon Aberration'],[9,'Modify Memory','Telekinesis']],
-  'Knowledge Domain':[[3,'Command','Identify','Augury','Suggestion'],[5,'Nondetection','Speak with Dead'],[7,'Arcane Eye','Confusion'],[9,'Legend Lore','Scrying']],
+  'Knowledge Domain':[[3,'Command','Comprehend Languages','Detect Magic','Detect Thoughts','Identify','Mind Spike'],[5,'Dispel Magic','Nondetection','Tongues'],[7,'Arcane Eye','Banishment','Confusion'],[9,'Legend Lore','Scrying','Synaptic Static']],
   'Nature Domain':[[3,'Animal Friendship','Speak with Animals','Barkskin','Spike Growth'],[5,'Plant Growth','Wind Wall'],[7,'Dominate Beast','Grasping Vine'],[9,'Insect Plague','Tree Stride']],
   'Tempest Domain':[[3,'Fog Cloud','Thunderwave','Gust of Wind','Shatter'],[5,'Call Lightning','Sleet Storm'],[7,'Control Water','Ice Storm'],[9,'Destructive Wave','Insect Plague']],
-  'Arcana Domain':[[3,'Detect Magic','Magic Missile','Magic Weapon','Nystul’s Magic Aura'],[5,'Dispel Magic','Magic Circle'],[7,'Arcane Eye','Leomund’s Secret Chest'],[9,'Planar Binding','Teleportation Circle']],
+  'Arcana Domain':[[3,'Detect Magic','Magic Missile','Magic Weapon','Nystul’s Magic Aura'],[5,'Counterspell','Dispel Magic'],[7,'Arcane Eye','Leomund’s Secret Chest'],[9,'Bigby’s Hand','Teleportation Circle']],
+  'College of the Moon':[[6,'Moonbeam']],
+  'Oath of the Noble Genies':[[3,'Chromatic Orb','Elementalism','Thunderous Smite'],[5,'Mirror Image','Phantasmal Force'],[9,'Fly','Gaseous Form'],[13,'Conjure Minor Elementals','Summon Elemental'],[17,'Banishing Smite','Contact Other Plane']],
+  'Winter Walker':[[3,'Ice Knife'],[5,'Hold Person'],[9,'Remove Curse'],[13,'Ice Storm'],[17,'Cone of Cold']],
+  'Spellfire Sorcery':[[3,'Cure Wounds','Guiding Bolt','Lesser Restoration','Scorching Ray'],[5,'Aura of Vitality','Dispel Magic'],[7,'Fire Shield','Wall of Fire'],[9,'Greater Restoration','Flame Strike']],
+  Necromancer:[[6,'Animate Dead']],
   'Death Domain':[[3,'False Life','Ray of Sickness','Blindness/Deafness','Ray of Enfeeblement'],[5,'Animate Dead','Vampiric Touch'],[7,'Blight','Death Ward'],[9,'Antilife Shell','Cloudkill']],
   'Forge Domain':[[3,'Identify','Searing Smite','Heat Metal','Magic Weapon'],[5,'Elemental Weapon','Protection from Energy'],[7,'Fabricate','Wall of Fire'],[9,'Animate Objects','Creation']],
   'Grave Domain':[[3,'Bane','False Life','Gentle Repose','Ray of Enfeeblement'],[5,'Revivify','Vampiric Touch'],[7,'Blight','Death Ward'],[9,'Antilife Shell','Raise Dead']],
@@ -195,6 +224,7 @@ export const LEGACY_EXPANDED_SPELLS={
 // Latest pre-2024 versions of unrevised species magic. Spells use their 2024
 // versions where available, while species unlock levels follow the older book.
 export const LEGACY_LINEAGE_SPELLS={
+  Aarakocra:[[3,'Gust of Wind']],
   Duergar:[[3,'Enlarge/Reduce'],[5,'Invisibility']],
   'Deep Gnome':[[3,'Disguise Self'],[5,'Nondetection']],
   Githyanki:[[1,'Mage Hand'],[3,'Jump'],[5,'Misty Step']],
