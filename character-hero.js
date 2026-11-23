@@ -14,7 +14,7 @@ export function characterHero(c,{editable=false,compact=false}={}) {
     return url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer" title="${esc(row.subclass||row.class)}">${label}</a>`:label;
   }).join('<span class="meta-dot">/</span>');
   const tags=[c.background,c.alignment].filter(Boolean);
-  const portrait=`${portraitMarkup(c)}${editable?'<span class="portrait-edit-hint">'+icon('edit')+'</span>':''}<span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span>`;
+  const portrait=`${portraitMarkup(c)}<span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span>`;
   return `<section class="hero${compact?' party-hero':''}" data-inspired="${!!c.inspiration}" data-concentrating="${!!c.concentration}" aria-label="${esc(c.name)}">
     <div class="hero-art">${landscape()}</div>
     ${editable?`<button type="button" class="icon-btn hero-edit" data-action="edit-character" aria-label="Edit character details">${icon('edit')}</button>`:''}

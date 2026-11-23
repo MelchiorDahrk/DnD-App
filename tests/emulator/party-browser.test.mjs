@@ -112,7 +112,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await storeCall(alice,'apply',[a.id,{id:uid(),live:[{key:'inspiration',before:0,after:1}]}]);await bob.page.waitForSelector('[data-party-character="alice-main"] .party-portrait.is-inspired');
     await press(bob.page,'[data-party-character="alice-main"] [data-action="party-status"]');await bob.page.waitForFunction(()=>document.querySelector('#modal-title')?.textContent==='Heroic Inspiration');await click(bob.page,'close');
     await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:999,kind:'damage'}}]);await bob.page.waitForSelector('[data-party-character="alice-main"].is-unconscious');await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:20,kind:'heal'}}]);await bob.page.waitForFunction(()=>!document.querySelector('[data-party-character="alice-main"]')?.classList.contains('is-unconscious'));
-    phase='shared roll';await alice.page.goto(url+'#dice');await alice.page.evaluate(async()=>{const {rollDice}=await import('./model.js');const expression=document.querySelector('[name="expression"]');if(expression)expression.value='1d20';});
+    phase='shared roll';await alice.page.goto(url+'#dice');
     await press(alice.page,'[data-action="navigate"][data-route="party"]');
     await Promise.all([alice,bob].map(({page})=>page.evaluate(async()=>{
       const {sound}=await import('./sound.js'),play=sound.play;
@@ -120,15 +120,27 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       sound.play=(event,options)=>{if(event==='dice.multiple')window.sharedRollSounds.push(options);return play(event,options);};
     })));
     const trayHeight=await alice.page.$eval('#party-roll',n=>n.getBoundingClientRect().height);
-    await alice.page.$eval('[name="party-expression"]',n=>{n.value='1d20+3';n.dispatchEvent(new Event('input'));});
+    assert.equal(await alice.page.$('.party-roll-controls .dice-notation, [name="party-expression"]'),null);
     const quantity=await alice.page.$('[data-dice-wheel="quantity"]'),dieType=await alice.page.$('[data-dice-wheel="sides"]');
     await quantity.press('ArrowUp');await dieType.press('Home');await dieType.press('ArrowUp');
-    assert.equal(await alice.page.$eval('[name="party-expression"]',n=>n.value),'2d6+3');
-    await alice.page.$eval('[name="party-label"]',n=>n.value='Group stealth');await click(alice.page,'party-roll');assert.equal(await alice.page.$('#modal[open]'),null);
+    await alice.page.select('[name="party-label"]','custom');
+    assert.equal(await alice.page.$eval('[name="party-custom-label"]',input=>input.disabled),false);
+    await alice.page.select('[name="party-label"]','Stealth');
+    await click(alice.page,'party-roll');assert.equal(await alice.page.$('#modal[open]'),null);
     const rollId=await alice.page.$eval('#party-roll',n=>n.dataset.rollId);await bob.page.waitForFunction(rollId=>document.querySelector('#party-roll')?.dataset.rollId===rollId&&['settled','static'].includes(document.querySelector('#party-roll .dice-stage')?.dataset.state),{},rollId);
     const remote=await bob.page.$$eval('#party-roll .dice-stage-faces span',nodes=>nodes.map(n=>Number(n.textContent)));await alice.page.waitForFunction(()=>['settled','static'].includes(document.querySelector('#party-roll .dice-stage')?.dataset.state));assert.deepEqual(remote,await alice.page.$$eval('#party-roll .dice-stage-faces span',nodes=>nodes.map(n=>Number(n.textContent))));assert.equal(await alice.page.$eval('#party-roll',n=>n.getBoundingClientRect().height),trayHeight);
+    assert.match(await bob.page.$eval('.party-last-roll',node=>node.textContent),/Stealth.*2d6/);
     const sharedCues=await Promise.all([alice,bob].map(({page})=>page.evaluate(()=>window.sharedRollSounds)));
     assert.deepEqual(sharedCues,[[{variant:remote[0]}],[{variant:remote[0]}]],'Both players hear the same multiple-dice sample.');
+    phase='shared quick roll';
+    await alice.page.goto(url+'#dice');
+    await press(alice.page,'#dice-form button[value="quick"]');
+    await bob.page.waitForFunction(rollId=>{
+      const tray=document.querySelector('#party-roll');
+      return tray?.dataset.rollId!==rollId&&tray?.querySelector('.dice-stage[data-state="static"]');
+    },{},rollId);
+    assert.equal(await bob.page.$('#party-roll .dice-stage canvas'),null);
+    await alice.page.goto(url+'#party');
     phase='rest vote';
     await click(alice.page,'party-rest');await click(alice.page,'party-rest-short');
     await bob.page.waitForSelector('[data-action="party-rest-yes"]');await click(bob.page,'party-rest-yes');

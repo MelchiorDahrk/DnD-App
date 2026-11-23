@@ -111,7 +111,8 @@ export function presentDice(result,host,{spectator=false}={}) {
   const faces=document.createElement('div');faces.className='dice-stage-faces';faces.hidden=true;faces.setAttribute('aria-hidden','true');faces.setAttribute('aria-label','Individual dice results');
   const kept=result.mode==='advantage'?Math.max(...result.rolls):result.mode==='disadvantage'?Math.min(...result.rolls):null;
   const keptIndex=kept===null?-1:result.rolls.indexOf(kept);
-  if(kept!==null){note.hidden=false;note.textContent=`Keep the ${result.mode==='advantage'?'higher':'lower'} result.`;}
+  const keepResult=kept===null?'':`Keep the ${result.mode==='advantage'?'higher':'lower'} result`;
+  if(keepResult){note.hidden=false;note.textContent=`${keepResult}.`;}
   result.rolls.forEach((value,index)=>{
     const face=document.createElement('span');face.textContent=value;
     if(index===keptIndex){face.className='dice-face-kept';face.setAttribute('aria-label',`${value}, kept die`);}
@@ -134,7 +135,7 @@ export function presentDice(result,host,{spectator=false}={}) {
     session.failed=true;
     releaseEngine(session);stage.dataset.state='static';surface.hidden=true;
     reveal(session);
-    status.textContent=`Result: ${result.total}`;note.hidden=false;note.textContent=message;
+    status.textContent=`Result: ${result.total}`;note.hidden=!message;note.textContent=message;
     resolve('static');
   };
   session.observer=new MutationObserver(()=>{if(isCurrent(session)&&!stage.isConnected)clearDice(spectator);});
@@ -145,6 +146,10 @@ export function presentDice(result,host,{spectator=false}={}) {
   session.onVisibility=()=>{if(document.hidden&&isCurrent(session))clearDice(spectator);};
   motion.addEventListener('change',session.onMotion);
   document.addEventListener('visibilitychange',session.onVisibility);
+  if(result.quick) {
+    fallback(keepResult?`${keepResult} (${kept}).`:'');
+    return done;
+  }
   if(motion.matches||!plan.dice.length) {
     fallback(motion.matches?'Reduced motion · see individual results below.':plan.note);
     return done;
@@ -160,7 +165,7 @@ export function presentDice(result,host,{spectator=false}={}) {
         if(!active())return;
         if(!facesMatch(outcome.results)) {fallback('See the recorded individual results below.');return;}
         clearTimeout(session.timer);stage.dataset.state='settled';status.textContent=`Result: ${result.total}`;
-        if(kept!==null){note.hidden=false;note.textContent=`Keep the ${result.mode==='advantage'?'higher':'lower'} result (${kept}).`;}
+        if(keepResult){note.hidden=false;note.textContent=`${keepResult} (${kept}).`;}
         reveal(session);
         // Also lets browser checks verify the faces, not just that a canvas was created.
         stage.dispatchEvent(new CustomEvent('dice-settled',{bubbles:true,detail:outcome}));

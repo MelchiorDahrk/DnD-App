@@ -34,6 +34,7 @@ try {
   await page.reload({waitUntil:'networkidle0'});
   phase='custom dice colors';
   assert.equal(await page.$('[data-dice-color]'),null,'Dice color editing stays in Settings');
+  assert.equal(await page.$('.dice-selection, .dice-notation, #dice-expression'),null,'The wheels are the roll page’s dice controls');
   assert.equal(await page.$('.tray-eyebrow'),null);
   assert.equal(await page.$eval('.roll-history-empty',node=>node.textContent),'');
   assert.ok(await page.$('.roll-history-empty>.icon'));
@@ -92,8 +93,14 @@ try {
     const result=await page.$eval(selector,node=>({state:node.dataset.state,status:node.querySelector('.dice-stage-status')?.textContent,note:node.querySelector('.dice-stage-note')?.textContent}));
     assert.equal(result.state,'settled',`${phase}: ${JSON.stringify(result)}`);
   };
+  const selectDice=expression=>page.evaluate(expression=>{
+    const [quantity,sides]=expression.split('d');
+    document.querySelector(`[data-dice-wheel="quantity"] [data-dice-value="${quantity}"]`).click();
+    document.querySelector(`[data-dice-wheel="sides"] [data-dice-value="${sides}"]`).click();
+  },expression);
   const roll=async(expression,values,mode='normal',settled=true)=>{
     phase=`${expression} (${mode})`;
+    await selectDice(expression);
     const modeSelector=`[data-action="roll-mode"][data-mode="${mode}"]`;
     await page.$eval(modeSelector,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
     await page.waitForFunction(selector=>{
@@ -101,11 +108,10 @@ try {
       return rect&&node.contains(document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2));
     },{},modeSelector);
     await page.locator(modeSelector).click();
-    await page.evaluate(({expression,values})=>{
+    await page.evaluate(values=>{
       window.testDice=[...values];window.diceSettled=null;window.criticalEvents=[];
-      document.querySelector('#dice-expression').value=expression;
       document.querySelector('#dice-form').requestSubmit();
-    },{expression,values});
+    },values);
     if(settled) {
       await page.waitForSelector('.dice-stage[data-state="rolling"]');
       const rollingHeight=await page.$eval('.dice-tray',node=>node.getBoundingClientRect().height);
@@ -143,11 +149,23 @@ try {
     desktopGeometry.set(`d${sides}`,(await dieGeometry())[0]);
     console.log(`d${sides}: actual canvas and landing face verified`);
   }
-  await roll('2d6+3',[2,5]);assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'10');
-  await roll('1d20+4',[3,17],'advantage');assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'21');
-  await roll('1d20-2',[3,17],'disadvantage');assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'1');
+  await roll('2d6',[2,5]);assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'7');
+  await roll('1d20',[3,17],'advantage');assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'17');
+  await roll('1d20',[3,17],'disadvantage');assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'3');
   await mkdir(resolve(root,'.tmp'),{recursive:true});await page.screenshot({path:resolve(root,'.tmp/dice-desktop.png'),fullPage:true});
-  console.log('Modifiers and advantage/disadvantage verified');
+  console.log('Multiple dice and advantage/disadvantage verified');
+
+  phase='Quick roll';
+  const quickHistory=await page.$$eval('.history-row',nodes=>nodes.length);
+  await page.locator('[data-action="roll-mode"][data-mode="advantage"]').click();
+  await page.evaluate(()=>{window.testDice=[6,20];window.criticalEvents=[];});
+  await page.locator('#dice-form button[value="quick"]').click();
+  assert.equal(await page.$eval('.dice-stage',node=>node.dataset.state),'static');
+  assert.equal(await page.$('.dice-stage canvas, .dice-pending'),null);
+  assert.equal(await page.$eval('.dice-face-kept',node=>node.textContent),'20');
+  assert.equal(await page.$eval('#tray-die strong',node=>node.textContent),'20');
+  assert.equal(await page.$$eval('.history-row',nodes=>nodes.length),quickHistory+1);
+  assert.deepEqual(await page.evaluate(()=>window.criticalEvents),[]);
 
   phase='effect cleanup';
   const particlesStarted=await page.evaluate(async()=>{
@@ -210,10 +228,10 @@ try {
     if(viewport.width===390&&viewport.height===844)mobileRolls.push(['1d4',[4]],['1d8',[8]],['1d10',[10]],['1d12',[12]],['1d20',[16]],['4d6',[1,2,3,4]],['2d20',[3,17]]);
     for(const [expression,values] of mobileRolls) {
       phase=`mobile ${viewport.width}×${viewport.height}: ${expression}`;
-      await page.evaluate(({expression,values})=>{
+      await selectDice(expression);
+      await page.evaluate(values=>{
         window.testDice=[...values];window.diceSettled=null;
-        document.querySelector('#dice-expression').value=expression;
-      },{expression,values});
+      },values);
       const submit='#dice-form button[type="submit"]';
       await page.$eval(submit,node=>node.scrollIntoView({block:'center',behavior:'instant'}));
       await page.waitForFunction(selector=>{
@@ -248,22 +266,20 @@ try {
   await page.setViewport({width:390,height:844});
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'reduce'}]);
   assert.ok(await page.$('.dice-stage[data-state="settled"] canvas'),'changing motion preference keeps an already stationary tray stable');
-  await roll('1d20+2',[18],'normal',false);
+  await roll('1d20',[18],'normal',false);
   await page.waitForSelector('.dice-stage[data-state="static"]');
   assert.equal(await page.$('.dice-stage canvas'),null);
-  assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'20');
+  assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'18');
   assert.deepEqual(await page.$eval('.dice-stage-faces span',node=>({body:getComputedStyle(node).backgroundColor,numbers:getComputedStyle(node).color})),{body:'rgb(124, 58, 237)',numbers:'rgb(230, 255, 179)'},'reduced motion also uses the chosen dice colors');
   await page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
-  await roll('1d3',[3],'normal',false);await page.waitForSelector('.dice-stage[data-state="static"]');
   await roll('50d6',Array(50).fill(2),'normal',false);await page.waitForSelector('.dice-stage[data-state="static"]');
   assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'100');
-  await roll('7',[],'normal',false);assert.equal(await page.$('.dice-stage'),null);
   console.log('Mobile dice rolls and visible results, reduced motion and fallback results verified');
 
   await page.evaluate(async()=>{await navigator.serviceWorker.ready;});
   await page.waitForFunction(()=>navigator.serviceWorker.controller);
   await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});await instrument();
-  await roll('2d6+1',[3,6]);assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'10');
+  await roll('2d6',[3,6]);assert.equal(await page.$eval('#tray-die strong',n=>n.textContent),'9');
   await page.setOfflineMode(false);
   console.log('3D engine works offline under the production subpath');
 

@@ -56,7 +56,8 @@ let sheetHelpDismissed=false;
 try {sheetHelpDismissed=localStorage.getItem(SHEET_HELP_KEY)==='true';} catch {}
 sound.configure({enabled:state.settings.sound});
 let route = Object.hasOwn(routes,location.hash.slice(1))?location.hash.slice(1):'sheet';
-let filters=new Set(),query='',rollMode='normal',diceExpression='1d20',rollHistory=[],lastRoll=null;
+let filters=new Set(),query='',rollMode='normal',diceSelection={quantity:1,sides:20},rollHistory=[],lastRoll=null;
+const canUseRollMode=()=>diceSelection.quantity===1&&diceSelection.sides===20;
 let modalSubmit=null,installPrompt=null,trainingEditingId=null;
 let cleanupSheetNavigation=()=>{};
 const conditionUsage=createConditionUsage();
@@ -212,17 +213,14 @@ function render() {
   if(partyControls&&partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('.party-roll-controls')?.replaceWith(partyControls);
   if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
-  if(route==='dice')mountDiceControls($('#dice-form'),$('#dice-expression'),expression=>{
-    diceExpression=expression;
-    const wheels=$('#dice-form').querySelectorAll('[data-dice-wheel]');
-    const [quantity,sides]=[...wheels].map(wheel=>wheel.getAttribute('aria-valuenow'));
-    const singleD20=/^(?:1)?d20(?:[+-]\d{1,4})?$/i.test(expression.replace(/\s/g,''));
-    if(!singleD20)rollMode='normal';
+  if(route==='dice')mountDiceControls($('#dice-form'),selection=>{
+    diceSelection=selection;
+    if(!canUseRollMode())rollMode='normal';
     document.querySelectorAll('[data-action="roll-mode"]').forEach(button=>{
       button.classList.toggle('active',button.dataset.mode===rollMode);
       button.setAttribute('aria-pressed',button.dataset.mode===rollMode);
+      button.disabled=button.dataset.mode!=='normal'&&!canUseRollMode();
     });
-    document.querySelectorAll('[data-action="select-die"]').forEach(button=>button.classList.toggle('active',quantity==='1'&&sides===button.dataset.sides));
   });
   document.title=`${routes[route][0]} · Questlog`;
   cloud.afterRender();
@@ -297,15 +295,23 @@ function renderCombat(c) {
 }
 function renderAttack(c,a) {const hit=attackBonus(c,a);return `<div class="action-row" ${sheetEntry(a.id,a.name)}><div class="item-symbol">${attackIconMarkup(a,undefined,c.items)}</div><div class="action-info">${btn('attack',esc(a.name),'',`data-id="${a.id}" style="padding:0;text-align:left;font-size:11px;font-weight:600;margin-bottom:5px" aria-label="Edit ${esc(a.name)}"`)}<small style="display:block">${esc(a.type)}${a.range?' · '+esc(a.range):''}${a.rollMode!=='normal'?' · '+esc(a.rollMode):''}</small>${timingBadge(a,'attack')}${a.notes?`<small class="attack-notes">${esc(a.notes)}</small>`:''}</div><div class="action-rolls">${btn('attack-roll',icon('dice')+signed(hit),'roll-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} to hit"`)}${btn('damage-roll',esc(a.damage),'roll-button damage-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} damage"`)}</div></div>`;}
 function searchToolbar(placeholder,action='',label='') {return `<div class="toolbar"><label class="search-field">${icon('search')}<input id="search" type="search" placeholder="${placeholder}" aria-label="${placeholder}" value="${esc(query)}"></label>${action?btn(action,icon('plus')+label,'btn btn-primary'):''}</div>`;}
-const FILTER_ICONS={All:'grid',Favorites:'star',Equipped:'check',Weapon:'sword',Armor:'shield',Gear:'bag',Consumable:'potion',Treasure:'coin',Pinned:'pin',Session:'journal',Quest:'flag',People:'people',Lore:'book',Personal:'sheet',Ready:'check',Cantrips:'spark',Concentration:'eye'};
+const FILTER_ICONS={All:'grid',Favorites:'star',Equipped:'check',Weapon:'sword',Armor:'shield-outline',Gear:'bag',Consumable:'potion',Treasure:'coin',Pinned:'pin',Session:'journal',Quest:'flag',People:'people',Lore:'book',Personal:'sheet',Ready:'check',Cantrips:'spark',Concentration:'eye'};
 function listToolbar(placeholder,choices) {
   return `<div class="list-toolbar">${searchToolbar(placeholder)}<div class="filter-tabs" role="group" aria-label="Filter types">${choices.map(f=>{const active=f==='All'?!filters.size:filters.has(f);return btn('filter',icon(FILTER_ICONS[f]),`filter-tab${active?' active':''}`,`data-filter="${f}" aria-label="${f}" title="${f}" aria-pressed="${active}"`);}).join('')}</div></div>`;
+}
+function showFilterLabel(button) {
+  const label=document.createElement('span');
+  label.className='filter-tooltip';
+  label.setAttribute('aria-hidden','true');
+  label.textContent=button.dataset.filter;
+  button.append(label);
+  setTimeout(()=>label.remove(),1400);
 }
 function matchesFilters(matches) {return !filters.size||[...filters].some(matches);}
 function renderInventory() {
   const c=character(),weight=c.items.reduce((n,i)=>n+i.weight*i.qty,0),items=c.items.filter(i=>matchesFilters(f=>f==='Favorites'?isSheetFavorite(c,'pack',i.id):f==='Equipped'?i.equipped:i.category===f)&&(i.name+' '+i.description).toLowerCase().includes(query.toLowerCase()));
   return pageHeading('Inventory',btn('item',icon('plus')+'Add item','btn btn-primary'))+
-    `<div class="summary-grid inventory-summary"><div class="summary-card">${icon('bag')}<div><strong>${c.items.reduce((n,i)=>n+i.qty,0)}</strong><small>Items carried</small></div></div><div class="summary-card">${icon('boot')}<div><strong>${weight.toLocaleString(undefined,{maximumFractionDigits:1})} <span style="font-size:12px">lb.</span></strong><small>Capacity ${c.stats.str*15} lb. ${weight>c.stats.str*15?'· Over capacity':''}</small></div></div><div class="summary-card currency-summary"><div class="coin-purse-heading"><span class="coin-purse-title">Coin purse</span>${btn('currency','Manage '+icon('chevron'),'text-btn','aria-label="Edit coin purse"')}</div>${renderCoinBalances(c)}</div></div>`+
+    `<div class="summary-grid inventory-summary"><div class="summary-card">${icon('bag')}<div><strong>${c.items.reduce((n,i)=>n+i.qty,0)}</strong><small>Items carried</small></div></div><div class="summary-card">${icon('barbell')}<div><strong>${weight.toLocaleString(undefined,{maximumFractionDigits:1})} <span style="font-size:12px">lb.</span></strong><small>Capacity ${c.stats.str*15} lb. ${weight>c.stats.str*15?'· Over capacity':''}</small></div></div><div class="summary-card currency-summary"><div class="coin-purse-heading"><span class="coin-purse-title">Coin purse</span>${btn('currency','Manage '+icon('chevron'),'text-btn','aria-label="Edit coin purse"')}</div>${renderCoinBalances(c)}</div></div>`+
     listToolbar('Search your inventory…',['All','Favorites','Equipped','Weapon','Armor','Gear','Consumable','Treasure'])+`<div class="panel inventory-list">${items.length?items.map(i=>`<div class="action-row" data-inventory-item="${i.id}"><div class="item-symbol">${itemIconMarkup(i)}</div><div class="action-info"><strong>${esc(i.name)}</strong><div class="inventory-details"><span class="badge">${i.category}</span><small>${i.weight} lb. each</small>${i.wiki?ext(referenceURL(i.wiki,i.name,'equipment'),'Rules '+icon('external'),'text-btn'):''}</div>${i.description?`<details class="inventory-description"><summary>Description<span class="inventory-description-preview" aria-hidden="true">${esc(i.description)}</span></summary><p class="inventory-stats">${esc(i.description)}</p></details>`:''}${itemUsesMarkup(i)}</div><div class="item-right"><div class="quantity-stepper">${btn('quantity',icon('minus'),'',`data-id="${i.id}" data-delta="-1" aria-label="Remove one ${esc(i.name)}" ${i.qty===0?'disabled':''}`)}<span>${i.qty}</span>${btn('quantity',icon('plus'),'',`data-id="${i.id}" data-delta="1" aria-label="Add one ${esc(i.name)}" ${i.qty>=99999?'disabled':''}`)}</div>${btn('equip',icon(i.equipped?'check':'plus')+(i.equipped?'Equipped':'Equip'),`equipped-btn${i.equipped?' active':''}`,`data-id="${i.id}" aria-pressed="${i.equipped}"`)}${i.category==='Weapon'||i.category==='Consumable'||i.equipped||itemTool(i)||itemUses(i).maxUses||packContents(i).length?itemUseButton(i):''}</div><div class="inventory-card-actions">${inventoryFavorite(c,i)}${btn('item',icon('edit'),'icon-btn inventory-edit',`data-id="${i.id}" aria-label="Edit ${esc(i.name)}"`)}</div></div>`).join(''):empty('bag',query?'No treasures found':'Travel light. Dream big.',query?'Try a different search or inventory filter.':'Add equipment, potions, and the curious things you find along the way.','item','Add item')}</div><p class="data-caption">Weight includes item quantities. Weapons have linked actions on your sheet. AC updates automatically from equipped armor, shields, and defensive items. Equipped weapons occupy hands; edit a stack to dual wield two of it. Standard carrying capacity is Strength × 15.</p>`;
 }
 function renderJournal() {
@@ -361,7 +367,14 @@ function renderSpells() {
   `<section class="panel slot-panel"><strong>Spell slots</strong>${slotEntries(c).map(slotRow).join('')||'<span class="form-help">No spell slots available.</span>'}${btn('slots','Edit slots','btn btn-sm')}${flexible.options.length||flexible.conversions.length?btn('flexible-casting','Flexible Casting','btn btn-sm'):''}</section>`+renderConcentration(c,'concentration-banner')+
   listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${spellAvailability(c,s)}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Spell slots follow class progression after enabling calculation in Edit slots. Pact Magic refreshes on a Short or Long Rest. Use Edit slots for table overrides.</p>`;
 }
-function renderDice() {return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray"><div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div><div class="dice-selection">${[4,6,8,10,12,20,100].map(d=>btn('select-die',icon('dice')+`d${d}`,`dice-select${diceExpression===`1d${d}`?' active':''}`,`data-sides="${d}"`)).join('')}</div><form id="dice-form" class="dice-form dice-controls-form">${diceControlsMarkup(diceExpression)}<button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button><details class="dice-notation"><summary>Dice formula</summary><input id="dice-expression" name="expression" value="${esc(diceExpression)}" aria-label="Dice formula, for example 2d6 plus 3" maxlength="30" autocomplete="off" spellcheck="false"></details></form><div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}"`)).join('')}</div><p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Choose your dice and roll.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section><section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;}
+function renderDice() {
+  return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray">
+    <div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div>
+    <form id="dice-form" class="dice-form">${diceControlsMarkup(diceSelection)}<div class="dice-roll-actions"><button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button><button type="submit" class="btn" value="quick">Quick roll</button></div></form>
+    <div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}" ${m!=='normal'&&!canUseRollMode()?'disabled':''}`)).join('')}</div>
+    <p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Choose your dice and roll.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section>
+    <section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;
+}
 const wikiEntries=[['Classes','2024 progression & features.','people','classes'],['Spells','Revised spell descriptions.','spark','spells'],['Weapons','Properties & Weapon Mastery.','sword','weapons'],['Armor','Armor training & equipment.','shield','armor'],['Adventuring gear','Potions, tools, and supplies.','bag','adventuring-gear'],['Magic items','Current item rules.','star','wondrous-items'],['Backgrounds','Ability increases & Origin feats.','journal','backgrounds'],['Feats','Origin, General, and more.','bolt','feats'],['Species','Your character’s heritage.','leaf','species'],['Rules glossary','Conditions, rests, and actions.','compass','rules']];
 function renderWiki() {
   const c=character();
@@ -903,9 +916,9 @@ function castSpell(id) {
 }
 
 function rollBreakdown(r) {if(!r.rolls.length)return `Fixed result: ${r.total}`;return `${r.rolls.join(r.mode==='normal'?' + ':' & ')}${r.mode!=='normal'?` → ${r.mode==='advantage'?'higher':'lower'} die`:''}${r.bonus?' '+signed(r.bonus):''} = ${r.total}`;}
-function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,result=null,featureId='',partyOptions={}) {
+function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,result=null,featureId='',{quick=false,...partyOptions}={}) {
   clearEffects();
-  const r=recordRoll(result||rollDice(expression,mode),label,{celebrate:true,inlineParty:!inDialog&&route==='party',partyOptions});
+  const r=recordRoll(result||rollDice(expression,mode),label,{celebrate:!quick,quick,inlineParty:!inDialog&&route==='party',partyOptions});
   if(inDialog)setModal(esc(label),`<div class="roll-modal"><div class="roll-expression">${esc(r.expression)}${mode!=='normal'?' · '+mode:''}</div><div class="big-die">${icon('dice')}<strong>${r.total}</strong></div>${r.natural===20?'<div class="roll-critical">✦ NATURAL 20! ✦</div>':r.natural===1?'<div class="roll-critical fail">NATURAL 1. A NEW PLOT TWIST.</div>':''}<div class="roll-breakdown">${esc(rollBreakdown(r))}</div></div><div class="modal-actions">${btn('close','Keep adventuring','btn')}${featureId?btn('feature-roll',icon('dice')+'Use & roll again','btn btn-primary',`data-id="${featureId}" ${character().features.some(f=>f.id===featureId&&f.maxUses&&f.used>=f.maxUses)?'disabled':''}`):btn('reroll',icon('dice')+'Roll again','btn btn-primary',`data-expression="${esc(expression)}" data-label="${esc(label)}" data-mode="${mode}"`)}</div>`);
   else render();
   return r;
@@ -913,9 +926,9 @@ function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,re
 function afterRoll(result,callback) {
   result.finished.then(status=>{if(lastRoll===result&&status!=='cancelled')callback();});
 }
-function recordRoll(result,label,{criticalFeedback=true,combatSounds,celebrate=false,onReveal,inlineParty=false,partyOptions={},presentationHost}={}) {
-  const r={...result,label,criticalFeedback,combatSounds,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
-  if(r.rolls.length)beginDice();
+function recordRoll(result,label,{criticalFeedback=true,combatSounds,celebrate=false,onReveal,quick=false,inlineParty=false,partyOptions={},presentationHost}={}) {
+  const r={...result,label,criticalFeedback,combatSounds,quick,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
+  if(r.rolls.length&&!quick)beginDice();
   cloud.broadcastRoll(r,label,{...partyOptions,inline:inlineParty}).catch(error=>toast('Party roll could not be shared: '+error.message,true));
   let finish;
   Object.defineProperty(r,'finished',{value:new Promise(resolve=>{finish=resolve;})});
@@ -1065,9 +1078,15 @@ document.addEventListener('click',event=>{
       case 'slot':{const index=Number(el.dataset.level),slot=el.hasAttribute('data-pact-slot')?c.pactSlot:c.slots[index];if(!slot)break;const before=slot.used;slot.used=clamp(Number(el.dataset.used),0,slot.max);commit();if(slot.used<before)sound.play('resource.restore');if(slot.used!==before)playEffect('spell',{label:`Level ${index+1} slot`,detail:slot.used>before?'MAGIC EXPENDED':'MAGIC RESTORED',target:'.slot-panel, .spell-peek'});break;}
       case 'cast':castSpell(id);break;
       case 'end-concentration':c.concentration='';commit('Concentration ended.');break;
-      case 'filter':{const value=el.dataset.filter;if(value==='All')filters.clear();else if(filters.has(value))filters.delete(value);else filters.add(value);render();[...document.querySelectorAll('.list-toolbar [data-filter]')].find(node=>node.dataset.filter===value)?.focus({preventScroll:true});break;}
-      case 'select-die':diceExpression='1d'+el.dataset.sides;if(el.dataset.sides!=='20')rollMode='normal';render();break;
-      case 'roll-mode':diceExpression=$('#dice-expression').value;rollMode=el.dataset.mode;render();break;
+      case 'filter':{
+        const value=el.dataset.filter;
+        if(value==='All')filters.clear();else if(filters.has(value))filters.delete(value);else filters.add(value);
+        render();
+        const button=$(`.list-toolbar [data-filter="${CSS.escape(value)}"]`);
+        if(button){button.focus({preventScroll:true});showFilterLabel(button);}
+        break;
+      }
+      case 'roll-mode':rollMode=el.dataset.mode;render();break;
       case 'reroll':performRoll(el.dataset.expression,el.dataset.label,el.dataset.mode);break;
       case 'clear-rolls':rollHistory=[];render();break;
       case 'reset-dice-colors':{const saved=updateDiceColors(DEFAULT_DICE_COLORS);toast(saved?'Default dice colors restored.':'Dice colors reset for this visit. Browser storage is unavailable.',!saved);break;}
@@ -1086,7 +1105,12 @@ document.addEventListener('click',event=>{
 });
 document.addEventListener('submit',event=>{
   if(event.target.id==='modal-form'){event.preventDefault();if(!modalSubmit)return;try{for(const input of event.target.querySelectorAll('input[required][type="text"]:not(:disabled)')){if(!input.value.trim())throw new Error('Please fill in '+(input.closest('label')?.firstChild.textContent||'all required fields')+'.');}modalSubmit(new FormData(event.target));}catch(error){sound.play('ui.error');const el=$('#form-error');el.hidden=false;el.className='form-error';el.textContent=error.message;}}
-  if(event.target.id==='dice-form'){event.preventDefault();try{diceExpression=$('#dice-expression').value;performRoll(diceExpression,'Custom roll',rollMode,false);}catch(error){toast(error.message,true);}}
+  if(event.target.id==='dice-form'){
+    event.preventDefault();
+    const {quantity,sides}=diceSelection;
+    try{performRoll(`${quantity}d${sides}`,'Custom roll',rollMode,false,null,'',{quick:event.submitter?.value==='quick'});}
+    catch(error){toast(error.message,true);}
+  }
 });
 document.addEventListener('input',event=>{if(event.target.hasAttribute('data-audio-volume')){const key=event.target.dataset.audioVolume,value=Number(event.target.value)/100;sound.configure(key==='master'?{volume:value}:{categories:{[key]:value}});event.target.nextElementSibling.value=Math.round(value*100)+'%';}if(event.target.dataset.catalogSearch)handleCatalogFilter(modal,event.target,character(),state.settings);if(event.target.hasAttribute('data-feature-level'))handleCatalogChoice(modal,event.target,character(),state.settings);if(event.target.id==='search'){query=event.target.value;const start=event.target.selectionStart;render();const input=$('#search');input.focus({preventScroll:true});try{input.setSelectionRange(start,start);}catch{}}});
 document.addEventListener('change',event=>{

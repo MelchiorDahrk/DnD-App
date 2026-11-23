@@ -21,10 +21,8 @@
 .dice-wheel::before,.dice-wheel::after{content:'';display:block;height:var(--dice-step);pointer-events:none}
 .dice-wheel>span{display:grid;place-items:center;height:var(--dice-step);scroll-snap-align:center;user-select:none}
 .dice-wheel>.is-selected{background:var(--surface-recessed);color:var(--text-primary);font-weight:700;box-shadow:inset 0 1px var(--accent-edge),inset 0 -1px var(--accent-edge)}
-.dice-form.dice-controls-form{display:grid;gap:12px;justify-items:center;margin-top:16px}
-.dice-notation{min-width:0;text-align:left}
-.dice-notation summary{cursor:pointer;color:var(--text-secondary);font-size:11px;padding:8px 0}
-.dice-notation input{display:block;width:100%;min-width:0;max-width:12em;font-size:16px}
+.dice-form{display:grid;gap:12px;justify-items:center;margin:16px 0 15px}
+.dice-roll-actions{display:flex;justify-content:center;gap:8px}
 .dice-pending #tray-die,.dice-pending #roll-detail,.dice-pending .history-row:first-child,.dice-pending .modal-body:has(>.dice-stage)>:not(.dice-stage){visibility:hidden}
 .dice-stage-host:has(.dice-stage)~.big-die,.modal-body:has(>.dice-stage) .roll-modal .big-die{width:auto;height:auto;margin:0 auto 20px;background:none;border:0;box-shadow:none;transform:none;color:var(--text-primary)}
 .dice-stage-host:has(.dice-stage)~.big-die>.icon,.modal-body:has(>.dice-stage) .roll-modal .big-die>.icon{display:none}
@@ -46,7 +44,6 @@
   .dice-tray{padding:20px 14px;overflow-anchor:none}
   .tray-eyebrow{margin-bottom:14px}
   .dice-stage{margin-bottom:14px}
-  .dice-selection{margin:16px 0}
   .dice-stage-heading{font-size:9px;padding:12px 12px 0}
   .dice-stage-note{padding:0 12px 12px;font-size:10px}
 }

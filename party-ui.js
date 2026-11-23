@@ -4,11 +4,13 @@ import {icon,conditionIcon} from './icons.js';
 import {armorCheckMode} from './armor-class.js';
 import {partyRows,skillLeaders,partyTime,designatedDM,effectiveDM} from './party-model.js';
 import {presentPartyDice} from './dice-roller.js';
-import {diceControlsMarkup,mountDiceControls} from './dice-controls.js';
+import {diceControlsMarkup,mountDiceControls,readDiceSelection} from './dice-controls.js';
 import {sound,playRollSound,playRollFeedback} from './sound.js';
 import {partyStatusSoundEvent} from './sound-events.js';
 import {createShopUI} from './shop-ui.js';
 import {createEncounterUI} from './encounter-ui.js';
+
+const rollLabels=['Party roll','Ability check','Saving throw','Attack roll','Damage roll','Healing','Initiative'];
 
 export function createPartyPlay(ui) {
   const {esc,btn,field,actions,setModal,modal,toast,getState,navigate}=ui;
@@ -80,10 +82,16 @@ export function createPartyPlay(ui) {
     const positions=new Map(view.ordered.map((row,index)=>[row.id,index+1]));
     const nextTurn=()=>btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${view.started?'Next turn':'Begin turns'}" title="${view.started?'Next turn':'Begin turns'}"`);
     const dmName=p.members.find(m=>m.uid===effectiveDM(p))?.displayName||dm?.sheet.playerName||(dm?'Party member':'Party owner');
+    const rollLabelOptions=rollLabels.map(label=>`<option>${esc(label)}</option>`).join('');
+    const skillLabelOptions=Object.keys(SKILLS).map(skill=>`<option>${esc(skill)}</option>`).join('');
     return `${connectionMarkup()}<div class="page-heading party-heading"><div class="party-title"><h1>${esc(p.name||'Your party')}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div><p class="party-dm-name"><span class="badge party-dm-badge">DM</span> ${esc(dm?dm.sheet.name+' · '+dmName:dmName)}</p><div class="heading-actions">${btn('party-stores',icon('bag')+'Stores','btn')}${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}</div></div>
       <section class="party-table" aria-label="Party members in turn order">${partyRows(ordered).map(row=>`<div class="party-player-row">${row.map(c=>card(c,positions.get(c.id))).join('')}</div>`).join('')||`<div class="panel panel-body"><p>Bring your adventurers to the table.</p>${btn('cloud-share','Share a character','btn btn-primary')}</div>`}</section>
       ${encounters.markup()}
-      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><div class="cloud-actions party-encounter-actions">${isDM()&&!p.combat.managed?(p.combat.active?btn('party-end-combat','End','btn btn-sm btn-ghost','aria-label="End encounter"'):btn('party-start-combat','Start','btn btn-sm','aria-label="Start encounter"')):''}${btn('party-roll',icon('dice')+'Roll','btn btn-sm btn-primary')}${isDM()&&p.combat.active&&(!p.combat.managed||view.full?.status==='active')?nextTurn():''}</div><div class="cloud-actions">${btn('party-skills','Skills','btn btn-sm btn-ghost')}${isDM()?btn('party-rest','Rest','btn btn-sm btn-ghost'):''}</div></div>${p.combat.active?`<p class="party-encounter-status" role="status">Round ${esc(p.combat.round)} · ${encounters.turnStatus(view)}</p>`:''}<div class="party-roll-controls">${diceControlsMarkup('1d20')}<div class="party-roll-fields">${field('Label','party-label','Party roll','text','required maxlength="120" aria-label="Roll label"')}<details class="dice-notation"><summary>Dice formula</summary>${field('Formula','party-expression','1d20','text','required maxlength="30" autocomplete="off" spellcheck="false"')}</details></div></div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>`;
+      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><div class="cloud-actions party-encounter-actions">${isDM()&&!p.combat.managed?(p.combat.active?btn('party-end-combat','End','btn btn-sm btn-ghost','aria-label="End encounter"'):btn('party-start-combat','Start','btn btn-sm','aria-label="Start encounter"')):''}${btn('party-roll',icon('dice')+'Roll','btn btn-sm btn-primary')}${isDM()&&p.combat.active&&(!p.combat.managed||view.full?.status==='active')?nextTurn():''}</div><div class="cloud-actions">${btn('party-skills','Skills','btn btn-sm btn-ghost')}${isDM()?btn('party-rest','Rest','btn btn-sm btn-ghost'):''}</div></div>${p.combat.active?`<p class="party-encounter-status" role="status">Round ${esc(p.combat.round)} · ${encounters.turnStatus(view)}</p>`:''}
+      <div class="party-roll-controls">${diceControlsMarkup()}<div class="party-roll-fields">
+        <label class="form-field">Roll label<select name="party-label">${rollLabelOptions}<optgroup label="Skills">${skillLabelOptions}</optgroup><option value="custom">Custom label…</option></select></label>
+        <div data-custom-roll-label hidden>${field('Custom roll label','party-custom-label','','text','required disabled maxlength="120" pattern=".*\\S.*"')}</div>
+      </div></div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>`;
   }
   function staticRoll(event){try{const r=JSON.parse(event.result);return `<div class="party-last-roll"><span>${esc(event.name)} · ${esc(r.label)}</span><strong>${esc(r.total)}</strong><small>${esc(r.expression)} · ${r.rolls.map(v=>esc(v)).join(' + ')}${r.bonus?' '+safeSigned(r.bonus):''}</small></div>`;}catch{return '';}}
   function react(characterId,event){
@@ -166,7 +174,7 @@ export function createPartyPlay(ui) {
     if(ui.route()==='party')notification='';
     const host=document.getElementById('party-roll');
     const controls=document.querySelector('.party-roll-controls');
-    if(controls)mountDiceControls(controls,controls.querySelector('[name="party-expression"]'));
+    if(controls)mountDiceControls(controls);
     if(host&&latestRoll&&host.dataset.rollId!==latestRoll.id){
       const event=latestRoll;
       host.dataset.rollId=event.id;host.innerHTML=staticRoll(event);
@@ -204,6 +212,7 @@ export function createPartyPlay(ui) {
     if(!shared){if(inline)throw new Error('Select a character shared with this party first.');return;}
     if(shared.ownerId!==user()?.uid)throw new Error('You can only roll for your own characters.');
     const r={expression:result.expression,rolls:result.rolls,...(result.dieSides?{dieSides:result.dieSides}:{}),total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label,criticalFeedback:result.criticalFeedback,combatSounds:result.combatSounds};
+    if(result.quick)r.quick=true;
     const id=uid(),event={id,kind:'roll',actorId:user().uid,characterId:shared.characterId,name:shared.sheet.name,result:JSON.stringify(r)};
     if(inline){latestRoll=event;const host=document.getElementById('party-roll');if(host){host.dataset.rollId=id;host.innerHTML=staticRoll(event);}}
     if(!party().errors?.activities)await store().activity(partyId,{kind:event.kind,characterId:event.characterId,name:event.name,result:event.result},id);
@@ -260,11 +269,25 @@ export function createPartyPlay(ui) {
       case 'party-rest-short':case 'party-rest-long':requestRest(action.endsWith('long')?'long':'short');break;
       case 'party-rest-reply':{const rest=p.rests.find(r=>r.id===id);if(rest)restDialog(rest);break;}
       case 'party-rest-yes':case 'party-rest-no':run(async()=>{const rest=p.rests.find(r=>r.id===id),yes=action.endsWith('yes');if(yes&&!own().some(c=>c.characterId===active()?.id))throw new Error('Select a character shared with this party first.');await store().replyRest(partyId,id,yes,active()?.id||'');modal.close();if(yes)ui.openRest(rest.kind);ui.refresh();});break;
-      case 'party-roll':{const controls=document.querySelector('.party-roll-controls'),expression=controls.querySelector('[name="party-expression"]'),label=controls.querySelector('[name="party-label"]');if(!expression.reportValidity()||!label.reportValidity())break;if(!own().some(c=>c.characterId===active()?.id)){toast('Select a character shared with this party first.',true);break;}ui.roll(expression.value,label.value,'normal',false);break;}
+      case 'party-roll':{
+        const controls=document.querySelector('.party-roll-controls');
+        const choice=controls.querySelector('[name="party-label"]');
+        const custom=controls.querySelector('[name="party-custom-label"]');
+        if(!custom.reportValidity())break;
+        if(!own().some(c=>c.characterId===active()?.id)){toast('Select a character shared with this party first.',true);break;}
+        const {quantity,sides}=readDiceSelection(controls);
+        ui.roll(`${quantity}d${sides}`,choice.value==='custom'?custom.value.trim():choice.value,'normal',false);
+        break;
+      }
     }
     return true;
   }
   document.addEventListener('change',event=>{
+    if(event.target.matches('.party-roll-controls [name="party-label"]')){
+      const custom=event.target.closest('.party-roll-fields').querySelector('[data-custom-roll-label]');
+      custom.hidden=event.target.value!=='custom';
+      custom.querySelector('input').disabled=custom.hidden;
+    }
     if(event.target.hasAttribute('data-party-skill')){skill=event.target.value;const host=document.getElementById('party-skills-dialog');if(host)host.innerHTML=skillMarkup();}
     if(event.target.hasAttribute('data-initiative-method')){
       const physical=event.target.value==='physical';

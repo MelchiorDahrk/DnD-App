@@ -1,3 +1,4 @@
+const shieldOutline='<path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4Z"/>';
 const paths = {
   grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
   dice: '<path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10M12 2 8 9l-5 8m9-15 4 7 5 8M8 9h8l-4 13Z"/>',
@@ -13,7 +14,9 @@ const paths = {
   arrow: '<path d="M4 12h16m-6-6 6 6-6 6"/>',
   external: '<path d="M14 3h7v7m0-7L11 13M10 3H3v18h18v-7"/>',
   heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z"/>',
-  shield: '<path d="m12 2 9 4v6c0 5-9 10-9 10S3 17 3 12V6l9-4Z"/><path d="m8 12 3 3 5-6"/>',
+  shield: shieldOutline+'<path d="m8 12 3 3 5-6"/>',
+  'shield-outline': shieldOutline,
+  barbell: '<rect x="3" y="7" width="4" height="10" rx="1"/><rect x="17" y="7" width="4" height="10" rx="1"/><path d="M7 12h10M1 12h2m18 0h2"/>',
   boot: '<path d="M7 3h8v10l5 3v5H3v-7h4V3Z"/><path d="M7 7h4M7 10h4M3 18h17"/>',
   bolt: '<path d="m13 2-9 12h7l-1 8 10-12h-7l1-8Z"/>',
   star: '<path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1 3-6Z"/>',
