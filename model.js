@@ -5,6 +5,7 @@ import {itemUses,removeEmptyItems} from './inventory-rules.js';
 import {wikiURL} from './reference-links.js';
 import {attackIsProficient,validTraining} from './training-rules.js';
 import {syncSpellSlots,validSlotSettings} from './spell-slots.js';
+import {CLASSES,advanceClass,classHitDie,hitDicePools,setHitDicePools,validHitDicePools,characterSubclass} from './character-classes.js';
 export {RULES_URL,wikiURL,subclassURL,referenceURL,safeURL} from './reference-links.js';
 
 export const SAVE_VERSION = 2;
@@ -28,7 +29,7 @@ export function calculateMoney(balance,expression) {
 }
 export const SHEET_TEXT = {personalityTraits:'Personality traits',ideals:'Ideals',bonds:'Bonds',flaws:'Flaws',languages:'Languages',armorProficiencies:'Armor training',weaponProficiencies:'Weapon proficiencies',toolProficiencies:'Tool & other proficiencies',senses:'Senses',defenses:'Armor, shield & defense notes'};
 const sheetDefaults = () => Object.fromEntries([...Object.keys(SHEET_TEXT),'playerName'].map(key=>[key,'']).concat([['electrum',0],['platinum',0],['initiativeBonus',0],['passivePerceptionBonus',0]]));
-export const CLASSES = {Artificer:8,Barbarian:12,Bard:8,Cleric:8,Druid:8,Fighter:10,Monk:8,Paladin:10,Ranger:10,Rogue:8,Sorcerer:6,Warlock:8,Wizard:6};
+export {CLASSES} from './character-classes.js';
 export const XP = [0,0,300,900,2700,6500,14000,23000,34000,48000,64000,85000,100000,120000,140000,165000,195000,225000,265000,305000,355000];
 export const CONDITIONS = ['Blinded','Charmed','Deafened','Frightened','Grappled','Incapacitated','Invisible','Paralyzed','Petrified','Poisoned','Prone','Restrained','Stunned','Unconscious'];
 export const uid = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -77,7 +78,11 @@ export function rollFeature(feature, roller = randomDie) {
   if (feature.maxUses) feature.used++;
   return result;
 }
-export function castingAbility(c) { return Object.hasOwn(ABILITIES,c.spellAbility) ? c.spellAbility : ['Wizard','Artificer'].includes(c.class) ? 'int' : ['Bard','Paladin','Sorcerer','Warlock'].includes(c.class) ? 'cha' : 'wis'; }
+export function castingAbility(c,className=c.class) {
+  if(className===c.class&&Object.hasOwn(ABILITIES,c.spellAbility))return c.spellAbility;
+  if(['Wizard','Artificer'].includes(className)||['Eldritch Knight','Arcane Trickster'].includes(characterSubclass(c,className)))return 'int';
+  return ['Bard','Paladin','Sorcerer','Warlock'].includes(className)||characterSubclass(c,className)==='Warrior of the Mystic Arts'?'cha':'wis';
+}
 export function makeCharacter(values = {}) {
   const cls = Object.hasOwn(CLASSES, values.class) ? values.class : 'Ranger';
   const stats = values.stats || {str:10,dex:14,con:14,int:10,wis:12,cha:10};
@@ -173,7 +178,8 @@ export function changeHP(c, amount, kind) {
 }
 export function longRest(c,{reduceExhaustion=true,skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Long Rest.');
-  c.hp=c.maxHp;c.tempHp=0;c.hitDice=c.level;
+  c.hp=c.maxHp;c.tempHp=0;
+  setHitDicePools(c,hitDicePools(c).map(pool=>({...pool,available:pool.max})));
   if (reduceExhaustion) c.exhaustion=Math.max(0,c.exhaustion-1);
   c.slots.forEach(s=>s.used=0);if(c.pactSlot)c.pactSlot.used=0;
   if(c.temporarySlots){delete c.temporarySlots;syncSpellSlots(c);}
@@ -181,11 +187,18 @@ export function longRest(c,{reduceExhaustion=true,skipFeatureIds=[]}={}) {
   c.features.filter(f=>f.reset!=='manual'&&!skipFeatureIds.includes(f.id)).forEach(f=>f.used=0);
   if(!inspirationPoints(c)&&hasResourceful(c))gainInspiration(c);
 }
-export function shortRest(c,count=0,roller=randomDie,{skipFeatureIds=[]}={}) {
+export function shortRest(c,dice=0,roller=randomDie,{skipFeatureIds=[]}={}) {
   if (c.hp<1) throw new Error('You need at least 1 HP to start a Short Rest.');
-  if (!Number.isInteger(count)||count<0||count>c.hitDice) throw new Error('Choose an available number of Hit Dice.');
-  const healing=Array.from({length:count},()=>Math.max(0,roller(c.hitDie)+mod(c.stats.con))).reduce((a,b)=>a+b,0);
-  changeHP(c,healing,'heal');c.hitDice-=count;
+  const pools=hitDicePools(c),counts=typeof dice==='number'?{[c.hitDie]:dice}:dice;
+  if(!counts||typeof counts!=='object'||Array.isArray(counts)||Object.entries(counts).some(([die,count])=>
+    !Number.isInteger(count)||count<0||!pools.some(pool=>String(pool.die)===die&&count<=pool.available)))throw new Error('Choose an available number of Hit Dice.');
+  let healing=0;
+  for(const pool of pools){
+    const count=counts[pool.die]??0;
+    for(let i=0;i<count;i++)healing+=Math.max(0,roller(pool.die)+mod(c.stats.con));
+    pool.available-=count;
+  }
+  changeHP(c,healing,'heal');setHitDicePools(c,pools);
   if(c.pactMagic===true)c.slots.forEach(s=>s.used=0);
   if(c.pactSlot)c.pactSlot.used=0;
   for (const f of c.features) {
@@ -195,11 +208,15 @@ export function shortRest(c,count=0,roller=randomDie,{skipFeatureIds=[]}={}) {
   }
   return healing;
 }
-export function levelUp(c, gain) {
+export function levelUp(c,gain,{className=c.class,subclass=characterSubclass(c,className)}={}) {
   if (c.level >= 20) throw new Error('You’ve reached level 20. Legendary!');
+  if(!Object.hasOwn(CLASSES,className))throw new Error('Choose a class to advance.');
   const hpGain = Math.max(1,Math.floor(gain));
-  c.level++;c.maxHp=Math.min(9999,c.maxHp+hpGain);c.hp=Math.min(c.maxHp,c.hp+hpGain);c.hitDice=Math.min(c.level,c.hitDice+1);
-  // Class features, spells, ASIs, and multiclass choices remain explicit player edits.
+  const pools=hitDicePools(c);
+  const hitDie=classHitDie(c,className);
+  Object.assign(c,advanceClass(c,className,subclass));
+  c.maxHp=Math.min(9999,c.maxHp+hpGain);c.hp=Math.min(c.maxHp,c.hp+hpGain);
+  setHitDicePools(c,hitDicePools(c).map(pool=>({...pool,available:(pools.find(old=>old.die===pool.die)?.available??0)+Number(pool.die===hitDie)})));
   return c;
 }
 
@@ -246,6 +263,7 @@ function validateCharacter(c) {
   requireThat(integerIn(c.exhaustion,0,6)&&integerIn(c.deathSuccess,0,3)&&integerIn(c.deathFailure,0,3),'invalid condition counters.');
   requireThat(Array.isArray(c.slots)&&c.slots.length===9&&c.slots.every(s=>s&&integerIn(s.max,0,99)&&integerIn(s.used,0,s.max)),'invalid spell slots.');
   requireThat(validSlotSettings(c,Object.keys(CLASSES)),'invalid spell slot settings or class levels.');
+  requireThat(validHitDicePools(c),'invalid Hit Dice pools.');
   for (const key of ['items','spells','notes','features','attacks']) {
     requireThat(Array.isArray(c[key])&&c[key].length<=2000,`invalid ${key}.`);
     const ids = new Set();
@@ -270,8 +288,13 @@ function validateCharacter(c) {
   c.spells.forEach(v=>requireThat((v.origin===undefined||string(v.origin,500))&&(v.origins===undefined||Array.isArray(v.origins)&&v.origins.length<=30&&v.origins.every(origin=>string(origin,500))),'invalid spell origin.'));
   c.spells.forEach(v=>requireThat(
     (v.classPrepared===undefined||typeof v.classPrepared==='boolean') &&
+    (v.manualPrepared===undefined||typeof v.manualPrepared==='boolean') &&
+    (v.classSpells===undefined||v.classSpells&&typeof v.classSpells==='object'&&!Array.isArray(v.classSpells)&&Object.entries(v.classSpells).every(([name,state])=>
+      Object.hasOwn(CLASSES,name)&&state&&typeof state==='object'&&
+      (typeof state.prepared==='boolean'||state.granted===true)&&Object.keys(state).every(key=>key==='prepared'&&typeof state.prepared==='boolean'||key==='granted'&&state.granted===true)
+    )) &&
     (v.castingGrants===undefined||Array.isArray(v.castingGrants)&&v.castingGrants.length<=30&&v.castingGrants.every(g=>
-      g&&string(g.origin,500)&&Object.hasOwn(ABILITIES,g.ability)&&['free','at-will','slot'].includes(g.mode)
+      g&&string(g.origin,500)&&Object.hasOwn(ABILITIES,g.ability)&&['free','free-only','at-will','slot'].includes(g.mode)
       &&(g.featureId===undefined||string(g.featureId,100)&&/^[a-zA-Z0-9_-]+$/.test(g.featureId))
     )),'invalid spell casting grants.'));
   // Optional stable key: older saves need no migration, future keys fall back safely.

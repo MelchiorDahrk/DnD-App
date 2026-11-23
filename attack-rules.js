@@ -2,6 +2,23 @@
 import {attackBonus,mod,proficiency,randomDie,rollDice,signed} from './model.js';
 import {WEAPONS} from './catalog.js';
 import {armorTrainingEffects} from './armor-class.js';
+import {characterClasses,characterClassLevel} from './character-classes.js';
+
+export function attacksPerAction(character,{pactWeapon=false}={}){
+  const fighter=characterClassLevel(character,'Fighter');
+  if(fighter>=20)return 4;
+  if(fighter>=11)return 3;
+  const invocations=character.features.map(feature=>feature.name);
+  const warlock=characterClassLevel(character,'Warlock');
+  if(pactWeapon&&warlock>=12&&invocations.includes('Devouring Blade'))return 3;
+  if(pactWeapon&&warlock>=5&&invocations.includes('Thirsting Blade'))return 2;
+  const extra=characterClasses(character).some(row=>
+    row.level>=5&&(['Barbarian','Fighter','Monk','Paladin','Ranger'].includes(row.class)||
+      ['Armorer','Battle Smith'].includes(row.subclass)&&row.class==='Artificer')||
+    row.level>=6&&(['College of Valor','College of Swords'].includes(row.subclass)&&row.class==='Bard'||
+      row.class==='Wizard'&&['Bladesinger','Bladesinging'].includes(row.subclass)));
+  return extra?2:1;
+}
 
 export const MASTERIES=['Cleave','Graze','Nick','Push','Sap','Slow','Topple','Vex'];
 export function attackWeapon(a) {

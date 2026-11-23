@@ -1,4 +1,6 @@
 import {CLASS_LEVELS} from './progression-data.js';
+import {characterClasses,characterClassLevel} from './character-classes.js';
+export {characterClassLevel} from './character-classes.js';
 
 const fullCasters = ['Bard','Cleric','Druid','Sorcerer','Wizard'];
 const halfCasters = ['Artificer','Paladin','Ranger'];
@@ -17,16 +19,8 @@ export function classSlotMaximums(name,level,subclass) {
   ];
 }
 
-export function characterClassLevel(character,name) {
-  const additional=character.multiclass || [];
-  if(character.class===name)return character.level-additional.reduce((total,row)=>total+row.level,0);
-  return additional.find(row=>row.class===name)?.level ?? 0;
-}
-
 export function spellSlotPlan(character) {
-  const additional = character.multiclass || [];
-  const primaryLevel = characterClassLevel(character,character.class);
-  const classes = [{class:character.class,subclass:character.subclass,level:primaryLevel},...additional];
+  const classes = characterClasses(character);
   const casters = classes.filter(row=>row.class!=='Warlock'&&classSlotMaximums(row.class,row.level,row.subclass).some(Boolean));
   const warlock = classes.find(row=>row.class==='Warlock');
   const pact = warlock ? classSlots('Warlock',warlock.level) : emptySlots();
@@ -72,10 +66,13 @@ export function syncSpellSlots(character) {
 export function flexibleCastingOptions(character) {
   const level=characterClassLevel(character,'Sorcerer');
   const feature=character.features.find(({catalogId,name})=>catalogId==='class-features-sorcerer-font-of-magic-sorcery-points'||name==='Font of Magic / Sorcery Points');
-  if(!feature||character.spellSlotMode!=='auto')return {feature,options:[]};
+  if(!feature||level<2)return {feature,options:[],conversions:[]};
   const options=[2,3,5,6,7].map((cost,index)=>({level:index+1,cost,required:[2,3,5,7,9][index]}))
-    .filter(row=>level>=row.required&&feature.maxUses-feature.used>=row.cost&&character.slots[row.level-1].max<99);
-  return {feature,options};
+    .filter(row=>character.spellSlotMode==='auto'&&level>=row.required&&feature.maxUses-feature.used>=row.cost&&character.slots[row.level-1].max<99);
+  const regular=character.slots.map((slot,index)=>({slot,level:index+1,pact:!!character.pactMagic}));
+  const pact=character.pactSlot?[{slot:character.pactSlot,level:character.pactSlot.level,pact:true}]:[];
+  const conversions=feature.used?[...regular,...pact].filter(row=>row.slot.used<row.slot.max):[];
+  return {feature,options,conversions};
 }
 
 export function arcaneRecoveryPlan(character) {

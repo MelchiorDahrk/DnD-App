@@ -17,12 +17,13 @@ import {WEAPONS,ARMOR,attackFromEquipment} from './catalog.js';
 import {characterChoice,classPreview,catalogPicker,handleCatalogFilter,handleCatalogChoice,handleCatalogVariant,rollCatalogVariant,catalogBrowser,updateCatalogBrowser} from './catalog-ui.js';
 import {playEffect,clearEffects,hpFeedback,effectGlyph} from './vfx.js';
 import {openLevelUp} from './level-up-ui.js';
-import {addProgressionSpell,spellKey,LEVEL_SUBCLASSES,canonicalSubclass} from './level-up.js';
+import {addProgressionSpell,spellKey,LEVEL_SUBCLASSES,canonicalSubclass,progressionForClass,classSpellState,readySpellClasses,setClassSpell,spellCastingStats} from './level-up.js';
+import {characterClasses,characterClassLevel,classBreakdown,totalClassLevel,hitDicePools,setHitDicePools,reconcileHitDice} from './character-classes.js';
 import {arcaneRecoveryPlan,flexibleCastingOptions,spellSlotPlan,syncSpellSlots,validSlotSettings} from './spell-slots.js';
 import {SPELL_CATALOG} from './progression-data.js';
 import {openCharacterBuilder} from './character-creation-ui.js';
 import {restRefreshes,restReminders} from './rest-rules.js';
-import {MASTERIES,attackWeapon,attackMastery} from './attack-rules.js';
+import {MASTERIES,attackWeapon,attackMastery,attacksPerAction} from './attack-rules.js';
 import {openAttack} from './attack-ui.js';
 import {beginDice,presentDice,clearDice,diceColorPreferences,DEFAULT_DICE_COLORS} from './dice-roller.js';
 import {diceControlsMarkup,mountDiceControls} from './dice-controls.js';
@@ -152,7 +153,9 @@ function renderConcentration(c,className) {
 }
 function renderSheetActions(c) {
   const spells=sheetSpells(c);
-  return (c.attacks.length?c.attacks.map(a=>renderAttack(c,a)).join(''):'')+
+  const base=attacksPerAction(c),pact=attacksPerAction(c,{pactWeapon:true});
+  const extra=base>1||pact>1?`<div class="combat-notes"><span>Attack action · ${base} ${base===1?'attack':'attacks'}${pact>base?` · ${pact} with your pact weapon`:''}</span></div>`:'';
+  return extra+(c.attacks.length?c.attacks.map(a=>renderAttack(c,a)).join(''):'')+
     spells.map(s=>{
       const concentrating=c.concentration===s.name;
       return `<div class="action-row sheet-spell" ${sheetEntry(s.id,s.name)}><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><strong>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</strong>${timingBadge(s,'spell')}<small>${s.level===0?'Cantrip':'Level '+s.level}${s.range?' · '+esc(s.range):''} · ${esc(s.castingTime)||'Casting time not set'}</small>${s.concentration?`<small class="spell-concentration${concentrating?' is-active':''}">${icon('spark')}${concentrating?'Concentrating':'Requires concentration'}</small>`:''}</div>${btn('cast',icon('spark')+'Cast','btn btn-sm',`data-id="${s.id}" aria-label="Cast ${esc(s.name)}"`)}</div>`;
@@ -270,7 +273,7 @@ function featureCharges(f) {
   return `<div class="feature-counter">${btn('feature-use',icon('minus'),'icon-btn',`data-id="${f.id}" data-used="${f.used+1}" ${f.used>=f.maxUses?'disabled':''} aria-label="Spend one ${esc(f.name)} point"`)}<strong>${f.maxUses-f.used} / ${f.maxUses}</strong>${btn('feature-use',icon('plus'),'icon-btn',`data-id="${f.id}" data-used="${f.used-1}" ${f.used<=0?'disabled':''} aria-label="Restore one ${esc(f.name)} point"`)}${btn('feature', 'Set amount','text-btn',`data-id="${f.id}"`)}</div>`;
 }
 function renderFeatures(c) {
-  return `<section class="panel" data-sheet-section="features"><div class="panel-heading"><h2>${icon('star')}Features & resources</h2>${btn('feature',icon('plus'),'icon-btn','aria-label="Add a feature or resource"')}</div><div class="features-list">${c.features.length?c.features.map(f=>`<div class="action-row" ${sheetEntry(f.id,f.name)}><div class="item-symbol">${itemIconMarkup(f,'star')}</div><div class="action-info"><strong>${ext(referenceURL(f.wiki,f.name,c.class),esc(f.name)+' '+icon('external'))}</strong>${timingBadge(f,'feature')}<small>${esc(f.description)}</small>${f.maxUses?`<div class="feature-uses">${featureCharges(f)}<small>${f.maxUses-f.used} / ${f.maxUses} remaining · Resets: ${f.reset==='manual'?'manually':f.reset+' rest'}${f.reset==='long'&&f.shortRestRecovery?' · +'+f.shortRestRecovery+' use(s) / short rest':''}</small></div>`:''}${f.rollFormula?btn('feature-roll',icon('dice')+esc(f.rollFormula)+(f.maxUses?' · Use & roll':' · Roll'),'btn btn-sm feature-roll',`data-id="${f.id}" ${f.maxUses&&f.used>=f.maxUses?'disabled':''} aria-label="Roll ${esc(f.name)}${f.maxUses?' and spend one use':''}"`):''}</div>${btn('feature',icon('edit'),'icon-btn',`data-id="${f.id}" aria-label="Edit ${esc(f.name)}"`)}</div>`).join(''):empty('star','A few special talents','Track class features, feats, maneuvers, and limited-use abilities.','feature','Add feature')}</div></section>`;
+  return `<section class="panel" data-sheet-section="features"><div class="panel-heading"><h2>${icon('star')}Features & resources</h2>${btn('feature',icon('plus'),'icon-btn','aria-label="Add a feature or resource"')}</div><div class="features-list">${c.features.length?c.features.map(f=>`<div class="action-row" ${sheetEntry(f.id,f.name)}><div class="item-symbol">${itemIconMarkup(f,'star')}</div><div class="action-info"><strong>${ext(referenceURL(f.wiki,f.name,c.class),esc(f.name)+' '+icon('external'))}</strong>${timingBadge(f,'feature')}${c.multiclass?.length&&f.origin?.startsWith('Class · ')?`<small>${esc(f.origin)}</small>`:''}<small>${esc(f.description)}</small>${f.maxUses?`<div class="feature-uses">${featureCharges(f)}<small>${f.maxUses-f.used} / ${f.maxUses} remaining · Resets: ${f.reset==='manual'?'manually':f.reset+' rest'}${f.reset==='long'&&f.shortRestRecovery?' · +'+f.shortRestRecovery+' use(s) / short rest':''}</small></div>`:''}${f.rollFormula?btn('feature-roll',icon('dice')+esc(f.rollFormula)+(f.maxUses?' · Use & roll':' · Roll'),'btn btn-sm feature-roll',`data-id="${f.id}" ${f.maxUses&&f.used>=f.maxUses?'disabled':''} aria-label="Roll ${esc(f.name)}${f.maxUses?' and spend one use':''}"`):''}</div>${btn('feature',icon('edit'),'icon-btn',`data-id="${f.id}" aria-label="Edit ${esc(f.name)}"`)}</div>`).join(''):empty('star','A few special talents','Track class features, feats, maneuvers, and limited-use abilities.','feature','Add feature')}</div></section>`;
 }
 function showBackground() {
   const c=character();
@@ -290,7 +293,7 @@ function renderInspiration(c) {
 }
 function renderCombat(c) {
   const hpScale=Math.max(c.maxHp,c.hp+c.tempHp),ac=armorClassDetails(c);
-  return `<div class="combat-grid" data-sheet-group><div class="hp-block" ${sheetEntry('hp','Hit points')}><button type="button" class="hp-manage" data-action="hp" aria-label="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}. Apply damage, healing, or temporary HP" aria-haspopup="dialog"><span class="tiny-label hp-title">${icon('heart')}HIT POINTS${c.tempHp?` <span>+${c.tempHp} TEMP</span>`:''}</span><span class="hp-numbers"><strong>${c.hp}</strong><span>/ ${c.maxHp}</span></span><span class="hp-track${c.hp/c.maxHp<.3?' low':''}" role="progressbar" aria-label="Hit points" aria-valuemin="0" aria-valuemax="${c.maxHp}" aria-valuenow="${c.hp}" aria-valuetext="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}"><span class="hp-current" style="width:${c.hp/hpScale*100}%"></span>${c.tempHp?`<span class="hp-temp" style="width:${c.tempHp/hpScale*100}%"></span>`:''}</span></button></div><div class="combat-stat" ${sheetEntry('ac','Armor class')}><span class="tiny-label">ARMOR CLASS</span>${icon('shield')}<strong>${ac.total}</strong><small>${c.acOverride===undefined?'Automatic':'Override'}</small></div>${btn('initiative',`<span class="tiny-label">INITIATIVE</span>${icon('bolt')}<strong>${signed(initiative(c))}</strong><small>Tap to roll</small>`,'combat-stat',sheetEntry('initiative','Initiative'))}<div class="combat-stat" ${sheetEntry('speed','Speed')}><span class="tiny-label">SPEED</span>${icon('boot')}<strong>${walkingSpeed(c,c.trainingOrigins?armorSpeedPenalty(c):0)}<span style="font-size:10px"> ft.</span></strong><small>Walking${c.race==='Aarakocra'?` · Flying ${aarakocraFlyingSpeed(c)} ft.`:''}</small></div></div><div class="combat-notes" data-ac-breakdown aria-live="polite"><span>${esc(ac.summary)}${ac.warnings.map(warning=>`<br>${esc(warning)}`).join('')}</span></div><div class="status-row" data-sheet-group>${btn('conditions',icon(c.conditions.length||c.exhaustion?'flag':'check')+esc([...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])].join(', ')||'No conditions.'),'btn btn-sm condition-summary',`${sheetEntry('conditions','Conditions')} aria-haspopup="dialog"`)}${renderConditionControls(c)}${renderInspiration(c)}</div>${c.defenses?`<div class="combat-notes" ${sheetEntry('defenses',SHEET_TEXT.defenses)}><span>${esc(c.defenses)}</span></div>`:''}${c.hp===0?`<div class="death-saves" ${sheetEntry('death-saves','Death saving throws')}><div class="death-counter">Success ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathSuccess?'active':'',`data-kind="success" data-value="${i<c.deathSuccess?i:i+1}" aria-label="Set ${i+1} death save successes"`)).join('')}</div><div class="death-counter">Failure ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathFailure?'active':'',`data-kind="failure" data-value="${i<c.deathFailure?i:i+1}" aria-label="Set ${i+1} death save failures"`)).join('')}</div>${btn('death-roll',icon('dice')+'Death save','btn btn-sm',`${c.deathSuccess>=3||c.deathFailure>=3?'disabled':''}`)}${c.deathSuccess>=3||c.deathFailure>=3?`<div class="death-message">${c.deathFailure>=3?'Three failures. Check with your DM.':'Stable. You’re still at 0 HP.'}</div>`:''}</div>`:''}`;
+  return `<div class="combat-grid" data-sheet-group><div class="hp-block" ${sheetEntry('hp','Hit points')}><button type="button" class="hp-manage" data-action="hp" aria-label="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}. Apply damage, healing, or temporary HP" aria-haspopup="dialog"><span class="tiny-label hp-title">${icon('heart')}HIT POINTS${c.tempHp?` <span>+${c.tempHp} TEMP</span>`:''}</span><span class="hp-numbers"><strong>${c.hp}</strong><span>/ ${c.maxHp}</span></span><span class="hp-track${c.hp/c.maxHp<.3?' low':''}" role="progressbar" aria-label="Hit points" aria-valuemin="0" aria-valuemax="${c.maxHp}" aria-valuenow="${c.hp}" aria-valuetext="${c.hp} of ${c.maxHp} hit points${c.tempHp?`, plus ${c.tempHp} temporary hit points`:''}"><span class="hp-current" style="width:${c.hp/hpScale*100}%"></span>${c.tempHp?`<span class="hp-temp" style="width:${c.tempHp/hpScale*100}%"></span>`:''}</span></button></div><div class="combat-stat" ${sheetEntry('ac','Armor class')}><span class="tiny-label">ARMOR CLASS</span>${icon('shield')}<strong>${ac.total}</strong><small>${c.acOverride===undefined?'Automatic':'Override'}</small></div>${btn('initiative',`<span class="tiny-label">INITIATIVE</span>${icon('bolt')}<strong>${signed(initiative(c))}</strong><small>Tap to roll</small>`,'combat-stat',sheetEntry('initiative','Initiative'))}<div class="combat-stat" ${sheetEntry('speed','Speed')}><span class="tiny-label">SPEED</span>${icon('boot')}<strong>${walkingSpeed(c,c.trainingOrigins?armorSpeedPenalty(c):0)}<span style="font-size:10px"> ft.</span></strong><small>Walking${c.race==='Aarakocra'?` · Flying ${aarakocraFlyingSpeed(c)} ft.`:''}</small></div></div><div class="combat-notes"><span>Hit Dice · ${hitDicePools(c).map(pool=>`${pool.available}/${pool.max} d${pool.die}`).join(' · ')}</span></div><div class="combat-notes" data-ac-breakdown aria-live="polite"><span>${esc(ac.summary)}${ac.warnings.map(warning=>`<br>${esc(warning)}`).join('')}</span></div><div class="status-row" data-sheet-group>${btn('conditions',icon(c.conditions.length||c.exhaustion?'flag':'check')+esc([...c.conditions,...(c.exhaustion?['Exhaustion '+c.exhaustion]:[])].join(', ')||'No conditions.'),'btn btn-sm condition-summary',`${sheetEntry('conditions','Conditions')} aria-haspopup="dialog"`)}${renderConditionControls(c)}${renderInspiration(c)}</div>${c.defenses?`<div class="combat-notes" ${sheetEntry('defenses',SHEET_TEXT.defenses)}><span>${esc(c.defenses)}</span></div>`:''}${c.hp===0?`<div class="death-saves" ${sheetEntry('death-saves','Death saving throws')}><div class="death-counter">Success ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathSuccess?'active':'',`data-kind="success" data-value="${i<c.deathSuccess?i:i+1}" aria-label="Set ${i+1} death save successes"`)).join('')}</div><div class="death-counter">Failure ${Array.from({length:3},(_,i)=>btn('death-counter','',i<c.deathFailure?'active':'',`data-kind="failure" data-value="${i<c.deathFailure?i:i+1}" aria-label="Set ${i+1} death save failures"`)).join('')}</div>${btn('death-roll',icon('dice')+'Death save','btn btn-sm',`${c.deathSuccess>=3||c.deathFailure>=3?'disabled':''}`)}${c.deathSuccess>=3||c.deathFailure>=3?`<div class="death-message">${c.deathFailure>=3?'Three failures. Check with your DM.':'Stable. You’re still at 0 HP.'}</div>`:''}</div>`:''}`;
 }
 function renderAttack(c,a) {const hit=attackBonus(c,a);return `<div class="action-row" ${sheetEntry(a.id,a.name)}><div class="item-symbol">${attackIconMarkup(a,undefined,c.items)}</div><div class="action-info">${btn('attack',esc(a.name),'',`data-id="${a.id}" style="padding:0;text-align:left;font-size:11px;font-weight:600;margin-bottom:5px" aria-label="Edit ${esc(a.name)}"`)}<small style="display:block">${esc(a.type)}${a.range?' · '+esc(a.range):''}${a.rollMode!=='normal'?' · '+esc(a.rollMode):''}</small>${timingBadge(a,'attack')}${a.notes?`<small class="attack-notes">${esc(a.notes)}</small>`:''}</div><div class="action-rolls">${btn('attack-roll',icon('dice')+signed(hit),'roll-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} to hit"`)}${btn('damage-roll',esc(a.damage),'roll-button damage-button',`data-id="${a.id}" aria-label="Roll ${esc(a.name)} damage"`)}</div></div>`;}
 function searchToolbar(placeholder,action='',label='') {return `<div class="toolbar"><label class="search-field">${icon('search')}<input id="search" type="search" placeholder="${placeholder}" aria-label="${placeholder}" value="${esc(query)}"></label>${action?btn(action,icon('plus')+label,'btn btn-primary'):''}</div>`;}
@@ -332,12 +335,31 @@ function addCatalogSpell(id) {
   modal.close();
   commit(spell.name+' added to your spellbook.');
 }
+function spellcasterRows(c) {
+  return characterClasses(c).filter(row=>progressionForClass(c,row.class)?.prepared>0);
+}
+function spellAvailability(c,spell) {
+  if(!c.multiclass?.length)return spell.prepared?'Prepared':'Not readied';
+  const sources=spellcasterRows(c).flatMap(row=>{
+    const info=classSpellState(spell,c,row.class);
+    return info?[row.class+(info.granted?' · always prepared':info.prepared?' · prepared':' · unprepared')]:[];
+  });
+  if(spell.manualPrepared)sources.push('Manual source · prepared');
+  return sources.length?esc(sources.join(' / ')):spell.prepared?'Prepared':'Not readied';
+}
 function renderSpells() {
-  const c=character(),ability=castingAbility(c),spells=c.spells.filter(s=>matchesFilters(f=>f==='Ready'?s.prepared:f==='Cantrips'?s.level===0:f==='Concentration'&&s.concentration)&&(s.name+' '+s.school).toLowerCase().includes(query.toLowerCase()));
+  const c=character(),spells=c.spells.filter(s=>matchesFilters(f=>f==='Ready'?s.prepared:f==='Cantrips'?s.level===0:f==='Concentration'&&s.concentration)&&(s.name+' '+s.school).toLowerCase().includes(query.toLowerCase()));
+  const casters=spellcasterRows(c),flexible=flexibleCastingOptions(c);
+  const showClasses=c.multiclass?.length&&casters.length;
+  const classStats=showClasses?casters.map(row=>{
+    const {ability,attack,dc}=spellCastingStats(c,row.class);
+    return `<div class="summary-card">${icon('spark')}<div><strong>${esc(row.class)}</strong><small>${ABILITIES[ability]} · DC ${dc} · ${signed(attack)} spell attack</small></div></div>`;
+  }).join(''):'';
+  const {ability,attack,dc}=spellCastingStats(c);
   return pageHeading('Spellbook',btn('spell',icon('plus')+'Add spell','btn btn-primary'))+
-  `<div class="summary-grid"><div class="summary-card">${icon('spark')}<div><strong>${8+proficiency(c.level)+mod(c.stats[ability])}</strong><small>Spell save DC · ${ability.toUpperCase()}</small></div></div><div class="summary-card">${icon('bolt')}<div><strong>${signed(proficiency(c.level)+abilityCheckBonus(c,ability))}</strong><small>Spell attack bonus</small></div></div><div class="summary-card">${icon('book')}<div><strong>${c.spells.filter(s=>s.prepared).length}</strong><small>Prepared spells</small></div></div></div>`+
-  `<section class="panel slot-panel"><strong>Spell slots</strong>${slotEntries(c).map(slotRow).join('')||'<span class="form-help">No spell slots available.</span>'}${btn('slots','Edit slots','btn btn-sm')}${flexibleCastingOptions(c).options.length?btn('flexible-casting','Create slot','btn btn-sm'):''}</section>`+renderConcentration(c,'concentration-banner')+
-  listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${s.prepared?'Prepared':'Not readied'}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Spell slots follow class progression after enabling calculation in Edit slots. Pact Magic refreshes on a Short or Long Rest. Use Edit slots for table overrides.</p>`;
+  `<div class="summary-grid">${showClasses?classStats:`<div class="summary-card">${icon('spark')}<div><strong>${dc}</strong><small>Spell save DC · ${ability.toUpperCase()}</small></div></div><div class="summary-card">${icon('bolt')}<div><strong>${signed(attack)}</strong><small>Spell attack bonus</small></div></div>`}<div class="summary-card">${icon('book')}<div><strong>${c.spells.filter(s=>s.prepared).length}</strong><small>Prepared spells</small></div></div></div>`+
+  `<section class="panel slot-panel"><strong>Spell slots</strong>${slotEntries(c).map(slotRow).join('')||'<span class="form-help">No spell slots available.</span>'}${btn('slots','Edit slots','btn btn-sm')}${flexible.options.length||flexible.conversions.length?btn('flexible-casting','Flexible Casting','btn btn-sm'):''}</section>`+renderConcentration(c,'concentration-banner')+
+  listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${spellAvailability(c,s)}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Spell slots follow class progression after enabling calculation in Edit slots. Pact Magic refreshes on a Short or Long Rest. Use Edit slots for table overrides.</p>`;
 }
 function renderDice() {return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray"><div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div><div class="dice-selection">${[4,6,8,10,12,20,100].map(d=>btn('select-die',icon('dice')+`d${d}`,`dice-select${diceExpression===`1d${d}`?' active':''}`,`data-sides="${d}"`)).join('')}</div><form id="dice-form" class="dice-form dice-controls-form">${diceControlsMarkup(diceExpression)}<button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button><details class="dice-notation"><summary>Dice formula</summary><input id="dice-expression" name="expression" value="${esc(diceExpression)}" aria-label="Dice formula, for example 2d6 plus 3" maxlength="30" autocomplete="off" spellcheck="false"></details></form><div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}"`)).join('')}</div><p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Choose your dice and roll.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section><section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;}
 const wikiEntries=[['Classes','2024 progression & features.','people','classes'],['Spells','Revised spell descriptions.','spark','spells'],['Weapons','Properties & Weapon Mastery.','sword','weapons'],['Armor','Armor training & equipment.','shield','armor'],['Adventuring gear','Potions, tools, and supplies.','bag','adventuring-gear'],['Magic items','Current item rules.','star','wondrous-items'],['Backgrounds','Ability increases & Origin feats.','journal','backgrounds'],['Feats','Origin, General, and more.','bolt','feats'],['Species','Your character’s heritage.','leaf','species'],['Rules glossary','Conditions, rests, and actions.','compass','rules']];
@@ -450,13 +472,60 @@ function createCharacter() {
 }
 function editCharacter() {
   const c=character();
-  const classes=Object.keys(CLASSES).filter(name=>name===c.class||contentEnabled({name},state.settings,'class'));
-  setModal('Meet your adventurer.',`<p class="modal-intro">The little details make a character your own.</p><div class="form-grid">${field('Character name','name',c.name,'text','required maxlength="120" data-full placeholder="What shall we call you?"')}${field('Player name','playerName',c.playerName,'text','maxlength="120"')}${field('Level','level',c.level,'number','required min="1" max="20" step="1"')}${field('Experience points','xp',c.xp,'number','required min="0" max="100000000" step="1"')}${characterChoice('Species / race','race',c.race,{required:true,settings:state.settings})}${select('Class','class',classes.length?classes:[''],c.class,'required')}${classPreview(c.class)}${characterChoice('Subclass','subclass',c.subclass,{entries:LEVEL_SUBCLASSES.filter(option=>option.className===c.class),settings:state.settings})}${characterChoice('Background','background',c.background,{settings:state.settings})}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],c.alignment)}${field('Campaign','campaign',c.campaign,'text','maxlength="100"')}</div><p class="form-help">Dropdown previews include core and supplemental options. Changing an option doesn’t rebuild your existing stats, notes, or equipment. Edit hit die size, scores, spells, and features as needed. Set level and XP here when copying a sheet, or use Level up to gain HP as you advance.</p>${btn('portrait',icon('edit')+'Make or edit portrait','btn portrait-details-action')}${actions('Save character',btn('delete-character',icon('trash')+'Delete character','btn btn-danger left-action'))}`,data=>{
-    const level=num(data,'level'), nextClass=textValue(data,'class');
-    if(!validSlotSettings({...c,level,class:nextClass},Object.keys(CLASSES)))throw new Error('Update additional class levels in Spellbook before changing the primary class or total level.');
-    c.playerName=textValue(data,'playerName');c.level=level;c.xp=num(data,'xp');c.hitDice=Math.min(c.hitDice,c.level);c.name=textValue(data,'name');c.race=textValue(data,'race');c.class=textValue(data,'class');c.subclass=textValue(data,'subclass');c.background=textValue(data,'background');c.alignment=textValue(data,'alignment');c.campaign=textValue(data,'campaign');
-    syncSpellSlots(c);modal.close();route='sheet';location.hash='sheet';commit('Character updated.');
+  const classes=Object.keys(CLASSES).filter(name=>characterClassLevel(c,name)||contentEnabled({name},state.settings,'class'));
+  setModal('Meet your adventurer.',`<p class="modal-intro">The little details make a character your own.</p><div class="form-grid">${field('Character name','name',c.name,'text','required maxlength="120" data-full placeholder="What shall we call you?"')}${field('Player name','playerName',c.playerName,'text','maxlength="120"')}${field('Primary class level','level',characterClassLevel(c,c.class),'number','required min="1" max="20" step="1"')}${field('Experience points','xp',c.xp,'number','required min="0" max="100000000" step="1"')}${characterChoice('Species / race','race',c.race,{required:true,settings:state.settings})}${select('Primary class','class',classes.length?classes:[''],c.class,'required')}${classPreview(c.class)}${characterChoice('Subclass','subclass',c.subclass,{entries:LEVEL_SUBCLASSES.filter(option=>option.className===c.class),settings:state.settings})}${characterChoice('Background','background',c.background,{settings:state.settings})}${select('Alignment','alignment',['Lawful Good','Neutral Good','Chaotic Good','Lawful Neutral','True Neutral','Chaotic Neutral','Lawful Evil','Neutral Evil','Chaotic Evil','Unaligned'],c.alignment)}${field('Campaign','campaign',c.campaign,'text','maxlength="100"')}</div><fieldset class="level-choice"><legend>Additional classes</legend><div data-class-rows>${(c.multiclass||[]).map(row=>classRow(row)).join('')}</div><p class="form-help" data-class-total role="status"></p><button type="button" class="btn btn-sm" data-add-class>Add a class row</button></fieldset><p class="form-help">Use Level up to gain HP, class features, and spell choices. Use this editor to enter an existing build or apply a DM adjustment. Review missing choices in Features and assign older spells to their classes in Spellbook.</p>${btn('portrait',icon('edit')+'Make or edit portrait','btn portrait-details-action')}${actions('Save character',btn('delete-character',icon('trash')+'Delete character','btn btn-danger left-action'))}`,data=>{
+    const nextClass=textValue(data,'class'),subclass=checkedSubclass(nextClass,textValue(data,'subclass'));
+    const multiclass=rows().map(row=>{
+      const name=row.querySelector('[name="additionalClass"]').value;
+      return {class:name,level:Number(row.querySelector('[name="additionalLevel"]').value),subclass:checkedSubclass(name,row.querySelector('[name="additionalSubclass"]').value)};
+    });
+    const level=num(data,'level')+totalClassLevel(multiclass);
+    const next={...c,level,class:nextClass,subclass,multiclass};
+    if(level>20||!validSlotSettings(next,Object.keys(CLASSES)))throw new Error('Use each class once and keep the total character level between 1 and 20.');
+    const oldPools=hitDicePools(c);
+    if(c.class!==nextClass&&c.hitDie===CLASSES[c.class])next.hitDie=CLASSES[nextClass];
+    reconcileHitDice(next,oldPools);
+    for(const key of ['playerName','name','race','background','alignment','campaign'])next[key]=textValue(data,key);
+    next.xp=num(data,'xp');
+    syncSpellSlots(next);
+    Object.assign(c,next);
+    if(!multiclass.length)delete c.multiclass;
+    for(const key of ['hitDicePools','pactSlot','pactMagic'])if(!Object.hasOwn(next,key))delete c[key];
+    modal.close();route='sheet';location.hash='sheet';commit('Character updated.');
   });
+  const form=modal.querySelector('form'),container=form.querySelector('[data-class-rows]');
+  const rows=()=>[...container.querySelectorAll('[data-class-row]')];
+  function checkedSubclass(name,value){
+    const subclass=canonicalSubclass(value.trim());
+    const known=LEVEL_SUBCLASSES.find(option=>option.name.toLowerCase()===subclass.toLowerCase());
+    if(known&&known.className!==name)throw new Error(`${known.name} belongs to ${known.className}.`);
+    return known?.name??subclass;
+  }
+  function classRow(row){
+    const listId='subclasses-'+uid();
+    return `<div class="form-grid level-choice" data-class-row>${select('Class','additionalClass',classes,row.class,'required')}${field('Class level','additionalLevel',row.level,'number','required min="1" max="19" step="1"')}${field('Subclass (optional)','additionalSubclass',row.subclass,'text',`maxlength="500" list="${listId}"`)}<datalist id="${listId}"></datalist><button type="button" class="btn btn-sm" data-remove-class>Remove class row</button></div>`;
+  }
+  function preview(){
+    const primary=form.elements.class.value,primaryLevel=Number(form.elements.level.value);
+    const breakdown=rows().map(row=>{
+      const name=row.querySelector('[name="additionalClass"]').value;
+      row.querySelector('datalist').innerHTML=LEVEL_SUBCLASSES.filter(option=>option.className===name&&contentEnabled(option,state.settings,'subclass')).map(option=>`<option value="${esc(option.name)}"></option>`).join('');
+      return {class:name,level:Number(row.querySelector('[name="additionalLevel"]').value)};
+    });
+    form.querySelector('[data-class-total]').textContent=`${primary} ${primaryLevel}${breakdown.map(row=>` / ${row.class} ${row.level}`).join('')} · Character level ${primaryLevel+totalClassLevel(breakdown)}`;
+    form.querySelector('[data-add-class]').disabled=breakdown.length>=classes.length-1;
+  }
+  form.querySelector('[data-add-class]').addEventListener('click',()=>{
+    const used=new Set([form.elements.class.value,...rows().map(row=>row.querySelector('[name="additionalClass"]').value)]);
+    const available=classes.find(name=>!used.has(name));
+    if(!available)return;
+    container.insertAdjacentHTML('beforeend',classRow({class:available,level:1,subclass:''}));
+    preview();container.lastElementChild.querySelector('select').focus();
+  });
+  container.addEventListener('click',event=>{
+    if(event.target.closest('[data-remove-class]')){event.target.closest('[data-class-row]').remove();preview();}
+  });
+  form.addEventListener('input',preview);preview();
 }
 function editAbilities() {
   const c=character();
@@ -467,13 +536,21 @@ function editAbilities() {
   });
 }
 function editCombat() {
-  const c=character();
-  setModal('Ready for the next encounter.',`<div class="form-grid">${field('Maximum hit points','maxHp',c.maxHp,'number','required min="1" max="9999" step="1"')}${field('Current hit points','hp',c.hp,'number','required min="0" max="9999" step="1"')}${field('Temporary hit points','tempHp',c.tempHp,'number','required min="0" max="9999" step="1"')}${field('AC adjustment (temporary or custom bonuses)','acBonus',c.acBonus||0,'number','required min="-99" max="99" step="1"')}${field('AC override (optional total)','acOverride',c.acOverride??'','number','min="0" max="99" step="1" placeholder="Leave blank for automatic AC"')}${field('Base walking speed (before Exhaustion, ft.)','speed',c.speed,'number','required min="0" max="999" step="1"')}${field('Initiative bonus (in addition to Dexterity)','initiativeBonus',c.initiativeBonus,'number','required min="-99" max="99" step="1"')}${select('Hit die size','hitDie',['d6','d8','d10','d12'],'d'+c.hitDie)}${field('Hit dice remaining','hitDice',c.hitDice,'number',`required min="0" max="${c.level}" step="1"`)}${textarea(SHEET_TEXT.defenses,'defenses',c.defenses,3)}</div><label class="check-field"><input name="initiativeAdvantage" type="checkbox" ${c.initiativeAdvantage?'checked':''}>Advantage on initiative</label><p class="form-help">AC ${armorClass(c)}: ${esc(armorClassDetails(c).summary)}. Armor, shields, equipped items, and ability scores update AC automatically. Leave the override blank to keep automatic AC. Previously recorded AC: ${c.ac}. Exhaustion reduces the displayed walking speed automatically.</p>${actions()}`,data=>{
+  const c=character(),pools=hitDicePools(c);
+  const mixed=Boolean(c.multiclass?.length);
+  const poolFields=pools.map(pool=>field(`d${pool.die} Hit Dice remaining`,`hitDice${pool.die}`,pool.available,'number',`required min="0" max="${pool.max}" step="1"`)).join('');
+  setModal('Ready for the next encounter.',`<div class="form-grid">${field('Maximum hit points','maxHp',c.maxHp,'number','required min="1" max="9999" step="1"')}${field('Current hit points','hp',c.hp,'number','required min="0" max="9999" step="1"')}${field('Temporary hit points','tempHp',c.tempHp,'number','required min="0" max="9999" step="1"')}${field('AC adjustment (temporary or custom bonuses)','acBonus',c.acBonus||0,'number','required min="-99" max="99" step="1"')}${field('AC override (optional total)','acOverride',c.acOverride??'','number','min="0" max="99" step="1" placeholder="Leave blank for automatic AC"')}${field('Base walking speed (before Exhaustion, ft.)','speed',c.speed,'number','required min="0" max="999" step="1"')}${field('Initiative bonus (in addition to Dexterity)','initiativeBonus',c.initiativeBonus,'number','required min="-99" max="99" step="1"')}${select(mixed?'Primary Hit Die size':'Hit die size','hitDie',['d6','d8','d10','d12'],'d'+c.hitDie)}${mixed?poolFields:''}${mixed?'':field('Hit dice remaining','hitDice',c.hitDice,'number',`required min="0" max="${c.level}" step="1"`)}${textarea(SHEET_TEXT.defenses,'defenses',c.defenses,3)}</div><label class="check-field"><input name="initiativeAdvantage" type="checkbox" ${c.initiativeAdvantage?'checked':''}>Advantage on initiative</label><p class="form-help">AC ${armorClass(c)}: ${esc(armorClassDetails(c).summary)}. Armor, shields, equipped items, and ability scores update AC automatically. Leave the override blank to keep automatic AC. Previously recorded AC: ${c.ac}. Exhaustion reduces the displayed walking speed automatically.</p>${actions()}`,data=>{
     if(num(data,'hp')>num(data,'maxHp'))throw new Error('Current HP cannot exceed maximum HP.');
     c.initiativeAdvantage=data.has('initiativeAdvantage');
     if(textValue(data,'acOverride')==='')delete c.acOverride;else c.acOverride=num(data,'acOverride');
-    for(const key of ['maxHp','hp','tempHp','acBonus','speed','hitDice','initiativeBonus'])c[key]=num(data,key);
-    c.hitDie=Number(textValue(data,'hitDie').slice(1));c.defenses=textValue(data,'defenses');
+    for(const key of ['maxHp','hp','tempHp','acBonus','speed','initiativeBonus'])c[key]=num(data,key);
+    if(mixed){
+      const edited=pools.map(pool=>({...pool,available:num(data,`hitDice${pool.die}`)}));
+      c.hitDie=Number(textValue(data,'hitDie').slice(1));
+      reconcileHitDice(c,edited);
+    }
+    else {c.hitDie=Number(textValue(data,'hitDie').slice(1));setHitDicePools(c,[{available:num(data,'hitDice')}]);}
+    c.defenses=textValue(data,'defenses');
     if(c.hp>0){c.deathSuccess=0;c.deathFailure=0;}
     modal.close();commit('Combat stats updated.');
   });
@@ -511,9 +588,11 @@ function showRest(kind='short') {
   if(c.hp<1) {toast('You need at least 1 HP to start a rest.',true);return;}
   const reminders=restReminders(c,kind),initial=restRefreshes(c,{kind}),defaultSkips=initial.filter(row=>row.cooldown).map(row=>row.featureId);
   const preview=restRefreshes(c,{kind,skipFeatureIds:defaultSkips});
+  const pools=hitDicePools(c),mixed=pools.length>1;
+  const spendFields=pools.map(pool=>field(mixed?`d${pool.die} to spend (${pool.available} available)`:'Hit dice to spend',mixed?`dice${pool.die}`:'dice',0,'number',`required min="0" max="${pool.available}" step="1"`)).join('');
   const recovery=kind==='short' ? arcaneRecoveryPlan(c) : null;
-  setModal(kind==='long'?'A well-earned night’s rest.':'Catch your breath.',`<div class="rest-illustration rest-${kind}"><div class="rest-sky" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>${campArt()}<span class="rest-moon" aria-hidden="true">${effectGlyph(kind==='long'?'moon':'camp')}</span><span class="rest-scene-label">${kind==='long'?'UNDER A QUIET SKY':'A MOMENT BY THE FIRE'}</span></div><div class="choice-buttons">${btn('rest','Short rest',`btn${kind==='short'?' btn-primary':''}`,'data-kind="short"')}${btn('rest','Long rest',`btn${kind==='long'?' btn-primary':''}`,'data-kind="long"')}</div>${kind==='long'?`<p class="form-help">A Long Rest normally takes 8 hours. Wait at least 16 hours after the previous Long Rest before starting another. Finish once your DM confirms the rest qualifies.</p><label class="check-field"><input name="reduceExhaustion" type="checkbox" checked>Remove one Exhaustion level if eligible</label><p class="form-help">Uncheck recovery when an effect prevents it, including unresolved dehydration or malnutrition.</p>`:`<p class="modal-intro" style="margin-top:18px">A Short Rest takes at least 1 hour. You have ${c.hitDice} d${c.hitDie} available, with ${signed(mod(c.stats.con))} Constitution per die.</p>${field('Hit dice to spend','dice',0,'number',`required min="0" max="${c.hitDice}" step="1"`)}`}<section class="rest-section" aria-labelledby="rest-refresh-title"><h3 id="rest-refresh-title">What will refresh</h3><p>Available amounts before → after this rest. Uncheck a resource if another rule blocks its recovery.</p><div id="rest-refresh-preview" aria-live="polite">${preview.length?restRefreshList(preview):'<p>No tracked resources to refresh.</p>'}</div></section>${arcaneRecoveryFields(recovery)}${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">${kind==='long'?'Long Rest reminders':'Short Rest reminders'}</h3><p>Review choices and effects for this character. These changes are yours to apply; checking a reminder marks it reviewed.</p>${restReminderList(reminders)}</section>`:''}${actions(kind==='long'?'Finish long rest':'Finish short rest')}`,data=>{
-    const beforeHP=c.hp,beforeDice=c.hitDice;
+  setModal(kind==='long'?'A well-earned night’s rest.':'Catch your breath.',`<div class="rest-illustration rest-${kind}"><div class="rest-sky" aria-hidden="true">${Array.from({length:9},(_,i)=>`<i style="--i:${i}"></i>`).join('')}</div>${campArt()}<span class="rest-moon" aria-hidden="true">${effectGlyph(kind==='long'?'moon':'camp')}</span><span class="rest-scene-label">${kind==='long'?'UNDER A QUIET SKY':'A MOMENT BY THE FIRE'}</span></div><div class="choice-buttons">${btn('rest','Short rest',`btn${kind==='short'?' btn-primary':''}`,'data-kind="short"')}${btn('rest','Long rest',`btn${kind==='long'?' btn-primary':''}`,'data-kind="long"')}</div>${kind==='long'?`<p class="form-help">A Long Rest normally takes 8 hours. Wait at least 16 hours after the previous Long Rest before starting another. Finish once your DM confirms the rest qualifies.</p><label class="check-field"><input name="reduceExhaustion" type="checkbox" checked>Remove one Exhaustion level if eligible</label><p class="form-help">Uncheck recovery when an effect prevents it, including unresolved dehydration or malnutrition.</p>`:`<p class="modal-intro" style="margin-top:18px">A Short Rest takes at least 1 hour. You have ${pools.map(pool=>`${pool.available} d${pool.die}`).join(', ')} available, with ${signed(mod(c.stats.con))} Constitution per die.</p><div class="form-grid">${spendFields}</div>`}<section class="rest-section" aria-labelledby="rest-refresh-title"><h3 id="rest-refresh-title">What will refresh</h3><p>Available amounts before → after this rest. Uncheck a resource if another rule blocks its recovery.</p><div id="rest-refresh-preview" aria-live="polite">${preview.length?restRefreshList(preview):'<p>No tracked resources to refresh.</p>'}</div></section>${arcaneRecoveryFields(recovery)}${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">${kind==='long'?'Long Rest reminders':'Short Rest reminders'}</h3><p>Review choices and effects for this character. These changes are yours to apply; checking a reminder marks it reviewed.</p>${restReminderList(reminders)}</section>`:''}${actions(kind==='long'?'Finish long rest':'Finish short rest')}`,data=>{
+    const beforeHP=c.hp,beforeDice=hitDicePools(c);
     const currentRecovery=recovery && arcaneRecoveryPlan(c);
     const counts=recovery?.slots.map(({level})=>({level,count:num(data,`recoverSlot${level}`)})) || [];
     const total=counts.reduce((sum,row)=>sum+row.count*row.level,0);
@@ -523,8 +602,9 @@ function showRest(kind='short') {
     const refreshed=restRefreshes(c,{kind,reduceExhaustion:data.has('reduceExhaustion'),skipFeatureIds});
     if(kind==='long')longRest(c,{reduceExhaustion:data.has('reduceExhaustion'),skipFeatureIds});
     else {
-      const rolls=[];
-      const healing=shortRest(c,num(data,'dice'),sides=>{const value=randomDie(sides);rolls.push(value);return value;},{skipFeatureIds});
+      const rolls=[],dieSides=[];
+      const spending=Object.fromEntries(pools.map(pool=>[pool.die,num(data,mixed?`dice${pool.die}`:'dice')]));
+      const healing=shortRest(c,spending,sides=>{const value=randomDie(sides);rolls.push(value);dieSides.push(sides);return value;},{skipFeatureIds});
       if(total){
         currentRecovery.feature.used++;
         for(const {level,count} of counts.filter(row=>row.count)){
@@ -535,9 +615,12 @@ function showRest(kind='short') {
       }
       if(rolls.length) {
         const bonus=healing-rolls.reduce((sum,value)=>sum+value,0);
-        hitDiceRoll=recordRoll({expression:`${rolls.length}d${c.hitDie}${bonus?signed(bonus):''}`,rolls,total:healing,bonus,mode:'normal',natural:null},'Short Rest · Hit Dice');
+        const expression=pools.filter(pool=>spending[pool.die]).map(pool=>`${spending[pool.die]}d${pool.die}`).join('+')+(bonus?signed(bonus):'');
+        hitDiceRoll=recordRoll({expression,rolls,...(new Set(dieSides).size>1?{dieSides}:{}),total:healing,bonus,mode:'normal',natural:null},'Short Rest · Hit Dice');
       }
-      refreshed.unshift({key:'hp',title:'Hit points',before:beforeHP,after:c.hp},{key:'hit-dice',title:'Hit Dice',before:beforeDice,after:c.hitDice});
+      refreshed.unshift({key:'hp',title:'Hit points',before:beforeHP,after:c.hp},...hitDicePools(c).map((pool,index)=>({
+        key:`hit-dice-${pool.die}`,title:mixed?`d${pool.die} Hit Dice`:'Hit Dice',before:beforeDice[index].available,after:pool.available
+      })));
     }
     commit();
     setModal(kind==='long'?'Long rest complete.':'Short rest complete.',`<p class="modal-intro">${esc(c.name)} is ready for the road. Your sheet has been updated.</p><section class="rest-section" aria-labelledby="rest-refreshed-title"><h3 id="rest-refreshed-title">Refreshed & cleared</h3>${restRefreshList(refreshed,true)}</section>${reminders.length?`<section class="rest-section" aria-labelledby="rest-reminder-title"><h3 id="rest-reminder-title">Choices & reminders</h3><p>Work through these before your next adventure. Use Edit to update your sheet.</p>${restReminderList(reminders,true,data.getAll('reviewedReminder'))}</section>`:''}<div class="modal-actions">${btn('close','Done','btn btn-primary')}</div>`);
@@ -555,12 +638,11 @@ function showRest(kind='short') {
 }
 function showXP() {const c=character();setModal('A little experience goes a long way.',`<p class="modal-intro">Currently ${fmt(c.xp)} XP. ${c.level<20?`Level ${c.level+1} starts at ${fmt(XP[c.level+1])} XP.`:'You’re a level 20 legend.'} Level up whenever your DM gives the word.</p><div class="form-grid">${field('Experience to add','amount',100,'number','required min="0" max="10000000" step="1"')}${field('Or set total XP','total','','number','min="0" max="100000000" step="1" placeholder="Leave blank to add"')}</div>${actions('Update experience')}`,data=>{const before=c.xp;c.xp=data.get('total')!==''?num(data,'total'):Math.min(100000000,c.xp+num(data,'amount'));modal.close();commit('Experience updated. Keep that adventure going.');if(c.xp>before){sound.play('progression.xp');playEffect('xp',{label:`+${fmt(c.xp-before)} XP`,detail:'EVERY CHAPTER COUNTS',target:'.xp-strip'});}});}
 function showLevelUp() {
-  if(character().multiclass?.length){toast('For multiclass advancement, update total level in Character details and class levels in Spellbook.');return;}
-  openLevelUp(character(),{setModal,settings:state.settings,onComplete:()=>{persist();render();celebrate();}});
+  openLevelUp(character(),{setModal,settings:state.settings,onComplete:className=>{persist();render();celebrate(className);}});
 }
-function celebrate() {
+function celebrate(className=character().class) {
   const c=character();
-  setModal('A new chapter unlocked.',`<div class="celebration celebration-ascend"><div class="ascension-stage"><div class="ascension-sigil" aria-hidden="true">${effectGlyph('star')}</div><span class="ascension-kicker">THE ADVENTURE CONTINUES</span><div class="avatar-frame">${portraitMarkup(c)}<span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></div><span class="ascension-level">LEVEL ${String(c.level).padStart(2,'0')}</span></div><h2>LEVEL UP!</h2><p>The road has changed you, ${esc(c.name.split(' ')[0])}.<br>And there’s still so much story left.</p><span class="badge">LEVEL ${c.level} ${esc(c.class).toUpperCase()} · ${c.maxHp} MAX HP</span><p>Check your class progression for new abilities, spells, and choices.</p>${ext(wikiURL(c.class),'View class progression '+icon('external'),'btn')}</div><div class="modal-actions">${btn('close','Onward, adventurer. '+icon('arrow'),'btn btn-primary')}</div>`);
+  setModal('A new chapter unlocked.',`<div class="celebration celebration-ascend"><div class="ascension-stage"><div class="ascension-sigil" aria-hidden="true">${effectGlyph('star')}</div><span class="ascension-kicker">THE ADVENTURE CONTINUES</span><div class="avatar-frame">${portraitMarkup(c)}<span class="level-badge">LVL ${String(c.level).padStart(2,'0')}</span></div><span class="ascension-level">LEVEL ${String(c.level).padStart(2,'0')}</span></div><h2>LEVEL UP!</h2><p>The road has changed you, ${esc(c.name.split(' ')[0])}.<br>And there’s still so much story left.</p><span class="badge">${esc(classBreakdown(c))} · ${c.maxHp} MAX HP</span><p>Check your class progression for new abilities, spells, and choices.</p>${ext(wikiURL(className),'View class progression '+icon('external'),'btn')}</div><div class="modal-actions">${btn('close','Onward, adventurer. '+icon('arrow'),'btn btn-primary')}</div>`);
   sound.play('progression.level');
   playEffect('level',{target:'.ascension-stage .avatar-frame',caption:false,sigil:false});
 }
@@ -658,31 +740,55 @@ function editFeature(id) {
   });
 }
 
-function editSpell(id) {modal.dataset.spellId=id||'';const c=character(),existing=c.spells.find(s=>s.id===id),s=existing||{name:'',level:1,school:'Evocation',castingTime:'1 action',range:'',duration:'Instantaneous',concentration:false,prepared:true,notes:'',wiki:''};setModal(existing?'A little spellcraft.':'A new spark of magic.',`<div class="form-grid">${field('Spell name','name',s.name,'text','required maxlength="200" data-full')}${field('Spell level (0 = cantrip)','level',s.level,'number','required min="0" max="9" step="1"')}${select('School','school',['Abjuration','Conjuration','Divination','Enchantment','Evocation','Illusion','Necromancy','Transmutation','Other'],s.school)}${field('Casting time','castingTime',s.castingTime,'text','maxlength="100"')}${field('Range','range',s.range,'text','maxlength="100"')}${field('Duration','duration',s.duration,'text','maxlength="100"')}${field('2024 reference link (blank = Wikidot spell reference)','wiki',s.wiki,'url','maxlength="2000"')}${textarea('Spell notes','notes',s.notes,4)}</div><label class="check-field"><input name="concentration" type="checkbox" ${s.concentration?'checked':''}>Requires concentration</label><label class="check-field"><input name="prepared" type="checkbox" ${s.prepared?'checked':''}>Prepared and ready to cast</label>${spellIconPicker(s)}${actions('Save spell',existing?btn('delete-entry',icon('trash'),'btn btn-danger left-action',`data-type="spells" data-id="${id}" aria-label="Delete spell"`):'')}`,data=>{const name=textValue(data,'name'),spell={id:existing?.id||uid(),name,level:num(data,'level'),school:textValue(data,'school'),spellIconKey:textValue(data,'spellIconKey'),castingTime:textValue(data,'castingTime'),range:textValue(data,'range'),duration:textValue(data,'duration'),concentration:data.has('concentration'),prepared:data.has('prepared'),notes:textValue(data,'notes'),wiki:textValue(data,'wiki')||wikiURL(name,'spell')};if(existing){if(c.concentration===existing.name)c.concentration=spell.name;if(existing.classPrepared!==undefined)existing.classPrepared=spell.prepared;Object.assign(existing,spell);}else c.spells.push(spell);modal.close();commit('A little more magic in your spellbook.');});}
+function editSpell(id) {modal.dataset.spellId=id||'';const c=character(),existing=c.spells.find(s=>s.id===id),s=existing||{name:'',level:1,school:'Evocation',castingTime:'1 action',range:'',duration:'Instantaneous',concentration:false,prepared:true,notes:'',wiki:''};
+  const casters=c.multiclass?.length?spellcasterRows(c):[];
+  const singleSource=s.classSpells?.[c.class];
+  const alwaysPrepared=!casters.length&&singleSource?.granted&&singleSource.prepared===undefined;
+  const ready=casters.length
+    ?s.manualPrepared??(!existing||!s.classSpells&&s.classPrepared===undefined&&!casters.some(row=>classSpellState(s,c,row.class))&&s.prepared)
+    :singleSource?.prepared??s.classPrepared??s.prepared;
+  const classFields=casters.map(row=>{
+    const info=existing&&classSpellState(s,c,row.class);
+    const value=info?.prepared===undefined?'Manual / another source':info.prepared?'Prepared':'Known / unprepared';
+    return select(row.class+(info?.granted?' (always prepared by a feature)':''),`spellClass-${row.class}`,['Manual / another source','Prepared','Known / unprepared'],value);
+  }).join('');
+  setModal(existing?'A little spellcraft.':'A new spark of magic.',`<div class="form-grid">${field('Spell name','name',s.name,'text','required maxlength="200" data-full')}${field('Spell level (0 = cantrip)','level',s.level,'number','required min="0" max="9" step="1"')}${select('School','school',['Abjuration','Conjuration','Divination','Enchantment','Evocation','Illusion','Necromancy','Transmutation','Other'],s.school)}${field('Casting time','castingTime',s.castingTime,'text','maxlength="100"')}${field('Range','range',s.range,'text','maxlength="100"')}${field('Duration','duration',s.duration,'text','maxlength="100"')}${field('2024 reference link (blank = Wikidot spell reference)','wiki',s.wiki,'url','maxlength="2000"')}${textarea('Spell notes','notes',s.notes,4)}</div><label class="check-field"><input name="concentration" type="checkbox" ${s.concentration?'checked':''}>Requires concentration</label><label class="check-field"><input name="prepared" type="checkbox" ${ready?'checked':''} ${alwaysPrepared?'disabled':''}>${alwaysPrepared?'Always prepared by a class feature':casters.length?'Ready from a manual source':'Prepared and ready to cast'}</label>${casters.length?`<fieldset class="level-choice"><legend>Class origins & preparation</legend><p class="form-help">Set readiness for each class that knows or prepares this spell. Always-prepared features remain available.</p><div class="form-grid">${classFields}</div></fieldset>`:''}${spellIconPicker(s)}${actions('Save spell',existing?btn('delete-entry',icon('trash'),'btn btn-danger left-action',`data-type="spells" data-id="${id}" aria-label="Delete spell"`):'')}`,data=>{const name=textValue(data,'name'),spell={id:existing?.id||uid(),name,level:num(data,'level'),school:textValue(data,'school'),spellIconKey:textValue(data,'spellIconKey'),castingTime:textValue(data,'castingTime'),range:textValue(data,'range'),duration:textValue(data,'duration'),concentration:data.has('concentration'),prepared:data.has('prepared'),notes:textValue(data,'notes'),wiki:textValue(data,'wiki')||wikiURL(name,'spell')};const stored=existing||spell;
+    if(existing){
+      if(c.concentration===existing.name)c.concentration=spell.name;
+      Object.assign(existing,spell);
+    }else c.spells.push(spell);
+    if(casters.length&&(stored.classSpells||casters.some(row=>data.get(`spellClass-${row.class}`)!=='Manual / another source'))){
+      stored.manualPrepared=data.has('prepared');
+      for(const row of casters){
+        const choice=data.get(`spellClass-${row.class}`),granted=stored.classSpells?.[row.class]?.granted;
+        const info=choice==='Manual / another source'?(granted?{granted}:undefined):{...(granted?{granted}:{}),prepared:choice==='Prepared'};
+        setClassSpell(stored,c,row.class,info);
+      }
+      if(!Object.keys(stored.classSpells).length){
+        delete stored.classSpells;
+        delete stored.manualPrepared;
+        stored.prepared=data.has('prepared');
+      }
+    }else if(alwaysPrepared){
+      setClassSpell(stored,c,c.class,singleSource);
+    }else if(stored.classSpells?.[c.class]?.prepared!==undefined){
+      setClassSpell(stored,c,c.class,{...stored.classSpells[c.class],prepared:data.has('prepared')});
+    }else if(stored.classPrepared!==undefined)stored.classPrepared=stored.prepared;
+    modal.close();commit('A little more magic in your spellbook.');
+  });
+}
 function editSlots() {
   const c=character(), previous=spellSlotPlan(c);
-  const extras=(c.multiclass || []).map(row=>[row.class,row.level,row.subclass].filter(Boolean).join(' | ')).join('\n');
-  const parseClasses=value=>value.split('\n').filter(line=>line.trim()).map(line=>{
-    const [name,level,subclass='',extra]=line.split('|').map(part=>part.trim());
-    const className=Object.keys(CLASSES).find(nameInRules=>nameInRules.toLowerCase()===name.toLowerCase());
-    const selected=canonicalSubclass(subclass), option=LEVEL_SUBCLASSES.find(row=>row.name.toLowerCase()===selected.toLowerCase());
-    if(!className||!/^\d+$/.test(level)||extra!==undefined||option&&option.className!==className)throw new Error('Enter a valid class, level, and optional subclass on each line.');
-    return {class:className,level:Number(level),subclass:option?.name ?? selected};
-  });
   const overrides=c.spellSlotMode==='auto' ? c.slotOverrides || [] : c.slots.map((slot,index)=>slot.max===previous.maxima[index] ? null : slot.max);
   const limit='min="0" max="99" step="1" data-slot-override';
   setModal('Spell slot settings',`<p class="modal-intro">Slot maximums follow your class levels and subclass. Enter an override for any level to keep a custom maximum. Leave it blank to use the calculated number.</p>
-    ${select('Spellcasting ability','spellAbility',['auto','int','wis','cha','str','dex','con'],c.spellAbility)}
-    <details class="level-choice"${extras?' open':''}><summary>Multiclass levels</summary>
-      <p class="form-help">Enter each additional class as Class | level | optional subclass. Example: Fighter | 3 | Eldritch Knight. The remaining levels belong to ${esc(c.class)}.</p>
-      ${textarea('Additional classes','multiclass',extras,3,1000)}
-    </details>
+    ${select('Primary casting ability override','spellAbility',['auto','int','wis','cha','str','dex','con'],c.spellAbility)}
     <p class="form-help" data-calculated-slots role="status"></p>
     <div class="form-grid">${c.slots.map((_,i)=>field('Level '+(i+1)+' maximum override','slot'+i,overrides[i]??'','number',limit)).join('')}</div>
     <div data-pact-override${previous.pactSlot?'':' hidden'}>${field('Pact Magic maximum override','pactOverride',c.pactSlotOverride??'','number',limit)}</div>
     <p class="form-help">Free castings from species and feats use their own resources. Items that restore slots can be recorded by restoring a spent slot. Use an override for temporary extra slots or table rules.</p>
     ${btn('clear-slot-overrides','Clear overrides','btn btn-sm')}${actions('Save slots')}`,data=>{
-    const next=settingsFrom(data);
+    const next=structuredClone(c);
     const values=c.slots.map((_,index)=>data.get('slot'+index)===''?null:num(data,'slot'+index));
     next.spellSlotMode='auto';
     next.spellAbility=textValue(data,'spellAbility');
@@ -691,43 +797,44 @@ function editSlots() {
     if(!validSlotSettings(next,Object.keys(CLASSES)))throw new Error('Enter valid spell slot overrides.');
     syncSpellSlots(next);
     Object.assign(c,next);
-    for(const key of ['slotOverrides','pactSlotOverride','pactMagic','pactSlot','multiclass'])if(!Object.hasOwn(next,key))delete c[key];
+    for(const key of ['slotOverrides','pactSlotOverride','pactMagic','pactSlot'])if(!Object.hasOwn(next,key))delete c[key];
     modal.close();commit('Spell slots updated.');
   });
-  function settingsFrom(data){
-    const next=structuredClone(c), multiclass=parseClasses(textValue(data,'multiclass'));
-    if(multiclass.length)next.multiclass=multiclass;else delete next.multiclass;
-    if(!validSlotSettings(next,Object.keys(CLASSES)))throw new Error(`Use each class once and leave at least one level for ${c.class}.`);
-    return next;
-  }
   const form=modal.querySelector('form');
   const preview=()=>{
     const label=form.querySelector('[data-calculated-slots]');
     try {
-      const plan=spellSlotPlan(settingsFrom(new FormData(form)));
+      const plan=spellSlotPlan(c);
       const rows=plan.maxima.flatMap((max,i)=>max?[`level ${i+1} × ${max}`]:[]);
       label.textContent=(rows.length?`${plan.pactMagic?'Calculated Pact Magic':'Calculated spell slots'} · ${rows.join(', ')}.`:'No calculated spell slots.')+
         (plan.pactSlot?` Pact Magic · level ${plan.pactSlot.level} × ${plan.pactSlot.max}.`:'');
       form.querySelector('[data-pact-override]').hidden=!plan.pactSlot;
     } catch(error){label.textContent=error.message;}
   };
-  form.querySelector('[name="multiclass"]').addEventListener('input',preview);
   form.querySelector('[data-action="clear-slot-overrides"]').addEventListener('click',()=>form.querySelectorAll('[data-slot-override]').forEach(field=>{field.value='';}));
   preview();
 }
 function showFlexibleCasting() {
-  const c=character(),{options}=flexibleCastingOptions(c);
-  const label=({level,cost})=>`Level ${level} · ${cost} Sorcery Points`;
-  if(!options.length)return;
-  setModal('Create a spell slot',`<p class="modal-intro">Spend Sorcery Points to create one slot. The extra slot expires when you finish a Long Rest.</p>
-    ${select('Slot level','flexibleSlot',options.map(label),label(options[0]))}${actions('Create slot')}`,data=>{
-    const {feature,options:current}=flexibleCastingOptions(c);
-    const choice=current.find(row=>label(row)===data.get('flexibleSlot'));
-    if(!choice)throw new Error('You do not have enough Sorcery Points for that slot.');
-    (c.temporarySlots ??= Array(5).fill(0))[choice.level-1]++;
-    feature.used+=choice.cost;
-    syncSpellSlots(c);
-    modal.close();commit(`Created a level ${choice.level} spell slot.`);
+  const c=character(),{options,conversions}=flexibleCastingOptions(c);
+  const createLabel=({level,cost})=>`Create level ${level} · spend ${cost} Sorcery Points`;
+  const convertLabel=({level,pact})=>`Spend ${pact?'Pact Magic · ':''}level ${level} · regain up to ${level} Sorcery Points`;
+  const labels=[...options.map(createLabel),...conversions.map(convertLabel)];
+  if(!labels.length)return;
+  setModal('Flexible Casting',`<p class="modal-intro">Spend Sorcery Points to create a spell slot, or spend an available spell slot to regain points. Created slots expire on a Long Rest.</p>
+    ${select('Conversion','flexibleSlot',labels,labels[0])}${actions('Confirm conversion')}`,data=>{
+    const current=flexibleCastingOptions(c),value=data.get('flexibleSlot');
+    const create=current.options.find(row=>createLabel(row)===value);
+    const convert=current.conversions.find(row=>convertLabel(row)===value);
+    if(!create&&!convert)throw new Error('That conversion is no longer available.');
+    if(create){
+      (c.temporarySlots ??= Array(5).fill(0))[create.level-1]++;
+      current.feature.used+=create.cost;
+      syncSpellSlots(c);
+    }else{
+      convert.slot.used++;
+      current.feature.used=Math.max(0,current.feature.used-convert.level);
+    }
+    modal.close();commit(create?`Created a level ${create.level} spell slot.`:'Sorcery Points restored.');
   });
 }
 function castSpell(id) {
@@ -736,24 +843,29 @@ function castSpell(id) {
   if(armorTrainingEffects(c).blocksCasting){toast('You cannot cast spells while wearing armor without training.',true);return;}
   const options=new Map(),castingGrants=s.castingGrants||[];
   const manual='No slot (ritual / item / feature)';
-  const classAbility=castingAbility(c);
-  const abilityLabel=ability=>`${ABILITIES[ability]} · DC ${8+mod(c.stats[ability])+proficiency(c.level)} · spell attack ${signed(mod(c.stats[ability])+proficiency(c.level))}`;
+  const readyClasses=readySpellClasses(s,c).filter(()=>s.classSpells||s.classPrepared!==undefined||!castingGrants.length);
+  const abilityLabel=ability=>`${ABILITIES[ability]} · DC ${8+mod(c.stats[ability])+proficiency(c.level)} · spell attack ${signed(abilityCheckBonus(c,ability)+proficiency(c.level))}`;
   const available=slotEntries(c).filter(({slot,level})=>level>=s.level&&slot.used<slot.max);
   const addSlots=(source,ability)=>available.forEach(({level,pact,secondary})=>options.set(`${pact?'Pact Magic · ':''}Level ${level}${source?` · ${source} (${ABILITIES[ability]})`:''}`,{slot:level-1,secondary,ability}));
   if(s.level){
-    if(s.classPrepared===true||s.classPrepared===undefined&&!castingGrants.length)addSlots('',classAbility);
+    for(const name of readyClasses)addSlots(c.multiclass?.length?name:'',castingAbility(c,name));
+    if(s.manualPrepared||!readyClasses.length&&!s.classSpells&&!castingGrants.length&&s.prepared)addSlots(s.classSpells?'Manual source':'',castingAbility(c));
     for(const grant of castingGrants){
       const {origin,ability,mode,featureId}=grant;
-      if(mode==='free'){
+      if(mode==='free'||mode==='free-only'){
         const feature=c.features.find(f=>f.id===featureId);
         if(feature&&feature.used<feature.maxUses)options.set(`Free · ${origin} (${ABILITIES[ability]})`,{feature,ability});
-        addSlots(origin,ability);
+        if(mode==='free')addSlots(origin,ability);
       }else if(mode==='slot')addSlots(origin,ability);
       else options.set(`No slot · ${origin} (${ABILITIES[ability]})`,{ability});
     }
     options.set(manual,{});
   }else{
-    if(!castingGrants.length||s.classPrepared)options.set(`Cantrip · ${c.class} (${ABILITIES[classAbility]})`,{ability:classAbility});
+    for(const name of readyClasses){
+      const ability=castingAbility(c,name);
+      options.set(`Cantrip · ${name} (${ABILITIES[ability]})`,{ability});
+    }
+    if(s.manualPrepared||!readyClasses.length&&!castingGrants.length)options.set('Cantrip · table choice',{ability:castingAbility(c)});
     for(const {origin,ability} of castingGrants)options.set(`Cantrip · ${origin} (${ABILITIES[ability]})`,{ability});
   }
   const labels=[...options.keys()];
@@ -940,7 +1052,11 @@ document.addEventListener('click',event=>{
       case 'add-catalog-spell':addCatalogSpell(id);break;
       case 'prepare':{
         const s=c.spells.find(s=>s.id===id);
-        if(s.classPrepared!==undefined){s.classPrepared=!s.classPrepared;s.prepared=s.classPrepared||!!s.origin;}
+        if(c.multiclass?.length&&spellcasterRows(c).length){editSpell(id);break;}
+        if(s.classSpells?.[c.class]?.prepared!==undefined){
+          const info=s.classSpells[c.class];setClassSpell(s,c,c.class,{...info,prepared:!info.prepared});
+        }else if(s.classSpells&&Object.values(s.classSpells).some(info=>info.granted)){editSpell(id);break;}
+        else if(s.classPrepared!==undefined){s.classPrepared=!s.classPrepared;s.prepared=s.classPrepared||!!s.origin;}
         else s.prepared=!s.prepared;
         commit();break;
       }

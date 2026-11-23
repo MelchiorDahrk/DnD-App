@@ -2,6 +2,7 @@
 // Presets are editable snapshots, not a character builder. See docs/catalog.md.
 import {RULES_URL, wikiURL, subclassURL, mod, signed} from './model.js';
 import {ORIGIN_FEATS, SUBCLASSES} from './catalog.js';
+import {characterClasses,characterClassLevel} from './character-classes.js';
 import {PUBLISHED_FEATS} from './published-feat-data.js';
 
 const slug=value=>value.toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
@@ -205,10 +206,11 @@ function speciesMatches(race,allowed) {
   });
 }
 export function featureMatchesCharacter(entry,character={}) {
-  if(entry.className&&!matches(character.class,entry.className))return false;
-  if(entry.subclass&&!matches(character.subclass,entry.subclass))return false;
+  const classes=characterClasses(character);
+  if((entry.className||entry.subclass)&&!classes.some(row=>
+    (!entry.className||matches(row.class,entry.className))&&(!entry.subclass||matches(row.subclass,entry.subclass))))return false;
   if(entry.species&&!speciesMatches(character.race,entry.species))return false;
-  if(entry.group==='Fighting styles'&&!['Fighter','Paladin','Ranger'].includes(character.class))return false;
+  if(entry.group==='Fighting styles'&&!classes.some(row=>['Fighter','Paladin','Ranger'].includes(row.class)))return false;
   return true;
 }
 export function filterFeatures({character={},scope='character',group='All',source='All',query=''}={}) {
@@ -216,7 +218,7 @@ export function filterFeatures({character={},scope='character',group='All',sourc
   return entries.filter(entry=>{
     if(group!=='All'&&entry.group!==group)return false;
     if(source!=='All'&&entry.book!==source)return false;
-    if(scope!=='all'&&(!featureMatchesCharacter(entry,character)||(scope==='character'&&entry.level>(character.level||1))))return false;
+    if(scope!=='all'&&(!featureMatchesCharacter(entry,character)||(scope==='character'&&entry.level>featureLevel(entry,character))))return false;
     const haystack=normalized([entry.name,entry.details,entry.group,entry.owner,entry.className,entry.subclass,entry.source,entry.book,...(entry.species||[])].join(' '));
     return terms.every(term=>haystack.includes(term));
   });
@@ -225,7 +227,10 @@ export function featureRequirements(entry) {
   return [entry.className,entry.subclass,...(entry.species||[]),entry.level>1?`Level ${entry.level}+`:'',entry.prerequisites].filter(Boolean).join(' · ')||'Any character; review your chosen options';
 }
 const tier=(level,steps)=>steps.reduce((value,[at,next])=>level>=at?next:value,steps[0][1]);
-export function featureFields(entry,character={},classLevel=character.level||1) {
+export function featureLevel(entry,character) {
+  return entry.className?characterClassLevel(character,entry.className):entry.subclass?characterClasses(character).find(row=>matches(row.subclass,entry.subclass))?.level??0:character.level||1;
+}
+export function featureFields(entry,character={},classLevel=featureLevel(entry,character)) {
   const level=Math.max(1,Math.min(20,Math.trunc(Number(classLevel))||1));
   const totalLevel=Math.max(1,Math.min(20,Number(character.level)||1));
   const pb=2+Math.floor((totalLevel-1)/4),ability=name=>Math.max(1,mod(character.stats?.[name]??10));

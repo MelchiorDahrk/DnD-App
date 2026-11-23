@@ -2,6 +2,8 @@ import {ARMOR,EQUIPMENT,WEAPONS,findEquipment} from './catalog.js';
 import {equipmentName} from './inventory-rules.js';
 import {mod,walkingSpeed} from './model.js';
 import {hasArmorTraining} from './training-rules.js';
+import {characterClass,characterClassLevel} from './character-classes.js';
+import {SUBCLASS_ALIASES} from './progression-options.js';
 
 export function armorTrainingEffects(character) {
   const worn=character.items.filter(equipped).map(item=>({item,...itemDefense(item)})).filter(p=>p.armor&&p.armor.family!=='Shield');
@@ -105,8 +107,11 @@ export function armorClassDetails(character) {
   let base=armor?armorValue(armor):10+dex,label=armor?armor.item.name:'Unarmored (10 + Dexterity)';
   if(!armor) {
     const candidates=[{value:base,label}];
-    if(character.class==='Barbarian')candidates.push({value:10+dex+mod(character.stats.con),label:'Unarmored Defense (Dexterity + Constitution)'});
-    if(character.class==='Monk'&&!usingShield)candidates.push({value:10+dex+mod(character.stats.wis),label:'Unarmored Defense (Dexterity + Wisdom)'});
+    if(characterClassLevel(character,'Barbarian'))candidates.push({value:10+dex+mod(character.stats.con),label:'Unarmored Defense (Dexterity + Constitution)'});
+    if(characterClassLevel(character,'Monk')&&!usingShield)candidates.push({value:10+dex+mod(character.stats.wis),label:'Unarmored Defense (Dexterity + Wisdom)'});
+    const sorcerer=characterClass(character,'Sorcerer'),bard=characterClass(character,'Bard');
+    if(sorcerer?.level>=3&&(SUBCLASS_ALIASES[sorcerer.subclass]||sorcerer.subclass)==='Draconic Sorcery')candidates.push({value:10+dex+mod(character.stats.cha),label:'Draconic Resilience (Dexterity + Charisma)'});
+    if(bard?.level>=3&&bard.subclass==='College of Dance'&&!usingShield)candidates.push({value:10+dex+mod(character.stats.cha),label:'Dazzling Footwork (Dexterity + Charisma)'});
     const robe=active.find(profile=>equipmentName(profile.entry?.name||profile.item.name)==='robe of the archmagi'&&(!profile.requiresAttunement||profile.item.attuned));
     if(robe)candidates.push({value:15+dex,label:robe.item.name});
     const best=candidates.sort((a,b)=>b.value-a.value)[0];base=best.value;label=best.label;

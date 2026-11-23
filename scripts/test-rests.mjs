@@ -29,6 +29,7 @@ try {
  await page.reload({waitUntil:'networkidle0'});
  const state=()=>page.evaluate(()=>JSON.parse(localStorage.getItem('questlog.v2')));
  const active=async()=>(await state()).characters[0];
+ const hydrated=await active();
  const open=()=>page.click('[data-action="rest"][data-kind="long"]');
  const row=key=>`[data-rest-refresh="${key}"]`;
  await open();
@@ -39,8 +40,8 @@ try {
  assert.equal(await page.$eval('.rest-reminder-list',n=>n.querySelectorAll('img').length),0,'custom rules are escaped');
  assert.match(await page.$eval('.rest-reminder-list',n=>n.textContent),/Ancestral ward/,'plural Long Rests retain the cooldown reminder');
  await page.click('[name="reduceExhaustion"]');assert.match(await page.$eval(row('exhaustion'),n=>n.textContent),/2 → 2/);
- assert.deepEqual(await active(),c,'preview and checkboxes do not mutate the character');
- await page.click('#modal [data-action="close"]');assert.deepEqual(await active(),c,'cancel preserves all state');
+ assert.deepEqual(await active(),hydrated,'preview and checkboxes do not mutate the character');
+ await page.click('#modal [data-action="close"]');assert.deepEqual(await active(),hydrated,'cancel preserves all state');
  await open();await page.click(`[name="restoreFeature"][value="${wind.id}"]`);
  assert.match(await page.$eval(row('feature:'+wind.id),n=>n.textContent),/0 → 0/);
  await page.click('[name="reduceExhaustion"]');

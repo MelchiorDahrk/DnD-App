@@ -21,7 +21,7 @@ A level 1 Wizard chooses three class cantrips, six level 1 spellbook entries, an
 
 ## Spell slots
 
-New sheets calculate slot maximums by class, level, and spellcasting subclass. In **Spellbook → Edit slots**, record additional class levels for multiclass spellcasting or enter a per-level override. Pact Magic has separate expenditure and Short Rest recovery when the character also has regular slots. Existing sheets can adopt automatic calculation in the same editor.
+New sheets calculate slot maximums by class, level, and spellcasting subclass. Use **Level up** to add or advance a class. Use **Character Details** to enter an existing class breakdown and **Spellbook → Edit slots** to enable automatic calculation for an older sheet or set an override. Pact Magic has its own expenditure and Short Rest recovery.
 
 Use the Short Rest dialog to choose slots to recover with Arcane Recovery. A held, attuned Arcane Grimoire increases its budget. Spell Recall rolls for qualifying casts. A Sorcerer can spend tracked Sorcery Points in Spellbook to add a temporary slot that expires on a Long Rest. Other item charges, recovery effects, and table adjustments can be recorded with the slot and item controls.
 
@@ -29,7 +29,7 @@ Use the Short Rest dialog to choose slots to recover with Arcane Recovery. A hel
 
 - Core choices cover the twelve 2024 classes, the ten 2024 species and their lineages, all sixteen 2024 backgrounds, and the core Origin feats. Aarakocra uses its Monsters of the Multiverse traits. Half-Elf and Half-Orc use their earlier species traits with 2024 background ability increases. Artificer uses the app’s Tasha-era progression and equipment.
 - Table-approved species and backgrounds can provide manual traits, chosen skills and tools, languages, and spell references. The book’s original effects and extra gear must be reviewed at the table. Other supplemental Origin feats require the player to record their selections and table-managed effects.
-- Level up guides single-class advancement. Enter multiclass advancement through Character details and Spellbook. Supplemental features include linked rules and named unlocks, with table-managed effects recorded in Features.
+- **Level up** guides single-class and multiclass advancement from the same sheet. See the [level-up guide](level-up.md) for prerequisites, Hit Dice, and spell preparation.
 - Starting purchases use priced, enabled mundane equipment. Firearms and firearm ammunition are table-controlled. Ammunition in packages is stored in the inventory’s existing bundles, including the count of individual shots per bundle.
 
 ## Rules references

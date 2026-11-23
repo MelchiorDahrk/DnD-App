@@ -2,6 +2,7 @@
 import {changeHP,parseBackup,SAVE_VERSION,ABILITIES,SKILLS,skillBonus,initiative} from './model.js';
 import {armorClass,armorCheckMode} from './armor-class.js';
 import {selectSpellIcon} from './spell-icons.js';
+import {classBreakdown} from './character-classes.js';
 // Share the resolved artwork for structured homebrew effects without sharing
 // private effect metadata. Exact names and schools can be resolved by readers.
 const publicSpellIcon=spell=>{const selected=selectSpellIcon(spell);return ['manual','effect'].includes(selected.source)?{spellIconKey:selected.key}:{};};
@@ -14,6 +15,7 @@ export function emptyState(settings={sound:true}){return {version:SAVE_VERSION,c
 export function splitCharacter(character){
   const content=copy(character),live={};
   for(const key of LIVE_KEYS){live[key]=content[key];delete content[key];}
+  if(content.hitDicePools){live.hitDicePools=content.hitDicePools;delete content.hitDicePools;}
   live.inspiration=Number(live.inspiration);
   live.slotUses=content.slots.map(slot=>slot.used);
   live.slotMax=content.slots.map(slot=>slot.max);
@@ -28,6 +30,7 @@ export function joinCharacter(content,live){
   const c={...copy(content),...Object.fromEntries(LIVE_KEYS.map(key=>[key,copy(live[key])]))};
   c.slots=c.slots.map((slot,i)=>({...slot,max:live.slotMax[i]??0,used:live.slotUses[i]??0}));
   if(live.pactSlot)c.pactSlot=copy(live.pactSlot);
+  if(live.hitDicePools)c.hitDicePools=copy(live.hitDicePools);
   c.features=c.features.map(feature=>({...feature,maxUses:live.featureMax[feature.id]??0,used:live.featureUses[feature.id]??0}));
   // Apply the same validation/defaults as version 2 JSON import.
   return parseBackup(JSON.stringify({...emptyState(),characters:[c],activeId:c.id})).characters[0];
@@ -98,7 +101,7 @@ export function applyLive(current,operation){
 export const hasChanges=op=>!!(op.content?.length||op.live?.length||op.conditions||op.hpAction||op.resources?.slots.length||op.resources?.features.length);
 export function publicProjection(character){
   // Deliberate allowlist: no notes, backstory, inventory, spell notes, or metadata.
-  return {initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
+  return {initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),id:character.id,name:character.name,playerName:character.playerName||'',class:character.class,subclass:character.subclass,level:character.level,...(character.multiclass?.length?{classBreakdown:classBreakdown(character)}:{}),race:character.race,ac:armorClass(character),portrait:copy(character.portrait)||null,skillBonuses:Object.fromEntries(Object.keys(SKILLS).map(skill=>[skill,skillBonus({...character,exhaustion:0},skill)])),slots:character.slots.map(slot=>({max:slot.max})),features:character.features.filter(f=>f.maxUses).map(f=>({id:f.id,name:f.name,maxUses:f.maxUses})),details:{
     stats:Object.fromEntries(Object.keys(ABILITIES).map(key=>[key,character.stats[key]])),initiativeBonus:character.initiativeBonus,initiativeAdvantage:character.initiativeAdvantage,initiative:initiative({...character,exhaustion:0}),initiativeMode:armorCheckMode(character,'dex',character.initiativeAdvantage),skills:copy(character.skills),expertise:copy(character.expertise),saves:copy(character.saves),speed:character.speed,hitDie:character.hitDie,spellAbility:character.spellAbility,
     attacks:character.attacks.map(a=>({name:a.name,ability:a.ability,bonus:a.bonus,damage:a.damage,type:a.type,range:a.range})),
     spells:character.spells.map(s=>({name:s.name,level:s.level,school:s.school,castingTime:s.castingTime,range:s.range,duration:s.duration,concentration:s.concentration,prepared:s.prepared,...publicSpellIcon(s)}))

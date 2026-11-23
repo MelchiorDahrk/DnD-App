@@ -2,6 +2,18 @@
 
 **Level up** opens a review before changing the character. The old HP-only dialog has been replaced. Cancel and failed validation leave the character untouched; a successful confirmation saves all choices together and opens the existing portrait celebration.
 
+## Multiclass advancement
+
+Open **Level up** and select **Class to advance**. Choose an existing class to increase its level or choose a class under **Add a class**. An unavailable class lists the ability scores you need. The 2024 prerequisites apply to the new class and to each class you already have. The review shows the new class breakdown, total level, Hit Die, suggested HP, and any training or choices. A Fighter 5 / Rogue 1 advancing in Rogue becomes Fighter 5 / Rogue 2 at character level 7.
+
+The class you advance determines your HP die, subclass unlocks, class features, feat and ASI opportunities, and the scaling of its resources. A new class grants its multiclass proficiencies and its level 1 features. Starting equipment, first-level maximum HP, and starting saves belong to character creation. XP thresholds, proficiency bonus, species unlocks, and Constitution adjustments use total character level. The sheet shows the highest applicable Extra Attack count, including a separate count for a qualifying pact weapon. Cleric and Paladin Channel Divinity have separate pools.
+
+Hit Dice of the same size share a pool. In **Short Rest**, choose how many Dice of each size to spend. A qualifying **Long Rest** restores all pools. Older saves with a single remaining count keep the same total. The app assigns their legacy spent dice to the primary class’s die size first, then the other recorded sizes in class order. Use **Edit combat stats** to correct the distribution.
+
+Each spellcasting class learns and prepares spells at its own level. A newly added Wizard chooses six spellbook spells and prepares four. Higher shared slots can upcast eligible spells. Shared progression adds full caster levels, rounds up Paladin, Ranger and legacy Artificer half levels, and rounds down supported one-third caster levels. A sole Spellcasting class uses its own table. Pact Magic refreshes separately and can cast eligible spells from any class; shared slots can also cast Warlock spells. **Flexible Casting** can spend either eligible pool to restore Sorcery Points.
+
+The Spellbook keeps a single card per spell. On a multiclass sheet, use **Edit spell** to review or adjust each class’s preparation. The **Cast spell** dialog shows available slots, the source class, and its attack bonus and save DC. Arcane Recovery uses Wizard level and restores shared spell slots.
+
 ## Included progression
 
 | Area | Bundled coverage |
@@ -37,15 +49,17 @@ The process does not convert a saved sheet’s existing narrative rules, attack 
 
 Matching resource limits, dice and recovery values can be updated in the review. Spent uses are retained; values differing from the previous preset are preserved. ASIs and selected feat ability increases are checked against their caps. Constitution changes apply to HP for every level; Dwarven Toughness, an existing/new Tough feat, and the Barbarian/Monk capstones are included. Proficiency bonus remains derived from total level.
 
-Guided character advancement supports single-class characters. For multiclass slot calculations, record class levels in Spellbook. Named supplemental features are brief references, not copied book rules. Many feature effects—damage, armor, movement, languages, situational bonuses, forms, resistances and special prerequisites—still require the existing sheet editors or table adjudication. Legacy setting options, special feat effects and every supplemental spell are not exhaustively automated. Additional book/table feature names and `level | spell name` entries can be recorded inside the level-up dialog rather than postponing them until afterward. Spell reference entries explicitly say when casting details must be filled from the book.
+Use **Character Details → Additional classes** to review the build, copy an existing character, or apply a DM override. Manual level edits update derived totals, Hit Dice limits, and automatic slots. They preserve recorded HP, features, proficiencies, and spells. Use **Spellbook → Edit slots** for slot maximums and a primary casting ability override.
+
+Named supplemental features include brief references. Apply situational bonuses, action and damage limits, cantrip damage scaling, some feat and invocation prerequisites, and untracked book or table effects during play. The level-up review accepts additional feature names and `level | spell name` entries. Use the spell editor to complete those spell entries and assign their source classes.
 
 Missing older proficiencies cannot be reconstructed reliably from a flat imported skill list. Basic missing choices are offered; if too few eligible options are recorded, the player can explicitly save a **Pending choice** feature to complete from their book. The dialog never silently invents missing selections. An optional earlier-features section offers catch-up entries; choose only alternatives the character actually has.
 
-No required save migration: existing version 2 characters remain valid. Optional feature provenance, spell origins, Pact Magic, terrain and Genie metadata travel in backups and are validated. The progression engine validates the resulting character before committing it. New modules and the generated data ship in the static build and offline service-worker cache.
+Existing version 2 characters, backups, and private cloud sheets remain valid. Optional Hit Dice pools, spell origins, feature provenance, Pact Magic, terrain, and Genie metadata travel with the character. Live cloud state includes the remaining Hit Dice per size. The progression engine validates the completed sheet before committing it.
 
 ## Validation and regeneration
 
-`npm test` covers every core class level, every built-in subclass’s later unlocks, source replacements, legacy lineage magic, explicit/atomic choices, resource expenditure, ASI/Constitution HP, feat choices, Wizard learning/preparation, spell replacement and save round trips. `npm run test:level-up` checks the browser flow, subclass refresh, class and lineage spells, Mystic Arcanum, cancellation, 320/390 px layouts and offline use. Set `BROWSER_PATH` if Chromium is not installed at a standard path.
+`npm test` covers core and subclass advancement, multiclass combinations, rollback, rest recovery, shared slots and Pact Magic, spell origins, and save and cloud round trips. `npm run test:level-up` checks class selection and advancement, spell preparation and casting, mixed Hit Dice, manual class edits, 320/390 px layouts, and offline use. Set `BROWSER_PATH` to a Chromium executable if needed. After building, set `LEVEL_TEST_PATH=/dist/` to test the packaged site.
 
 The checked-in `progression-data.js` requires no runtime network access. Regenerate it with `node scripts/build-progression-data.mjs --download`; `npm run build:progression` uses the cached source inputs in `.tmp/rules`. Review regenerated facts before committing.
 
@@ -54,6 +68,8 @@ The checked-in `progression-data.js` requires no runtime network access. Regener
 - [Heroes of Faerûn subclasses](https://www.dndbeyond.com/sources/dnd/frhof) and [Arcana Unleashed subclasses](https://www.dndbeyond.com/sources/dnd/au).
 
 - [Publisher’s 2024 class progression tables](https://www.dndbeyond.com/sources/dnd/br-2024/character-classes) and [species rules](https://www.dndbeyond.com/sources/dnd/br-2024/character-origins).
+
+- [2024 multiclassing, Hit Dice, and Spellcasting rules](https://www.dndbeyond.com/sources/dnd/br-2024/creating-a-character#Multiclassing).
 - [2024 feat prerequisite rules](https://www.dndbeyond.com/sources/dnd/br-2024/feats) and licensed PHB feat entries, including [War Caster](https://roll20.net/compendium/dnd5e/Feats%3AWar%20Caster?expansion=32231&iframe=true) and [Shield Master](https://roll20.net/compendium/dnd5e/Feats%3AShield%20Master?expansion=32231&iframe=true).
 - Licensed 2024 PHB class lists, for example [Wizard](https://roll20.net/compendium/dnd5e/Classes%3AWizard?expansion=32231) and [Cleric](https://roll20.net/compendium/dnd5e/Classes%3ACleric?expansion=32231). Only list facts are adapted from non-SRD material.
 - [D&D Beyond compatibility guidance](https://www.dndbeyond.com/changelog) and [Cleric compatibility discussion](https://www.dndbeyond.com/posts/1767-2024-cleric-vs-2014-cleric-whats-new).

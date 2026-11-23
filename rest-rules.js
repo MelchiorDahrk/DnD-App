@@ -3,6 +3,7 @@ import {SUBCLASS_ALIASES} from './progression-options.js';
 import {referenceURL} from './reference-links.js';
 import {hasResourceful,inspirationPoints} from './model.js';
 import {spellSlotPlan} from './spell-slots.js';
+import {characterClasses,characterClassLevel,hitDicePools} from './character-classes.js';
 
 const normalize=value=>String(value||'').toLowerCase().replace(/[’']/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 const same=(a,b)=>normalize(a)===normalize(b);
@@ -64,8 +65,11 @@ const summaries={
 
 function referenceFor(entry,category,c) {
  const candidates=REST_REFERENCES.filter(r=>(r.category||'feature')===category&&matches(entry.name,r.name));
- return candidates.find(r=>r.className===c.class&&(!r.subclass||same(r.subclass,c.subclass)))||candidates.find(r=>!r.className)||candidates[0];
+ const classes=characterClasses(c),origin=entry.origin?.split(' · ')[1];
+ const applicable=candidates.filter(r=>classes.some(row=>r.className===row.class&&(!r.subclass||same(r.subclass,restSubclass(row)))));
+ return applicable.find(r=>r.className===origin)||applicable[0]||candidates.find(r=>!r.className)||candidates[0];
 }
+const restSubclass=row=>Object.entries(SUBCLASS_ALIASES).find(([name])=>same(name,row.subclass))?.[1]||row.subclass;
 function summary(rule) {
  const custom=summaries[normalize(rule.name)];
  if(custom)return custom;
@@ -84,8 +88,9 @@ export function restReminders(c,kind='long') {
   result.push({key,title:name,detail,wiki:url?referenceURL(url,name,extra.target==='spells'?'spell':extra.target==='inventory'?'equipment':c.class):url,target:'features',...extra});
  };
  const recorded=c.features||[];
- const subclass=Object.entries(SUBCLASS_ALIASES).find(([name])=>same(name,c.subclass))?.[1]||c.subclass;
- const implicit=REST_REFERENCES.filter(r=>r.implicit&&r.className===c.class&&(!r.subclass||same(r.subclass,subclass))&&c.level>=Math.max(r.subclass?3:1,r.level)&&(!r.legacy||r.className==='Artificer'||r.subclass)&&(!r.subclass||r.legacy||!REST_REFERENCES.some(other=>other.legacy&&same(other.subclass,r.subclass))));
+ for(const row of characterClasses(c)){
+ const subclass=restSubclass(row);
+ const implicit=REST_REFERENCES.filter(r=>r.implicit&&r.className===row.class&&(!r.subclass||same(r.subclass,subclass))&&row.level>=Math.max(r.subclass?3:1,r.level)&&(!r.legacy||r.className==='Artificer'||r.subclass)&&(!r.subclass||r.legacy||!REST_REFERENCES.some(other=>other.legacy&&same(other.subclass,r.subclass))));
  for(const rule of implicit) {
   if(!isLong&&!rule.short)continue;
   if(!isLong&&['wild shape','rune carver'].includes(normalize(rule.name)))continue;
@@ -93,15 +98,19 @@ export function restReminders(c,kind='long') {
   const feature=recorded.find(f=>matches(f.name,rule.name)||(same(rule.name,'Combat Superiority')&&same(f.name,'Superiority Dice')));
   // A tracked resource already appears in the automatic refresh list. Keep its choices.
   if(feature?.maxUses>0&&feature.reset!=='manual'&&rule.kind==='recovery'&&!summaries[normalize(rule.name)])continue;
-  const detail=same(rule.name,'Weapon Mastery')?`${['Fighter','Barbarian'].includes(c.class)?'You may replace one mastered weapon':'You may change your selected weapon kinds'}. Practice weapon drills and update the mastery notes on your attacks.`:same(rule.name,'Portent')&&c.level>=14?'Roll three d20s for Greater Portent. Replace your unused foretelling results with the new rolls.':summary(rule);
+  const detail=same(rule.name,'Weapon Mastery')?`${['Fighter','Barbarian'].includes(row.class)?'You may replace one mastered weapon':'You may change your selected weapon kinds'}. Practice weapon drills and update the mastery notes on your attacks.`:same(rule.name,'Portent')&&row.level>=14?'Roll three d20s for Greater Portent. Replace your unused foretelling results with the new rolls.':summary(rule);
   add(rule.name,detail,rule.wiki,feature?{featureId:feature.id}:{});
+ }
+ if(isLong){
+   const target={target:'spells',key:`prepared-spells:${row.class}`};
+   const label=c.multiclass?.length?`${row.class} prepared spells`:'Prepared spells';
+   if(['Cleric','Druid','Wizard','Artificer'].includes(row.class))add(label,row.class==='Wizard'?'You may change your prepared spells using eligible spells in your spellbook. Keep always-prepared spells selected.':'You may change your prepared spells to eligible spells from your class list. Keep always-prepared spells selected.',row.class==='Artificer'?earlier('artificer'):wiki(row.class.toLowerCase()+':main'),target);
+   if(['Paladin','Ranger'].includes(row.class))add(label,`You may replace one prepared ${row.class} spell with another eligible ${row.class} spell. Keep always-prepared spells selected.`,wiki(row.class.toLowerCase()+':main'),target);
+   if(row.class==='Wizard')add('Wizard cantrip','You may replace one cantrip from Wizard Spellcasting with another Wizard cantrip.',wiki('wizard:main'),{target:'spells'});
+ }
  }
  if(isLong) {
   const legacyLineage=recorded.some(f=>/2014|legacy|earlier.book/i.test(f.description)&&/lineage|elf|drow|tiefling/i.test(f.name+' '+f.description));
-  const prepared=['Cleric','Druid','Wizard','Artificer'].includes(c.class);
-  if(prepared)add('Prepared spells',c.class==='Wizard'?'You may change your prepared spells using eligible spells in your spellbook. Keep always-prepared spells selected.':'You may change your prepared spells to eligible spells from your class list. Keep always-prepared spells selected.',c.class==='Artificer'?earlier('artificer'):wiki(c.class.toLowerCase()+':main'),{target:'spells'});
-  if(['Paladin','Ranger'].includes(c.class))add('Prepared spells',`You may replace one prepared ${c.class} spell with another eligible ${c.class} spell. Keep always-prepared spells selected.`,wiki(c.class.toLowerCase()+':main'),{target:'spells'});
-  if(c.class==='Wizard')add('Wizard cantrip','You may replace one cantrip from Wizard Spellcasting with another Wizard cantrip.',wiki('wizard:main'),{target:'spells'});
   if(same(c.race,'Human')&&!hasResourceful(c))add('Resourceful',summaries.resourceful,wiki('species:human'));
   if(same(c.race,'High Elf')&&!legacyLineage)add('High Elf cantrip',summaries['high elf cantrip'],wiki('species:elf'),{target:'spells'});
   const extraSpecies={
@@ -122,7 +131,7 @@ export function restReminders(c,kind='long') {
  for(const feature of recorded) {
   if(feature.name==='Resourceful'&&hasResourceful(c))continue;
   if(['spellcasting','pact magic','preparing and casting spells'].includes(normalize(feature.name)))continue;
-  const rule=referenceFor(feature,'feature',{...c,subclass});
+  const rule=referenceFor(feature,'feature',c);
   const text=feature.description||'';
   if(!isLong&&!shortText(text)&&!rule?.short)continue;
   if(!restText(text)&&!rule)continue;
@@ -151,7 +160,8 @@ export function restRefreshes(c,{kind='long',reduceExhaustion=true,skipFeatureId
  const add=(key,title,before,after,detail='')=>rows.push({key,title,before,after,detail});
  if(long) {
   add('hp','Hit points',c.hp,c.maxHp);
-  add('hit-dice','Hit Dice',c.hitDice,c.level,`d${c.hitDie} available`);
+  const pools=hitDicePools(c);
+  for(const {die,available,max} of pools)add(pools.length===1?'hit-dice':`hit-dice-${die}`,pools.length===1?'Hit Dice':`d${die} Hit Dice`,available,max,`d${die} available`);
   add('temp-hp','Temporary hit points',c.tempHp,0);
   add('exhaustion','Exhaustion',c.exhaustion,reduceExhaustion?Math.max(0,c.exhaustion-1):c.exhaustion,reduceExhaustion?'Remove one level if eligible':'Recovery disabled');
   add('concentration','Concentration',c.concentration||'None','None');
@@ -168,7 +178,8 @@ export function restRefreshes(c,{kind='long',reduceExhaustion=true,skipFeatureId
  for(const f of c.features) {
   if(!f.maxUses||f.reset==='manual'||(!long&&f.reset!=='short'&&!f.shortRestRecovery))continue;
   const used=skipFeatureIds.includes(f.id)?f.used:long||f.reset==='short'?0:Math.max(0,f.used-f.shortRestRecovery);
-  rows.push({key:'feature:'+f.id,title:f.name,before:f.maxUses-f.used,after:f.maxUses-used,detail:`of ${f.maxUses} uses available`,featureId:f.id,cooldown:specialCooldown(f.description||'')||referenceFor(f,'feature',c)?.kind==='cooldown'||same(f.name,'Lethargy Resilience')||same(f.name,'Greater Divine Intervention')||(c.class==='Cleric'&&c.level>=20&&same(f.name,'Divine Intervention'))});
+  const title=c.multiclass?.length&&c.features.some(other=>other!==f&&other.name===f.name)&&f.origin?`${f.name} · ${f.origin.split(' · ')[1]}`:f.name;
+  rows.push({key:'feature:'+f.id,title,before:f.maxUses-f.used,after:f.maxUses-used,detail:`of ${f.maxUses} uses available`,featureId:f.id,cooldown:specialCooldown(f.description||'')||referenceFor(f,'feature',c)?.kind==='cooldown'||same(f.name,'Lethargy Resilience')||same(f.name,'Greater Divine Intervention')||(characterClassLevel(c,'Cleric')>=20&&same(f.name,'Divine Intervention'))});
  }
  return rows;
 }

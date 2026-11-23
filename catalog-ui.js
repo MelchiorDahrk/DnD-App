@@ -3,7 +3,7 @@ import {EQUIPMENT,MAGIC_ITEMS,MAGIC_ITEM_VERSIONS,WEAPONS,CLASS_OPTIONS,SPECIES,
 import {variantForRoll} from './magic-item-variants.js';
 import {randomDie} from './model.js';
 import {equipmentName} from './inventory-rules.js';
-import {FEATURE_CATALOG,FEATURE_GROUPS,FEAT_GROUPS,isFeat,filterFeatures,featureFields,featureRequirements} from './feature-catalog.js';
+import {FEATURE_CATALOG,FEATURE_GROUPS,FEAT_GROUPS,isFeat,filterFeatures,featureFields,featureLevel,featureRequirements} from './feature-catalog.js';
 import {itemIconMarkup} from './item-icons.js';
 import {contentEnabled,visibleContent,enabledFeatSources} from './content-sources.js';
 
@@ -164,7 +164,7 @@ export function handleCatalogChoice(root,target,character,settings={}) {
       const entry=FEATURE_CATALOG.find(option=>option.id===target.value),level=root.querySelector('[data-feature-level]');
       root.querySelector('[data-feature-level-field]').hidden=!entry?.className;
       level.disabled=!entry?.className;
-      if(entry)level.value=entry.className===character.class?character.level:entry.level;
+      if(entry)level.value=featureLevel(entry,character)||entry.level;
       root.querySelector('[data-catalog-preview="feat"]').innerHTML=featurePreview(entry,character,level.value);
       if(entry)fillFields(root,featureFields(entry,character,level.value));
       return true;

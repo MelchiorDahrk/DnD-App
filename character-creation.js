@@ -2,7 +2,7 @@ import {ABILITIES, SKILLS, SAVE_VERSION, makeCharacter, parseBackup, castingAbil
 import {BACKGROUNDS, BASIC_EQUIPMENT, CLASS_OPTIONS, SPECIES, WEAPONS, applyStartingOptions, itemFromEquipment} from './catalog.js';
 import {FEATURE_CATALOG} from './feature-catalog.js';
 import {SPELL_CATALOG} from './progression-data.js';
-import {addProgressionFeature, addProgressionSpell, eligibleFeat, levelOnePlan, originFeatChoices, spellKey} from './level-up.js';
+import {addProgressionFeature, addProgressionSpell, eligibleFeat, levelOnePlan, originFeatChoices, setClassSpell, spellKey} from './level-up.js';
 import {LANGUAGE_GROUPS, TOOL_NAMES, ensureTraining, hasArmorTraining, trainingKey} from './training-rules.js';
 import {contentEnabled, visibleContent} from './content-sources.js';
 import {armorClass, itemDefense, setItemEquipped} from './armor-class.js';
@@ -334,6 +334,7 @@ export function creationPlan(draft, settings = {}, through = 7) {
     const stored = addProgressionSpell(c,spell,source);
     if (ability) (stored.castingGrants ??= []).push({origin:source,ability,mode,...(feature ? {featureId:feature.id} : {})});
     grants.push({spell,source,ability,mode});
+    return stored;
   };
   if (plan && through>=5) {
     const lineageAbility = !customSpecies && (plan.grant.some(spell => spell.origin.includes('lineage')) || ['High Elf','Aarakocra'].includes(c.race))
@@ -346,7 +347,8 @@ export function creationPlan(draft, settings = {}, through = 7) {
       const forest = isSpecies && spell.level>0 && c.race==='Forest Gnome';
       const ranger = spell.origin.startsWith('Favored Enemy');
       const feature = c.features.find(f => f.name===(forest?'Speak with Animals (lineage)':'Favored Enemy'));
-      addSpell(spell,spell.origin,{ability:isSpecies?lineageAbility:castingAbility(c),mode:forest||ranger?'free':spell.level?'slot':'at-will',feature:forest||ranger?feature:undefined});
+      const stored=addSpell(spell,spell.origin,{ability:isSpecies?lineageAbility:ranger?castingAbility(c):undefined,mode:ranger?'free-only':forest?'free':spell.level?'slot':'at-will',feature:forest||ranger?feature:undefined});
+      if(stored&&spell.fromClass)setClassSpell(stored,c,c.class,{granted:true});
     }
     for (const ch of plan.choices.filter(ch => !customSpecies && ch.id==='elfCantrip')) {
       for (const picked of choose(5,ch.id,ch.label,ch.count,ch.options)) addSpell(picked.spell,'High Elf lineage',{ability:lineageAbility,mode:'at-will'});
@@ -367,8 +369,7 @@ export function creationPlan(draft, settings = {}, through = 7) {
     for (const picked of [...chosenCantrips,...listedSpells]) {
       const ready = picked.spell.level===0 || prepared.includes(picked.id);
       const stored = addProgressionSpell(c,picked.spell,'',ready);
-      stored.classPrepared=ready;
-      stored.origins=[...new Set([...(stored.origins || (stored.origin?[stored.origin]:[])),c.class])];
+      setClassSpell(stored,c,c.class,{...stored.classSpells?.[c.class],prepared:ready});
     }
     if (invocation==='Pact of the Chain') addSpell(lookup('Find Familiar'),invocation,{ability:'cha',mode:'at-will'});
     if (invocation==='Armor of Shadows') addSpell(lookup('Mage Armor'),invocation,{ability:'cha',mode:'at-will'});
@@ -383,7 +384,10 @@ export function creationPlan(draft, settings = {}, through = 7) {
       for (const [id,label,count,pool] of [
         ['tomeCantrips','Pact of the Tome cantrips',3,available.filter(s => s.level===0)],
         ['tomeRituals','Pact of the Tome rituals',2,available.filter(s => s.level===1 && s.ritual)]
-      ]) for (const picked of choose(5,id,label,count,pool.map(spellOption))) addSpell(picked.spell,invocation,{ability:'cha',mode:picked.spell.level?'slot':'at-will'});
+      ]) for (const picked of choose(5,id,label,count,pool.map(spellOption))) {
+        const stored=addSpell(picked.spell,invocation);
+        if(stored)setClassSpell(stored,c,c.class,{granted:true});
+      }
     }
     c.spellSlotMode='auto';
     syncSpellSlots(c);

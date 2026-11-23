@@ -7,10 +7,11 @@ import {initializeApp,deleteApp} from 'firebase/app';
 import {getAuth,connectAuthEmulator,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail} from 'firebase/auth';
 import {CloudStore} from '../../cloud-store.js';
 import {CharacterSync} from '../../cloud-sync.js';
-import {demoCharacter,uid,changeHP} from '../../model.js';
+import {demoCharacter,uid,changeHP,shortRest} from '../../model.js';
 import {makeOperation,queueKey,copy,splitCharacter} from '../../cloud-model.js';
 import {newShop,walletTotal} from '../../shop-model.js';
 import {syncSpellSlots} from '../../spell-slots.js';
+import {hitDicePools,reconcileHitDice} from '../../character-classes.js';
 
 const projectId='demo-questlog';let env;
 before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:await readFile(new URL('../../firestore.rules',import.meta.url),'utf8')}});});
@@ -67,20 +68,28 @@ test('competing offers cannot overspend and accepting an item preserves its quan
   assert.equal((await b.readCharacter(d.id)).character.items.filter(i=>i.name==='Arrows').reduce((n,i)=>n+i.qty,0),24);
 });
 
-test('multiclass Pact slots sync to the party and can be removed from live state',async()=>{
+test('multiclass Pact slots, class breakdown and Hit Dice sync to the party',async()=>{
   const {a,b,c,party}=await transferParty();
-  const multiclass={...copy(c),class:'Wizard',level:5,spellSlotMode:'auto',multiclass:[{class:'Warlock',level:3,subclass:''}]};
+  const multiclass={...copy(c),class:'Wizard',subclass:'',hitDie:6,level:5,spellSlotMode:'auto',multiclass:[{class:'Warlock',level:3,subclass:''}]};
+  reconcileHitDice(multiclass,hitDicePools(c));
   syncSpellSlots(multiclass);
   await a.apply(c.id,op(makeOperation(c,multiclass)));
   const sharedId=`alice_${c.id}`;
-  assert.deepEqual((await b.readShared(party,sharedId)).live.pactSlot,{level:2,max:2,used:0});
+  const shared=await b.readShared(party,sharedId);
+  assert.deepEqual(shared.live.pactSlot,{level:2,max:2,used:0});
+  assert.deepEqual(shared.live.hitDicePools,{6:2,8:3});
+  assert.equal(shared.sheet.classBreakdown,'Wizard 2 / Warlock 3');
   const spent=copy(multiclass);
+  shortRest(spent,{8:1},()=>4);
   spent.pactSlot.used++;
   await a.apply(c.id,op(makeOperation(multiclass,spent)));
   assert.equal((await a.readCharacter(c.id)).character.pactSlot.used,1);
   assert.equal((await b.readShared(party,sharedId)).live.pactSlot.used,1);
+  assert.deepEqual((await b.readShared(party,sharedId)).live.hitDicePools,{6:2,8:2});
+  await assertFails(sdk.updateDoc(a.ref(`users/alice/characters/${c.id}/state/live`),{hitDicePools:{6:2,8:1}}));
   const single=copy(spent);
   delete single.multiclass;
+  reconcileHitDice(single,hitDicePools(spent));
   syncSpellSlots(single);
   await a.apply(c.id,op(makeOperation(spent,single)));
   assert.equal((await a.readCharacter(c.id)).live.pactSlot,undefined);

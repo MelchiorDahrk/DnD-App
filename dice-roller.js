@@ -56,6 +56,10 @@ function reveal(session) {
 export function diceAnimationPlan(result) {
   const sides=Number(String(result.expression).match(/^\d*d(\d+)/i)?.[1]);
   if(!result.rolls?.length)return {dice:[],note:''};
+  if(result.dieSides?.length===result.rolls.length&&result.dieSides.every(die=>SUPPORTED.has(die))){
+    if(result.rolls.length>MAX_PHYSICAL_DICE)return {dice:[],note:'Large roll · see all individual results below.'};
+    return {dice:result.rolls.map((rolled,index)=>({dice:`d${result.dieSides[index]}`,rolled})),note:'Mixed Hit Dice'};
+  }
   if(!SUPPORTED.has(sides))return {dice:[],note:`d${sides} · see individual results below.`};
   if(result.rolls.length*(sides===100?2:1)>MAX_PHYSICAL_DICE)return {dice:[],note:'Large roll · see all individual results below.'};
   return {dice:result.rolls.map(rolled=>({dice:`d${sides}`,rolled})),note:sides===100?'Read tens + units; 00 and 0 = 100.':sides===10?'A 0 on a d10 counts as 10.':''};

@@ -190,7 +190,7 @@ export function createPartyPlay(ui) {
     const shared=characterId?party()?.characters.find(c=>c.id===characterId):own().find(s=>s.characterId===active()?.id);
     if(!shared){if(inline)throw new Error('Select a character shared with this party first.');return;}
     if(shared.ownerId!==user()?.uid)throw new Error('You can only roll for your own characters.');
-    const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label,criticalFeedback:result.criticalFeedback,combatSounds:result.combatSounds};
+    const r={expression:result.expression,rolls:result.rolls,...(result.dieSides?{dieSides:result.dieSides}:{}),total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label,criticalFeedback:result.criticalFeedback,combatSounds:result.combatSounds};
     const id=uid(),event={id,kind:'roll',actorId:user().uid,characterId:shared.characterId,name:shared.sheet.name,result:JSON.stringify(r)};
     if(inline){latestRoll=event;const host=document.getElementById('party-roll');if(host){host.dataset.rollId=id;host.innerHTML=staticRoll(event);}}
     if(!party().errors?.activities)await store().activity(partyId,{kind:event.kind,characterId:event.characterId,name:event.name,result:event.result},id);

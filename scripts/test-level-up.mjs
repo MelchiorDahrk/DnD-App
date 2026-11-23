@@ -136,6 +136,58 @@ try{
   const arcanum=await page.$eval('[name="arcanum"]',n=>n.options[1].value);await set('arcanum',arcanum);await submit();
   c=active(await state());assert.equal(c.level,11);assert.equal(c.slots[5].max,0);assert.ok(c.spells.some(s=>s.level===6&&s.origin==='Mystic Arcanum'));parseBackup(JSON.stringify(await state()));
   await page.waitForFunction(()=>navigator.serviceWorker.controller);await page.setOfflineMode(true);await page.reload({waitUntil:'networkidle0'});await open();assert.ok(await page.$('[name="choice-feat"]'));
-  assert.deepEqual(errors,[]);console.log('PASS Mystic Arcanum, Pact slots, offline level-up, no browser errors');
+  await page.setOfflineMode(false);
+  console.log('PASS Mystic Arcanum, Pact slots and offline level-up');
+
+  await load(makeCharacter({class:'Fighter',subclass:'Champion',level:5,hitDice:4,stats:{str:16,dex:14,con:14,int:12,wis:13,cha:13},skills:['Athletics','Perception']}));
+  await page.setViewport({width:390,height:900});
+  before=await state();await open();
+  assert.equal(await page.$eval('[name="levelClass"] option[value="Wizard"]',n=>n.disabled),true);
+  await set('levelClass','Rogue');
+  assert.match(await page.$eval('[data-level-class-breakdown]',n=>n.textContent),/Fighter 5 \/ Rogue 1 · Character level 6/);
+  assert.equal(await page.$eval('[name="hpGain"]',n=>n.value),'7');
+  await page.click('#modal [data-action="close"]');assert.deepEqual(await state(),before);
+  await open();await set('levelClass','Rogue');await set('choice-classSkills','Stealth');await set('choice-rogueLanguage','Gnomish');
+  await page.$$eval('[name="choice-expertise"]',fields=>fields.forEach((field,index)=>field.value=['Stealth','Perception'][index]));
+  await page.$$eval('[name="choice-mastery"]',fields=>fields.forEach((field,index)=>field.value=field.options[index+1].value));
+  await submit();
+  c=active(await state());assert.equal(c.level,6);assert.deepEqual(c.multiclass,[{class:'Rogue',level:1,subclass:''}]);
+  assert.deepEqual(c.hitDicePools,{8:1,10:4});
+  await page.click('#modal [data-action="close"]');await open();await set('levelClass','Rogue');await submit();
+  c=active(await state());assert.equal(c.level,7);assert.equal(c.multiclass[0].level,2);
+  assert.ok(c.features.some(feature=>feature.name==='Cunning Action'));
+  assert.match(await page.$eval('.hero-meta',n=>n.textContent),/Fighter 5\s*\/\s*Rogue 2/);
+  await page.click('#modal [data-action="close"]');
+  await page.$eval('[data-action="rest"][data-kind="short"]',button=>button.click());
+  await set('dice8',1);await set('dice10',1);await submit();
+  assert.deepEqual(active(await state()).hitDicePools,{8:1,10:3});
+  await page.$eval('#modal [data-action="close"]',button=>button.click());
+  await page.$eval('[data-action="edit-character"]',button=>button.click());
+  await page.click('[data-add-class]');
+  await page.$$eval('[name="additionalClass"]',fields=>{fields.at(-1).value='Wizard';fields.at(-1).dispatchEvent(new Event('input',{bubbles:true}));});
+  assert.match(await page.$eval('[data-class-total]',n=>n.textContent),/Fighter 5 \/ Rogue 2 \/ Wizard 1 · Character level 8/);
+  await submit();
+  c=active(await state());assert.equal(c.level,8);assert.equal(c.multiclass[1].class,'Wizard');assert.deepEqual(c.hitDicePools,{6:1,8:1,10:3});
+  parseBackup(JSON.stringify(await state()));
+  console.log('PASS guided multiclass entry and secondary advancement, prerequisite labels, mixed rest spending and structured class edits');
+
+  const spell=SPELL_CATALOG.find(s=>s.id==='protectionfromevilandgood');
+  const dual=makeCharacter({class:'Cleric',level:4,hitDice:4,multiclass:[{class:'Wizard',level:2,subclass:''}],spellSlotMode:'auto',
+    stats:{str:10,dex:12,con:14,int:18,wis:14,cha:10},spells:[{...spell,id:'shared-spell',prepared:true,classSpells:{Cleric:{prepared:true},Wizard:{prepared:true}}}]});
+  await load(dual);
+  await page.$eval('[data-action="navigate"][data-route="spells"]',button=>button.click());
+  await page.waitForSelector('.spell-card');
+  assert.equal(await page.$$eval('.spell-card',cards=>cards.length),1);
+  await page.$eval('.spell-card [data-action="cast"]',button=>button.click());
+  const castOptions=await page.$$eval('[name="slot"] option',rows=>rows.map(option=>option.value));
+  await set('slot',castOptions.find(option=>option.includes('Wizard')));
+  assert.match(await page.$eval('[data-spell-casting-ability]',n=>n.textContent),/Intelligence · DC 14 · spell attack \+6/);
+  await set('slot',castOptions.find(option=>option.includes('Cleric')));
+  assert.match(await page.$eval('[data-spell-casting-ability]',n=>n.textContent),/Wisdom · DC 12 · spell attack \+4/);
+  await page.click('#modal [data-action="close"]');
+  await page.$eval('.spell-card [data-action="prepare"]',button=>button.click());
+  await set('spellClass-Wizard','Known / unprepared');await submit();
+  assert.deepEqual(active(await state()).spells[0].classSpells,{Cleric:{prepared:true},Wizard:{prepared:false}});
+  assert.deepEqual(errors,[]);console.log('PASS one spell card, class-specific casting and preparation, no browser errors');
 }finally{await browser?.close();server?.kill();}
 function spellName(name){return name.toLowerCase().replace(/[^a-z]/g,'');}
