@@ -7,11 +7,12 @@ import {initializeApp,deleteApp} from 'firebase/app';
 import {getAuth,connectAuthEmulator,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail} from 'firebase/auth';
 import {CloudStore} from '../../cloud-store.js';
 import {CharacterSync} from '../../cloud-sync.js';
-import {demoCharacter,uid,changeHP,shortRest} from '../../model.js';
+import {demoCharacter,uid,changeHP,shortRest,rollDice} from '../../model.js';
 import {makeOperation,queueKey,copy,splitCharacter} from '../../cloud-model.js';
 import {newShop,walletTotal} from '../../shop-model.js';
 import {syncSpellSlots} from '../../spell-slots.js';
 import {hitDicePools,reconcileHitDice} from '../../character-classes.js';
+import {SRD_CREATURES} from '../../creature-catalog.js';
 
 const projectId='demo-questlog';let env;
 before(async()=>{env=await initializeTestEnvironment({projectId,firestore:{rules:await readFile(new URL('../../firestore.rules',import.meta.url),'utf8')}});});
@@ -21,12 +22,122 @@ const storeFor=uid=>new CloudStore({sdk,db:env.authenticatedContext(uid).firesto
 const op=value=>({id:uid(),...value});
 const create=async(store,c=demoCharacter())=>{await store.apply(c.id,op({create:c}));return c;};
 const waitFor=async predicate=>{const until=Date.now()+15000;while(Date.now()<until){if(await predicate())return;await new Promise(resolve=>setTimeout(resolve,30));}throw new Error('Timed out waiting for realtime state');};
+const wolf=SRD_CREATURES.find(row=>row.id==='srd-wolf');
 
 async function transferParty(){
   const a=storeFor('alice'),b=storeFor('bob'),c=await create(a),d=await create(b),party=await a.createParty('Shared adventure','Alice');
   await b.join(await a.invite(party),'Bob');await a.share(party,c);await b.share(party,d);
   return {a,b,c,d,party,target:{id:`bob_${d.id}`,ownerId:'bob',characterId:d.id}};
 }
+
+test('creature encounters persist, survive reconnect, and protect private data after DM reassignment',async t=>{
+  const {a,b,d,party,target}=await transferParty(),eve=storeFor('eve');
+  t.after(()=>Promise.all([a,b,eve].map(store=>store.db.terminate())));
+  const id=uid(),publicPath=`parties/${party}/session/encounter`,privatePath=`parties/${party}/encounters/${id}`;
+  const privateState=async store=>JSON.parse((await sdk.getDocFromServer(store.ref(privatePath))).data().payload);
+  const create={kind:'create',name:'Secret encounter title'};
+  await a.encounters.mutate(party,id,create);
+  await assertFails(b.encounters.library(party));
+  await assertFails(sdk.getDocFromServer(b.ref(privatePath)));
+  await assertFails(sdk.getDocsFromServer(sdk.collection(b.db,`parties/${party}/encounters`)));
+  await assertFails(sdk.setDoc(b.ref(privatePath),{name:'Forgery',status:'prepared',revision:2,payload:'{}'}));
+  await assertFails(sdk.setDoc(b.ref(publicPath),{id,runId:'bogus',status:'active',creatures:[],current:'',started:false}));
+  const template=await a.encounters.saveTemplate(party,{name:'Cave beast',stats:{hp:16,ac:12}});
+  await assertFails(sdk.getDocFromServer(b.ref(`parties/${party}/creatureTemplates/${template}`)));
+  await a.encounters.saveTemplate(party,{name:'Cave beast',stats:{hp:18,ac:12}},template,1);
+  const saved=(await a.encounters.library(party)).templates[0];
+  assert.equal(saved.stats.hp,18);
+  await a.encounters.mutate(party,id,{kind:'add',template:saved,quantity:2,values:{notes:'Private ambush'}});
+  await a.encounters.mutate(party,id,{kind:'rename',name:'Ambush behind the curtain'});
+  const copyId=await a.encounters.mutate(party,id,{kind:'duplicate',name:'Ambush copy'});
+  const copy=(await a.encounters.library(party)).encounters.find(row=>row.id===copyId);
+  assert.notEqual(copy.roster[0].id,(await privateState(a)).roster[0].id);
+  await a.encounters.mutate(party,copyId,{kind:'delete'});
+  await a.encounters.mutate(party,id,{kind:'start'});
+  await assertFails(sdk.getDocFromServer(eve.ref(publicPath)));
+  const {run}=await privateState(a);
+  const first=run.creatures[0].id, second=run.creatures[1].id;
+  const edit={kind:'creature',creature:first,runId:run.id,change:{kind:'edit',values:{visible:true,publicName:'Figure'},hp:18,tempHp:0,initiative:14}};
+  await assertFails(b.encounters.mutate(party,id,edit));
+  await a.encounters.mutate(party,id,edit);
+  const projection=(await sdk.getDocFromServer(b.ref(publicPath))).data();
+  assert.deepEqual(projection.creatures.map(row=>[row.name,row.health]),[['Figure','Healthy']]);
+  assert.doesNotMatch(JSON.stringify(projection),/Private ambush|Cave beast|maxHp|curtain/);
+  assert.ok(!JSON.stringify(projection).includes(second));
+
+  await a.assignDM(party,target.id);
+  await assertFails(sdk.getDocFromServer(a.ref(privatePath)));
+  assert.equal((await privateState(b)).run.id,run.id);
+  let latest;
+  const stop=b.encounters.watchPublic(party,(value,cached)=>latest={value,cached},error=>{throw error;});
+  try {
+    await waitFor(()=>latest?.value?.runId===run.id&&!latest.cached);
+    await sdk.disableNetwork(b.db);
+    await waitFor(()=>latest?.cached);
+    assert.equal(latest.value.status,'active');
+    await sdk.enableNetwork(b.db);
+    await waitFor(()=>latest&&!latest.cached);
+    await b.encounters.mutate(party,id,{kind:'pause',runId:run.id});
+    await waitFor(()=>latest?.value?.status==='paused');
+    await b.encounters.mutate(party,id,{kind:'resume',runId:run.id});
+    await b.encounters.mutate(party,id,{kind:'end',runId:run.id});
+    assert.equal((await sdk.getDocFromServer(b.ref(publicPath))).exists(),false);
+    assert.equal((await privateState(b)).run.creatures.length,2);
+    await b.encounters.mutate(party,id,{kind:'archive'});
+    await b.encounters.mutate(party,id,{kind:'reset'});
+    assert.equal((await privateState(b)).run,null);
+    assert.equal((await privateState(b)).roster.length,2);
+    // The fallback DM can open the still-saved roster after the assigned DM unshares.
+    await b.unshare(party,d.id);
+    assert.equal((await privateState(a)).roster.length,2);
+    await assertFails(sdk.getDocFromServer(b.ref(privatePath)));
+  } finally {stop();}
+});
+
+test('managed combat serializes competing changes and keeps attack notifications owner-scoped',async t=>{
+  const {a,b,c,d,party,target}=await transferParty();
+  t.after(()=>Promise.all([a,b].map(store=>store.db.terminate())));
+  const id=uid(),root=`parties/${party}`, combat=a.ref(root+'/session/combat');
+  const details=async()=>JSON.parse((await sdk.getDocFromServer(a.ref(root+'/encounters/'+id))).data().payload).run;
+  await a.encounters.mutate(party,id,{kind:'create',name:'Wolf road'});
+  await a.encounters.mutate(party,id,{kind:'add',template:wolf,quantity:1,values:{visible:true,identity:true}});
+  await a.encounters.mutate(party,id,{kind:'start'});
+  const {id:runId,creatures:[row]}=await details();
+  const characters=[`alice_${c.id}`,target.id];
+  const change=command=>a.encounters.mutate(party,id,{runId,...command});
+  await Promise.all([
+    b.setInitiative(party,target.id,15,{temporaryModifier:2}),
+    change({kind:'initiative',scores:{[row.id]:20}}),
+    a.setInitiative(party,characters[0],10)
+  ]);
+  await assertFails(sdk.updateDoc(b.ref(combat.path),{scores:{[row.id]:99},initiativeCharacter:row.id,updatedBy:'bob'}));
+  await assertFails(sdk.updateDoc(b.ref(combat.path),{managed:sdk.deleteField(),initiativeCharacter:target.id,updatedBy:'bob'}));
+  const turn={kind:'turn',turn:0,characters};
+  const advances=await Promise.allSettled([change(turn),change(turn)]);
+  assert.equal(advances.filter(result=>result.status==='fulfilled').length,1);
+  assert.equal((await details()).cursor.id,row.id);
+  assert.equal((await sdk.getDocFromServer(b.ref(combat.path))).data().current,'');
+  await Promise.all([3,4].map(amount=>change({kind:'creature',creature:row.id,change:{kind:'damage',amount}})));
+  assert.equal((await details()).creatures[0].hp,4);
+  await change({kind:'turn',turn:1,characters});
+  assert.equal((await sdk.getDocFromServer(b.ref(combat.path))).data().current,target.id);
+  assert.equal((await sdk.getDocFromServer(b.ref(combat.path))).data().modifiers[target.id],2);
+
+  const payload={id,runId,creature:row.id,target:target.id,operation:uid(),action:'Bite',attack:rollDice('1d20+4','normal',()=>13),
+    damage:rollDice('1d6+2','normal',()=>4),amount:6,damageType:'Piercing'};
+  await assertFails(b.encounters.publishAttack(party,payload));
+  const hit=await a.encounters.publishAttack(party,payload);
+  assert.equal(await a.encounters.publishAttack(party,payload),hit);
+  const inbox=`${root}/encounterInbox/bob/hits/${hit}`;
+  assert.equal((await sdk.getDocFromServer(b.ref(inbox))).data().amount,6);
+  assert.equal((await sdk.getDocFromServer(b.ref(`${root}/activities/${hit}-0`))).data().kind,'roll');
+  assert.equal((await b.readCharacter(d.id)).character.hp,d.hp);
+  await assertFails(sdk.getDocFromServer(a.ref(inbox)));
+  await assertFails(sdk.updateDoc(b.ref(inbox),{amount:1,acknowledged:true}));
+  await assertFails(sdk.updateDoc(a.ref(`users/bob/characters/${d.id}/state/live`),{hp:1}));
+  await b.encounters.acknowledge(party,hit);
+  assert.equal((await sdk.getDocFromServer(b.ref(inbox))).data().acknowledged,true);
+});
 
 test('party transfers escrow coins, require the recipient, and credit an acceptance only once',async()=>{
   const {a,b,c,d,party,target}=await transferParty(),eve=storeFor('eve');

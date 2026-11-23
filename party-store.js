@@ -2,10 +2,12 @@ import {copy,fragments,joinCharacter,splitCharacter} from './cloud-model.js';
 import {uid} from './model.js';
 import {initiativeOrder,reserveTransfer,receiveTransfer} from './party-model.js';
 import {applyShopOrder,prepareShop} from './shop-model.js';
+import {EncounterStore} from './encounter-store.js';
 
 // Party operations write only the acting user's private sheet. Offers escrow the
 // sender's assets, then the recipient's acceptance and credit commit together.
 export class PartyStore {
+  encounters = new EncounterStore(this);
   async partyTransaction(action){
     for(let attempt=0;attempt<4;attempt++){
       try{return await action();}catch(error){if(attempt===3||!['permission-denied','aborted'].includes(error.code))throw error;await new Promise(resolve=>setTimeout(resolve,50*(attempt+1)));}
@@ -32,11 +34,11 @@ export class PartyStore {
   }
   async combat(partyId,change) {
     const ref=this.ref(`parties/${partyId}/session/combat`);
-    return this.s.runTransaction(this.db,async tx=>{
+    return this.partyTransaction(()=>this.s.runTransaction(this.db,async tx=>{
       const snapshot=await tx.get(ref),previous=snapshot.exists()?snapshot.data():{scores:{},current:'',round:1,active:false};
       const next=change(copy(previous));
-      tx.set(ref,{scores:next.scores,modifiers:next.modifiers||{},current:next.current,round:next.round,active:next.active,encounterId:next.encounterId||'',initiativeCharacter:next.initiativeCharacter||'',updatedBy:this.uid});
-    });
+      tx.set(ref,{scores:next.scores,modifiers:next.modifiers||{},current:next.current,round:next.round,active:next.active,encounterId:next.encounterId||'',initiativeCharacter:next.initiativeCharacter||'',updatedBy:this.uid,...(next.managed?{managed:true}:{})});
+    }));
   }
   async setInitiative(partyId,sharedId,score,{temporaryModifier}={}) {
     if(!Number.isInteger(score)||score< -999||score>999)throw new Error('Initiative must be a whole number from −999 to 999.');
@@ -47,6 +49,7 @@ export class PartyStore {
   }
   async advanceTurn(partyId,characters,{start=false,end=false}={}) {
     return this.combat(partyId,state=>{
+      if(state.managed)throw new Error('Use the active encounter controls for this turn order.');
       state.initiativeCharacter='';
       if(end)return {...state,scores:{},modifiers:{},active:false,current:'',round:1};
       if(start)return state.active?state:{...state,scores:{},modifiers:{},active:true,current:'',round:1,encounterId:uid()};

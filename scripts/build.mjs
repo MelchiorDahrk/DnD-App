@@ -16,6 +16,7 @@ if(process.env.QUESTLOG_FIREBASE_CONFIG?.trim()){
   await writeFile(resolve(out,'firebase-config.js'),`export const firebaseConfig=${JSON.stringify(config)};\nexport function configuration(scope=globalThis){return Object.hasOwn(scope,'QUESTLOG_FIREBASE_CONFIG')?scope.QUESTLOG_FIREBASE_CONFIG:firebaseConfig;}\n`);
 }
 for(const file of ['dice-controls.js','dice-roller.js','dice-roller.css','party-model.js','party-store.js','party-ui.js','party.css','shop-model.js','shop-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
+for(const file of ['encounter-model.js','encounter-store.js','encounter-ui.js','encounter.css','creature-catalog.js','creature-data.js','creature-icons.js'])await copyFile(resolve(root,file),resolve(out,file));
 await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));
@@ -36,5 +37,6 @@ await cp(resolve(root,'assets/equipment'),resolve(out,'assets/equipment'),{recur
 await cp(resolve(root,'assets/status-icons'),resolve(out,'assets/status-icons'),{recursive:true});
 for(const file of ['spell-icons.js','spell-icon-mappings.js','spell-icon-manifest.js','spell-icons.css'])await copyFile(resolve(root,file),resolve(out,file));
 await cp(resolve(root,'assets/spell-icons'),resolve(out,'assets/spell-icons'),{recursive:true});
+await cp(resolve(root,'assets/creatures'),resolve(out,'assets/creatures'),{recursive:true});
 await cp(resolve(root,'assets/sfx'),resolve(out,'assets/sfx'),{recursive:true});
 console.log('Questlog built successfully → dist/ (static, GitHub Pages-ready)');

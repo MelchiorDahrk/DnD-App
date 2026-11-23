@@ -3,7 +3,8 @@ import {SOUND_FILES} from './sound-assets.js';
 import {CONDITION_ICON_FILES} from './icons.js';
 import {DEFAULT_PORTRAIT_IDS} from './portrait-defaults.js';
 import {SPELL_ICON_FILES} from './spell-icon-manifest.js';
-const CACHE = 'questlog-app-v80-multiclass';
+import {CREATURE_ART_FILES} from './creature-icons.js';
+const CACHE = 'questlog-app-v81-encounters';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./character-hero.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./firebase-config.js','./firebase-client.js','./firebase-sdk/firebase.js','./cloud-model.js','./cloud-store.js','./cloud-sync.js','./cloud-ui.js','./party-model.js','./party-store.js','./party-ui.js','./party.css');
 ASSETS.push('./shop-model.js','./shop-ui.js');
@@ -16,6 +17,9 @@ ASSETS.push('./legacy-magic-item-data.js','./magic-item-icon-names.js');
 ASSETS.push('./sheet-actions.js');
 ASSETS.push('./condition-usage.js',...Object.values(CONDITION_ICON_FILES));
 ASSETS.push('./spell-icons.js','./spell-icon-mappings.js','./spell-icon-manifest.js','./spell-icons.css','./assets/spell-icons/CREDITS.md',...SPELL_ICON_FILES);
+ASSETS.push('./encounter-model.js','./encounter-store.js','./encounter-ui.js','./encounter.css','./creature-catalog.js',
+  './creature-data.js','./creature-icons.js','./assets/creatures/SRD.md','./assets/creatures/CREDITS.md',
+  ...CREATURE_ART_FILES.filter(file=>!SPELL_ICON_FILES.includes(file)));
 ASSETS.push('./inventory-rules.js','./inventory.js','./armor-class.js');
 ASSETS.push('./training-data.js','./training-rules.js','./training-ui.js');
 ASSETS.push('./theme.js','./theme.css','./assets/gui/portrait-border.png','./assets/gui/journal-divider.png');

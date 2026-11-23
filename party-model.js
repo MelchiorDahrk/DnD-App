@@ -2,9 +2,10 @@ import {SKILLS,skillBonus,uid,COINS} from './model.js';
 import {itemUses,removeMissingItemActions} from './inventory-rules.js';
 
 export const partyTime = event => event.createdAt?.toMillis?.() ?? (event.createdAt?.seconds||0)*1000;
+export const compareInitiativeIds = (left,right) => left.localeCompare(right,'en');
 export function initiativeOrder(characters,combat={}) {
   const scores=combat.scores||{};
-  return [...characters].sort((a,b)=>(scores[b.id]??-1000)-(scores[a.id]??-1000)||a.id.localeCompare(b.id));
+  return [...characters].sort((a,b)=>(scores[b.id]??-1000)-(scores[a.id]??-1000)||compareInitiativeIds(a.id,b.id));
 }
 export function turnOrder(characters,combat={}) {
   const ordered=initiativeOrder(characters,combat);

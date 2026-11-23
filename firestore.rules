@@ -215,15 +215,21 @@ service cloud.firestore {
         allow delete: if dungeonMaster(party);
       }
       match /session/combat {
+        function publicEncounterPath() {
+          return /databases/$(database)/documents/parties/$(party)/session/encounter;
+        }
         function resetCombat() {
           return request.resource.data.scores=={} && request.resource.data.modifiers=={}
             && request.resource.data.current=='' && request.resource.data.round==1
-            && request.resource.data.initiativeCharacter=='';
+            && request.resource.data.initiativeCharacter==''
+            && (!request.resource.data.get('managed',false)
+              || getAfter(publicEncounterPath()).data.runId==request.resource.data.encounterId);
         }
         function ownInitiative() {
           let id=request.resource.data.initiativeCharacter;
           return id!='' && request.resource.data.active && resource.data.active
             && request.resource.data.encounterId==resource.data.get('encounterId','')
+            && request.resource.data.get('managed',false)==resource.data.get('managed',false)
             && request.resource.data.current==resource.data.current && request.resource.data.round==resource.data.round
             && get(/databases/$(database)/documents/parties/$(party)/characters/$(id)).data.ownerId==request.auth.uid
             && request.resource.data.scores.diff(resource.data.scores).affectedKeys().hasOnly([id])
@@ -234,29 +240,86 @@ service cloud.firestore {
         function advanceCombat() {
           return request.resource.data.initiativeCharacter=='' && request.resource.data.active && resource.data.active
             && request.resource.data.encounterId==resource.data.get('encounterId','')
+            && request.resource.data.get('managed',false)==resource.data.get('managed',false)
+            && (!request.resource.data.get('managed',false) || getAfter(publicEncounterPath()).data.status=='active')
             && request.resource.data.scores==resource.data.scores
             && request.resource.data.modifiers==resource.data.get('modifiers',{});
         }
         function validCombat() {
-          return request.resource.data.keys().hasOnly(['scores','modifiers','current','round','active','updatedBy','encounterId','initiativeCharacter'])
+          return request.resource.data.keys().hasOnly(['scores','modifiers','current','round','active','updatedBy','encounterId','initiativeCharacter','managed'])
             && request.resource.data.scores is map && request.resource.data.scores.size()<=100
             && request.resource.data.modifiers is map && request.resource.data.modifiers.size()<=100
             && text(request.resource.data.current,230) && integer(request.resource.data.round,1,1000000)
             && text(request.resource.data.encounterId,100) && text(request.resource.data.initiativeCharacter,230)
+            && (!('managed' in request.resource.data) || (request.resource.data.managed==true && request.resource.data.active))
             && request.resource.data.active is bool && request.resource.data.updatedBy==request.auth.uid;
         }
         allow read: if member(party);
         allow create: if dungeonMaster(party) && validCombat() && resetCombat();
         allow update: if member(party) && validCombat()
           && (ownInitiative() || (dungeonMaster(party) && (advanceCombat()
-            || (resetCombat() && (!request.resource.data.active || (!resource.data.active && request.resource.data.encounterId!=resource.data.get('encounterId','')))))));
+            || (resetCombat() && ((!request.resource.data.active && (!resource.data.get('managed',false) || !existsAfter(publicEncounterPath())))
+              || (!resource.data.active && request.resource.data.encounterId!=resource.data.get('encounterId','')))))));
+      }
+      match /encounters/{id} {
+        function validDefinition() {
+          let data=request.resource.data;
+          return id.matches('[a-zA-Z0-9_-]{1,100}') && data.keys().hasOnly(['name','status','revision','payload'])
+            && text(data.name,120) && data.name.size()>0 && text(data.payload,600000)
+            && data.status in ['prepared','active','paused','completed','archived']
+            && integer(data.revision,1,2147483647);
+        }
+        allow read: if dungeonMaster(party);
+        allow create: if dungeonMaster(party) && validDefinition()
+          && request.resource.data.revision==1 && request.resource.data.status=='prepared';
+        allow update: if dungeonMaster(party) && validDefinition()
+          && request.resource.data.revision==resource.data.revision+1;
+        allow delete: if dungeonMaster(party) && resource.data.status in ['prepared','completed','archived'];
+      }
+      match /creatureTemplates/{id} {
+        function validTemplate() {
+          let data=request.resource.data;
+          return id.matches('[a-zA-Z0-9_-]{1,100}') && data.keys().hasOnly(['name','payload','revision'])
+            && text(data.name,120) && data.name.size()>0 && text(data.payload,600000)
+            && integer(data.revision,1,2147483647);
+        }
+        allow read, delete: if dungeonMaster(party);
+        allow create: if dungeonMaster(party) && validTemplate() && request.resource.data.revision==1;
+        allow update: if dungeonMaster(party) && validTemplate() && request.resource.data.revision==resource.data.revision+1;
+      }
+      match /session/encounter {
+        allow read: if member(party);
+        allow create, update: if dungeonMaster(party)
+          && request.resource.data.keys().hasOnly(['id','runId','status','creatures','current','started'])
+          && request.resource.data.id.matches('[a-zA-Z0-9_-]{1,100}') && text(request.resource.data.runId,100)
+          && request.resource.data.status in ['active','paused'] && text(request.resource.data.current,100)
+          && request.resource.data.creatures is list && request.resource.data.creatures.size()<=30
+          && request.resource.data.started is bool
+          && getAfter(/databases/$(database)/documents/parties/$(party)/session/combat).data.encounterId==request.resource.data.runId
+          && getAfter(/databases/$(database)/documents/parties/$(party)/session/combat).data.managed==true;
+        allow delete: if dungeonMaster(party)
+          && getAfter(/databases/$(database)/documents/parties/$(party)/session/combat).data.active==false;
+      }
+      match /encounterInbox/{uid}/hits/{hit} {
+        allow read: if own(uid) && member(party);
+        allow create: if dungeonMaster(party) && exists(memberPath(party,uid))
+          && request.resource.data.keys().hasOnly(['actorId','createdAt','characterId','source','amount','damageType','acknowledged'])
+          && request.resource.data.actorId==request.auth.uid && request.resource.data.createdAt==request.time
+          && request.resource.data.characterId.matches('[a-zA-Z0-9_-]{1,100}')
+          && get(sharedPath(party,uid+'_'+request.resource.data.characterId)).data.ownerId==uid
+          && text(request.resource.data.source,120) && integer(request.resource.data.amount,1,9999)
+          && text(request.resource.data.damageType,60) && request.resource.data.acknowledged==false;
+        allow update: if own(uid) && member(party)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['acknowledged'])
+          && request.resource.data.acknowledged==true;
       }
       match /activities/{event} {
         allow read: if member(party);
         allow create: if member(party) && request.resource.data.actorId==request.auth.uid
           && request.resource.data.keys().hasOnly(['actorId','createdAt','kind','text','characterId','name','result'])
           && request.resource.data.createdAt==request.time
-          && request.resource.data.kind in ['damage','healing','unconscious','inspiration','condition','roll']
+          && (request.resource.data.kind in ['damage','healing','unconscious','inspiration','condition','roll']
+            || (request.resource.data.kind=='encounter' && dungeonMaster(party)))
           && text(request.resource.data.characterId,100) && text(request.resource.data.name,120)
           && (!('text' in request.resource.data) || text(request.resource.data.text,1000))
           && (!('result' in request.resource.data) || text(request.resource.data.result,4000));

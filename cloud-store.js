@@ -245,7 +245,7 @@ export class CloudStore extends PartyStore {
     const fail=scope=>async failure=>{
       if(stopped)return;
       data.errors[scope]={code:failure.code||'',message:failure.message||'Connection unavailable'};emit();
-      if(['combat','activities','transfers','rests','replies'].includes(scope)||checking)return;
+      if(['combat','encounters','encounterInbox','activities','transfers','rests','replies'].includes(scope)||checking)return;
       checking=true;
       try{if(!await this.partyAccess(partyId)&&!stopped){stopped=true;error(Object.assign(new Error('Party membership ended.'),{code:'questlog/party-access-ended'}));}}
       catch{/* A rules or network error must not erase the party selection. */}
@@ -255,10 +255,13 @@ export class CloudStore extends PartyStore {
     stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/members/${this.uid}`),{includeMetadataChanges:true},snapshot=>{if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites&&!snapshot.exists())ended();},fail('membership')));
     stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}`),{includeMetadataChanges:true},snapshot=>{if(snapshot.exists()){Object.assign(data,snapshot.data());emit();}else if(!snapshot.metadata.fromCache&&!snapshot.metadata.hasPendingWrites)ended();},fail('party')));
     stops.push(this.s.onSnapshot(this.ref(`parties/${partyId}/session/combat`),snapshot=>{data.combat=snapshot.exists()?snapshot.data():{};emit();},fail('combat')));
+    stops.push(this.encounters.watchPublic(partyId,(encounter,cached)=>{data.encounter=encounter;data.encounterCached=cached;emit();},fail('encounters')));
+    stops.push(this.encounters.watchInbox(partyId,hits=>{data.encounterHits=hits;emit();},fail('encounterInbox')));
     for(const kind of ['members','characters','invitations','activities','transfers','rests']){
       const collection=this.s.collection(this.db,`parties/${partyId}/${kind}`),source=['activities','rests'].includes(kind)?this.s.query(collection,this.s.orderBy('createdAt','desc'),this.s.limit(kind==='rests'?10:50)):collection;
       stops.push(this.s.onSnapshot(source,snapshot=>{
         data[kind]=snapshot.docs.filter(d=>!['activities','rests'].includes(kind)||d.data().createdAt).map(d=>({id:d.id,...d.data(),...(kind==='characters'?{live:data.characters.find(c=>c.id===d.id)?.live}:kind==='rests'?{replies:data.rests.find(r=>r.id===d.id)?.replies||[],repliesReady:data.rests.find(r=>r.id===d.id)?.repliesReady||false}: {})}));
+        if(kind==='members')data.membersReady=true;
         if(kind==='characters'){
           data.charactersReady=true;
           const ids=new Set(data.characters.map(c=>c.id));

@@ -206,6 +206,105 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await press(alice.page,`[data-action="cloud-select-party"][data-id="${second}"]`);await alice.page.waitForSelector('[data-party-character="alice-third"]');assert.equal((await accountState(alice.page)).activeId,a3.id);
     await alice.page.goto(url+'#party-manage');await press(alice.page,`[data-action="cloud-select-party"][data-id="${party}"]`);await alice.page.waitForSelector('[data-party-character="alice-main"]');assert.equal((await accountState(alice.page)).activeId,a.id);
     await alice.page.setViewport({width:390,height:844});assert.ok(await alice.page.$$eval('.party-player',nodes=>nodes.every(n=>n.getBoundingClientRect().height<250)),'Mobile cards stay compact');await alice.page.screenshot({path:resolve(diagnostics,'party-updated-mobile.png'),fullPage:true});
+
+    phase='encounter preparation';
+    await alice.page.setViewport({width:1440,height:1000});
+    await bob.page.setViewport({width:390,height:844});
+    const third=make('Mira','third-main'),charlie=await open('charlie',[third]);
+    await storeCall(charlie,'join',[await storeCall(alice,'invite',[party]),'Charlie']);
+    await storeCall(charlie,'share',[party,third]);
+    await charlie.page.waitForSelector('[data-party-character="third-main"]');
+    await click(charlie.page,'party-rest-no');await closed(charlie.page);
+    await alice.page.waitForSelector('[data-action="encounter-library"]');
+    assert.equal(await bob.page.$('[data-action="encounter-library"]'),null);
+    assert.equal(await charlie.page.$('[data-action="encounter-library"]'),null);
+    await click(alice.page,'encounter-library');await click(alice.page,'encounter-create');
+    await fill(alice.page,'name','Goblin road ambush');await submit(alice.page);
+    await click(alice.page,'encounter-catalog');
+    await alice.page.type('[name="query"]','Goblin Warrior');
+    await alice.page.select('#modal [name="type"]','fey');
+    await alice.page.select('#modal [name="cr"]','1/4');
+    await press(alice.page,'[data-action="encounter-select"][data-template="srd-goblin-warrior"]');
+    await fill(alice.page,'quantity','2');await fill(alice.page,'notes','Hide the scout behind the cart.');
+    await submit(alice.page);
+    await alice.page.waitForFunction(()=>document.querySelector('[data-encounter-dialog="builder"]')?.textContent.includes('Goblin Warrior #2'));
+    await alice.page.screenshot({path:resolve(diagnostics,'encounter-builder-desktop.png')});
+    await click(alice.page,'encounter-start');
+    await Promise.all([bob,charlie].map(({page})=>page.waitForSelector('[data-initiative-method]')));
+    const physical=async (page,total)=>{
+      await page.select('[data-initiative-method]','physical');
+      await fill(page,'initiativeTotal',String(total));await submit(page);
+    };
+    await physical(bob.page,12);await physical(charlie.page,8);
+    for(const [name,value] of [['Melchior',20],['Teyla',5]]){
+      await alice.page.waitForFunction(name=>document.querySelector('#modal[open]')?.textContent.includes(`Enter initiative for ${name}`),{},name);
+      await physical(alice.page,value);
+    }
+    await closed(alice.page);
+    for(const {page} of [bob,charlie]){
+      await page.waitForSelector('.encounter-section');
+      assert.equal(await page.$('.encounter-card'),null);
+      assert.doesNotMatch(await page.$eval('.encounter-section',node=>node.textContent),/Goblin|ambush|scout/);
+    }
+
+    phase='encounter combat, visibility, and targeted damage';
+    const first=await alice.page.$eval('.encounter-card [data-action="encounter-creature"]',node=>node.dataset.id);
+    const firstCard=`.encounter-card [data-action="encounter-creature"][data-id="${first}"]`;
+    await press(alice.page,firstCard);await click(alice.page,'encounter-setup');
+    await alice.page.select('#modal [name="visibility"]','unknown');
+    await fill(alice.page,'publicName','Cloaked scout');await fill(alice.page,'initiative','17');
+    await submit(alice.page);await closed(alice.page);
+    for(const {page} of [bob,charlie]){
+      await page.waitForSelector(firstCard);
+      assert.match(await page.$eval(firstCard,node=>node.textContent),/Cloaked scout.*Healthy/s);
+      assert.match(await page.$eval(firstCard+' img',node=>node.src),/silhouette\.svg$/);
+      assert.equal(await page.$$eval('.encounter-card',cards=>cards.length),1);
+    }
+    await click(alice.page,'party-next-turn');
+    await bob.page.waitForSelector('.party-player.is-current');
+    await click(alice.page,'party-next-turn');
+    await bob.page.waitForSelector('.encounter-card.is-current');
+    await bob.page.waitForSelector('#party-session-header .session-member.is-current[data-action="encounter-creature"]');
+    assert.equal(await bob.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+    await bob.page.screenshot({path:resolve(diagnostics,'encounter-playing-mobile.png'),fullPage:true});
+    await press(alice.page,firstCard);await fill(alice.page,'amount','6');await click(alice.page,'encounter-damage');
+    await bob.page.waitForFunction(()=>document.querySelector('.encounter-card')?.textContent.includes('Bloodied'));
+    await click(alice.page,'encounter-record');
+    await alice.page.select('#modal [name="target"]',sharedBob);
+    await fill(alice.page,'attackTotal','19');await fill(alice.page,'amount','3');await fill(alice.page,'damageType','Piercing');
+    const beforeHit=(await accountState(bob.page)).characters.find(c=>c.id===b.id).hp;
+    await submit(alice.page);
+    await bob.page.waitForSelector('.encounter-inbox [data-action="encounter-review-hit"]');
+    assert.equal(await charlie.page.$('.encounter-inbox'),null);
+    assert.equal((await accountState(bob.page)).characters.find(c=>c.id===b.id).hp,beforeHit);
+    await click(bob.page,'encounter-review-hit');
+    assert.equal(await bob.page.$eval('#modal [name="amount"]',node=>node.value),'3');
+    await press(bob.page,'#modal [data-action="hp-apply"][data-kind="damage"]');
+    await waitForValue(bob.page,b.id,'hp',beforeHit-3);
+    await press(bob.page,'.session-party-name');
+    await click(bob.page,'encounter-dismiss-hit');
+    await bob.page.waitForFunction(()=>!document.querySelector('.encounter-inbox'));
+    await bob.page.reload();
+    await bob.page.waitForSelector(firstCard);
+    assert.match(await bob.page.$eval(firstCard,node=>node.textContent),/Bloodied/);
+    const network=(page,online)=>page.evaluate(async online=>{
+      const sdk=await import('./firebase-sdk/firebase.js');
+      await sdk[online?'enableNetwork':'disableNetwork'](sdk.getFirestore());
+    },online);
+    await network(alice.page,false);
+    await alice.page.waitForFunction(()=>document.querySelector('.encounter-section')?.textContent.includes('last known state'));
+    await click(alice.page,'encounter-pause');
+    await text(alice.page,'Connect to the party before changing an encounter.');
+    await network(alice.page,true);
+    await alice.page.waitForFunction(()=>!document.querySelector('.encounter-section')?.textContent.includes('last known state'));
+    await click(alice.page,'encounter-pause');
+    await charlie.page.waitForFunction(()=>document.querySelector('.party-encounter-status')?.textContent.includes('Encounter paused'));
+    await click(alice.page,'encounter-resume');
+    await alice.page.waitForSelector('[data-action="encounter-pause"]');
+    await click(alice.page,'encounter-end');await submit(alice.page);
+    await Promise.all([bob,charlie].map(({page})=>page.waitForFunction(()=>!document.querySelector('.encounter-section'))));
+    await click(alice.page,'encounter-library');await click(alice.page,'encounter-builder');await click(alice.page,'encounter-archive');
+    await alice.page.waitForFunction(()=>document.querySelector('[data-encounter-dialog="builder"]')?.textContent.includes('Archived'));
     assert.deepEqual(errors,[]);
   }catch(error){
     const states={};

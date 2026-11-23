@@ -241,7 +241,8 @@ Fantasy catalog and equipment icon maintenance, build requirements, and regressi
 
 The live Party table includes shared initiative, spectator dice, accepted item
 and coin transfers, town stores, group rest replies, a skill finder, and Session
-Mode. Party owners can assign a DM to run encounters, call group rests, and
+Mode. Party owners can assign a DM to prepare and run creature encounters
+from the 2024 SRD compendium or homebrew templates, call group rests, and
 manage stores. Party
 notification preferences are in **Settings → Party**. See the
 [party play architecture and verification guide](docs/party-play.md); deploy its

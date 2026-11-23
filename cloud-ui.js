@@ -80,8 +80,8 @@ export function createCloudUI(ui){
   }
   const partyMarkup=()=>party&&!new URL(location.href).searchParams.has('invite')?play.markup():partyManagementMarkup();
   function chooseParty(id){
-    stopParty();party=null;selected=id;switchCharacter=true;
-    if(!id){play.reset();return refresh();}
+    stopParty();party=null;play.reset();selected=id;switchCharacter=true;
+    if(!id)return refresh();
     const token=generation;
     const details=new Map();
     stopParty=signed().watchParty(id,data=>{if(token!==generation||id!==selected)return;party=data;selectPartyCharacter();play.update(data);

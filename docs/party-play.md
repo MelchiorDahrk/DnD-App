@@ -36,6 +36,62 @@ turn order. Rest invitations let each player open their own recovery choices.
 The DM can send an invitation without sharing a character. The sheet's
 **Rest** button opens an individual rest.
 
+## Creature encounters
+
+Open **Party → Encounters → Manage encounters** to create and name a saved
+encounter. Open it and choose **Add creatures**. The compendium searches 341
+creature and form entries from the 2024 rules' SRD 5.2.1 by name, type, and
+Challenge Rating. Pick a creature, set the quantity, and customize the group's
+starting HP, AC, initiative modifier, visibility, name, portrait, and notes.
+Each instance has its own ID and combat state. You can edit each card
+individually. Use **Create creature template** in the encounter library for
+homebrew stat blocks and reusable actions. Changes to a template apply to
+instances added afterward.
+
+**Start encounter** copies the prepared roster into a live run and prompts
+players to enter initiative for their own characters. The DM can roll for one
+creature, roll selected creatures together, or enter a total when editing a
+creature. The group option gives instances of the same template and initiative
+modifier a shared roll. The Party page and Session Mode show the mixed turn
+order. It sorts ties by stable participant ID. A reinforcement with a slot
+after the current turn can act in the current round. Creatures at 0 HP and
+removed participants are skipped. Healing a creature above 0 HP returns it to
+the turn order. **Pause** holds turn advancement while allowing adjustments.
+
+Open a creature on the Party page or in Session Mode to manage HP, temporary
+HP, conditions, attack and damage rolls, checks, saves, recharge, and limited
+uses. Use **Edit / reveal creature** to change visibility, publish a display
+name, and optionally share exact HP, AC, and statistics. Unidentified
+creatures use a silhouette. Revealed creatures default to Healthy, Injured,
+Bloodied (half HP or less), or Defeated. The DM can add reinforcements from the
+compendium at any point during the run.
+
+In **Roll / target** or **Record attack manually**, choose a shared character.
+Confirm the actual damage and type, then publish to the party activity feed.
+For attacks with several damage types, roll and publish one damage component
+at a time. The targeted player gets a notice with **Open HP controls**. They
+review the prefilled damage and apply it to their character using the sheet's
+normal temporary HP and damage controls, then dismiss the notice. Rolls made
+in the creature panel stay local until published. An attack from a hidden or
+unidentified creature publishes the attack total and reported damage under a
+generic source name or a public alias.
+
+**End encounter** keeps the final state for review and clears initiative.
+**Archive** marks a completed run in the library. **Reset for reuse** restores
+the prepared roster and clears the previous run. Duplicate the prepared
+encounter to keep a separate copy. Encounter changes require a live connection.
+During an interruption, the last known encounter stays visible while the
+client reconnects. Each encounter supports up to 30 creatures and a
+600 KB private payload. Portrait uploads are resized to fit so they can travel
+with the encounter. The SRD catalog and built-in portraits are bundled offline.
+
+Creature portraits use a dedicated registry. Uploaded artwork takes priority,
+followed by a registered LEGO render, a manually chosen or automatically
+matched Game-icons.net icon, then the generic silhouette. The registry can
+add LEGO renders by template ID without editing saved encounter statistics.
+See the [SRD attribution](../assets/creatures/SRD.md) and
+[creature artwork credits](../assets/creatures/CREDITS.md).
+
 ## Town stores
 
 Open **Party → Stores**. The DM chooses **Create store**, selects a type, and
@@ -72,8 +128,8 @@ remain available offline.
 
 ## Shared state
 
-- `parties/{party}/session/combat`: initiative scores, temporary modifier map,
-  active character, round, and encounter ID. Starting an encounter clears prior
+- `parties/{party}/session/combat`: player initiative scores, temporary modifier map,
+  active player character, round, and encounter run ID. Starting an encounter clears prior
   scores and prompts each owner to roll in the app or enter their physical roll's
   total, including all modifiers. Prompts appear across pages; dismissed prompts
   can be reopened from that owner's party card. Other players' scores are
@@ -83,6 +139,27 @@ remain available offline.
   feat/class initiative bonus, Exhaustion and roll mode. Temporary modifiers add
   to this calculation for the encounter; ending it clears scores and modifiers
   and resets the round. The sheet's initiative roll also updates an active encounter.
+- `parties/{party}/encounters/{encounter}` stores the prepared roster, the
+  current or most recent run, a revision, and notes. Reusable homebrew stat
+  blocks live in `creatureTemplates/{template}`. Firestore restricts both
+  collections to the effective DM, including when the assignment falls back to
+  the party owner. Player characters and creature instances share one turn
+  order. The current creature cursor is private so a hidden creature's ID and
+  initiative stay out of the public combat document.
+- `parties/{party}/session/encounter` contains the current status and a
+  projection of revealed creatures. The store constructs it from allowed
+  display fields. A transaction updates the private run, shared turn state
+  when it changes, and the public projection when it changes. Transactions
+  reread current sheet initiative and preserve concurrent player scores.
+  Initiative-only sessions from older parties continue to use
+  `session/combat`.
+- A published attack writes party activity and an owner-scoped notice under
+  `encounterInbox/{uid}/hits/{event}` in one transaction. A retained event
+  ID deduplicates publish retries. The client listens for the newest 20
+  notices. Only the recipient can read or dismiss a notice. During play,
+  there is one public encounter listener and one inbox listener per connected
+  member. The effective DM also subscribes to the current private run. Party
+  switches close these listeners.
 - `activities/{event}`: immutable events with a server timestamp. Character
   changes append damage, healing, unconsciousness, inspiration, condition, and
   concentration events in the same transaction as their live state. Operation
@@ -145,8 +222,9 @@ As with existing character editing, game inventory values are controlled by
 their owners; Firestore cannot validate arithmetic inside JSON content chunks.
 ## Firebase deployment
 
-Before publishing the updated app, deploy the rules and the store inventory's
-index exemption to the production Firebase project.
+Before publishing the updated app, deploy the rules and index exemptions to
+the production Firebase project. The new exemptions cover private encounter
+and template payloads and the public encounter's creature array.
 
 ```sh
 npx firebase deploy --project YOUR_PROJECT_ID --only firestore:rules,firestore:indexes
@@ -162,9 +240,18 @@ creation, and recovery across this version mismatch.
 
 ## Verification
 
-`npm test` covers party and shop models, including presets, magic item
-filtering, currency, bundles, and linked actions. `npm run test:firebase` adds
-rule and two-account browser coverage for DM changes, initiative, rest votes,
-store publishing, finite-stock purchase races, retry, resale, transfers,
-notifications, Session Mode, and responsive layouts. Browser screenshots are
-written to `.tmp/browser-diagnostics/party/`.
+`npm test` covers encounter, party, and shop models. `npm run test:firebase`
+adds rules and browser coverage for private reads, player initiative, concurrent
+combat changes, reconnect, targeted damage, rest votes, store checkout, trading,
+Session Mode, and responsive layouts. The encounter scenario uses a DM and
+two connected players. Browser screenshots are written to
+`.tmp/browser-diagnostics/party/`.
+
+To regenerate `creature-data.js`, download the pinned 5e-bits monster JSON
+and the official SRD PDF from the [catalog attribution](../assets/creatures/SRD.md).
+Extract the SRD text with Python and `pypdf`, then run the importer:
+
+```sh
+python -c "from pypdf import PdfReader; from pathlib import Path; Path('srd.txt').write_text('\n'.join(p.extract_text() for p in PdfReader('srd.pdf').pages[245:]), encoding='utf-8')"
+node scripts/build-creature-catalog.mjs 5e-SRD-Monsters.json srd.txt
+```
