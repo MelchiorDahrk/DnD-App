@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { t } from '#lib/i18n.svelte.ts';
 	import type { Color } from '#lib/ldraw.ts';
-	import { COMMON_COLORS } from '#lib/state.svelte.ts';
 
 	interface Target {
 		label: string;
@@ -11,54 +10,24 @@
 
 	let {
 		targets,
-		colors,
-		used = []
+		colors
 	}: {
 		targets: Target[];
 		colors: Color[];
-		/** colours already on the figure, offered first to match them */
-		used?: number[];
 	} = $props();
 
 	let index = $state(0);
 	let all = $state(false);
 	let query = $state('');
-	let strip: HTMLElement | undefined = $state();
 	const target = $derived(targets[Math.min(index, targets.length - 1)]);
 	const current = $derived(colors.find((c) => c.code === target.value));
 	const opaque = $derived(colors.filter((c) => !c.alpha));
 	const byCode = $derived(new Map(colors.map((c) => [c.code, c])));
-	const figure = $derived(
-		[...new Set(used)].map((c) => byCode.get(c)).filter((c) => c !== undefined)
-	);
-	const common = $derived(
-		COMMON_COLORS.filter((c) => !used.includes(c))
-			.map((c) => byCode.get(c))
-			.filter((c) => c !== undefined)
-	);
 	const found = $derived.by(() => {
 		const q = query.trim().toLowerCase().replace(/^#/, '');
 		if (!q) return opaque;
 		return opaque.filter((c) => c.name.toLowerCase().includes(q) || String(c.code) === q);
 	});
-
-	// The folded strip shows the chosen colour, wherever it is
-	$effect(() => {
-		void target.value;
-		if (all || !strip) return;
-		strip.querySelector<HTMLElement>('[aria-pressed="true"]')?.scrollIntoView({
-			block: 'nearest',
-			inline: 'nearest'
-		});
-	});
-
-	// A mouse wheel scrolls the strip sideways
-	function wheel(e: WheelEvent) {
-		if (!strip || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-		if (strip.scrollWidth <= strip.clientWidth) return;
-		e.preventDefault();
-		strip.scrollLeft += e.deltaY;
-	}
 </script>
 
 {#snippet swatch(c: Color)}
@@ -105,7 +74,7 @@
 		</div>
 
 		<button type="button" class="more" aria-expanded={all} onclick={() => (all = !all)}>
-			<span>{all ? t('fewerColours') : t('allColours', { n: opaque.length })}</span>
+			<span>{t('allColours')}</span>
 			<svg viewBox="0 0 20 20" aria-hidden="true"><path d="m5 8 5 5 5-5" /></svg>
 		</button>
 	</div>
@@ -127,33 +96,11 @@
 				{/each}
 			</div>
 		</div>
-	{:else}
-		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div
-			class="list strip"
-			role="group"
-			aria-label="{t('colourOf')} {target.label}"
-			bind:this={strip}
-			onwheel={wheel}
-		>
-			{#if figure.length}
-				<div class="group on-figure" title={t('onFigure')}>
-					{#each figure as c (c.code)}
-						{@render swatch(c)}
-					{/each}
-				</div>
-				<span class="sep" aria-hidden="true"></span>
-			{/if}
-			{#each common as c (c.code)}
-				{@render swatch(c)}
-			{/each}
-		</div>
 	{/if}
 </div>
 
 <style>
 	.bar {
-		position: relative;
 		display: flex;
 		align-items: center;
 		gap: 10px;
@@ -163,15 +110,17 @@
 
 	.head {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 8px 12px;
 		min-height: 30px;
-		flex: none;
+		min-width: 0;
 		margin: 0;
 	}
 
 	.targets {
 		display: flex;
+		flex-wrap: wrap;
 		gap: 3px;
 		padding: 2px;
 		border-radius: var(--radius-sm);
@@ -295,43 +244,12 @@
 		align-items: center;
 	}
 
-	.strip {
-		overflow-x: auto;
-		scrollbar-width: none;
-		padding: 2px 4px;
-		flex: 1 1 180px;
-		min-width: 0;
-		max-width: 280px;
-		mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
-	}
-
-	.strip::-webkit-scrollbar {
-		display: none;
-	}
-
-	.group.on-figure {
-		display: flex;
-		gap: 4px;
-		padding: 2px 5px;
-		border-radius: 6px;
-		background: color-mix(in srgb, var(--ink) 5%, transparent);
-		border: 1px dashed var(--line);
-	}
-
-	.sep {
-		flex: none;
-		width: 1px;
-		height: 20px;
-		margin: 0 4px;
-		background: color-mix(in srgb, var(--ink) 10%, transparent);
-	}
-
 	.palette {
 		position: absolute;
 		top: calc(100% + 8px);
 		right: 0;
 		z-index: 50;
-		width: min(420px, calc(100vw - 32px));
+		width: min(420px, 100%);
 		background: var(--card);
 		border: 1px solid var(--line-focus);
 		border-radius: var(--radius-md);
@@ -455,19 +373,10 @@
 	}
 
 	@media (max-width: 640px) {
-		.strip {
-			flex: 0 0 auto;
-			width: 100%;
-			max-width: 100%;
-			min-height: 40px;
-		}
 		.bar {
 			flex-direction: column;
 			align-items: stretch;
 			gap: 8px;
-		}
-		.head {
-			flex-wrap: wrap;
 		}
 		.palette {
 			position: static;

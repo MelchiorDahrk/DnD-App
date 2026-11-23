@@ -1,6 +1,7 @@
 // Turns a portrait into pixels: owns the stage and the current figure model.
 import type { Box3 } from 'three';
-import { library, placements, type Figure } from './ldraw';
+import { library, type Figure } from './ldraw';
+import { moveLegacyGhostShroud, portraitPlacements } from './portrait-assembly.ts';
 import type { View } from './scene';
 import { PortraitStage } from './portrait-scene.ts';
 import { compose, type Style } from './compose';
@@ -28,13 +29,14 @@ export class PortraitRenderer {
 
 	/** Rebuilds the model if the figure changed. Resolves false if a newer call won. */
 	async update(figure: Figure) {
+		figure = moveLegacyGhostShroud(figure);
 		const key = JSON.stringify(figure);
 		if (key === this.key) return true;
 		const version = ++this.version;
 		await library.init();
 		const find = (id: string | null) => library.catalog.find((p) => p.id === id);
 		const model = await library.build(
-			placements(figure, find(figure.torso.id), find(figure.head.id), find(figure.legs.id))
+			portraitPlacements(figure, find(figure.torso.id), find(figure.head.id), find(figure.legs.id))
 		);
 		if (version !== this.version) {
 			disposePortraitModel(model);

@@ -106,6 +106,11 @@ test('every catalog item and default attack has explicit artwork',()=>{
   assert.equal(new Set(['Beast: Bite','Beast: Claws','Beast: Tail'].map(name=>equipmentIconURL({name}))).size,3);
 });
 
+test('starting equipment labels retain the quarterstaff and book icons',()=>{
+  for(const focus of ['Arcane','Druidic'])assert.equal(equipmentIconURL({name:`Quarterstaff (${focus} Focus)`}),equipmentIconURL({name:'Quarterstaff'}));
+  for(const subject of ['philosophy','history','occult lore','prayers'])assert.equal(equipmentIconURL({name:`Book (${subject})`}),equipmentIconURL({name:'Book'}));
+});
+
 test('named and renamed attacks share the base weapon artwork across all views',()=>{
   for(const name of ['Blood spear','Magic spear','+1 Battleaxe','Handaxes','Javelins','Daggers']) {
     assert.ok(equipmentIconURL({name}),name);

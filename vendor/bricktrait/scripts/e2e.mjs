@@ -215,7 +215,7 @@ check('the full palette unfolds and finds a colour by name', async () => {
 	await page.click('.palette .swatch');
 	assert.match(found[0], new RegExp(`\\(${(await state()).head.color}\\)`));
 	await page.click('.bar .more');
-	assert.ok(await page.$('.bar .strip'));
+	assert.equal(await page.$('.bar .swatch'), null);
 	await key('z', ['Control']);
 });
 

@@ -15,7 +15,7 @@ export async function buildPresetThumbnails(){
   await fs.mkdir(out,{recursive:true});
   const manifestFile=resolve(out,'manifest.json');
   const previous=JSON.parse(await fs.readFile(manifestFile,'utf8').catch(()=>'{}'));
-  const inputs=['src/lib/ldraw.ts','src/lib/portrait-scene.ts','src/lib/portrait-glow.ts','src/lib/scene.ts','src/lib/lighting.ts','src/lib/materials.ts','scripts/preset-thumbs/main.ts','static/ldraw/core.ldr','static/ldraw/LDConfig.ldr'];
+  const inputs=['src/lib/ldraw.ts','src/lib/portrait-assembly.ts','src/lib/portrait-scene.ts','src/lib/portrait-glow.ts','src/lib/scene.ts','src/lib/lighting.ts','src/lib/materials.ts','scripts/preset-thumbs/main.ts','static/ldraw/core.ldr','static/ldraw/LDConfig.ldr'];
   const rendererVersion=hash(Buffer.concat(await Promise.all(inputs.map(f=>fs.readFile(resolve(vendor,f))))));
   const fingerprint=await geometryFingerprinter(resolve(vendor,'static/ldraw'));
   const partHashes=new Map();

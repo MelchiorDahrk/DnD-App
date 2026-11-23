@@ -4,16 +4,45 @@ import { BoxGeometry, BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshS
 import { preparePortraitModel, disposePortraitModel, emissionBox, emissionColor } from '../vendor/bricktrait/src/lib/materials.ts';
 import { portraitGlowMaterial } from '../vendor/bricktrait/src/lib/portrait-glow.ts';
 import { placements } from '../vendor/bricktrait/src/lib/ldraw.ts';
+import { moveLegacyGhostShroud, portraitPlacements } from '../vendor/bricktrait/src/lib/portrait-assembly.ts';
 import { emptyFigure } from '../vendor/bricktrait/src/lib/presets.js';
 
 test('back attachments keep their native worn orientation independently of the head pose',()=>{
-  for(const id of ['2524','30158c01','26073','3838','4524','99464c01','50231c02','88290','10183','20608','2588','10173','7103']) {
+  for(const id of ['2524','30158c01','26073','3838','4524','99464c01','50231c02','88290','10183','20608','7103']) {
     const f=emptyFigure();f.back.id=id;f.pose.head=60;
     assert.deepEqual(placements(f).find(p=>p.id===id),{id,color:f.back.color},`${id} keeps its authored orientation at the neck peg`);
   }
   for(const id of ['6132','10052','60749','10065','2587']) {
     const f=emptyFigure();f.neck.id=id;
     assert.equal(placements(f).find(p=>p.id===id).m,undefined);
+  }
+});
+
+test('ghost shrouds sit on the head and replace earlier headgear in legacy designs',()=>{
+  for(const id of ['2588','10173']) {
+    const figure=emptyFigure();
+    figure.back={id,color:15};figure.headgear.id='3901';figure.pose.head=60;
+    const migrated=moveLegacyGhostShroud(figure);
+    assert.deepEqual(migrated.headgear,{id,color:15});
+    assert.equal(migrated.back.id,null);
+    assert.equal(figure.back.id,id);
+    const parts=portraitPlacements(figure);
+    const placement=parts.find(part=>part.id===id);
+    assert.ok(!parts.some(part=>part.id==='3901'));
+    assert.deepEqual(placement.at,[0,-24,0]);
+    assert.ok(Math.abs(placement.m[0]-.5)<1e-10);
+  }
+});
+
+test('battleaxes face forward while keeping their grip position and spin axis in either hand',()=>{
+  for(const side of ['handR','handL']) {
+    const figure=emptyFigure();
+    figure.torso.id='973';figure[side]={id:'3848',color:71,spin:25};
+    const before=placements(figure).find(part=>part.id==='3848');
+    const after=portraitPlacements(figure).find(part=>part.id==='3848');
+    assert.deepEqual(after.at,before.at);
+    after.m.forEach((entry,i)=>assert.ok(Math.abs(entry-(i%3===1?before.m[i]:-before.m[i]))<1e-10));
+    assert.equal(figure[side].spin,25);
   }
 });
 

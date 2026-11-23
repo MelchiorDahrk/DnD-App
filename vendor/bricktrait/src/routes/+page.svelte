@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { asset } from '../paths.js';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import {
 		needsLegs,
 		library,
@@ -11,6 +11,7 @@
 		type Part,
 		type Pose
 	} from '#lib/ldraw.ts';
+	import { moveLegacyGhostShroud } from '#lib/portrait-assembly.ts';
 	import { MIN_ZOOM } from '#lib/scene.ts';
 	import { appearance, applyAppearance } from '#lib/appearance.svelte.ts';
 	import { renderer, PortraitRenderer, webglAvailable, type ImageFormat } from '#lib/render.ts';
@@ -162,11 +163,12 @@
 			if (event.data.type === 'questlog:portrait-init' || event.data.type === 'questlog:portrait-theme') applyAppearance(event.data.theme);
 			if (event.data.type === 'questlog:portrait-init' && event.data.design) {
 				const design = structuredClone(event.data.design);
+				design.figure = moveLegacyGhostShroud(design.figure);
 				design.style = transparentStyle(design.style);
 				Object.assign(portrait, design);
 			}
 			if (event.data.type === 'questlog:portrait-init' && !event.data.design && event.data.figure) {
-				portrait.figure = structuredClone(event.data.figure);
+				portrait.figure = moveLegacyGhostShroud(structuredClone(event.data.figure));
 				portrait.view = { yaw: -18, pitch: 8, zoom: 1 };
 			}
 			if (event.data.type === 'questlog:portrait-request-save') void saveToCharacter();
@@ -223,19 +225,6 @@
 		id === STANDARD_LEGS ? standard : catalog.find((p) => p.id === id);
 	const colorOf = (code: number) => colors.find((c) => c.code === code);
 	const torso = $derived(find(portrait.figure.torso.id));
-
-	// Colours already worn, offered first so parts can match
-	const usedColours = $derived.by(() => {
-		const f = portrait.figure;
-		const list: number[] = [];
-		if (f.head.id) list.push(f.head.color);
-		if (f.headgear.id) list.push(f.headgear.color);
-		if (f.torso.id) list.push(f.torso.color, ...(torso?.arms ? [] : [f.torso.arms, f.torso.hands]));
-		if (f.legs.id) list.push(f.legs.color);
-		if (f.legs.id === STANDARD_LEGS || needsLegs(find(f.legs.id))) list.push(f.legs.hips);
-		for (const s of [f.neck, f.back, f.handR, f.handL]) if (s.id) list.push(s.color);
-		return list;
-	});
 
 	// What the colour bar edits for the active slot
 	const targets = $derived.by(() => {
@@ -344,7 +333,7 @@
 		} else if (!mod && !typing && !e.altKey) {
 			const slot = SLOTS.find((s) => s.key === e.key);
 			if (slot) {
-				active = slot.id;
+				void selectSlot(slot.id);
 				mode = 'parts';
 			}
 		}
@@ -432,6 +421,16 @@
 	function shrink() {
 		if (!compact && scrollY > 240) compact = true;
 		else if (compact && scrollY < 40) compact = false;
+	}
+
+	async function selectSlot(slot: SlotId) {
+		active = slot;
+		await tick();
+		if (!matchMedia('(max-width: 899px), (max-aspect-ratio: 999/1000)').matches) return;
+		const firstPart = document.querySelector('.catalogue .pick');
+		if (!firstPart) return;
+		const hiddenHeight = firstPart.getBoundingClientRect().bottom + 12 - innerHeight;
+		if (hiddenHeight > 0) window.scrollBy(0, hiddenHeight);
 	}
 
 	// Tabs: arrow keys go to the next or previous one
@@ -714,7 +713,7 @@
 									color={colorOf(f.color)}
 									active={active === s.id}
 									shortcut={s.key}
-									onselect={() => (active = s.id)}
+									onselect={() => selectSlot(s.id)}
 									onremove={() => remove(s.id)}
 								/>
 							{/each}
@@ -758,7 +757,7 @@
 											{/if}
 										</div>
 										<div class="colors">
-											<ColorBar {targets} {colors} used={usedColours} />
+											<ColorBar {targets} {colors} />
 											{#if active === 'handR' || active === 'handL'}
 												{@const hand = portrait.figure[active]}
 												<label class="range spin">
@@ -1349,6 +1348,7 @@
 	}
 
 	.inspector {
+		position: relative;
 		display: flex;
 		flex-wrap: wrap;
 		align-items: center;
@@ -1831,7 +1831,6 @@
 			flex: none;
 			min-width: 0;
 			max-width: 100%;
-			overflow: hidden;
 		}
 		.inspector .current {
 			display: flex;

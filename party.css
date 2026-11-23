@@ -25,7 +25,7 @@
 .party-roll-fields{flex:1;min-width:0}
 .party-roll-fields [data-custom-roll-label]{margin-top:8px}
 .session-member .party-portrait{flex:none}
-.session-member .party-portrait.is-inspired:before{inset:-1px -3px}
+.session-member .party-portrait.is-inspired:before{inset:3px}
 .session-member .party-heal-sparks{inset:15% -10px 0;font-size:14px;white-space:nowrap}
 @media(prefers-reduced-motion:reduce){.session-member *{animation:none!important;transition:none!important}}
 .party-roll-controls :is(input,select){width:100%;min-width:0;padding:8px;font-size:12px}
@@ -64,7 +64,7 @@
 @media(max-width:760px){
   .party-player{padding:10px 8px 0}.party-player.is-current{padding:9px 7px 0}
   .party-portrait-row{grid-template-columns:25px minmax(0,1fr) 25px;margin:3px 0}
-  .party-portrait .character-portrait{height:92px}.party-portrait-status{max-height:92px;gap:2px}
+  .party-player .party-portrait .character-portrait{height:92px}.party-portrait-status{max-height:92px;gap:2px}
   .party-status-icon{width:25px;min-height:28px;padding:4px}.party-status-icon .icon{width:16px;height:16px}
   .party-player h2{font-size:18px;margin:3px 0 5px}.party-player>p{font-size:8px;margin-bottom:8px}
   .party-player-top strong{font-size:16px}.party-player-top small{font-size:7px}.party-player-top .icon{width:11px;height:11px}

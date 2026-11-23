@@ -60,7 +60,7 @@ const en = {
 	arms: 'Arms',
 	hands: 'Hands',
 	hips: 'Hips',
-	allColours: 'All {n}',
+	allColours: 'All colours',
 	commonColours: 'Common colours',
 	colourOf: 'Colour of',
 	// picker
@@ -133,9 +133,7 @@ const en = {
 	editing: 'Editing',
 	poseRaise: 'Raise arms sideways',
 	poseSpread: 'Spread legs',
-	fewerColours: 'Fewer',
 	findColour: 'Colour name or number',
-	onFigure: 'Already on the figure',
 	keyboard: 'Keyboard shortcuts',
 	unofficialPart: 'community part, still in review at LDraw'
 };
@@ -195,7 +193,7 @@ const fr: Record<Key, string> = {
 	arms: 'Bras',
 	hands: 'Mains',
 	hips: 'Hanches',
-	allColours: 'Les {n}',
+	allColours: 'Toutes les couleurs',
 	commonColours: 'Couleurs courantes',
 	colourOf: 'Couleur de',
 	search: 'Nom, thème ou numéro de pièce',
@@ -268,9 +266,7 @@ const fr: Record<Key, string> = {
 	editing: 'Modification',
 	poseRaise: 'Lever les bras sur le côté',
 	poseSpread: 'Écarter les jambes',
-	fewerColours: 'Moins',
 	findColour: 'Nom ou numéro de couleur',
-	onFigure: 'Déjà sur la figurine',
 	keyboard: 'Raccourcis clavier',
 	unofficialPart: 'pièce de la communauté, en cours de validation chez LDraw'
 };

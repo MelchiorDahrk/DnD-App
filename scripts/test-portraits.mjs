@@ -126,8 +126,10 @@ try {
   // Use the bundled head colour and bring the target into view before breaking
   // its image, so this checks missing-asset recovery independently of that queue.
   await frame.click('.slots .pick[aria-label^="Head:"]');
+  await frame.click('.bar .more');
   await frame.click('.swatch[title$="(14)"]');
   await frame.waitForFunction(()=>document.querySelector('.swatch[title$="(14)"]')?.getAttribute('aria-pressed')==='true');
+  await frame.click('.bar .more');
   const thumbContainer=await frame.waitForSelector('.picker .pick[aria-pressed="false"] .thumb');
   await thumbContainer.evaluate(el=>el.scrollIntoView({block:'center',inline:'nearest',behavior:'instant'}));
   await frame.waitForFunction(el=>{
@@ -162,7 +164,9 @@ try {
   await frame.click('.slots .pick[aria-label^="Head:"]');
   const nextHead=await frame.$eval('.picker .pick[aria-pressed="false"]',el=>el.querySelector('.id').textContent);
   await frame.click('.picker .pick[aria-pressed="false"]');
+  await frame.click('.bar .more');
   await frame.click('.swatch[title$="(78)"]');
+  await frame.click('.bar .more');
   await frame.waitForSelector('.picker .thumb img[src^="blob:"]',{timeout:60000});
   await setYaw(frame,25);await save(frame);
   s=await state();const saved=s.characters.find(c=>c.id===firstId).portrait;
@@ -344,7 +348,9 @@ try {
   await page.screenshot({path:'screenshots/portrait-maker-mobile.png'});
   if(visualChecks)assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   if(visualChecks)assert.ok(await frame.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
-  if(visualChecks)assert.ok(await frame.$eval('.bar .strip',el=>el.getBoundingClientRect().height<=60),'Mobile swatches must stay compact');
+  assert.equal(await frame.$('.bar .swatch'),null,'Colour choices are only shown in the palette');
+  await frame.click('.slots .pick[aria-label^="Neck:"]');
+  await frame.waitForFunction(()=>document.querySelector('.catalogue .pick')?.getBoundingClientRect().bottom<=innerHeight);
   if(visualChecks)assert.ok(await frame.$eval('.lang select',el=>el.getBoundingClientRect().right<=innerWidth),'Mobile header controls must fit');
   await page.click('[data-portrait-close]');
   await page.screenshot({path:'screenshots/bricktrait-character-mobile.png'});

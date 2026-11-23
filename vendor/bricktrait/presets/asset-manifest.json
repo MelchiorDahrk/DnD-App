@@ -619,8 +619,8 @@
     {
       "id": "2588",
       "name": "Ghost Shroud",
-      "cat": "back",
-      "kind": "Cape",
+      "cat": "headgear",
+      "kind": "Hair",
       "theme": "Castle",
       "themes": [
         "Castle"

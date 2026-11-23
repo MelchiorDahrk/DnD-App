@@ -2007,7 +2007,6 @@
     },
     "Castle": {
       "back": {
-        "2588": "Ghost Shroud",
         "u9661c01": "Cape Cloth, Round Lobes (Formed)",
         "u9661p01c01": "Cape Cloth, Round Lobes (Formed) with Green Dragon Pattern"
       },
@@ -2105,6 +2104,7 @@
         "28621p02": "Head with Reddish Brown Bushy Eyebrows and Soul Patch, Metallic Light Blue Lines and Dots on Cheeks, Open Mouth Smile with Teeth Pattern"
       },
       "headgear": {
+        "2588": "Ghost Shroud",
         "3843": "Helmet Visor with Grille and Feather",
         "3844": "Helmet Castle with Neck Protector",
         "3896": "Helmet Castle with Chin-Guard",

@@ -51,7 +51,6 @@ const GROUPS = [
 		kinds: [
 			// Flat cloth capes are sewn sheets, only their formed versions look right
 			[/^Minifig Cape\b(?!.*Cloth(?!.*Formed))/, 'Cape'],
-			[/^Minifig Ghost Shroud\b/, 'Cape'],
 			[
 				/^Minifig (Backpack|Airtanks|Jet-Pack|Scuba|Arrow Quiver|Quiver|(Sword )?Scabbard|Ninja Turtle Shell)\b/,
 				'Pack'
@@ -67,6 +66,7 @@ const GROUPS = [
 		cat: 'headgear',
 		kinds: [
 			[/^Minifig ((?!with\b)\S+ ){0,2}Hair\b/, 'Hair'],
+			[/^Minifig Ghost Shroud\b/, 'Hair'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}Cap\b/, 'Cap'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}Helmet\b/, 'Helmet'],
 			[/^Minifig ((?!with\b)\S+ ){0,2}Hood\b/, 'Hood'],
@@ -259,11 +259,11 @@ function refsOf(text) {
 
 // Every file a part needs, by canonical name. `missing` counts the references
 // found nowhere: the part would show up with holes.
-function closure(name) {
+function closure(...names) {
 	const seen = new Map();
 	seen.missing = 0;
 	seen.missingRefs = [];
-	const stack = [name];
+	const stack = names;
 	while (stack.length) {
 		const ref = stack.pop();
 		const r = resolve(ref);
@@ -327,7 +327,7 @@ for (const root of ROOTS) {
 		}
 		// The file found for this name must be this one (official first)
 		if (resolve(file)?.key !== key) continue;
-		const deps = closure(file);
+		const deps = id === '5689' ? closure('87994.dat', file) : closure(file);
 		// LDrawLoader does not support textures; incomplete parts would have holes
 		if (deps.missing || [...deps.values()].some((k) => /!TEXMAP|!DATA/.test(read(k)))) {
 			diagnostics.push({id,name:desc,cat:group.cat,reason:deps.missing?'Missing geometry dependencies':'Unsupported texture rendering',missing:deps.missingRefs,type:deps.missing?'dependencies':'textures'});
@@ -395,7 +395,18 @@ for (const p of parts) {
 	const deps = [...p.deps.keys()].filter((n) => n !== p.file);
 	const own = [p.file, ...deps.filter((n) => !coreSet.has(n) && !sharedSet.has(n))];
 	requests += deps.filter((n) => sharedSet.has(n)).length;
-	const text = pack(own, keys);
+	let text = pack(own, keys);
+	if (id === '5689') {
+		// Raise the head above the grip. The top of the 3L bar sits 3 LDU inside its socket.
+		const axe = text.replace('0 FILE 5689.dat\n', '0 FILE questlog-5689-head.dat\n');
+		text = [
+			'0 FILE 5689.dat',
+			'0 Double-bladed axe with handle',
+			'1 16 0 -42 0 1 0 0 0 1 0 0 0 1 questlog-5689-head.dat',
+			'1 6 0 -26 0 1 0 0 0 1 0 0 0 1 87994.dat',
+			axe
+		].join('\n');
+	}
 	bytes += text.length;
 	writeChanged(path.join(OUT, 'p', `${id}.ldr`), text);
 	const entry = { id, name: p.desc.replace(/^Minifig /, ''), cat: p.cat };

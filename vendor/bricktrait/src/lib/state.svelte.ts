@@ -1,5 +1,6 @@
 import { deflateSync, inflateSync, strFromU8, strToU8 } from 'fflate';
 import { STANDARD_LEGS, STANDING, type Figure, type Part } from './ldraw';
+import { moveLegacyGhostShroud } from './portrait-assembly';
 import type { View } from './scene';
 import { defaultStyle, type Style } from './compose';
 import { selectableCatalog } from './fantasy-catalog.js';
@@ -63,7 +64,7 @@ export function fromHash(hash: string): Portrait | null {
 		if (!figure?.head || !figure?.torso) return null;
 		return {
 			// Links made before some slots existed get them empty
-			figure: {
+			figure: moveLegacyGhostShroud({
 				...structuredClone(initial.figure),
 				neck: { id: null, color: 6 },
 				back: { id: null, color: 4 },
@@ -72,7 +73,7 @@ export function fromHash(hash: string): Portrait | null {
 				handL: { ...initial.figure.handL },
 				...figure,
 				pose: { ...STANDING, ...figure.pose }
-			},
+			}),
 			view: { ...initial.view, ...view },
 			style: { ...initial.style, ...style }
 		};

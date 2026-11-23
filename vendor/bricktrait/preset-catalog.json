@@ -1469,16 +1469,16 @@
           "color": 0
         },
         "headgear": {
-          "id": null,
-          "color": 0
+          "id": "2588",
+          "color": 329
         },
         "neck": {
           "id": null,
           "color": 0
         },
         "back": {
-          "id": "2588",
-          "color": 329
+          "id": null,
+          "color": 0
         },
         "torso": {
           "id": "973",
