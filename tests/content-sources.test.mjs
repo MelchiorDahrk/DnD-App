@@ -6,6 +6,7 @@ import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 import {catalogPicker,characterChoice,filterEquipment} from '../catalog-ui.js';
 import {initialState} from '../default-characters.js';
 import {makeCharacter,parseBackup} from '../model.js';
+import {SPELL_CATALOG} from '../progression-data.js';
 
 const giants='Bigby Presents: Glory of the Giants';
 const giantFeats=FEATURE_CATALOG.filter(entry=>entry.book===giants);
@@ -15,11 +16,21 @@ const settings={sound:false,hiddenSources};
 test('every catalog source has a unique setting and spelling variants share the same setting',()=>{
   assert.equal(new Set(CONTENT_SOURCES.map(source=>source.id)).size,CONTENT_SOURCES.length);
   const ids=new Set(CONTENT_SOURCES.map(source=>source.id));
-  for(const entry of [...FEATURE_CATALOG,...EQUIPMENT])for(const id of contentSourceIds(entry))assert.ok(ids.has(id),entry.name);
+  for(const entry of visibleContent([...FEATURE_CATALOG,...EQUIPMENT,...SPELL_CATALOG],{}))for(const id of contentSourceIds(entry))assert.ok(ids.has(id),entry.name);
   for(const title of ['Bigby Presents - Glory of the Giants',giants])assert.deepEqual(contentSourceIds({source:title,edition:'2014'}),hiddenSources);
   assert.deepEqual(contentSourceIds({source:'Forgotten Realms - Heroes of Faerun'}),contentSourceIds({book:'Forgotten Realms: Heroes of Faerûn'}));
   assert.deepEqual(contentSourceIds({source:'Source: D&D Beyond Drops - June 2026'}),contentSourceIds({source:'DND Beyond Drops - August 2026'}));
   assert.notDeepEqual(contentSourceIds({book:'Player’s Handbook (2014)'}),contentSourceIds({book:'Player’s Handbook (2024)'}));
+});
+
+test('Warcraft content is excluded from new choices, including mixed and adventure sources',()=>{
+  assert.ok(CONTENT_SOURCES.every(source=>!source.id.includes('worldofwarcraft')));
+  assert.equal(contentEnabled({book:'World of Warcraft: Icecrown Citadel'},{},'spell'),false);
+  const items=EQUIPMENT.filter(entry=>/World of Warcraft/i.test(entry.source||''));
+  assert.ok(items.some(entry=>entry.name==='Ashbringer'));
+  assert.ok(items.some(entry=>entry.name==='Figurine of Wondrous Power'));
+  assert.deepEqual(filterEquipment(items),[]);
+  assert.ok(!catalogPicker('item').includes('value="magic-ashbringer"'));
 });
 
 test('settings hide every giant feat and item from initial and searched choices',()=>{

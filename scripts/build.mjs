@@ -15,7 +15,7 @@ if(process.env.QUESTLOG_FIREBASE_CONFIG?.trim()){
   const config=JSON.parse(process.env.QUESTLOG_FIREBASE_CONFIG);
   await writeFile(resolve(out,'firebase-config.js'),`export const firebaseConfig=${JSON.stringify(config)};\nexport function configuration(scope=globalThis){return Object.hasOwn(scope,'QUESTLOG_FIREBASE_CONFIG')?scope.QUESTLOG_FIREBASE_CONFIG:firebaseConfig;}\n`);
 }
-for(const file of ['dice-roller.js','dice-roller.css','party-model.js','party-store.js','party-ui.js','party.css','shop-model.js','shop-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
+for(const file of ['dice-controls.js','dice-roller.js','dice-roller.css','party-model.js','party-store.js','party-ui.js','party.css','shop-model.js','shop-ui.js'])await copyFile(resolve(root,file),resolve(out,file));
 await cp(resolve(root,'dice-engine'),resolve(out,'dice-engine'),{recursive:true});
 await mkdir(resolve(out,'assets'),{recursive:true});
 await copyFile(resolve(root,'sheet-actions.js'),resolve(out,'sheet-actions.js'));

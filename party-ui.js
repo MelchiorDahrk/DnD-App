@@ -4,13 +4,16 @@ import {icon,conditionIcon} from './icons.js';
 import {armorCheckMode} from './armor-class.js';
 import {partyRows,turnOrder,skillLeaders,partyTime,designatedDM,effectiveDM} from './party-model.js';
 import {presentPartyDice} from './dice-roller.js';
-import {sound} from './sound.js';
+import {diceControlsMarkup,mountDiceControls} from './dice-controls.js';
+import {sound,playRollSound,playRollFeedback} from './sound.js';
+import {partyStatusSoundEvent} from './sound-events.js';
 import {createShopUI} from './shop-ui.js';
 
 export function createPartyPlay(ui) {
   const {esc,btn,field,actions,setModal,modal,toast,getState,navigate}=ui;
   const shop=createShopUI(ui);
   let connectedAt=Date.now(),partyId='',seen=new Set(),reactions=new Map(),latestRoll=null,skill='Perception',notification='',prompting='',initiativePrompts=new Set(),recovering=false;
+  let sessionMarkup='',pendingRollFeedback='';
   const party=()=>ui.party(),store=()=>ui.store(),user=()=>ui.user();
   const active=()=>getState().characters.find(c=>c.id===getState().activeId);
   const own=()=>party()?.characters.filter(c=>c.ownerId===user()?.uid)||[];
@@ -18,6 +21,14 @@ export function createPartyPlay(ui) {
   const run=async fn=>{try{await fn();}catch(error){toast(error.message,true);}};
   const checked=(key,fallback=false)=>getState().settings[key]??fallback;
   const safeSigned=value=>signed(Number.isFinite(Number(value))?Number(value):0);
+  const isUnconscious=live=>live&&(live.hp===0||live.conditions.includes('Unconscious'));
+  function reactionFor(id){
+    const reaction=reactions.get(id);
+    return reaction?.until>Date.now()?reaction:null;
+  }
+  function partyPortrait(sheet,live){
+    return `<span class="party-portrait${live?.inspiration?' is-inspired':''}">${portraitMarkup(sheet)}<span class="party-heal-sparks" aria-hidden="true">✦ · ✧ · ✦</span></span>`;
+  }
   function connectionMarkup(){
     const errors=party()?.errors||{},issue=ui.serviceIssue?.();
     if(!Object.keys(errors).length&&!issue)return '';
@@ -31,17 +42,17 @@ export function createPartyPlay(ui) {
     const live=c.live,sheet=c.sheet;if(!sheet)return '';
     const combat=party().combat,hasInitiative=Object.hasOwn(combat.scores||{},c.id),canEnterInitiative=c.ownerId===user()?.uid&&combat.active;
     const initiativeValue=hasInitiative?esc(combat.scores[c.id]):canEnterInitiative?icon('dice')+'Roll':'—';
-    const current=party().combat.active&&party().combat.current===c.id,unconscious=live&&(live.hp===0||live.conditions.includes('Unconscious'));
-    const reaction=reactions.get(c.id),effect=reaction?.until>Date.now()?reaction.kind:'';
+    const current=party().combat.active&&party().combat.current===c.id,unconscious=isUnconscious(live);
+    const reaction=reactionFor(c.id);
     const statusButton=(name,content)=>btn('party-status',content,'party-status-icon',`data-status="${esc(name)}" aria-label="${esc(name)}" title="${esc(name)}" aria-haspopup="dialog"`);
     const conditions=[...(live?.conditions||[])];if(unconscious&&!conditions.includes('Unconscious'))conditions.push('Unconscious');
     const statuses=conditions.map(name=>statusButton(name,conditionIcon(name)));
     if(live?.exhaustion)statuses.push(statusButton('Exhaustion '+live.exhaustion,conditionIcon('Exhaustion')));
     if(live?.concentration)statuses.push(statusButton('Concentration: '+live.concentration,icon('eye')));
     const left=statuses.filter((_,i)=>i%2===0).join(''),right=(live?.inspiration?statusButton('Heroic Inspiration'+(live.inspiration>1?' ×'+live.inspiration:''),icon('inspiration')):'')+statuses.filter((_,i)=>i%2===1).join('');
-    return `<article class="party-player${current?' is-current':''}${unconscious?' is-unconscious':''}${effect?' reaction-'+effect:''}" data-party-character="${esc(c.characterId)}" ${current?'aria-current="step"':''}>
+    return `<article class="party-player${current?' is-current':''}${unconscious?' is-unconscious':''}${reaction?' reaction-'+reaction.kind:''}" data-party-character="${esc(c.characterId)}" ${reaction?`data-party-reaction="${esc(reaction.id)}"`:''} ${current?'aria-current="step"':''}>
       <div class="party-player-top"><span>${icon('heart')} <strong>${live?esc(live.hp):'…'}</strong><small> / ${live?esc(live.maxHp):'…'} HP${live?.tempHp?` +${esc(live.tempHp)}`:''}</small></span><span title="Armor class">${icon('shield')} <strong>${esc(sheet.ac)}</strong><small> AC</small></span></div>
-      <div class="party-portrait-row"><div class="party-portrait-status">${left}</div>${btn('party-member',`<span class="party-portrait${live?.inspiration?' is-inspired':''}">${portraitMarkup(sheet)}<span class="party-heal-sparks" aria-hidden="true">✦ · ✧ · ✦</span></span>`,'party-portrait-button',`data-id="${esc(c.id)}" aria-label="Interact with ${esc(sheet.name)}" aria-haspopup="dialog"`)}<div class="party-portrait-status">${right}</div></div>
+      <div class="party-portrait-row"><div class="party-portrait-status">${left}</div>${btn('party-member',partyPortrait(sheet,live),'party-portrait-button',`data-id="${esc(c.id)}" aria-label="Interact with ${esc(sheet.name)}" aria-haspopup="dialog"`)}<div class="party-portrait-status">${right}</div></div>
       <h2>${esc(sheet.name)}${designatedDM(party())?.id===c.id?' <span class="badge party-dm-badge" title="Dungeon Master">DM</span>':''}</h2><p>Level ${esc(sheet.level)} ${esc(sheet.class)}${c.ownerId===user()?.uid?' · You':''}</p>
       <div class="party-player-turn"><span>${current?'CURRENT TURN':combat.active?hasInitiative?`UP NEXT · ${index}`:'INITIATIVE':'INITIATIVE'}</span>${canEnterInitiative?btn('party-initiative',initiativeValue,'btn btn-sm btn-ghost',`data-id="${esc(c.id)}" aria-label="Enter initiative for ${esc(sheet.name)}"`):`<strong aria-label="Initiative for ${esc(sheet.name)}">${initiativeValue}</strong>`}</div>
     </article>`;
@@ -67,18 +78,46 @@ export function createPartyPlay(ui) {
     const dmName=p.members.find(m=>m.uid===effectiveDM(p))?.displayName||dm?.sheet.playerName||(dm?'Party member':'Party owner');
     return `${connectionMarkup()}<div class="page-heading party-heading"><div class="party-title"><h1>${esc(p.name||'Your party')}</h1>${btn('navigate',icon('edit'),'icon-btn','data-route="party-manage" aria-label="Manage party" title="Manage party"')}</div><p class="party-dm-name"><span class="badge party-dm-badge">DM</span> ${esc(dm?dm.sheet.name+' · '+dmName:dmName)}</p><div class="heading-actions">${btn('party-stores',icon('bag')+'Stores','btn')}${btn('party-session-toggle',icon('people')+(checked('sessionMode')?'Session Mode on':'Session Mode'),'btn'+(checked('sessionMode')?' btn-primary':''))}</div></div>
       <section class="party-table" aria-label="Party members in turn order">${partyRows(ordered).map(row=>`<div class="party-player-row">${row.map(c=>card(c,index++)).join('')}</div>`).join('')||`<div class="panel panel-body"><p>Bring your adventurers to the table.</p>${btn('cloud-share','Share a character','btn btn-primary')}</div>`}</section>
-      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><div class="cloud-actions party-encounter-actions">${isDM()?(p.combat.active?btn('party-end-combat','End','btn btn-sm btn-ghost','aria-label="End encounter"'):btn('party-start-combat','Start','btn btn-sm','aria-label="Start encounter"')):''}${btn('party-roll',icon('dice')+'Roll','btn btn-sm btn-primary')}${isDM()&&p.combat.active?btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`):''}</div><div class="cloud-actions">${btn('party-skills','Skills','btn btn-sm btn-ghost')}${isDM()?btn('party-rest','Rest','btn btn-sm btn-ghost'):''}</div></div>${p.combat.active?`<p class="party-encounter-status" role="status">Round ${esc(p.combat.round)} · ${p.combat.current?esc(p.characters.find(c=>c.id===p.combat.current)?.sheet.name||'Adventurer')+'’s turn':'Roll initiative, then begin turns'}</p>`:''}<div class="party-roll-controls">${field('Dice','party-expression','1d20','text','required maxlength="30" aria-label="Dice expression"')}${field('Label','party-label','Party roll','text','required maxlength="120" aria-label="Roll label"')}</div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>`;
+      <section class="party-play-area" aria-label="Shared play area"><div class="party-play-heading"><div class="cloud-actions party-encounter-actions">${isDM()?(p.combat.active?btn('party-end-combat','End','btn btn-sm btn-ghost','aria-label="End encounter"'):btn('party-start-combat','Start','btn btn-sm','aria-label="Start encounter"')):''}${btn('party-roll',icon('dice')+'Roll','btn btn-sm btn-primary')}${isDM()&&p.combat.active?btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`):''}</div><div class="cloud-actions">${btn('party-skills','Skills','btn btn-sm btn-ghost')}${isDM()?btn('party-rest','Rest','btn btn-sm btn-ghost'):''}</div></div>${p.combat.active?`<p class="party-encounter-status" role="status">Round ${esc(p.combat.round)} · ${p.combat.current?esc(p.characters.find(c=>c.id===p.combat.current)?.sheet.name||'Adventurer')+'’s turn':'Roll initiative, then begin turns'}</p>`:''}<div class="party-roll-controls">${diceControlsMarkup('1d20')}<div class="party-roll-fields">${field('Label','party-label','Party roll','text','required maxlength="120" aria-label="Roll label"')}<details class="dice-notation"><summary>Dice formula</summary>${field('Formula','party-expression','1d20','text','required maxlength="30" autocomplete="off" spellcheck="false"')}</details></div></div><div id="party-roll" class="party-roll-host" data-party-id="${esc(p.id)}">${latestRoll?staticRoll(latestRoll):'<div class="party-tray-empty">'+icon('dice')+'<strong>A place for every adventure.</strong><span>Roll together. Watch the story unfold.</span></div>'}</div><div id="party-requests">${requestsMarkup()}</div><div id="party-activity">${feedMarkup()}</div></section>`;
   }
   function staticRoll(event){try{const r=JSON.parse(event.result);return `<div class="party-last-roll"><span>${esc(event.name)} · ${esc(r.label)}</span><strong>${esc(r.total)}</strong><small>${esc(r.expression)} · ${r.rolls.map(v=>esc(v)).join(' + ')}${r.bonus?' '+safeSigned(r.bonus):''}</small></div>`;}catch{return '';}}
+  function react(characterId,event){
+    reactions.set(characterId,{id:event.id,kind:event.kind,until:Date.now()+2400});
+    setTimeout(()=>{
+      if(reactions.get(characterId)?.id!==event.id)return;
+      reactions.delete(characterId);
+      document.querySelectorAll(`[data-party-reaction="${CSS.escape(event.id)}"]`).forEach(node=>{
+        node.classList.remove('reaction-'+event.kind);
+        node.removeAttribute('data-party-reaction');
+      });
+    },2400);
+  }
+  function playActivity(event,data,characterId){
+    if(event.kind==='roll'){
+      try {
+        const result=JSON.parse(event.result);
+        playRollSound(result);
+        if(ui.route()==='party')pendingRollFeedback=event.id;
+        else playRollFeedback(result,.55);
+      }catch{/* Ignore unreadable rolls. */}
+      return;
+    }
+    const shared=data.characters.find(c=>c.id===characterId);
+    const name=event.text?.startsWith('concentrates on ')?event.text.slice('concentrates on '.length):'';
+    const spell=name?shared?.sheet?.details?.spells?.find(s=>s.name===name):undefined;
+    const cue=partyStatusSoundEvent(event,spell);
+    if(cue)sound.play(cue,{variant:name.length});
+  }
   function update(data){
-    if(partyId!==data.id){partyId=data.id;connectedAt=Date.now();seen=new Set();reactions=new Map();latestRoll=null;prompting='';initiativePrompts.clear();notification='';}
+    if(partyId!==data.id){partyId=data.id;connectedAt=Date.now();seen=new Set();reactions=new Map();latestRoll=null;pendingRollFeedback='';prompting='';initiativePrompts.clear();notification='';}
     if(!data.combat.active)initiativePrompts.clear();
     for(const event of [...data.activities].reverse()){
       if(seen.has(event.id))continue;seen.add(event.id);
       if(event.kind==='roll')latestRoll=event;
       if(partyTime(event)<connectedAt-2000)continue;
-      if(['damage','healing','inspiration'].includes(event.kind))reactions.set(event.actorId+'_'+event.characterId,{kind:event.kind,until:Date.now()+2400});
-      if(event.actorId!==user()?.uid){const sounds={damage:'combat.damage',healing:'magic.heal',inspiration:'inspiration.gain',condition:'condition.apply',unconscious:'condition.apply',roll:'dice.roll'};sound.play(sounds[event.kind]||'ui.confirm');}
+      const characterId=event.actorId+'_'+event.characterId;
+      if(['damage','healing','inspiration'].includes(event.kind))react(characterId,event);
+      if(event.actorId!==user()?.uid)playActivity(event,data,characterId);
       if(ui.route()!=='party'&&event.actorId!==user()?.uid)notification=`${event.name} ${event.kind==='roll'?'is rolling dice':event.text||'has an update'}`;
     }
     for(const offer of data.transfers){const key='transfer:'+offer.id;if(seen.has(key))continue;seen.add(key);if(offer.status==='pending'&&offer.recipientId===user()?.uid&&partyTime(offer)>=connectedAt-2000)notification=`${offer.fromName} offers you ${transferText(offer)}`;}
@@ -86,20 +125,47 @@ export function createPartyPlay(ui) {
       recovering=true;store().recoverEscrow().catch(error=>toast(error.message,true)).finally(()=>{recovering=false;ui.refreshCharacter();});
     }
   }
+  function sessionMember(c,combat){
+    const {sheet,live}=c,reaction=reactionFor(c.id);
+    const current=combat.active&&combat.current===c.id;
+    const status=`${esc(live?.hp??'…')}/${esc(live?.maxHp??'…')} HP · AC ${esc(sheet.ac)}${live?.conditions.length?' · '+esc(live.conditions.join(', ')):''}`;
+    const classes='session-member'+(current?' is-current':'')+(isUnconscious(live)?' is-unconscious':'')+(reaction?' reaction-'+reaction.kind:'');
+    return btn('party-member',`${partyPortrait(sheet,live)}<span class="session-member-details"><strong>${esc(sheet.name)}</strong><small>${status}</small></span>`,classes,`data-id="${esc(c.id)}" ${reaction?`data-party-reaction="${esc(reaction.id)}"`:''}`);
+  }
   function mount(){
     shop.mount();
     const p=party(),session=!!p&&checked('sessionMode');document.body.classList.toggle('session-mode',session);
     let header=document.getElementById('party-session-header');
     if(!header){header=document.createElement('header');header.id='party-session-header';header.className='party-session-header';document.querySelector('.app-shell').prepend(header);}
     header.hidden=!session;
-    if(session){const ordered=turnOrder(p.characters,p.combat);header.innerHTML=`${btn('navigate',icon('people'),'session-party-name icon-btn','data-route="party" aria-label="Party menu" title="Party menu"')}<div class="session-members">${ordered.map(c=>btn('party-member',`${portraitMarkup(c.sheet)}<span><strong>${esc(c.sheet.name)}</strong><small>${esc(c.live?.hp??'…')}/${esc(c.live?.maxHp??'…')} HP · AC ${esc(c.sheet.ac)}${c.live?.conditions.length?' · '+esc(c.live.conditions.join(', ')):''}</small></span>`,'session-member'+(p.combat.active&&p.combat.current===c.id?' is-current':''),`data-id="${esc(c.id)}"`)).join('')}</div><div class="session-controls">${p.combat.active?`<small>R${esc(p.combat.round)}</small>${isDM()?btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`):''}`:''}${btn('party-session-toggle',icon('close'),'icon-btn','aria-label="Exit Session Mode"')}</div>`;}
+    if(session){
+      const ordered=turnOrder(p.characters,p.combat);
+      const markup=`${btn('navigate',icon('people'),'session-party-name icon-btn','data-route="party" aria-label="Party menu" title="Party menu"')}<div class="session-members">${ordered.map(c=>sessionMember(c,p.combat)).join('')}</div><div class="session-controls">${p.combat.active?`<small>R${esc(p.combat.round)}</small>${isDM()?btn('party-next-turn',icon('chevron'),'icon-btn',`aria-label="${p.combat.current?'Next turn':'Begin turns'}" title="${p.combat.current?'Next turn':'Begin turns'}"`):''}`:''}${btn('party-session-toggle',icon('close'),'icon-btn','aria-label="Exit Session Mode"')}</div>`;
+      if(markup!==sessionMarkup){
+        const scrollLeft=header.querySelector('.session-members')?.scrollLeft||0;
+        header.innerHTML=sessionMarkup=markup;
+        header.querySelector('.session-members').scrollLeft=scrollLeft;
+      }
+    }
     let notice=document.getElementById('party-notification');
     if(!notice){notice=document.createElement('div');notice.id='party-notification';notice.className='party-notification';notice.setAttribute('role','status');document.body.append(notice);}
     notice.hidden=!p||!notification||ui.route()==='party'||!checked('partyNotifications',true);
     notice.innerHTML=notification?btn('navigate',icon('people')+`<span><strong>${esc(p?.name)}</strong>${esc(notification)}</span>`,'party-notification-link','data-route="party"')+btn('party-notification-dismiss',icon('close'),'icon-btn','aria-label="Dismiss party notification"'):'';
     if(ui.route()==='party')notification='';
     const host=document.getElementById('party-roll');
-    if(host&&latestRoll&&host.dataset.rollId!==latestRoll.id){host.dataset.rollId=latestRoll.id;host.innerHTML=staticRoll(latestRoll);if(Date.now()-partyTime(latestRoll)<20000){try{presentPartyDice(JSON.parse(latestRoll.result),host);}catch{}}}
+    const controls=document.querySelector('.party-roll-controls');
+    if(controls)mountDiceControls(controls,controls.querySelector('[name="party-expression"]'));
+    if(host&&latestRoll&&host.dataset.rollId!==latestRoll.id){
+      const event=latestRoll;
+      host.dataset.rollId=event.id;host.innerHTML=staticRoll(event);
+      if(Date.now()-partyTime(event)<20000){
+        try {
+          const result=JSON.parse(event.result),feedback=pendingRollFeedback===event.id;
+          pendingRollFeedback='';
+          presentPartyDice(result,host).then(status=>{if(feedback&&status!=='cancelled')playRollFeedback(result);});
+        }catch{/* Ignore unreadable rolls. */}
+      }
+    }
     if(!modal.open&&p){
       const pending=p.combat.active&&!p.errors?.combat&&own().find(c=>!Object.hasOwn(p.combat.scores||{},c.id)&&!initiativePrompts.has(`${p.combat.encounterId||'legacy'}:${c.id}`));
       if(pending){initiativeDialog(pending);return;}
@@ -124,7 +190,7 @@ export function createPartyPlay(ui) {
     const shared=characterId?party()?.characters.find(c=>c.id===characterId):own().find(s=>s.characterId===active()?.id);
     if(!shared){if(inline)throw new Error('Select a character shared with this party first.');return;}
     if(shared.ownerId!==user()?.uid)throw new Error('You can only roll for your own characters.');
-    const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label};
+    const r={expression:result.expression,rolls:result.rolls,total:result.total,bonus:result.bonus||0,mode:result.mode||'normal',natural:result.natural??null,label,criticalFeedback:result.criticalFeedback,combatSounds:result.combatSounds};
     const id=uid(),event={id,kind:'roll',actorId:user().uid,characterId:shared.characterId,name:shared.sheet.name,result:JSON.stringify(r)};
     if(inline){latestRoll=event;const host=document.getElementById('party-roll');if(host){host.dataset.rollId=id;host.innerHTML=staticRoll(event);}}
     if(!party().errors?.activities)await store().activity(partyId,{kind:event.kind,characterId:event.characterId,name:event.name,result:event.result},id);

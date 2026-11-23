@@ -66,7 +66,7 @@ test('earlier-only items retain valid stats, source, rarity, correct base gear a
 
 test('combined catalog filters by actual rules edition and fits existing backups without a migration',()=>{
   assert.deepEqual(filterEquipment(MAGIC_ITEMS,{edition:'2014'}),MAGIC_ITEMS.filter(item=>item.edition==='2014'));
-  assert.deepEqual(filterEquipment(MAGIC_ITEMS,{edition:'2024'}),MAGIC_ITEMS.filter(item=>item.edition==='2024'));
+  assert.deepEqual(filterEquipment(MAGIC_ITEMS,{edition:'2024'}),MAGIC_ITEMS.filter(item=>item.edition==='2024'&&!/World of Warcraft/i.test(item.source)));
   assert.ok(filterEquipment(MAGIC_ITEMS,{edition:'2014',query:'blood spear'}).length===1);
   assert.equal(filterEquipment(MAGIC_ITEMS,{edition:'2014',query:'bag of holding'}).length,0);
   assert.match(catalogPicker('item'),/data-catalog-edition/);

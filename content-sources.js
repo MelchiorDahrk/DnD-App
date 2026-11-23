@@ -1,5 +1,6 @@
 import {EQUIPMENT,CLASS_OPTIONS,SPECIES,BACKGROUNDS,SUBCLASSES} from './catalog.js';
 import {FEATURE_CATALOG,FEAT_SOURCES} from './feature-catalog.js';
+import {SPELL_CATALOG} from './progression-data.js';
 
 const key=value=>String(value).normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const phb2024='Player’s Handbook (2024)',phb2014='Player’s Handbook (2014)';
@@ -34,15 +35,16 @@ export function contentSourceTitles(entry,kind='feature') {
 }
 
 export const contentSourceIds=(entry,kind)=>contentSourceTitles(entry,kind).map(key);
+const excludedSource=source=>source.includes('worldofwarcraft');
 export function contentEnabled(entry,settings={},kind) {
   const sources=contentSourceIds(entry,kind),hidden=settings.hiddenSources||[];
-  return !sources.length||sources.some(source=>!hidden.includes(source));
+  return !sources.some(excludedSource)&&(!sources.length||sources.some(source=>!hidden.includes(source)));
 }
 export const visibleContent=(entries,settings,kind)=>entries.filter(entry=>contentEnabled(entry,settings,kind));
 
 const sourceTitles=new Set([earlier]);
-for(const [entries,kind] of [[FEATURE_CATALOG,'feature'],[EQUIPMENT,'item'],[CLASS_OPTIONS,'class'],[SPECIES,'race'],[BACKGROUNDS,'background'],[SUBCLASSES,'subclass']]){
-  for(const entry of entries)for(const title of contentSourceTitles(entry,kind))sourceTitles.add(title);
+for(const [entries,kind] of [[FEATURE_CATALOG,'feature'],[EQUIPMENT,'item'],[SPELL_CATALOG,'spell'],[CLASS_OPTIONS,'class'],[SPECIES,'race'],[BACKGROUNDS,'background'],[SUBCLASSES,'subclass']]){
+  for(const entry of visibleContent(entries,{},kind))for(const title of contentSourceTitles(entry,kind))sourceTitles.add(title);
 }
 export const CONTENT_SOURCES=[...sourceTitles].map(label=>({id:key(label),label})).sort((a,b)=>a.label.localeCompare(b.label));
 export const enabledFeatSources=settings=>FEAT_SOURCES.filter(book=>contentEnabled({book},settings));

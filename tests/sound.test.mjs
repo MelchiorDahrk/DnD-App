@@ -9,7 +9,7 @@ import {SOUND_ASSETS,SOUND_FILES} from '../sound-assets.js';
 import {CONDITION_ICON_FILES} from '../icons.js';
 import {DEFAULT_PORTRAIT_IDS} from '../portrait-defaults.js';
 import {SPELL_ICON_FILES} from '../spell-icon-manifest.js';
-import {SOUND_EVENTS,spellSoundEvent,weaponSoundEvent,rollSoundEvent,equipSoundEvent} from '../sound-events.js';
+import {SOUND_EVENTS,spellSoundEvent,weaponSoundEvent,rollSoundEvent,rollFeedbackSoundEvent,partyStatusSoundEvent,equipSoundEvent} from '../sound-events.js';
 import {EQUIPMENT,itemFromEquipment} from '../catalog.js';
 import {defaultPartyState} from './helpers/default-party.mjs';
 import {parseBackup,SAVE_VERSION} from '../model.js';
@@ -17,6 +17,19 @@ import {parseBackup,SAVE_VERSION} from '../model.js';
 const root=resolve(import.meta.dirname,'..');
 const read=path=>readFile(resolve(root,path));
 const hash=b=>createHash('sha256').update(b).digest('hex');
+test('party status and roll feedback use the corresponding local cues',()=>{
+  assert.equal(partyStatusSoundEvent({kind:'damage'}),'combat.damage');
+  assert.equal(partyStatusSoundEvent({kind:'unconscious'}),null);
+  assert.equal(partyStatusSoundEvent({kind:'healing'}),'magic.heal');
+  assert.equal(partyStatusSoundEvent({kind:'condition',text:'gains Prone'}),'condition.apply');
+  assert.equal(partyStatusSoundEvent({kind:'condition',text:'clears Prone'}),'condition.clear');
+  assert.equal(partyStatusSoundEvent({kind:'condition',text:'Exhaustion decreases to 1'}),'condition.clear');
+  const spell={name:'Aid',school:'Abjuration'};
+  assert.equal(partyStatusSoundEvent({kind:'condition',text:'concentrates on Aid'},spell),spellSoundEvent(spell));
+  assert.equal(rollFeedbackSoundEvent({natural:20}),'dice.critical');
+  assert.equal(rollFeedbackSoundEvent({natural:20},false),null);
+  assert.equal(rollFeedbackSoundEvent({natural:1},false),'dice.failure');
+});
 test('curated local assets have approved provenance, hashes, formats and event mappings',async()=>{
   const manifest=JSON.parse(await read('assets/sfx/manifest.json'));
   const selection=JSON.parse(await read('scripts/sfx-selection.json'));

@@ -58,6 +58,26 @@ test('random magic merchandise honors rarity, group, sources, and skip rules',()
   assert.ok(filtered.every(entry=>!entries.some(hidden=>hidden.id===entry.id)));
 });
 
+test('random magic uses the store specialty even when the item filter is Any',()=>{
+  const stock=(storeType,type='Any')=>randomMerchandise({storeType,type,rarity:'Rare',count:100},{},{},()=>0);
+  for(const [storeType,types] of Object.entries({armorer:['Armor'],alchemist:['Potion'],blacksmith:['Armor','Weapon'],arcane:['Wand','Staff','Rod','Scroll']})){
+    const entries=stock(storeType);
+    assert.ok(entries.length>0,storeType);
+    assert.ok(entries.every(entry=>types.includes(entry.itemType)),storeType);
+  }
+  assert.ok(stock('jeweler','Rings').length>0);
+  assert.deepEqual(stock('outfitter','Rings'),[]);
+  assert.deepEqual(stock('armorer','Potions'),[]);
+  assert.ok(stock('magic','Rings').every(entry=>!/World of Warcraft/i.test(entry.source)));
+});
+
+test('saving a new addition checks the final store type and preserves previously stocked lines',()=>{
+  const draft=shop('armorer'),potion=findEquipment('potion-of-healing');
+  draft.items[potion.id]=merchandiseLine(potion);
+  assert.throws(()=>prepareShop(draft),/Potion of Healing is unavailable/);
+  assert.ok(prepareShop(draft,{[potion.id]:draft.items[potion.id]}).items[potion.id]);
+});
+
 test('fixed prices, overrides, and stock constraints survive saving',()=>{
   for(const value of ['B+400 GP','500–1000 GP','Unlisted (2014 wiki)','Varies','0 GP','0.5 GP','10,00 GP','10GP and 1 SP'])assert.equal(parsePrice(value),null,value);
   assert.deepEqual(['5 CP','10 SP','1 EP','2 GP','2,000 PP'].map(parsePrice),[5,100,50,200,2000000]);

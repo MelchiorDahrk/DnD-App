@@ -1,5 +1,5 @@
 import {SOUND_ASSETS} from './sound-assets.js';
-import {SOUND_EVENTS,SOUND_CATEGORIES} from './sound-events.js';
+import {SOUND_EVENTS,SOUND_CATEGORIES,rollSoundEvent,rollFeedbackSoundEvent} from './sound-events.js';
 export {SOUND_EVENTS,SOUND_CATEGORIES} from './sound-events.js';
 
 export const AUDIO_PREFERENCES_KEY='questlog.audio.v1';
@@ -74,7 +74,7 @@ export function createSoundManager(options={}){
     })().finally(()=>loading.delete(id));
     loading.set(id,promise);return promise;
   }
-  async function play(name,{delay=0,ambient=false,fadeIn=0,maxDuration=15}={}){
+  async function play(name,{delay=0,ambient=false,fadeIn=0,maxDuration=15,variant}={}){
     const event=events[name];
     if(!event||!allowed()||!ctx||(prefs.categories[event.category]??1)===0)return false;
     const time=now();if(time-(last.get(name)??-Infinity)<event.cooldown)return false;
@@ -82,7 +82,8 @@ export function createSoundManager(options={}){
     const token=epoch,ambientToken=ambientEpoch;
     try{
       const variants=event.variants.filter(id=>assets[id]);if(!variants.length)return false;
-      const id=variants[Math.floor(Math.random()*variants.length)],buffer=await bufferFor(id);
+      const index=Number.isInteger(variant)&&variant>=0?variant%variants.length:Math.floor(Math.random()*variants.length);
+      const buffer=await bufferFor(variants[index]);
       if(!buffer||token!==epoch||(ambient&&ambientToken!==ambientEpoch)||!allowed())return false;
       if((prefs.categories[event.category]??1)===0)return false;
       // Drop the oldest voices before allocating new nodes, including repeated events.
@@ -112,6 +113,19 @@ export function createSoundManager(options={}){
 }
 
 export const sound=createSoundManager();
+export function playRollSound(result){
+  const cue=rollSoundEvent(result,result.label);
+  if(cue)sound.play(cue,{variant:result.rolls[0]});
+}
+export function playRollFeedback(result,delay=0){
+  const feedback=rollFeedbackSoundEvent(result,result.criticalFeedback);
+  if(feedback)sound.play(feedback,{delay});
+  if(!Array.isArray(result.combatSounds))return;
+  result.combatSounds.slice(0,2).forEach((cue,index)=>{
+    if(typeof cue==='string'&&cue.startsWith('combat.')&&Object.hasOwn(SOUND_EVENTS,cue))
+      sound.play(cue,{delay:delay+index*.15,variant:Math.abs(result.total)});
+  });
+}
 if(typeof document!=='undefined'){
   document.addEventListener('pointerdown',()=>sound.unlock(),{capture:true,passive:true});
   document.addEventListener('keydown',()=>sound.unlock(),{capture:true});

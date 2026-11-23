@@ -3,7 +3,7 @@ import {SOUND_FILES} from './sound-assets.js';
 import {CONDITION_ICON_FILES} from './icons.js';
 import {DEFAULT_PORTRAIT_IDS} from './portrait-defaults.js';
 import {SPELL_ICON_FILES} from './spell-icon-manifest.js';
-const CACHE = 'questlog-app-v76-character-creation';
+const CACHE = 'questlog-app-v77-party-and-catalog';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./character-hero.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./firebase-config.js','./firebase-client.js','./firebase-sdk/firebase.js','./cloud-model.js','./cloud-store.js','./cloud-sync.js','./cloud-ui.js','./party-model.js','./party-store.js','./party-ui.js','./party.css');
 ASSETS.push('./shop-model.js','./shop-ui.js');
@@ -24,7 +24,7 @@ ASSETS.push('./level-up.js','./level-up-ui.js','./progression-data.js','./progre
 ASSETS.push('./character-creation.js','./character-creation-ui.js','./character-creation-equipment.js');
 ASSETS.push('./rest-rules.js','./rest-reference-data.js');
 ASSETS.push('./attack-rules.js','./attack-ui.js');
-ASSETS.push('./dice-roller.js','./dice-roller.css','./dice-engine/dice-engine.js');
+ASSETS.push('./dice-controls.js','./dice-roller.js','./dice-roller.css','./dice-engine/dice-engine.js');
 // Both encodings are cached: older mobile Safari can fall back to MP3 offline.
 ASSETS.push('./sound.js','./sound-events.js','./sound-assets.js','./assets/sfx/manifest.json','./assets/sfx/CREDITS.md',...SOUND_FILES.map(path=>'./'+path));
 ASSETS.push('./portrait-scan.js','./portrait-photo-ui.js');

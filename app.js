@@ -17,13 +17,16 @@ import {SUBCLASSES,WEAPONS,ARMOR,attackFromEquipment} from './catalog.js';
 import {characterChoice,classPreview,catalogPicker,handleCatalogFilter,handleCatalogChoice,catalogBrowser,updateCatalogBrowser} from './catalog-ui.js';
 import {playEffect,clearEffects,hpFeedback,effectGlyph} from './vfx.js';
 import {openLevelUp} from './level-up-ui.js';
+import {addProgressionSpell,spellKey} from './level-up.js';
+import {SPELL_CATALOG} from './progression-data.js';
 import {openCharacterBuilder} from './character-creation-ui.js';
 import {restRefreshes,restReminders} from './rest-rules.js';
 import {MASTERIES,attackWeapon,attackMastery} from './attack-rules.js';
 import {openAttack} from './attack-ui.js';
 import {beginDice,presentDice,clearDice,diceColorPreferences,DEFAULT_DICE_COLORS} from './dice-roller.js';
-import {sound,SOUND_CATEGORIES} from './sound.js';
-import {rollSoundEvent,spellSoundEvent,equipSoundEvent} from './sound-events.js';
+import {diceControlsMarkup,mountDiceControls} from './dice-controls.js';
+import {sound,SOUND_CATEGORIES,playRollSound,playRollFeedback} from './sound.js';
+import {spellSoundEvent,equipSoundEvent} from './sound-events.js';
 import {itemUses,removeEmptyItems,setItemQuantity,spendItemUse} from './inventory-rules.js';
 import {packContents,unpackItem,itemAttack,saveItemAttack,linkWeaponActions,itemTool,addToolToInventory,toolCheck} from './inventory.js';
 import {armorClass,armorSpeedPenalty,armorClassDetails,itemDefense,setItemEquipped,armorTrainingEffects,armorCheckMode} from './armor-class.js';
@@ -57,6 +60,7 @@ let cleanupSheetNavigation=()=>{};
 const conditionUsage=createConditionUsage();
 const character = () => state.characters.find(c=>c.id===state.activeId) || state.characters[0];
 const modal = $('#modal');
+const spellChoices=[...SPELL_CATALOG].sort((a,b)=>a.name.localeCompare(b.name));
 const hpActions=new Map();
 function trackedHP(c,amount,kind){changeHP(c,amount,kind);hpActions.set(c.id,{amount,kind});}
 
@@ -204,6 +208,18 @@ function render() {
   if(partyControls&&partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('.party-roll-controls')?.replaceWith(partyControls);
   if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
+  if(route==='dice')mountDiceControls($('#dice-form'),$('#dice-expression'),expression=>{
+    diceExpression=expression;
+    const wheels=$('#dice-form').querySelectorAll('[data-dice-wheel]');
+    const [quantity,sides]=[...wheels].map(wheel=>wheel.getAttribute('aria-valuenow'));
+    const singleD20=/^(?:1)?d20(?:[+-]\d{1,4})?$/i.test(expression.replace(/\s/g,''));
+    if(!singleD20)rollMode='normal';
+    document.querySelectorAll('[data-action="roll-mode"]').forEach(button=>{
+      button.classList.toggle('active',button.dataset.mode===rollMode);
+      button.setAttribute('aria-pressed',button.dataset.mode===rollMode);
+    });
+    document.querySelectorAll('[data-action="select-die"]').forEach(button=>button.classList.toggle('active',quantity==='1'&&sides===button.dataset.sides));
+  });
   document.title=`${routes[route][0]} · Questlog`;
   cloud.afterRender();
 }
@@ -280,6 +296,29 @@ function renderJournal() {
   const c=character(),notes=[...c.notes].filter(n=>matchesFilters(f=>f==='Pinned'?n.pinned:n.tag===f)&&(n.title+' '+n.body).toLowerCase().includes(query.toLowerCase())).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||Date.parse(b.updated)-Date.parse(a.updated));
   return pageHeading('Journal',btn('note',icon('plus')+'Write a note','btn btn-primary'))+listToolbar('Search your notes…',['All','Pinned','Session','Quest','People','Lore','Personal'])+`<div class="notes-grid">${notes.length?notes.map(n=>`<article class="note-card${n.pinned?' pinned':''}"><div class="note-card-head"><span class="badge">${esc(n.tag||'Note')}</span>${btn('pin-note',icon('pin'),`icon-btn${n.pinned?' pin-active':''}`,`data-id="${n.id}" aria-label="${n.pinned?'Unpin':'Pin'} ${esc(n.title)}" aria-pressed="${n.pinned}"`)}</div><h2>${esc(n.title)}</h2><p>${esc(n.body)}</p><div class="note-card-footer"><time datetime="${esc(n.updated)}">${new Date(n.updated).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</time><div>${btn('view-note','Read '+icon('arrow'),'text-btn',`data-id="${n.id}"`)}</div></div></article>`).join(''):empty('journal',query?'No notes found':'The page is yours.',query?'Try another phrase or a different category.':'Record your first session, a character secret, or a lead you can’t let go.','note','Write a note')}</div>`;
 }
+function renderSpellChoices() {
+  const list=modal.querySelector('[data-spell-choices]');
+  const search=modal.querySelector('[data-spell-search]').value.trim().toLowerCase();
+  const level=modal.querySelector('[data-spell-level]').value;
+  const known=new Set(character().spells.map(spell=>spellKey(spell.name)));
+  const choices=spellChoices.filter(spell=>!known.has(spell.id)&&contentEnabled(spell,state.settings,'spell')
+    &&(level===''||spell.level===Number(level))&&spell.name.toLowerCase().includes(search));
+  list.innerHTML=choices.map(spell=>`<li>${btn('add-catalog-spell',`<span><strong>${esc(spell.name)}</strong><small>${spell.level?'Level '+spell.level:'Cantrip'} · ${esc(spell.school)}</small></span>${icon('plus')}`,'spell-choice',`data-id="${esc(spell.id)}" aria-label="Add ${esc(spell.name)}"`)}</li>`).join('');
+  list.scrollTop=0;
+  modal.querySelector('[data-spell-choice-status]').textContent=choices.length?'':'No spells match your search.';
+}
+function openSpellChoices() {
+  setModal('Add spell',`<div class="form-grid spell-choice-filters">${field('Search spells','spellSearch','','search','data-spell-search autocomplete="off" autofocus')}<label class="form-field">Spell level<select data-spell-level><option value="">All levels</option><option value="0">Cantrips</option>${Array.from({length:9},(_,i)=>`<option value="${i+1}">Level ${i+1}</option>`).join('')}</select></label></div><ul class="spell-choices" data-spell-choices aria-label="Spells available to add"></ul><p class="form-help" data-spell-choice-status role="status"></p><div class="modal-actions">${btn('spell-custom','Create custom spell','btn btn-ghost')}</div>`);
+  renderSpellChoices();
+  modal.querySelector('[data-spell-search]').focus({preventScroll:true});
+}
+function addCatalogSpell(id) {
+  const c=character(),spell=spellChoices.find(entry=>entry.id===id);
+  if(!spell||!contentEnabled(spell,state.settings,'spell')||c.spells.some(known=>spellKey(known.name)===id))return;
+  addProgressionSpell(c,spell);
+  modal.close();
+  commit(spell.name+' added to your spellbook.');
+}
 function renderSpells() {
   const c=character(),ability=castingAbility(c),spells=c.spells.filter(s=>matchesFilters(f=>f==='Ready'?s.prepared:f==='Cantrips'?s.level===0:f==='Concentration'&&s.concentration)&&(s.name+' '+s.school).toLowerCase().includes(query.toLowerCase()));
   return pageHeading('Spellbook',btn('spell',icon('plus')+'Add spell','btn btn-primary'))+
@@ -287,7 +326,7 @@ function renderSpells() {
   `<section class="panel slot-panel"><strong>Spell slots</strong>${c.slots.some(s=>s.max)?c.slots.map((s,i)=>s.max?`<div class="slot-level">Level ${i+1}${slotDots(s,i)}</div>`:'').join(''):'<span style="font-size:11px;color:var(--muted)">Set your available spell slots.</span>'}${btn('slots','Edit slots','btn btn-sm')}</section>`+renderConcentration(c,'concentration-banner')+
   listToolbar('Find a spell…',['All','Ready','Cantrips','Concentration'])+`<div class="spell-grid">${spells.length?spells.map(s=>`<article class="spell-card"><div class="spell-card-head"><div class="item-symbol">${spellIconMarkup(s)}</div><div class="action-info"><h2>${ext(referenceURL(s.wiki,s.name,'spell'),esc(s.name)+' '+icon('external'))}</h2><small>${s.level===0?'Cantrip':`Level ${s.level}`} · ${esc(s.school)}${s.concentration?' · Concentration':''}</small>${timingBadge(s,'spell')}</div>${btn('spell',icon('edit'),'icon-btn',`data-id="${s.id}" aria-label="Edit ${esc(s.name)}"`)}</div><dl><div><dt>Casting time</dt><dd>${esc(s.castingTime)||'—'}</dd></div><div><dt>Range</dt><dd>${esc(s.range)||'—'}</dd></div><div><dt>Duration</dt><dd>${esc(s.duration)||'—'}</dd></div><div><dt>Availability</dt><dd>${s.prepared?'Prepared':'Not readied'}</dd></div></dl>${s.notes?`<p>${esc(s.notes)}</p>`:''}<div class="spell-card-foot">${btn('prepare',icon(s.prepared?'check':'plus')+(s.prepared?'Readied':'Ready spell'),`equipped-btn${s.prepared?' active':''}`,`data-id="${s.id}" aria-pressed="${s.prepared}"`)}${btn('cast',icon('spark')+'Cast spell','btn btn-primary btn-sm',`data-id="${s.id}"`)}</div></article>`).join(''):empty('book',query?'No spells found':'Begin your spellbook.',query?'Try a different search or spell filter.':'Add the spells your character knows. Each one can link to its Wikidot spell reference.','spell','Add spell')}</div><p class="data-caption">Slots are tracked manually so this works with your table’s class and multiclass rules. Warlocks can restore pact slots manually after a short rest. Readying a spell is a tracking aid, without enforcing class limits.</p>`;
 }
-function renderDice() {return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray"><div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div><div class="dice-selection">${[4,6,8,10,12,20,100].map(d=>btn('select-die',icon('dice')+`d${d}`,`dice-select${diceExpression===`1d${d}`?' active':''}`,`data-sides="${d}"`)).join('')}</div><form id="dice-form" class="dice-form"><input id="dice-expression" name="expression" value="${esc(diceExpression)}" aria-label="Dice expression, for example 2d6 plus 3" maxlength="30" autocomplete="off" spellcheck="false"><button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button></form><div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}"`)).join('')}</div><p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Try 1d20+4, 2d6, or 4d6. The dice await.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section><section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;}
+function renderDice() {return pageHeading('Dice Roller')+`<div class="dice-layout"><section class="dice-tray"><div id="dice-stage" class="dice-stage-host"></div><div class="big-die" id="tray-die">${icon('dice')}<strong>${lastRoll?lastRoll.total:'20'}</strong></div><div class="dice-selection">${[4,6,8,10,12,20,100].map(d=>btn('select-die',icon('dice')+`d${d}`,`dice-select${diceExpression===`1d${d}`?' active':''}`,`data-sides="${d}"`)).join('')}</div><form id="dice-form" class="dice-form dice-controls-form">${diceControlsMarkup(diceExpression)}<button type="submit" class="btn btn-primary">${icon('dice')}Roll dice</button><details class="dice-notation"><summary>Dice formula</summary><input id="dice-expression" name="expression" value="${esc(diceExpression)}" aria-label="Dice formula, for example 2d6 plus 3" maxlength="30" autocomplete="off" spellcheck="false"></details></form><div class="dice-modes">${['normal','advantage','disadvantage'].map(m=>btn('roll-mode',m[0].toUpperCase()+m.slice(1),`dice-mode${rollMode===m?' active':''}`,`data-mode="${m}" aria-pressed="${rollMode===m}"`)).join('')}</div><p class="roll-detail" id="roll-detail" aria-live="polite">${lastRoll?esc(rollBreakdown(lastRoll)):'Choose your dice and roll.'}</p><p class="data-caption">Advantage & disadvantage apply to a single d20.</p></section><section class="panel"><div class="panel-heading"><h2>${icon('journal')}This session’s rolls</h2>${btn('clear-rolls','Clear','text-btn')}</div><div class="roll-history">${rollHistory.length?rollHistory.map(r=>`<div class="history-row"><div class="history-result">${r.total}</div><div><strong>${esc(r.label)}</strong><small>${esc(r.expression)}${r.mode!=='normal'?' · '+r.mode:''}${r.natural===20?' · Natural 20!':''}${r.natural===1?' · Natural 1':''}</small></div><time>${new Date(r.time).toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'})}</time></div>`).join(''):`<div class="roll-history-empty" aria-label="No rolls yet">${icon('dice')}</div>`}</div></section></div>`;}
 const wikiEntries=[['Classes','2024 progression & features.','people','classes'],['Spells','Revised spell descriptions.','spark','spells'],['Weapons','Properties & Weapon Mastery.','sword','weapons'],['Armor','Armor training & equipment.','shield','armor'],['Adventuring gear','Potions, tools, and supplies.','bag','adventuring-gear'],['Magic items','Current item rules.','star','wondrous-items'],['Backgrounds','Ability increases & Origin feats.','journal','backgrounds'],['Feats','Origin, General, and more.','bolt','feats'],['Species','Your character’s heritage.','leaf','species'],['Rules glossary','Conditions, rests, and actions.','compass','rules']];
 function renderWiki() {
   const c=character();
@@ -429,7 +468,7 @@ function editCombat() {
 }
 
 function showHP(kind='damage') {const c=character();setModal('Hit Points',`<div class="hp-modal-display">${c.hp} <small>/ ${c.maxHp} HP</small></div><div class="hp-modal-temp">${c.tempHp?c.tempHp+' temporary hit points':'No temporary hit points'}</div>${field('Amount','amount',1,'number','required min="0" max="9999" step="1" class="hp-input" autofocus')}<div class="hp-action-grid">${btn('hp-apply',icon('minus')+'Damage','btn btn-danger','data-kind="damage"')}${btn('hp-apply',icon('plus')+'Heal','btn btn-primary','data-kind="heal"')}${btn('hp-apply',icon('shield')+'Temp HP','btn','data-kind="temp"')}</div><p class="form-help">Damage uses temporary HP first. Temporary HP doesn’t stack; the higher value is kept. Check massive-damage and concentration rules with your DM.</p>`,data=>applyHP(data,kind));}
-function applyHP(data,kind) {const c=character();const n=num(data,'amount');if(!Number.isInteger(n)||n<0||n>9999)throw new Error('Enter an amount from 0 to 9,999.');const before={hp:c.hp,tempHp:c.tempHp};trackedHP(c,n,kind);if(kind==='damage'&&n>0)sound.play('combat.damage');modal.close();commit(kind==='damage'?`${n} damage taken.`:kind==='heal'?`${n} healing applied.`:`Temporary HP is now ${c.tempHp}.`);showHPFeedback(before,kind);}
+function applyHP(data,kind) {const c=character();const n=num(data,'amount');if(!Number.isInteger(n)||n<0||n>9999)throw new Error('Enter an amount from 0 to 9,999.');const before={hp:c.hp,tempHp:c.tempHp};trackedHP(c,n,kind);if(kind==='damage'&&n>0)sound.play('combat.damage',{variant:0});modal.close();commit(kind==='damage'?`${n} damage taken.`:kind==='heal'?`${n} healing applied.`:`Temporary HP is now ${c.tempHp}.`);showHPFeedback(before,kind);}
 function showHPFeedback(before,kind,target='.hp-block') {
   const feedback=hpFeedback(before,character(),kind);
   if(feedback){if(feedback.kind==='heal')sound.play('magic.heal');else if(feedback.kind==='shield')sound.play('magic.protect');playEffect(feedback.kind,{...feedback,target});}
@@ -629,7 +668,7 @@ function castSpell(id) {
     if(s.concentration)c.concentration=s.name;
     modal.close();
     commit(`${s.name} cast.${s.concentration?' You’re concentrating.':''}`);
-    sound.play(spellSoundEvent(s));
+    sound.play(spellSoundEvent(s),{variant:s.name.length});
     playEffect('spell',{spell:s,label:s.name,detail:s.concentration?'CONCENTRATION BEGINS':'SPELL CAST',target:route==='sheet'?`[data-sheet-entry="${CSS.escape(s.id)}"]`:'.concentration-banner, .spell-grid'});
   });
   const selection=modal.querySelector('[name="slot"]');
@@ -652,13 +691,13 @@ function performRoll(expression,label='Dice roll',mode='normal',inDialog=true,re
 function afterRoll(result,callback) {
   result.finished.then(status=>{if(lastRoll===result&&status!=='cancelled')callback();});
 }
-function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal,inlineParty=false,partyOptions={}}={}) {
-  const r={...result,label,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
+function recordRoll(result,label,{criticalFeedback=true,combatSounds,celebrate=false,onReveal,inlineParty=false,partyOptions={}}={}) {
+  const r={...result,label,criticalFeedback,combatSounds,time:Date.now()};lastRoll=r;rollHistory.unshift(r);rollHistory=rollHistory.slice(0,50);
   if(r.rolls.length)beginDice();
   cloud.broadcastRoll(r,label,{...partyOptions,inline:inlineParty}).catch(error=>toast('Party roll could not be shared: '+error.message,true));
   let finish;
   Object.defineProperty(r,'finished',{value:new Promise(resolve=>{finish=resolve;})});
-  const event=rollSoundEvent(r,label);if(event)sound.play(event);
+  playRollSound(r);
   // Rules and their callers finish rendering before the tray mounts (including combat dialogs).
   queueMicrotask(async()=>{
     if(lastRoll!==r){finish('cancelled');return;}
@@ -667,7 +706,7 @@ function recordRoll(result,label,{criticalFeedback=true,celebrate=false,onReveal
     const status=await presentDice(r,host);
     finish(status);
     if(lastRoll!==r||status==='cancelled')return;
-    if(criticalFeedback&&r.natural===20)sound.play('dice.critical');else if(r.natural===1)sound.play('dice.failure');
+    playRollFeedback(r);
     if(onReveal)onReveal();
     // Expensive celebration particles follow the throw, so software renderers can finish it.
     if(celebrate&&r.natural===20&&lastRoll===r&&host?.isConnected&&['settled','static'].includes(status))
@@ -785,7 +824,9 @@ document.addEventListener('click',event=>{
       case 'feature':editFeature(id);break;
       case 'feature-roll':{const f=c.features.find(f=>f.id===id);if(!f?.rollFormula)break;const result=rollFeature(f);performRoll(f.rollFormula,f.name,'normal',true,result,f.id);commit();break;}
       case 'feature-use':{const f=c.features.find(f=>f.id===id),before=f.used;f.used=clamp(Number(el.dataset.used),0,f.maxUses);commit();if(f.used<before)sound.play('resource.restore');if(f.used!==before)playEffect('resource',{label:f.name,detail:f.used>before?'POWER SPENT':'POWER RESTORED',target:`[data-sheet-entry="${CSS.escape(id)}"]`});break;}
-      case 'spell':editSpell(id);break;
+      case 'spell':if(id)editSpell(id);else openSpellChoices();break;
+      case 'spell-custom':editSpell();break;
+      case 'add-catalog-spell':addCatalogSpell(id);break;
       case 'prepare':{
         const s=c.spells.find(s=>s.id===id);
         if(s.classPrepared!==undefined){s.classPrepared=!s.classPrepared;s.prepared=s.classPrepared||!!s.origin;}
@@ -821,6 +862,7 @@ document.addEventListener('submit',event=>{
 });
 document.addEventListener('input',event=>{if(event.target.hasAttribute('data-audio-volume')){const key=event.target.dataset.audioVolume,value=Number(event.target.value)/100;sound.configure(key==='master'?{volume:value}:{categories:{[key]:value}});event.target.nextElementSibling.value=Math.round(value*100)+'%';}if(event.target.dataset.catalogSearch)handleCatalogFilter(modal,event.target,character(),state.settings);if(event.target.hasAttribute('data-feature-level'))handleCatalogChoice(modal,event.target,character(),state.settings);if(event.target.id==='search'){query=event.target.value;const start=event.target.selectionStart;render();const input=$('#search');input.focus({preventScroll:true});try{input.setSelectionRange(start,start);}catch{}}});
 document.addEventListener('change',event=>{
+  if(event.target.hasAttribute('data-spell-level'))renderSpellChoices();
   if(modal.contains(event.target))updateSpellIconPicker(modal,character()?.spells.find(s=>s.id===modal.dataset.spellId));
   if(event.target.hasAttribute('data-training')){
     const input=event.target,c=character();
@@ -845,6 +887,7 @@ document.addEventListener('change',event=>{
   if(modal.contains(event.target)){handleCatalogChoice(modal,event.target,character(),state.settings);updateItemAttackFields(event.target);updateItemDefenseFields(event.target);if(modal.querySelector('.item-icon-picker:not(.spell-icon-picker)'))updateItemIconPicker(modal);}
   if(event.target.matches('[data-reference-kind], [data-reference-entry], [data-reference-rarity], [data-reference-edition], [data-reference-feature-group], [data-reference-feature-source]'))updateCatalogBrowser($('#main'),!event.target.hasAttribute('data-reference-entry'),state.settings);
 });
+modal.addEventListener('input',event=>{if(event.target.hasAttribute('data-spell-search'))renderSpellChoices();});
 document.addEventListener('input',event=>{if(event.target.hasAttribute('data-dice-color'))updateDiceColors({[event.target.dataset.diceColor]:event.target.value});if(modal.contains(event.target)){if(modal.querySelector('.item-icon-picker:not(.spell-icon-picker)'))updateItemIconPicker(modal);updateSpellIconPicker(modal,character()?.spells.find(s=>s.id===modal.dataset.spellId));}if(event.target.hasAttribute('data-reference-search'))updateCatalogBrowser($('#main'),true,state.settings);});
 document.addEventListener('keydown',event=>{if(event.key==='Enter'&&(event.target.dataset.catalogSearch||event.target.hasAttribute('data-item-icon-search')||event.target.hasAttribute('data-spell-icon-search')))event.preventDefault();});
 document.addEventListener('keydown',event=>{

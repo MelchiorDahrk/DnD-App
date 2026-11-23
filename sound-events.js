@@ -109,6 +109,25 @@ export function rollSoundEvent(result,label=''){
   if(result.rolls.length>1)return 'dice.multiple';
   return /check|sav(e|ing)|initiative/i.test(label)?'dice.check':'dice.roll';
 }
+export function rollFeedbackSoundEvent(result,criticalFeedback=true){
+  if(criticalFeedback&&result.natural===20)return 'dice.critical';
+  return result.natural===1?'dice.failure':null;
+}
+
+export function partyStatusSoundEvent(activity,spell){
+  switch(activity.kind){
+    case 'damage':return 'combat.damage';
+    case 'healing':return 'magic.heal';
+    case 'inspiration':return 'inspiration.gain';
+    case 'condition':{
+      const text=activity.text||'';
+      if(text.startsWith('concentrates on '))return spellSoundEvent(spell||{name:text.slice('concentrates on '.length)});
+      if(text==='ends concentration')return null;
+      return /^(?:clears |Exhaustion decreases )/.test(text)?'condition.clear':'condition.apply';
+    }
+    default:return null;
+  }
+}
 export function spellSoundEvent(spell={}){
   // Names are more specific than a broad school; don't infer damage from notes.
   const name=String(spell.name||'').toLowerCase();

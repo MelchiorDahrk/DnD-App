@@ -101,10 +101,11 @@ export class PartyStore {
     return this.s.onSnapshot(this.ref(`parties/${partyId}/stores/${storeId}`),snapshot=>next(snapshot.exists()?{id:snapshot.id,...snapshot.data()}:null),error);
   }
   async saveShop(partyId,id,draft,revision=0){
-    const ref=this.ref(`parties/${partyId}/stores/${id}`),data=prepareShop(draft);
+    const ref=this.ref(`parties/${partyId}/stores/${id}`);
     await this.s.runTransaction(this.db,async tx=>{
-      const current=await tx.get(ref);
-      if((current.data()?.revision||0)!==revision)throw new Error('The store changed while you were editing. Open it again to edit the latest stock.');
+      const current=(await tx.get(ref)).data();
+      if((current?.revision||0)!==revision)throw new Error('The store changed while you were editing. Open it again to edit the latest stock.');
+      const data=prepareShop(draft,current?.items);
       tx.set(ref,{...data,revision:revision+1,lastPurchase:null});
     });
   }

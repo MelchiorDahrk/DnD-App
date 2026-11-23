@@ -113,9 +113,22 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await press(bob.page,'[data-party-character="alice-main"] [data-action="party-status"]');await bob.page.waitForFunction(()=>document.querySelector('#modal-title')?.textContent==='Heroic Inspiration');await click(bob.page,'close');
     await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:999,kind:'damage'}}]);await bob.page.waitForSelector('[data-party-character="alice-main"].is-unconscious');await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:20,kind:'heal'}}]);await bob.page.waitForFunction(()=>!document.querySelector('[data-party-character="alice-main"]')?.classList.contains('is-unconscious'));
     phase='shared roll';await alice.page.goto(url+'#dice');await alice.page.evaluate(async()=>{const {rollDice}=await import('./model.js');const expression=document.querySelector('[name="expression"]');if(expression)expression.value='1d20';});
-    await press(alice.page,'[data-action="navigate"][data-route="party"]');const trayHeight=await alice.page.$eval('#party-roll',n=>n.getBoundingClientRect().height);await alice.page.$eval('[name="party-expression"]',n=>n.value='2d6+3');await alice.page.$eval('[name="party-label"]',n=>n.value='Group stealth');await click(alice.page,'party-roll');assert.equal(await alice.page.$('#modal[open]'),null);
+    await press(alice.page,'[data-action="navigate"][data-route="party"]');
+    await Promise.all([alice,bob].map(({page})=>page.evaluate(async()=>{
+      const {sound}=await import('./sound.js'),play=sound.play;
+      window.sharedRollSounds=[];
+      sound.play=(event,options)=>{if(event==='dice.multiple')window.sharedRollSounds.push(options);return play(event,options);};
+    })));
+    const trayHeight=await alice.page.$eval('#party-roll',n=>n.getBoundingClientRect().height);
+    await alice.page.$eval('[name="party-expression"]',n=>{n.value='1d20+3';n.dispatchEvent(new Event('input'));});
+    const quantity=await alice.page.$('[data-dice-wheel="quantity"]'),dieType=await alice.page.$('[data-dice-wheel="sides"]');
+    await quantity.press('ArrowUp');await dieType.press('Home');await dieType.press('ArrowUp');
+    assert.equal(await alice.page.$eval('[name="party-expression"]',n=>n.value),'2d6+3');
+    await alice.page.$eval('[name="party-label"]',n=>n.value='Group stealth');await click(alice.page,'party-roll');assert.equal(await alice.page.$('#modal[open]'),null);
     const rollId=await alice.page.$eval('#party-roll',n=>n.dataset.rollId);await bob.page.waitForFunction(rollId=>document.querySelector('#party-roll')?.dataset.rollId===rollId&&['settled','static'].includes(document.querySelector('#party-roll .dice-stage')?.dataset.state),{},rollId);
     const remote=await bob.page.$$eval('#party-roll .dice-stage-faces span',nodes=>nodes.map(n=>Number(n.textContent)));await alice.page.waitForFunction(()=>['settled','static'].includes(document.querySelector('#party-roll .dice-stage')?.dataset.state));assert.deepEqual(remote,await alice.page.$$eval('#party-roll .dice-stage-faces span',nodes=>nodes.map(n=>Number(n.textContent))));assert.equal(await alice.page.$eval('#party-roll',n=>n.getBoundingClientRect().height),trayHeight);
+    const sharedCues=await Promise.all([alice,bob].map(({page})=>page.evaluate(()=>window.sharedRollSounds)));
+    assert.deepEqual(sharedCues,[[{variant:remote[0]}],[{variant:remote[0]}]],'Both players hear the same multiple-dice sample.');
     phase='rest vote';
     await click(alice.page,'party-rest');await click(alice.page,'party-rest-short');
     await bob.page.waitForSelector('[data-action="party-rest-yes"]');await click(bob.page,'party-rest-yes');
@@ -132,7 +145,9 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await alice.page.$eval('[data-shop-line][data-id="rope"][data-key="priceOverride"]',input=>input.value='125');
     await alice.page.$eval('[data-shop-line][data-id="rope"][data-key="sellOverride"]',input=>input.value='42');
     await press(alice.page,'.shop-editor-tool:has([name="magicRarity"]) summary');
-    await alice.page.select('[name="magicRarity"]','Rare');await alice.page.select('[name="magicType"]','Rings');
+    await alice.page.select('[name="magicRarity"]','Rare');
+    assert.equal(await alice.page.$('[name="magicType"] option[value="Rings"]'),null,'The outfitter offers magic adventuring gear.');
+    await alice.page.select('[name="magicType"]','Wondrous Items');
     await click(alice.page,'party-shop-random');
     await alice.page.waitForFunction(()=>document.querySelector('[data-shop-feedback]')?.textContent==='Added 3 magic items.');
     await press(alice.page,'[name="shopOpen"]');await submit(alice.page);
@@ -149,7 +164,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       await bob.page.screenshot({path:resolve(diagnostics,`storefront-${theme}-mobile.png`)});
     }
     await bob.page.setViewport({width:1440,height:1100});
-    await bob.page.type('[name="shopSearch"]','Magic · Rings');
+    await bob.page.type('[name="shopSearch"]','Magic · Wondrous');
     await bob.page.waitForFunction(()=>document.querySelectorAll('.shop-item').length===3);
     await bob.page.$eval('[name="shopSearch"]',input=>{input.value='torch';input.dispatchEvent(new Event('input',{bubbles:true}));});
     await press(bob.page,'[data-action="party-shop-detail"][data-id="torch"]');
@@ -170,6 +185,14 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     assert.equal(sold.items.some(item=>item.id===rope.id),false);assert.equal(walletTotal(sold),balance-125+42);
     await click(alice.page,'close');await click(bob.page,'close');
     phase='session header and notification preference';await click(bob.page,'party-session-toggle');await bob.page.goto(url+'#journal');await bob.page.waitForSelector('body.session-mode #party-session-header:not([hidden])');assert.equal(await bob.page.$eval('#topbar',node=>getComputedStyle(node).display),'none');await bob.page.goto(url+'#settings');await click(bob.page,'party-notifications-toggle');assert.equal((await accountState(bob.page)).settings.partyNotifications,false);await bob.page.reload();await bob.page.waitForSelector('body.session-mode');assert.equal((await accountState(bob.page)).settings.partyNotifications,false);
+    phase='session portrait effects';
+    await bob.page.emulateMediaFeatures([{name:'prefers-reduced-motion',value:'no-preference'}]);
+    const sessionPortrait=`#party-session-header .session-member[data-id="${alice.uid}_${a.id}"]`;
+    await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:2,kind:'damage'}}]);
+    await bob.page.waitForSelector(sessionPortrait+'.reaction-damage .party-portrait');
+    assert.equal(await bob.page.$eval(sessionPortrait+' .party-portrait',node=>getComputedStyle(node).animationName),'party-shake');
+    await storeCall(alice,'apply',[a.id,{id:uid(),hpAction:{amount:2,kind:'heal'}}]);
+    await bob.page.waitForSelector(sessionPortrait+'.reaction-healing .party-heal-sparks',{visible:true});
     phase='skill finder';await bob.page.goto(url+'#party');assert.equal(await bob.page.$('.party-skill-finder'),null);await click(bob.page,'party-skills');await bob.page.select('[data-party-skill]','Stealth');await bob.page.waitForFunction(()=>document.querySelector('#modal .party-skill-results')?.textContent.includes('+6'));await click(bob.page,'close');
     await bob.page.screenshot({path:resolve(diagnostics,'party-session-desktop.png'),fullPage:true});
     phase='sticky session filters';assert.equal(await bob.page.$eval('.session-party-name',n=>n.textContent),'');

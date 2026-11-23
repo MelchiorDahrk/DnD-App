@@ -69,22 +69,23 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
     const summary=modal.querySelector('.combat-mode');
     summary.textContent=attackModeSummary(context);summary.hidden=!summary.textContent;
   }
+  function attackRollSounds(phase) {
+    const cue=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase});
+    return [cue,phase==='attack'&&outcome==='critical'?'combat.critical':null].filter(Boolean);
+  }
   function animate(result,phase,damageLabel=a.type) {
     if(phase==='damage'){
       const results=modal.querySelectorAll(result===damage?'.combat-damage .combat-result':'.combat-extra-result .combat-result');
       results[results.length-1]?.scrollIntoView({block:'nearest',behavior:'instant'});
     }
-    const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase});
-    if(event)sound.play(event);
-    if(phase==='attack'&&outcome==='critical')sound.play('combat.critical',{delay:.15});
     playAttackEffect(a,{items:c.items,ranged:options.kind==='ranged',critical:outcome==='critical',miss:outcome==='miss',label:phase==='damage'?`${result.total} ${damageLabel}`:a.name,detail:phase==='damage'?'DAMAGE':outcome==='critical'?'CRITICAL HIT':outcome==='miss'?'MISS':'ATTACK ROLL',target:'.combat-weapon'});
   }
   function doRoll() {
     if(!readOptions())return;
     const context=attackContext(c,a,options);
     if(context.blocked)throw new Error(context.blocked);
-    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);recordRoll(roll,a.name+' · to hit',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
-    outcome=attackOutcome(roll,options.ac,context.coverBonus);render();
+    roll=rollDice(`1d20${signed(context.bonus)}`,context.mode);outcome=attackOutcome(roll,options.ac,context.coverBonus);
+    recordRoll(roll,a.name+' · to hit',{criticalFeedback:false,combatSounds:attackRollSounds('attack'),onReveal:()=>animate(roll,'attack')});render();
   }
   function masteryMarkup() {
     if(!mastery)return '';
@@ -143,14 +144,15 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
       if(['hit','critical','miss'].includes(action)){outcome=action;render();const event=weaponSoundEvent(a,attackWeapon(a),{ranged:options.kind==='ranged',outcome,phase:'impact'});if(event)sound.play(event);return;}
       if(action==='inspiration'){
         if(!c.inspiration||!roll||damage||extras.length||save)return;
-        roll=rerollAttackDie(roll,Number(el.dataset.index));spendInspiration(c);onChange();sound.play('inspiration.spend');recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false,onReveal:()=>animate(roll,'attack')});
-        outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);save=null;render();return;
+        roll=rerollAttackDie(roll,Number(el.dataset.index));spendInspiration(c);onChange();sound.play('inspiration.spend');
+        outcome=attackOutcome(roll,options.ac,attackContext(c,a,options).coverBonus);
+        recordRoll(roll,a.name+' · Inspiration reroll',{criticalFeedback:false,combatSounds:attackRollSounds('attack'),onReveal:()=>animate(roll,'attack')});save=null;render();return;
       }
       if(action==='damage'){
         if(damage||!outcome||outcome==='miss')return;
         if(!roll)outcome=modal.querySelector('[name="directCritical"]').checked?'critical':'hit';
         const formula=damageFormula(c,a,{twoHanded:options.twoHanded,omitAbility:['Cleave','Light extra attack'].includes(extraKind),keepAbility:extraKind==='Light extra attack'&&options.keepAbility});
-        damage=rollAttackDamage(formula,outcome==='critical');recordRoll(damage,a.name+' · damage',{onReveal:()=>animate(damage,'damage')});render();return;
+        damage=rollAttackDamage(formula,outcome==='critical');recordRoll(damage,a.name+' · damage',{combatSounds:attackRollSounds('damage'),onReveal:()=>animate(damage,'damage')});render();return;
       }
       if(action==='topple'){
         const target=modal.querySelector('[name="targetCon"]');if(!target.reportValidity())return;
@@ -171,7 +173,7 @@ export function openAttack({character:c,attack:initial,modal,setModal,recordRoll
         const result=rollAttackDamage(formula,critical);
         if(feature){usedFeatures.add(feature.id);if(feature.maxUses){feature.used++;onChange();}}
         if(action==='mark')usedFeatures.add('mark');
-        extras.push({label,result});recordRoll(result,a.name+' · '+label,{onReveal:()=>animate(result,'damage',label)});render();
+        extras.push({label,result});recordRoll(result,a.name+' · '+label,{combatSounds:attackRollSounds('damage'),onReveal:()=>animate(result,'damage',label)});render();
       }
     }catch(error){sound.play('ui.error');const errorNode=modal.querySelector('#form-error');errorNode.hidden=false;errorNode.className='form-error';errorNode.textContent=error.message;}
   },{signal});

@@ -1,5 +1,6 @@
 import {EQUIPMENT,EQUIPMENT_GROUPS} from './catalog.js';
 import {filterEquipment,statPreview} from './catalog-ui.js';
+import {contentEnabled} from './content-sources.js';
 import {COINS,uid} from './model.js';
 import {itemIconMarkup} from './item-icons.js';
 import {icon} from './icons.js';
@@ -7,7 +8,7 @@ import {effectiveDM} from './party-model.js';
 import {sound} from './sound.js';
 import {
   STORE_TYPES,STORE_LIMIT,PRICE_LIMIT,MAGIC_RARITIES,MAGIC_TYPES,newShop,defaultMerchandise,
-  merchandiseEntry,merchandiseLine,randomMerchandise,quoteSale,purchasePrice,formatPrice,walletTotal
+  merchandiseEntry,merchandiseLine,randomMerchandise,matchesShopMagic,quoteSale,purchasePrice,formatPrice,walletTotal
 } from './shop-model.js';
 
 export function createShopUI(ui) {
@@ -189,7 +190,7 @@ export function createShopUI(ui) {
       <label class="check-field"><input type="checkbox" name="acceptAll" ${draft.acceptAll?'checked':''}>Buy merchandise outside this store’s categories</label>
       <label class="check-field"><input type="checkbox" name="shopOpen" ${draft.open?'checked':''}>Open to party members after saving</label>
       <details class="shop-editor-tool"><summary>Add from catalog</summary><div class="form-grid">${field('Search catalog','catalogSearch','','search','autocomplete="off"')}${select('Category','catalogGroup',option('All')+EQUIPMENT_GROUPS.map(group=>option(group)).join(''))}</div><div data-shop-catalog></div></details>
-      <details class="shop-editor-tool"><summary>Add Random Magic Items</summary><div class="form-grid">${select('Rarity','magicRarity',MAGIC_RARITIES.map(rarity=>option(rarity)).join(''))}${select('Item type','magicType',Object.keys(MAGIC_TYPES).map(type=>option(type)).join(''))}${number('Different items','magicCount',3,1,STORE_LIMIT)}</div>${action('random','Add Random Magic Items','btn btn-sm')}${feedbackSlot}</details>
+      <details class="shop-editor-tool"><summary>Add Random Magic Items</summary><div class="form-grid">${select('Rarity','magicRarity',MAGIC_RARITIES.map(rarity=>option(rarity)).join(''))}${select('Item type','magicType',option('Any'))}${number('Different items','magicCount',3,1,STORE_LIMIT)}</div>${action('random','Add Random Magic Items','btn btn-sm')}${feedbackSlot}</details>
       <details class="shop-editor-tool"><summary>Add custom merchandise</summary><div class="form-grid">${field('Custom item name','customName','','text','maxlength="200"')}${select('Category','customCategory',['Gear','Armor','Consumable','Treasure','Weapon'].map(type=>option(type)).join(''))}${field('Weight each (lb.)','customWeight',0,'number','min="0" max="99999" step="any"')}<label class="form-field full">Item description <textarea name="customDetails" maxlength="2000" rows="2"></textarea></label></div>${action('custom','Add custom item','btn btn-sm')}</details>
       <div class="shop-toolbar shop-inventory-heading"><h3>Merchandise</h3>${action('defaults','Restore default inventory','btn btn-sm')}</div><p class="form-help">Leave stock blank for ∞. Set it to 0 to mark an item Sold Out. Items with variable or compound prices need a DM price.</p>
       <div data-shop-editor-items></div>${actions('Save store','','party-shop-list')}`,{id:shop?.id||uid(),revision:shop?.revision||0,draft,autoDefaults:!shop},()=>run(async()=>{
@@ -198,7 +199,7 @@ export function createShopUI(ui) {
       if(view===active&&root())showList();
       feedback(draft.open?'Store saved and open.':'Store saved as closed.');
     }));
-    renderEditorItems();renderCatalog();
+    renderEditorItems();renderCatalog();renderMagicTypes();
   }
   function readEditor() {
     const {draft}=view,form=modal.querySelector('form'),data=new FormData(form);
@@ -221,9 +222,18 @@ export function createShopUI(ui) {
   }
   function renderCatalog() {
     const form=modal.querySelector('form'),query=form.elements.catalogSearch.value,group=form.elements.catalogGroup.value;
-    const matches=filterEquipment(EQUIPMENT,{query,group,settings:settings()}).filter(item=>!Object.hasOwn(view.draft.items,item.id));
+    const {type,items}=view.draft;
+    const matches=filterEquipment(EQUIPMENT,{query,group,settings:settings()})
+      .filter(item=>!Object.hasOwn(items,item.id)&&(!item.magic||matchesShopMagic(item,type)));
     put('[data-shop-catalog]',matches.slice(0,40).map(entry=>`<div class="shop-catalog-row"><div class="shop-item-art">${itemIconMarkup(entry)}</div><span><strong>${esc(entry.name)}</strong><small>${esc(entry.group)} · ${esc(entry.cost)}</small></span>${action('add','Add','btn btn-sm',dataId(entry.id)+` aria-label="Add ${esc(entry.name)}"`)}</div>`).join('')
       +(matches.length>40?status(`Showing 40 of ${matches.length}. Search to narrow the list.`):matches.length?'':status('No matching catalog items.')));
+  }
+  function renderMagicTypes() {
+    const field=modal.querySelector('[name="magicType"]');
+    const selected=field.value,type=view.draft.type;
+    const available=new Set(EQUIPMENT.filter(entry=>entry.magic&&matchesShopMagic(entry,type)&&contentEnabled(entry,settings(),'item')).map(entry=>entry.itemType));
+    field.innerHTML=Object.entries(MAGIC_TYPES).filter(([,types])=>!types.length||types.some(itemType=>available.has(itemType)))
+      .map(([name])=>option(name,name,name===selected)).join('');
   }
   function editMerchandise(edit) {
     checkManage();readEditor();
@@ -251,12 +261,15 @@ export function createShopUI(ui) {
         case 'party-shop-retry':{const order=pendingOrders().find(o=>o.id===id);if(order)await trade(order,view);break;}
         case 'party-shop-defaults':editMerchandise(items=>{for(const key of Object.keys(items))delete items[key];Object.assign(items,defaultMerchandise(view.draft.type,settings()));});break;
         case 'party-shop-remove':editMerchandise(items=>delete items[id]);break;
-        case 'party-shop-add':editMerchandise(items=>{const entry=EQUIPMENT.find(i=>i.id===id);if(entry&&!Object.hasOwn(items,id))addLine(items,entry);});break;
+        case 'party-shop-add':editMerchandise(items=>{
+          const entry=EQUIPMENT.find(i=>i.id===id);
+          if(entry&&contentEnabled(entry,settings(),'item')&&(!entry.magic||matchesShopMagic(entry,view.draft.type))&&!Object.hasOwn(items,id))addLine(items,entry);
+        });break;
         case 'party-shop-random':editMerchandise((items,fields)=>{
           const count=Number(fields.magicCount.value);
-          const entries=randomMerchandise({rarity:fields.magicRarity.value,type:fields.magicType.value,count},items,settings());
+          const entries=randomMerchandise({rarity:fields.magicRarity.value,type:fields.magicType.value,count,storeType:view.draft.type},items,settings());
           entries.forEach(entry=>addLine(items,entry));
-          feedback(entries.length===count?`Added ${count} magic items.`:entries.length?`Added ${entries.length} matching magic items.`:'No additional items match that rarity and type.');
+          feedback(entries.length===count?`Added ${count} magic items.`:entries.length?`Added ${entries.length} matching magic items.`:'No additional magic items match this store and rarity.');
         });break;
         case 'party-shop-custom':editMerchandise((items,fields)=>{
           const name=fields.customName.value.trim();
@@ -315,7 +328,8 @@ export function createShopUI(ui) {
     if(field.name==='catalogGroup')renderCatalog();
     if(field.name==='shopType'){
       readEditor();
-      if(view.autoDefaults){view.draft.items=defaultMerchandise(field.value,settings());renderEditorItems();renderCatalog();}
+      if(view.autoDefaults){view.draft.items=defaultMerchandise(field.value,settings());renderEditorItems();}
+      renderCatalog();renderMagicTypes();
     }
   });
   return {handle,mount};

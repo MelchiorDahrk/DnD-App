@@ -55,6 +55,28 @@ export const MAGIC_TYPES={
   Any:[],Weapons:['Weapon'],'Armor / Shields':['Armor'],Potions:['Potion'],Scrolls:['Scroll'],
   Rings:['Ring'],'Wands / Staves / Rods':['Wand','Staff','Rod'],'Wondrous Items':['Wondrous Item']
 };
+const magicWeaponBase=entry=>entry.typeDetails?.match(/^Weapon\s*\(([^)]+)\)/i)?.[1]||'';
+const smithMagic=entry=>{
+  if(entry.itemType==='Armor')return true;
+  if(entry.itemType!=='Weapon'||/^Ammunition\b/i.test(entry.typeDetails||''))return false;
+  const base=magicWeaponBase(entry);
+  if(/\bammunition\b/i.test(base)&&!/\bmelee\b/i.test(base))return false;
+  return !/\b(?:bow|crossbow|longbow|shortbow|sling|blowgun|musket|pistol)\b/i.test(base);
+};
+const wondrous=namePattern=>entry=>entry.itemType==='Wondrous Item'&&namePattern.test(entry.name);
+const stockMagic={
+  general:wondrous(/\b(?:bag|broom|candle|jug|lamp|lantern|pouch|rope|sack)\b/i),
+  blacksmith:smithMagic,
+  armorer:entry=>entry.itemType==='Armor',
+  alchemist:isPotion,
+  arcane,
+  scribe:entry=>isScroll(entry)||wondrous(/\b(?:book|spellbook|tome|manual|lexicon|grimoire|quill|ink)\b/i)(entry),
+  jeweler:entry=>entry.itemType==='Ring'||wondrous(/\b(?:amulet|bracelet|brooch|circlet|crown|gem|necklace|pearl|pendant|talisman)\b/i)(entry),
+  stables:wondrous(/\b(?:saddle|horseshoes|reins)\b/i),
+  outfitter:wondrous(/\b(?:backpack|bag|bedroll|boots|cloak|compass|lantern|quiver|rope|tent)\b/i),
+  magic:()=>true
+};
+export const matchesShopMagic=(entry,storeType)=>Object.hasOwn(stockMagic,storeType)&&stockMagic[storeType](entry);
 export function parsePrice(value) {
   const match=/^(\d+|\d{1,3}(?:,\d{3})+)\s+(cp|sp|ep|gp|pp)$/i.exec(String(value??'').trim());
   if(!match)return null;
@@ -112,13 +134,13 @@ export function defaultMerchandise(type,settings) {
 export function newShop(type='general',settings={}) {
   return {name:'',type,description:'',multiplier:100,buyRate:50,acceptAll:false,open:false,items:defaultMerchandise(type,settings)};
 }
-export function randomMerchandise({rarity,type,count},items,settings,random=Math.random) {
-  if(!MAGIC_RARITIES.includes(rarity)||!Object.hasOwn(MAGIC_TYPES,type)||!integer(count,1,STORE_LIMIT))throw new Error('Choose a rarity, item type, and valid quantity.');
+export function randomMerchandise({rarity,type,count,storeType='magic'},items,settings,random=Math.random) {
+  if(!MAGIC_RARITIES.includes(rarity)||!Object.hasOwn(MAGIC_TYPES,type)||!Object.hasOwn(STORE_TYPES,storeType)||!integer(count,1,STORE_LIMIT))throw new Error('Choose a rarity, item type, and valid quantity.');
   const types=MAGIC_TYPES[type],names=new Set(Object.values(items).map(line=>equipmentName(merchandiseEntry(line)?.name)));
   const pool=MAGIC_ITEMS.filter(entry=>{
     const rarities=entry.id==='potion-of-healing'?['Common']:entry.rarities;
     return !Object.hasOwn(items,entry.id)&&!rareOrUnique(entry)&&rarities.includes(rarity)
-      &&(!types.length||types.includes(entry.itemType))&&contentEnabled(entry,settings);
+      &&matchesShopMagic(entry,storeType)&&(!types.length||types.includes(entry.itemType))&&contentEnabled(entry,settings);
   });
   const chosen=[];
   while(pool.length&&chosen.length<Math.min(count,STORE_LIMIT-Object.keys(items).length)){
@@ -128,7 +150,7 @@ export function randomMerchandise({rarity,type,count},items,settings,random=Math
   }
   return chosen;
 }
-export function prepareShop(draft) {
+export function prepareShop(draft,previousItems={}) {
   const {name,type,description,multiplier,buyRate,acceptAll,open}=draft;
   if(typeof name!=='string'||!name.trim()||name.trim().length>100||typeof description!=='string'||description.length>2000||!Object.hasOwn(STORE_TYPES,type))throw new Error('Enter a store name and choose a store type.');
   if(!integer(multiplier,1,1000)||!integer(buyRate,0,100))throw new Error('Enter a price multiplier from 1–1000% and a resale rate from 0–100%.');
@@ -137,6 +159,8 @@ export function prepareShop(draft) {
     const {catalogId,priceOverride,sellOverride,stock,custom}=line,entry=merchandiseEntry(line);
     if(id!==catalogId||!entry||!/^[a-z0-9-]{1,200}$/.test(id)||![priceOverride,sellOverride].every(value=>value===null||integer(value,1,PRICE_LIMIT))
       ||!(stock===null||integer(stock,0,STOCK_LIMIT)))throw new Error('Check each item’s prices and stock.');
+    if(entry.magic&&!Object.hasOwn(previousItems,id)&&(!matchesShopMagic(entry,type)||!contentEnabled(entry,{},'item')))
+      throw new Error(`${entry.name} is unavailable for new stock at a ${STORE_TYPES[type].name}.`);
     if(custom&&(!id.startsWith('custom-')||typeof custom.name!=='string'||!custom.name.trim()||custom.name.length>200
       ||!['Weapon','Armor','Gear','Consumable','Treasure'].includes(custom.category)||!Number.isFinite(custom.weight)||custom.weight<0||custom.weight>99999
       ||typeof custom.details!=='string'||custom.details.length>2000))throw new Error('Check the custom merchandise fields.');
