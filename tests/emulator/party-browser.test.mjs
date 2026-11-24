@@ -251,8 +251,10 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       await page.select('[data-initiative-method]','physical');
       await fill(page,'initiativeTotal',String(total));await submit(page);
     };
+    // Keep the first two turns ahead of the hidden goblin's rolled d20 + 2.
+    const melchiorInitiative=30, scoutInitiative=25;
     await physical(bob.page,12);await physical(charlie.page,8);
-    for(const [name,value] of [['Melchior',20],['Teyla',5]]){
+    for(const [name,value] of [['Melchior',melchiorInitiative],['Teyla',5]]){
       await alice.page.waitForFunction(name=>document.querySelector('#modal[open]')?.textContent.includes(`Enter initiative for ${name}`),{},name);
       await physical(alice.page,value);
     }
@@ -264,11 +266,11 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     }
 
     phase='open creature after initiative sync';
-    await alice.page.waitForFunction(()=>{
+    await alice.page.waitForFunction(melchiorInitiative=>{
       const scores=Array.from(document.querySelectorAll('.encounter-turns > li'),row=>row.textContent);
-      return scores.join('|')==='Melchior · 20|Jane · 12|Mira · 8|Teyla · 5' &&
+      return scores.join('|')===`Melchior · ${melchiorInitiative}|Jane · 12|Mira · 8|Teyla · 5` &&
         document.querySelectorAll('.encounter-card [data-action="encounter-creature"]').length===2;
-    });
+    },{},melchiorInitiative);
     const first=await alice.page.$$eval('.encounter-card [data-action="encounter-creature"]',nodes=>
       nodes.find(node=>node.querySelector('strong')?.textContent==='Goblin Warrior #1').dataset.id);
     const firstCard=`.encounter-card [data-action="encounter-creature"][data-id="${first}"]`;
@@ -320,7 +322,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     phase='reveal creature';
     await press(alice.page,'[data-encounter-dialog="combat"] [data-action="encounter-setup"]');
     await alice.page.select('#modal [name="visibility"]','unknown');
-    await fill(alice.page,'publicName','Cloaked scout');await fill(alice.page,'initiative','17');
+    await fill(alice.page,'publicName','Cloaked scout');await fill(alice.page,'initiative',String(scoutInitiative));
     await submit(alice.page);await closed(alice.page);
     for(const {page} of [bob,charlie]){
       await page.waitForSelector(firstCard);
@@ -330,11 +332,11 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     }
     phase='advance mixed encounter turns';
     await click(alice.page,'party-next-turn');
-    await bob.page.waitForSelector('.party-player.is-current');
-    await alice.page.waitForSelector('.party-player.is-current');
+    const melchiorTurn='.party-player.is-current[data-party-character="alice-main"]';
+    await Promise.all([bob,alice].map(({page})=>page.waitForSelector(melchiorTurn)));
     await click(alice.page,'party-next-turn');
-    await bob.page.waitForSelector('.encounter-card.is-current');
-    await bob.page.waitForSelector('#party-session-header .session-member.is-current[data-action="encounter-creature"]');
+    await bob.page.waitForSelector(`.encounter-card.is-current [data-action="encounter-creature"][data-id="${first}"]`);
+    await bob.page.waitForSelector(`#party-session-header .session-member.is-current[data-action="encounter-creature"][data-id="${first}"]`);
     assert.equal(await bob.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await bob.page.screenshot({path:resolve(diagnostics,'encounter-playing-mobile.png'),fullPage:true});
     phase='creature damage and targeted notice';
