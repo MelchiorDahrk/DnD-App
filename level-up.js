@@ -417,7 +417,7 @@ function progressionPlan(character,className,level,selection,starting=false){
   const requiresSpellChoices=entering||Boolean(character.multiclass?.length&&!before.prepared&&after.prepared);
   return {character:next,className,subclass:c.subclass,classLevel:level,hitDie:classHitDie(character,className),entering,training,order,before,after,fresh,catchup,updates,choices,grant,available,maxSpellLevel,arcanum,arcanumOptions,land,requiresSpellChoices,
     ordinaryCantrips,bonusCantrips,cantripGain:Math.max(0,ordinaryCantrips-beforeCantrips),spellGain:c.class==='Wizard'?(level===1?6:2):Math.max(0,after.prepared-before.prepared),
-    hpBonus:(/dwarf/i.test(c.race)?1:0)+(has(c,'Tough')?2:0),
+    hpBonuses:{dwarvenToughness:/dwarf/i.test(c.race)?1:0,tough:has(c,'Tough')?2:0,newTough:feat?.label==='Tough'?2*next.level:0},
     warnings:[...(!LEVEL_SUBCLASSES.some(s=>s.name===c.subclass&&s.className===c.class)&&level>=3?['This subclass has no bundled progression. Add its unlocks below using your book.']:[]),...(!species.length&&!LEGACY_LINEAGE_SPELLS[c.race]?['This species has no bundled progression. Add its unlocks below using your book.']:[])]};
 }
 export function originFeatChoices(entry,c){
@@ -533,7 +533,8 @@ export function applyLevelUp(character,selection={}){
   if(subclass==='Circle of the Land'){if(!Object.hasOwn(LAND_SPELLS,plan.land))throw new Error('Choose a Circle of the Land terrain.');c.circleLand=plan.land;}
   if(className==='Barbarian'&&classLevel===20)for(const a of ['str','con'])c.stats[a]=Math.min(25,c.stats[a]+4);
   if(className==='Monk'&&classLevel===20)for(const a of ['dex','wis'])c.stats[a]=Math.min(25,c.stats[a]+4);
-  const hpExtra=plan.hpBonus+(mod(c.stats.con)-beforeCon)*plan.character.level;
+  const {dwarvenToughness,tough,newTough}=plan.hpBonuses;
+  const hpExtra=dwarvenToughness+tough+(mod(c.stats.con)-beforeCon)*plan.character.level;
   levelUp(c,selection.hpGain,{className,subclass});
   c.maxHp=Math.min(9999,c.maxHp+hpExtra);c.hp=Math.min(c.maxHp,c.hp+hpExtra);
   if(entering){
@@ -590,7 +591,7 @@ export function applyLevelUp(character,selection={}){
     }
   }
   for(const choice of pending)addProgressionFeature(c,{...reference(`Pending choice: ${choice.label}`,className,classLevel),details:`Choose ${choice.count} option(s) for ${choice.label}. The sheet has too few eligible recorded proficiencies/options. Review your book and fill in the missing selections and sheet entries.`});
-  if(feat?.label==='Tough'){c.maxHp+=2*c.level;c.hp+=2*c.level;}
+  c.maxHp+=newTough;c.hp+=newTough;
   if(className==='Monk'&&classLevel===14)c.saves=Object.keys(ABILITIES);
   if(className==='Rogue'&&classLevel===15)c.saves=[...new Set([...c.saves,'wis','cha'])];
   if(subclass==='Scout'&&classLevel===3)for(const skill of ['Nature','Survival']){if(!c.skills.includes(skill))c.skills.push(skill);if(!c.expertise.includes(skill))c.expertise.push(skill);}

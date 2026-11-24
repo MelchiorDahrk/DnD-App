@@ -3,7 +3,7 @@ import {icon} from './icons.js';
 export const SHEET_SECTIONS = ['abilities','combat','attacks','skills','features'];
 // Keep older layouts valid, including favorites still used by the inventory page.
 const SAVED_SECTIONS = [...SHEET_SECTIONS,'essentials','proficiencies','personality','journal','pack'];
-const sheetScrolls = new WeakMap();
+const sectionScrolls = new WeakMap();
 
 export function validSheetLayout(layout) {
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -88,8 +88,6 @@ export function mountSheetLayout(root,c,activeSection='') {
   return mountSheetNavigation(root,activeSection);
 }
 
-// Keep the compact navigation in sync with the visible headings, including the
-// two-column desktop layout. Tear it down whenever the app replaces the sheet.
 function mountSheetNavigation(root,activeSection) {
   const header=root.querySelector('.sheet-header'),nav=header?.querySelector('.sheet-section-nav');
   if(!nav)return ()=>{};
@@ -113,6 +111,20 @@ function mountSheetNavigation(root,activeSection) {
     button.append(label);
     nav.append(button);
   }
+  return mountSectionNavigation(root,header,sections,'sheet',activeSection);
+}
+
+export function mountSettingsNavigation(root,activeSection) {
+  const header=root.querySelector('.settings-header');
+  const sections=[...root.querySelectorAll('[data-settings-section]')];
+  return mountSectionNavigation(root,header,sections,'settings',activeSection);
+}
+
+// Track the heading nearest the sticky header, including side-by-side sections.
+function mountSectionNavigation(root,header,sections,page,activeSection) {
+  if(!header||!sections.length)return ()=>{};
+  const sectionKey=page+'Section';
+  const scrollOffset=`--${page}-scroll-offset`;
   header.dataset.activeSection=activeSection||'';
   let frame=0;
   const update=()=>{
@@ -120,26 +132,31 @@ function mountSheetNavigation(root,activeSection) {
     const top=parseFloat(getComputedStyle(header).top)||0;
     const offset=top+header.getBoundingClientRect().height+12;
     const scrollPadding=parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop)||0;
-    root.style.setProperty('--sheet-scroll-offset',`${Math.max(0,offset-scrollPadding)}px`);
+    root.style.setProperty(scrollOffset,`${Math.max(0,offset-scrollPadding)}px`);
     // Keep the requested destination selected while passing other headings.
-    if(sheetScrolls.has(root))return;
-    const positions=sections.map(section=>({key:section.dataset.sheetSection,rect:section.getBoundingClientRect()}));
+    if(sectionScrolls.has(root))return;
+    const positions=sections.map(section=>({key:section.dataset[sectionKey],rect:section.getBoundingClientRect()}));
     const current=positions.find(({key})=>key===header.dataset.activeSection);
     // Short or collapsed sheets can reach the page bottom before a destination
     // reaches the header. Keep that visible destination selected after a jump.
-    if(scrollY+innerHeight>=document.documentElement.scrollHeight-2&&current?.rect.top>=offset-1&&current.rect.top<innerHeight-80) {
-      setActiveSheetSection(header,current.key);return;
+    if(scrollY+innerHeight>=document.documentElement.scrollHeight-2) {
+      if(current?.rect.top>=offset-1&&current.rect.top<innerHeight-80) {
+        setActiveSection(header,current.key);return;
+      }
+      if(page==='settings'&&positions.at(-1).rect.top<innerHeight-80) {
+        setActiveSection(header,positions.at(-1).key);return;
+      }
     }
     const passed=positions.filter(({rect})=>rect.top<=offset+1);
     const nearest=passed.length?Math.max(...passed.map(({rect})=>rect.top)):positions[0].rect.top;
     const candidates=positions.filter(({rect})=>Math.abs(rect.top-nearest)<2);
     const key=candidates.find(({key})=>key===header.dataset.activeSection)?.key||candidates[0].key;
-    setActiveSheetSection(header,key);
+    setActiveSection(header,key);
   };
   const schedule=()=>{if(!frame)frame=requestAnimationFrame(update);};
   const interrupt=()=>{
-    if(!sheetScrolls.has(root))return;
-    cancelSheetScroll(root);
+    if(!sectionScrolls.has(root))return;
+    cancelSectionScroll(root);
     schedule();
   };
   const onKeydown=event=>{
@@ -155,7 +172,7 @@ function mountSheetNavigation(root,activeSection) {
   window.addEventListener('keydown',onKeydown);
   update();
   return ()=>{
-    cancelSheetScroll(root);
+    cancelSectionScroll(root);
     observer.disconnect();
     window.removeEventListener('scroll',schedule);
     window.removeEventListener('resize',schedule);
@@ -163,11 +180,11 @@ function mountSheetNavigation(root,activeSection) {
     window.removeEventListener('pointerdown',interrupt);
     window.removeEventListener('keydown',onKeydown);
     cancelAnimationFrame(frame);
-    root.style.removeProperty('--sheet-scroll-offset');
+    root.style.removeProperty(scrollOffset);
   };
 }
 
-function setActiveSheetSection(header,key) {
+function setActiveSection(header,key) {
   header.dataset.activeSection=key;
   for(const button of header.querySelectorAll('.sheet-section-link')) {
     const active=button.dataset.section===key,changed=button.classList.contains('active')!==active;
@@ -181,19 +198,28 @@ function setActiveSheetSection(header,key) {
   }
 }
 
-function cancelSheetScroll(root) {
-  const scroll=sheetScrolls.get(root);
+function cancelSectionScroll(root) {
+  const scroll=sectionScrolls.get(root);
   if(scroll)cancelAnimationFrame(scroll.frame);
-  sheetScrolls.delete(root);
+  sectionScrolls.delete(root);
 }
 
 export function jumpToSheetSection(root,key) {
   if(!SHEET_SECTIONS.includes(key))return;
-  const section=root.querySelector(`[data-sheet-section="${key}"]`),header=root.querySelector('.sheet-header');
+  jumpToSection(root,'sheet',key);
+}
+
+export function jumpToSettingsSection(root,key) {
+  jumpToSection(root,'settings',CSS.escape(key));
+}
+
+function jumpToSection(root,page,key) {
+  const section=root.querySelector(`[data-${page}-section="${key}"]`),header=root.querySelector(`.${page}-header`);
   if(!section||!header)return;
-  cancelSheetScroll(root);
-  setActiveSheetSection(header,key);
-  section.querySelector('.sheet-section-toggle').focus({preventScroll:true});
+  cancelSectionScroll(root);
+  setActiveSection(header,key);
+  const focus=page==='sheet'?section.querySelector('.sheet-section-toggle'):section;
+  focus.focus({preventScroll:true});
   const offset=(parseFloat(getComputedStyle(header).top)||0)+header.getBoundingClientRect().height+12;
   const start=window.scrollY,left=window.scrollX;
   const target=Math.max(0,Math.min(start+section.getBoundingClientRect().top-offset,document.documentElement.scrollHeight-innerHeight));
@@ -201,14 +227,14 @@ export function jumpToSheetSection(root,key) {
     window.scrollTo({top:target,left,behavior:'instant'});
     return;
   }
-  // Cap travel at a brief 240 ms, even for long mobile sheets.
+  // Cap travel at a brief 240 ms, even on long pages.
   const scroll={frame:0},started=performance.now();
-  sheetScrolls.set(root,scroll);
+  sectionScrolls.set(root,scroll);
   const step=now=>{
     const progress=Math.min(1,(now-started)/240),eased=1-(1-progress)**3;
     window.scrollTo({top:start+(target-start)*eased,left,behavior:'instant'});
     if(progress<1)scroll.frame=requestAnimationFrame(step);
-    else sheetScrolls.delete(root);
+    else sectionScrolls.delete(root);
   };
   scroll.frame=requestAnimationFrame(step);
 }

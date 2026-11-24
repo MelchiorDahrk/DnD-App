@@ -6,7 +6,7 @@ import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import puppeteer from 'puppeteer-core';
 import {makeCharacter,parseBackup} from '../model.js';
-import {FEATURE_CATALOG} from '../feature-catalog.js';
+import {FEATURE_CATALOG,featureFields} from '../feature-catalog.js';
 import {SPELL_CATALOG} from '../progression-data.js';
 const root=resolve(import.meta.dirname,'..'),port=process.env.LEVEL_TEST_PORT||'4191';
 const executablePath=process.env.BROWSER_PATH||['C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe','C:/Program Files/Google/Chrome/Application/chrome.exe','/usr/bin/chromium'].find(existsSync);
@@ -76,7 +76,12 @@ try{
   await searchFeats('');assert.deepEqual(await formValues(),chosenForm);assert.deepEqual(await featIds(),allFeats);
   assert.deepEqual(await state(),before,'Searching and choosing remain unsaved until confirmation');
   console.log('PASS feat search by name/source, accent-insensitive multiword matching, categories, empty results, preserved selections and 320px layout');
+  const tough=FEATURE_CATALOG.find(f=>f.name==='Tough');
+  const hpBonuses=()=>page.$eval('[data-level-hp-bonuses]',node=>node.textContent);
+  await set('choice-feat',tough.id);
+  assert.match(await hpBonuses(),/\+8 HP from Tough \(\+2 per level\)/);
   const athlete=FEATURE_CATALOG.find(f=>f.name==='Athlete');await set('choice-feat',athlete.id);
+  assert.doesNotMatch(await page.$eval('#modal',node=>node.textContent),/HP from Tough/);
   assert.equal(await page.$eval('[name="ability-dex"]',n=>n.value),'0','Changing feats clears previous increases');
   assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.href),'https://dnd2024.wikidot.com/feat:athlete');
   assert.equal(await page.$eval('[data-level-feat-reference]',n=>n.target),'_blank');
@@ -86,6 +91,13 @@ try{
   assert.equal(c.maxHp,active(before).maxHp+7+4);
   await celebration();
   console.log('PASS cancel, shared ASI/feat point limits, selected feat references, Constitution HP, resource scaling, save validation, portrait-centered celebration');
+  const veteran=makeCharacter({class:'Fighter',subclass:'Champion',race:'Dwarf',level:4,skills:['Athletics','Perception']});
+  veteran.features.push({id:'legacy-tough',used:0,...featureFields(tough,veteran),name:'Tough (Origin feat)'});
+  await load(veteran);await open();
+  assert.equal(await hpBonuses(),'+1 HP from Dwarven Toughness · +2 HP from Tough');
+  await submit();
+  assert.equal(active(await state()).maxHp,veteran.maxHp+8+1+2);
+  console.log('PASS level-up previews for newly selected and existing Tough bonuses');
   for(const width of [1280,390,320]){
     await load(makeCharacter({class:'Ranger',subclass:'Hunter',race:'Wood Elf',level:4,skills:['Stealth','Perception','Survival']}));
     await page.setViewport({width,height:900});

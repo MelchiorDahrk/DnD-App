@@ -230,9 +230,13 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await alice.page.waitForSelector('[data-action="encounter-library"]');
     assert.equal(await bob.page.$('[data-action="encounter-library"]'),null);
     assert.equal(await charlie.page.$('[data-action="encounter-library"]'),null);
-    await click(alice.page,'encounter-library');await click(alice.page,'encounter-create');
+    await click(alice.page,'encounter-library');
+    const creatureCredits='#modal a[href^="./assets/creatures/"]';
+    assert.equal(await alice.page.$(creatureCredits),null);
+    await click(alice.page,'encounter-create');
     await fill(alice.page,'name','Goblin road ambush');await submit(alice.page);
     await click(alice.page,'encounter-catalog');
+    assert.equal(await alice.page.$(creatureCredits),null);
     await alice.page.type('[name="query"]','Goblin Warrior');
     await alice.page.select('#modal [name="type"]','fey');
     await alice.page.select('#modal [name="cr"]','1/4');
@@ -268,8 +272,51 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     const first=await alice.page.$$eval('.encounter-card [data-action="encounter-creature"]',nodes=>
       nodes.find(node=>node.querySelector('strong')?.textContent==='Goblin Warrior #1').dataset.id);
     const firstCard=`.encounter-card [data-action="encounter-creature"][data-id="${first}"]`;
+    phase='bulk creature initiative';
+    await click(alice.page,'encounter-initiative');
+    const secondCreature=await alice.page.$$eval('[name="creature"]',nodes=>nodes[1].value);
+    const secondCheckbox=`[name="creature"][value="${secondCreature}"]`;
+    await press(alice.page,secondCheckbox);
+    await submit(alice.page);
+    const results='[data-encounter-dialog="initiative-results"]';
+    await alice.page.waitForSelector(results);
+    assert.deepEqual(await alice.page.$$eval(`${results} dt`,nodes=>nodes.map(node=>node.textContent)),['Goblin Warrior #1']);
+    const total=await alice.page.$eval(`${results} dd`,node=>node.textContent);
+    await press(alice.page,`${results} [data-action="close"]`);
+    await closed(alice.page);
+    await alice.page.waitForFunction((firstCard,total)=>document.querySelector(firstCard)?.parentElement.textContent.includes(`Initiative ${total}`),{},firstCard,total);
+    assert.match(await alice.page.$eval(`[data-action="encounter-creature"][data-id="${secondCreature}"]`,node=>node.parentElement.textContent),/Awaiting initiative/);
+    await click(alice.page,'encounter-initiative');
+    await press(alice.page,'[name="group"]');
+    await alice.page.select('[name="mode"]','advantage');
+    await submit(alice.page);
+    await alice.page.waitForSelector(results);
+    assert.deepEqual(await alice.page.$$eval(`${results} dt`,nodes=>nodes.map(node=>node.textContent)),['Goblin Warrior #1','Goblin Warrior #2']);
+    const totals=await alice.page.$$eval(`${results} dd`,nodes=>nodes.map(node=>node.textContent));
+    assert.match(totals[0],/^\d+$/);
+    assert.equal(totals[0],totals[1],'Identical creatures share one roll when grouped');
+    await press(alice.page,`${results} [data-action="close"]`);
+    await closed(alice.page);
+
+    phase='mobile creature conditions';
+    await alice.page.setViewport({width:320,height:844});
     await press(alice.page,firstCard);
     await alice.page.waitForSelector('#modal[open] [data-encounter-dialog="combat"]');
+    await press(alice.page,'details:has(.condition-grid) > summary');
+    const conditions='[data-action="encounter-condition"]';
+    assert.ok(await alice.page.$$eval(conditions,buttons=>buttons.length>0&&buttons.every(button=>{
+      const box=button.getBoundingClientRect(),icon=button.firstElementChild.getBoundingClientRect();
+      return button.getAttribute('aria-label')&&button.textContent.trim()===''&&box.width>=44&&box.height>=44&&
+        Math.abs((box.left+box.right)-(icon.left+icon.right))<2&&
+        Math.abs((box.top+box.bottom)-(icon.top+icon.bottom))<2&&box.left>=0&&box.right<=innerWidth;
+    })),'Creature condition controls are centered and accessible on a 320px screen');
+    const poisoned=`${conditions}[data-condition="Poisoned"]`;
+    await press(alice.page,poisoned);
+    await alice.page.waitForSelector(`${poisoned}[aria-pressed="true"]`);
+    assert.ok(await alice.page.$eval(poisoned,button=>button===document.activeElement));
+    await press(alice.page,poisoned);
+    await alice.page.waitForSelector(`${poisoned}[aria-pressed="false"]`);
+    await alice.page.setViewport({width:1440,height:1000});
     phase='reveal creature';
     await press(alice.page,'[data-encounter-dialog="combat"] [data-action="encounter-setup"]');
     await alice.page.select('#modal [name="visibility"]','unknown');

@@ -35,7 +35,9 @@ button.encounter-card-button:hover{background:color-mix(in srgb,var(--hero-brass
 .encounter-detail dl{display:grid;grid-template-columns:minmax(0,1fr) 2fr;gap:5px 10px;margin-bottom:6px}
 .encounter-detail dt{font-weight:600}
 .encounter-detail dd{margin:0;white-space:pre-wrap;overflow-wrap:anywhere}
-.encounter-detail button[aria-pressed="true"]{border-color:var(--hero-brass);background:var(--surface-raised)}
+.encounter-initiative-results .encounter-list-row{justify-content:space-between}
+.encounter-initiative-results dt{min-width:0;overflow-wrap:anywhere}
+.encounter-initiative-results dd{margin:0;font-weight:700}
 .encounter-abilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
 .encounter-abilities article{display:grid;justify-items:center;gap:4px;padding:8px 2px;border:1px solid var(--border-subtle);border-radius:6px;text-align:center}
 .encounter-abilities article>div{display:flex;flex-wrap:wrap;justify-content:center;gap:4px}

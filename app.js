@@ -8,7 +8,7 @@ import {createConditionUsage} from './condition-usage.js';
 import {ACTION_TYPES,actionTiming,sheetSpells} from './sheet-actions.js';
 import {itemIconMarkup,attackIconMarkup,installItemIconFallbacks,itemIconPicker,updateItemIconPicker} from './item-icons.js';
 import {spellIconMarkup,spellIconPicker,updateSpellIconPicker,installSpellIconFallbacks} from './spell-icons.js';
-import {isSheetFavorite,mountSheetLayout,refreshSheetLayout,toggleSheetSection,toggleSheetFavorite,jumpToSheetSection} from './sheet-layout.js';
+import {isSheetFavorite,mountSheetLayout,refreshSheetLayout,toggleSheetSection,toggleSheetFavorite,jumpToSheetSection,mountSettingsNavigation,jumpToSettingsSection} from './sheet-layout.js';
 import {campArt} from './art.js';
 import {characterHero} from './character-hero.js';
 import {portraitMarkup} from './portrait.js';
@@ -59,7 +59,7 @@ let route = Object.hasOwn(routes,location.hash.slice(1))?location.hash.slice(1):
 let filters=new Set(),query='',rollMode='normal',diceSelection={quantity:1,sides:20},rollHistory=[],lastRoll=null;
 const canUseRollMode=()=>diceSelection.quantity===1&&diceSelection.sides===20;
 let modalSubmit=null,installPrompt=null,trainingEditingId=null;
-let cleanupSheetNavigation=()=>{};
+let cleanupSectionNavigation=()=>{};
 const conditionUsage=createConditionUsage();
 const character = () => state.characters.find(c=>c.id===state.activeId) || state.characters[0];
 const modal = $('#modal');
@@ -192,9 +192,9 @@ function render() {
   const partyRoll=route==='party'?$('#party-roll'):null;
   const partyControls=route==='party'?$('.party-roll-controls'):null;
   cloud.viewRoute(route);
-  const previousSection=$('.sheet-header')?.dataset.activeSection;
-  cleanupSheetNavigation();
-  cleanupSheetNavigation=()=>{};
+  const previousSection=$(`.${route}-header`)?.dataset.activeSection;
+  cleanupSectionNavigation();
+  cleanupSectionNavigation=()=>{};
   const hasCharacter=!!character();
   document.body.classList.toggle('no-character',!hasCharacter);
   for(const id of ['sidebar','topbar','mobile-nav'])$('#'+id).hidden=!hasCharacter;
@@ -203,6 +203,7 @@ function render() {
     for(const id of ['sidebar','topbar','mobile-nav'])$('#'+id).replaceChildren();
     $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)}</div>`:'')+(route==='settings'?renderSettings():route==='party'?cloud.partyMarkup():route==='party-manage'?cloud.partyManagementMarkup():renderLanding()+cloud.accountMarkup())+`<div class="cloud-actions">${btn('navigate','Home','btn btn-ghost','data-route="sheet"')}${btn('navigate','Account & settings','btn btn-ghost','data-route="settings"')}${btn('navigate','Party','btn btn-ghost','data-route="party"')}</div>`;
     document.title='Welcome · Questlog';
+    if(route==='settings')cleanupSectionNavigation=mountSettingsNavigation($('#main'),previousSection);
     cloud.afterRender();
     return;
   }
@@ -211,7 +212,8 @@ function render() {
   $('#main').innerHTML=(storageError?`<div class="storage-warning">${esc(storageError)} ${btn('export','Export current sheet','btn btn-sm')}</div>`:'')+views[route]();
   if(partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('#party-roll').replaceWith(partyRoll);
   if(partyControls&&partyRoll&&$('#party-roll')?.dataset.partyId===partyRoll.dataset.partyId)$('.party-roll-controls')?.replaceWith(partyControls);
-  if(route==='sheet')cleanupSheetNavigation=mountSheetLayout($('#main'),character(),previousSection);
+  if(route==='sheet')cleanupSectionNavigation=mountSheetLayout($('#main'),character(),previousSection);
+  if(route==='settings')cleanupSectionNavigation=mountSettingsNavigation($('#main'),previousSection);
   if(route==='wiki')updateCatalogBrowser($('#main'),true,state.settings);
   if(route==='dice')mountDiceControls($('#dice-form'),selection=>{
     diceSelection=selection;
@@ -419,18 +421,19 @@ function renderSoundSettings() {
   return `<div class="sound-settings">${slider('master','Master',prefs.volume)}<details><summary>Audio categories</summary>${Object.entries(SOUND_CATEGORIES).map(([key,label])=>slider(key,label,prefs.categories[key])).join('')}</details><div class="sound-preview"><label class="form-field">Sound preview<select id="sound-preview-event">${previews.map(([value,label])=>`<option value="${value}">${label}</option>`).join('')}</select></label>${btn('sound-preview',icon('sound')+'Test sound','btn btn-sm',state.settings.sound?'':'disabled')}</div><p class="form-help">Enable sound, then try a preview. Campfire ambience fades out automatically. Volume preferences stay on this device.</p></div>`;
 }
 function renderSettingsHeader() {
-  const sections=[['account','people','Account'],['party','people','Party'],['preferences','settings','Preferences'],['sound','sound','Sound'],['sources','book','Content sources']];
+  const sections=[['account','people','Account'],['party','people','Party'],['preferences','settings','Preferences'],['sound','sound','Sound'],['sources','book','Content sources'],['credits','book','Credits']];
   return `<header class="settings-header">${pageHeading('Settings')}<nav class="sheet-section-nav" aria-label="Settings sections">${sections.map(([key,symbol,label])=>btn('settings-jump',icon(symbol)+label,'sheet-section-link',`data-section="${key}"`)).join('')}</nav></header>`;
 }
-function jumpToSettingsSection(key) {
-  const header=$('.settings-header'),target=$(`[data-settings-section="${CSS.escape(key)}"]`);
-  if(!header||!target)return;
-  const top=parseFloat(getComputedStyle(header).top)||0;
-  target.style.scrollMarginTop=`${top+header.getBoundingClientRect().height+12}px`;
-  target.focus({preventScroll:true});
-  target.scrollIntoView({block:'start',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+function renderSettingsCredits() {
+  return `<section class="panel" data-settings-section="credits" tabindex="-1">
+    <div class="panel-heading"><h2>${icon('book')}Credits</h2></div>
+    <div class="panel-body about-copy">
+      <p>Spell and creature artwork by ${ext('https://lorcblog.blogspot.com/','Lorc')} and ${ext('https://delapouite.com/','Delapouite')} from ${ext('https://game-icons.net/','Game-icons.net')}, licensed under ${ext('https://creativecommons.org/licenses/by/3.0/','CC BY 3.0')}. Questlog removes backgrounds and applies theme colors. See the <a href="./assets/spell-icons/CREDITS.md" target="_blank" rel="noopener noreferrer">spell artwork credits</a> and <a href="./assets/creatures/CREDITS.md" target="_blank" rel="noopener noreferrer">creature artwork credits</a>.</p>
+      <p>Creature rules are adapted from the System Reference Document 5.2.1 by Wizards of the Coast LLC under ${ext('https://creativecommons.org/licenses/by/4.0/','CC BY 4.0')}. See the <a href="./assets/creatures/SRD.md" target="_blank" rel="noopener noreferrer">SRD 5.2.1 attribution</a>.</p>
+    </div>
+  </section>`;
 }
-function renderSettings() {return renderSettingsHeader()+`<div data-settings-section="account" tabindex="-1">${cloud.accountMarkup()}</div>`+cloud.partySettingsMarkup()+`<div class="settings-grid"><section class="panel" data-settings-section="preferences" tabindex="-1"><div class="panel-heading"><h2>${icon('settings')}Your preferences</h2></div><div class="setting-row appearance-setting">${icon('moon')}<div><strong>The light of your adventure</strong><p>The same journal, in daylight or by candlelight.</p>${themeSelect('settings-appearance')}</div></div>${renderDiceColors()}${renderInspirationSettings()}${storageBlocked?`<div class="panel-body">${btn('recover-storage','Enable saving for this sheet','btn btn-danger')}</div>`:''}<div class="setting-row" data-settings-section="sound" tabindex="-1">${icon('sound')}<div><strong>Sound effects</strong><p>Dice, steel, spells, and a moment by the fire.</p></div>${btn('sound','','toggle-switch'+(state.settings.sound?' active':''),`role="switch" aria-checked="${state.settings.sound}" aria-label="Sound effects"`)}</div>${renderSoundSettings()}${renderContentSources()}<div class="setting-row">${icon('people')}<div><strong>Your adventurers</strong><p>${state.characters.length} character${state.characters.length!==1?'s':''} saved in this browser.</p></div>${btn('characters','Manage','btn btn-sm')}</div><div class="setting-row">${icon('book')}<div><strong>Try the 2024 example</strong><p>Add the updated Ranger alongside your saved characters.</p></div>${btn('demo-2024','Add 2024 example','btn btn-sm')}</div><div class="setting-row">${icon('compass')}<div><strong>Take Questlog with you</strong><p>Install on your home screen for easy access.</p></div>${btn('install','How to','btn btn-sm')}</div></section><section class="panel"><div class="panel-heading"><h2>${icon('book')}Spell artwork credits</h2></div><div class="panel-body about-copy"><p>Spell artwork by ${ext('https://lorcblog.blogspot.com/','Lorc')} and ${ext('https://delapouite.com/','Delapouite')} from ${ext('https://game-icons.net/','Game-icons.net')}, licensed under ${ext('https://creativecommons.org/licenses/by/3.0/','CC BY 3.0')}. Backgrounds are removed and theme colors applied. <a href="./assets/spell-icons/CREDITS.md" target="_blank" rel="noopener noreferrer">View individual icon credits and sources</a>.</p><p>Creature portraits use Game-icons.net artwork by Lorc and Delapouite under CC BY 3.0. See <a href="./assets/creatures/CREDITS.md" target="_blank" rel="noopener noreferrer">creature artwork credits</a> and <a href="./assets/creatures/SRD.md" target="_blank" rel="noopener noreferrer">SRD 5.2.1 attribution</a>.</p></div></section></div>`;}
+function renderSettings() {return renderSettingsHeader()+`<div data-settings-section="account" tabindex="-1">${cloud.accountMarkup()}</div>`+cloud.partySettingsMarkup()+`<div class="settings-grid"><section class="panel" data-settings-section="preferences" tabindex="-1"><div class="panel-heading"><h2>${icon('settings')}Your preferences</h2></div><div class="setting-row appearance-setting">${icon('moon')}<div><strong>The light of your adventure</strong><p>The same journal, in daylight or by candlelight.</p>${themeSelect('settings-appearance')}</div></div>${renderDiceColors()}${renderInspirationSettings()}${storageBlocked?`<div class="panel-body">${btn('recover-storage','Enable saving for this sheet','btn btn-danger')}</div>`:''}<div class="setting-row" data-settings-section="sound" tabindex="-1">${icon('sound')}<div><strong>Sound effects</strong><p>Dice, steel, spells, and a moment by the fire.</p></div>${btn('sound','','toggle-switch'+(state.settings.sound?' active':''),`role="switch" aria-checked="${state.settings.sound}" aria-label="Sound effects"`)}</div>${renderSoundSettings()}${renderContentSources()}<div class="setting-row">${icon('people')}<div><strong>Your adventurers</strong><p>${state.characters.length} character${state.characters.length!==1?'s':''} saved in this browser.</p></div>${btn('characters','Manage','btn btn-sm')}</div><div class="setting-row">${icon('book')}<div><strong>Try the 2024 example</strong><p>Add the updated Ranger alongside your saved characters.</p></div>${btn('demo-2024','Add 2024 example','btn btn-sm')}</div><div class="setting-row">${icon('compass')}<div><strong>Take Questlog with you</strong><p>Install on your home screen for easy access.</p></div>${btn('install','How to','btn btn-sm')}</div></section>${renderSettingsCredits()}</div>`;}
 
 // Dialogs keep the on-sheet flows small enough for a thumb and a dice bag.
 function showCharacters() {const c=character();setModal('Characters',`${state.characters.map(x=>`<div class="character-manager-row">${btn('switch-character',`<span class="mini-avatar">${portraitMarkup(x)}</span><div><strong>${esc(x.name)}</strong><small>Level ${x.level} ${esc(x.race)} ${esc(x.class)}</small></div>${icon(x.id===c?.id?'check':'chevron')}`,`character-option${x.id===c?.id?' active':''}`,`data-id="${x.id}"`)}${btn('delete-character',icon('trash')+'Delete','btn btn-sm btn-danger',`data-id="${x.id}" aria-label="Delete ${esc(x.name)}"`)}</div>`).join('')}<div class="modal-actions">${btn('new-character',icon('plus')+'New character','btn btn-primary')}${btn('export',icon('download')+'Download','btn')}${btn('import',icon('upload')+'Import','btn')}</div>${storageBlocked?btn('recover-storage','Enable saving for this sheet','btn btn-danger'):''}${cloud.characterMenuMarkup()}`);}
@@ -977,7 +980,7 @@ document.addEventListener('click',event=>{
       case 'navigate':if(modal.open)modal.close();navigate(el.dataset.route);break;
       case 'close':modal.close();break;
       case 'characters':showCharacters();break;
-      case 'settings-jump':jumpToSettingsSection(el.dataset.section);break;
+      case 'settings-jump':jumpToSettingsSection($('#main'),el.dataset.section);break;
       case 'more':setModal('More pages',`${btn('navigate',icon('compass')+'<div><strong>Compendium</strong></div>'+icon('chevron'),'character-option','data-route="wiki"')}${btn('navigate',icon('people')+'<div><strong>Party</strong></div>'+icon('chevron'),'character-option','data-route="party"')}${btn('navigate',icon('settings')+'<div><strong>Settings</strong></div>'+icon('chevron'),'character-option','data-route="settings"')}${btn('characters',icon('people')+'<div><strong>Characters</strong></div>'+icon('chevron'),'character-option')}`);break;
       case 'switch-character':trainingEditingId=null;clearEffects();state.activeId=id;modal.close();query='';filters.clear();commit('Ready when you are.');break;
       case 'demo-2024':{if(state.characters.length>=100){toast('This browser has 100 characters. Export a backup before removing any.',true);break;}const example=demoCharacter();state.characters.push(example);state.activeId=example.id;navigate('sheet');commit('2024 example added. Your other characters are preserved.');break;}

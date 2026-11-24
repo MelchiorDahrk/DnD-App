@@ -44,12 +44,35 @@ try {
   const search=async(selector,value)=>page.$eval(selector,(node,value)=>{node.value=value;node.dispatchEvent(new Event('input',{bubbles:true}));},value);
   const openFeatures=()=>click('[data-action="feature"]:not([data-id])');
   const featureOptions=()=>options('[data-catalog-pick="feat"]');
+  const settingsActive=key=>page.waitForFunction(key=>{
+    const links=[...document.querySelectorAll('.settings-header .sheet-section-link.active')];
+    return links.length===1&&links[0].dataset.section===key&&links[0].getAttribute('aria-current')==='location';
+  },{},key);
+  const scrollToSettings=key=>page.evaluate(key=>{
+    const header=document.querySelector('.settings-header');
+    const target=document.querySelector(`[data-settings-section="${key}"]`);
+    const offset=(parseFloat(getComputedStyle(header).top)||0)+header.getBoundingClientRect().height;
+    scrollTo({top:scrollY+target.getBoundingClientRect().top-offset,behavior:'instant'});
+  },key);
 
   await openFeatures();await page.select('[data-catalog-scope="feat"]','all');
   for(const entry of giantFeats)assert.ok((await featureOptions()).includes(entry.id),entry.name);
   await page.select('[data-catalog-source="feat"]','Bigby Presents: Glory of the Giants');
   assert.equal((await featureOptions()).length,9,'all eight giant feats can be added');
   await close();await navigate('settings');
+  await settingsActive('account');
+  for(const key of ['party','preferences','sound','sources']){
+    await scrollToSettings(key);
+    await settingsActive(key);
+  }
+  const credits='[data-settings-section="credits"]';
+  for(const asset of ['spell-icons/CREDITS.md','creatures/CREDITS.md','creatures/SRD.md']){
+    assert.ok(await page.$(`${credits} a[href="./assets/${asset}"]`));
+  }
+  await page.evaluate(()=>scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}));
+  await settingsActive('credits');
+  await click('[data-action="settings-jump"][data-section="account"]');
+  await page.waitForFunction(()=>scrollY<150&&document.activeElement?.dataset.settingsSection==='account');
   const before=(await state()).characters;
   await click(`[data-content-source="${sourceId}"]`);
   assert.deepEqual((await state()).settings.hiddenSources,[sourceId]);
@@ -60,6 +83,14 @@ try {
   assert.equal(await page.$$eval('[data-source-row]:not([hidden])',nodes=>nodes.length),1);
   for(const width of [390,320]){
     await page.setViewport({width,height:900});
+    await scrollToSettings('sound');
+    await settingsActive('sound');
+    await scrollToSettings('sources');
+    await settingsActive('sources');
+    assert.ok(await page.$eval('.settings-header .sheet-section-link.active',node=>{
+      const link=node.getBoundingClientRect(),nav=node.parentElement.getBoundingClientRect();
+      return link.left>=nav.left-1&&link.right<=nav.right+1;
+    }),'The active Settings link stays in view on mobile');
     assert.ok(await page.$eval('.content-source-settings',node=>node.scrollWidth<=node.clientWidth));
     await mkdir(resolve(root,'.tmp'),{recursive:true});
     await (await page.$('.content-source-settings')).screenshot({path:resolve(root,`.tmp/content-sources-${width}.png`)});

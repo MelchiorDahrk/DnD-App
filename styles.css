@@ -436,6 +436,7 @@ body.no-character .settings-header{top:0;margin:0 0 24px;flex-shrink:0}
 .sheet-section-link:hover{background:var(--surface-hover)}
 .sheet-section-link.active{background:var(--nav-active);color:var(--nav-text);border-color:var(--accent-edge);box-shadow:inset 0 -2px var(--hero-brass)}
 [data-sheet-section]{scroll-margin-top:var(--sheet-scroll-offset,112px)}
+[data-settings-section]{scroll-margin-top:var(--settings-scroll-offset,112px)}
 @media(max-width:1000px){.sheet-status{gap:6px}}
 @media(max-width:760px){
   .sheet-header,.settings-header{top:65px;margin:-24px -16px 20px;padding:2px 10px 0}

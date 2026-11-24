@@ -229,12 +229,7 @@ export function createEncounterUI(ui) {
     setModal('Encounters', marker('library', `<div class="cloud-actions">
       ${action('create', 'Create encounter', '', 'btn btn-primary')}${action('template', 'Create creature template', '', 'btn')}
       </div><div class="encounter-list">${rows || '<p class="form-help">Your saved encounters will appear here.</p>'}</div>
-      ${templates ? `<details><summary>Homebrew templates (${entries.templates.length})</summary><div class="encounter-list">${templates}</div></details>` : ''}
-      ${credits()}`));
-  }
-
-  function credits() {
-    return '<p class="form-help"><a href="./assets/creatures/SRD.md" target="_blank" rel="noopener">SRD 5.2.1 credits</a> · <a href="./assets/creatures/CREDITS.md" target="_blank" rel="noopener">Creature artwork credits</a></p>';
+      ${templates ? `<details><summary>Homebrew templates (${entries.templates.length})</summary><div class="encounter-list">${templates}</div></details>` : ''}`));
   }
 
   function builder(encounter) {
@@ -286,7 +281,7 @@ export function createEncounterUI(ui) {
       ${select('Type', 'type', [['', 'All types'], ...types.map(type => [type, type])], '')}
       ${select('Challenge Rating', 'cr', [['', 'All ratings'], ...ratings.map(cr => [formatCR(cr), 'CR ' + formatCR(cr)])], '')}
       </div><div data-encounter-results class="encounter-cards" aria-label="Creatures"></div>
-      <div class="modal-actions">${action('builder', 'Back to encounter', dataId(encounter.id), 'btn')}</div>${credits()}`));
+      <div class="modal-actions">${action('builder', 'Back to encounter', dataId(encounter.id), 'btn')}</div>`));
     const root = dialog();
     const render = () => {
       const results = catalog.searchCreatures(library.templates, Object.fromEntries(new FormData(modal.querySelector('form'))));
@@ -413,7 +408,8 @@ export function createEncounterUI(ui) {
     const amount = body.querySelector('[name="amount"]')?.value || 1;
     const openDetails = [...body.querySelectorAll('details')].map(el => el.open);
     const focused = document.activeElement;
-    const focusAttrs = body.contains(focused) && [focused.dataset.action, focused.dataset.ability, focused.dataset.index, focused.name];
+    const focusAttrs = el => [el.dataset.action, el.dataset.ability, el.dataset.index, el.dataset.condition, el.name];
+    const previousFocus = body.contains(focused) && focusAttrs(focused);
     modal.querySelector('#modal-title').textContent = row.name;
     body.innerHTML = `<div class="encounter-detail-title">${portrait(resolveCreatureArt(row))}<div><strong>${row.hp}/${row.maxHp} HP</strong>
       <p>${row.tempHp} temp · AC ${row.ac} · Initiative ${row.initiative ?? '—'}</p><p>${esc(row.templateName)} · ${esc(row.source)} · ${esc(creatureHealth(row))} · ${row.visible ? 'Revealed' : 'Hidden'}</p></div></div>
@@ -425,14 +421,18 @@ export function createEncounterUI(ui) {
       ${row.visible && !row.identity ? action('identity', 'Reveal identity') : ''}
       ${action('record', 'Record attack manually')}</div>
       <details class="encounter-detail"><summary>Conditions ${row.conditions.length ? '· ' + esc(row.conditions.join(', ')) : ''}</summary>
-      <div class="condition-grid">${CREATURE_CONDITIONS.map(condition => action('condition',
-        conditionIcon(condition) + esc(condition), `data-condition="${esc(condition)}" aria-pressed="${row.conditions.includes(condition)}"`, 'btn btn-sm')).join('')}</div></details>
+      <div class="condition-grid" role="group" aria-label="Creature conditions">${CREATURE_CONDITIONS.map(condition => {
+        const label = esc(condition), applied = row.conditions.includes(condition);
+        return action('condition', conditionIcon(condition),
+          `data-condition="${label}" aria-label="${label}" aria-pressed="${applied}" title="${label}"`,
+          `condition-chip${applied ? ' active' : ''}`);
+      }).join('')}</div></details>
       ${statBlock(row.stats, true)}
       ${row.stats.actions.length ? `<details class="encounter-detail" open><summary>Attacks and abilities</summary>${abilities(row, true)}</details>` : ''}
       ${row.notes ? `<div class="encounter-notes"><strong>Private DM notes</strong><p>${esc(row.notes)}</p></div>` : ''}`;
     [...body.querySelectorAll('details')].forEach((el, index) => { if (openDetails[index] !== undefined) el.open = openDetails[index]; });
-    if (focusAttrs) [...body.querySelectorAll('button,input')].find(el =>
-      [el.dataset.action, el.dataset.ability, el.dataset.index, el.name].every((value, index) => value === focusAttrs[index]))?.focus({preventScroll: true});
+    if (previousFocus) [...body.querySelectorAll('button,input')].find(el =>
+      focusAttrs(el).every((value, index) => value === previousFocus[index]))?.focus({preventScroll: true});
   }
 
   function initiativeDialog(encounter) {
@@ -441,24 +441,25 @@ export function createEncounterUI(ui) {
       ${rows.map(row => check(`${esc(row.name)} (${signed(row.initiativeMod)})`, 'creature', true).replace('name="creature"', `name="creature" value="${esc(row.id)}"`)).join('')}
       </div>${check('Identical creatures share initiative', 'group', false)}
       ${select('Roll mode', 'mode', [['normal', 'Normal'], ['advantage', 'Advantage'], ['disadvantage', 'Disadvantage']], 'normal')}
-      <div class="encounter-dice"></div>${actions('Roll for selected')}`), data => run(async p => {
+      ${actions('Roll for selected')}`), data => run(async p => {
+      const form = dialog();
       const selected = new Set(data.getAll('creature'));
-      const modifiers = new Map();
+      const creatures = rows.filter(row => selected.has(row.id));
+      if (!creatures.length) throw new Error('Select at least one creature.');
+      const grouped = data.has('group'), mode = data.get('mode');
+      const totals = new Map();
       const scores = {};
-      let first;
-      for (const row of rows.filter(row => selected.has(row.id))) {
-        const key = data.has('group') ? `${row.templateId}:${row.initiativeMod}` : row.id;
-        if (!modifiers.has(key)) {
-          const expression = toHit(row.initiativeMod);
-          const result = first ? rollDice(expression, data.get('mode')) : ui.rollCreature(expression, row.name + ' initiative', data.get('mode'));
-          first ||= result;
-          modifiers.set(key, result.total);
-        }
-        scores[row.id] = modifiers.get(key);
+      for (const row of creatures) {
+        const key = grouped ? `${row.templateId}:${row.initiativeMod}` : row.id;
+        if (!totals.has(key)) totals.set(key, rollDice(toHit(row.initiativeMod), mode).total);
+        scores[row.id] = totals.get(key);
       }
-      if (!first) throw new Error('Select at least one creature.');
       await change(p, encounter, {kind: 'initiative', scores});
-      toast('Creature initiative saved.');
+      if (!modal.open || dialog() !== form) return;
+      setModal('Creature initiative results', marker('initiative-results', `
+        <dl class="encounter-list encounter-initiative-results">${creatures.map(row => `
+          <div class="encounter-list-row"><dt>${esc(row.name)}</dt><dd>${scores[row.id]}</dd></div>`).join('')}</dl>
+        <div class="modal-actions">${btn('close', 'Done', 'btn btn-primary', 'autofocus')}</div>`));
     }));
   }
 
