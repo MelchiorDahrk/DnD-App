@@ -41,13 +41,13 @@ test('creature encounters persist, survive reconnect, and protect private data a
   await assertFails(sdk.getDocFromServer(b.ref(privatePath)));
   await assertFails(sdk.getDocsFromServer(sdk.collection(b.db,`parties/${party}/encounters`)));
   await assertFails(sdk.setDoc(b.ref(privatePath),{name:'Forgery',status:'prepared',revision:2,payload:'{}'}));
-  await assertFails(sdk.setDoc(b.ref(publicPath),{id,runId:'bogus',status:'active',creatures:[],current:'',started:false}));
+  await assertFails(sdk.setDoc(b.ref(publicPath),{id,runId:'bogus',status:'active',creatures:[],creatureTurns:[],current:-1,started:false}));
   const template=await a.encounters.saveTemplate(party,{name:'Cave beast',stats:{hp:16,ac:12}});
   await assertFails(sdk.getDocFromServer(b.ref(`parties/${party}/creatureTemplates/${template}`)));
   await a.encounters.saveTemplate(party,{name:'Cave beast',stats:{hp:18,ac:12}},template,1);
   const saved=(await a.encounters.library(party)).templates[0];
   assert.equal(saved.stats.hp,18);
-  await a.encounters.mutate(party,id,{kind:'add',template:saved,quantity:2,values:{notes:'Private ambush'}});
+  await a.encounters.mutate(party,id,{kind:'add',template:saved,quantity:2,values:{notes:'Private ambush',visible:false,identity:false}});
   await a.encounters.mutate(party,id,{kind:'rename',name:'Ambush behind the curtain'});
   const copyId=await a.encounters.mutate(party,id,{kind:'duplicate',name:'Ambush copy'});
   const copy=(await a.encounters.library(party)).encounters.find(row=>row.id===copyId);
@@ -117,6 +117,10 @@ test('managed combat serializes competing changes and keeps attack notifications
   assert.equal(advances.filter(result=>result.status==='fulfilled').length,1);
   assert.equal((await details()).cursor.id,row.id);
   assert.equal((await sdk.getDocFromServer(b.ref(combat.path))).data().current,'');
+  const {current,creatureTurns,creatures}=(await sdk.getDocFromServer(b.ref(`${root}/session/encounter`))).data();
+  assert.deepEqual([current,creatureTurns],[0,[20]]);
+  assert.equal(creatures[0].identity,'Wolf');
+  assert.equal(creatures[0].initiative,undefined);
   await Promise.all([3,4].map(amount=>change({kind:'creature',creature:row.id,change:{kind:'damage',amount}})));
   assert.equal((await details()).creatures[0].hp,4);
   await change({kind:'turn',turn:1,characters});

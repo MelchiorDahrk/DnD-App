@@ -4,6 +4,7 @@ import {normalizeCreatureArt, resolveCreatureArt} from './creature-icons.js';
 
 export const ENCOUNTER_LIMIT = 30;
 export const ENCOUNTER_BYTES = 600000;
+export const DEFAULT_CREATURE_VISIBILITY = {visible: true, identity: true};
 export const ABILITY_KEYS = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
 export const CREATURE_CONDITIONS = [...CONDITIONS, 'Exhaustion'];
 export const ACTION_GROUPS = ['Trait', 'Action', 'Bonus action', 'Reaction', 'Legendary action', 'Spell'];
@@ -107,7 +108,7 @@ export function addCreatures(roster, template, quantity, values = {}, ids) {
       id: ids[index], templateId: template.id, templateName: template.name, source: template.source,
       name: display, stats: structuredClone(template.stats),
       maxHp: template.stats.hp, ac: template.stats.ac, initiativeMod: template.stats.initiativeMod,
-      art: template.art, notes: '', publicName: '', visible: false, identity: false, exact: false
+      art: template.art, notes: '', publicName: '', ...DEFAULT_CREATURE_VISIBILITY, exact: false
     }, {...values, name: display}));
   }
   return [...roster, ...added];
@@ -187,7 +188,7 @@ export function publicCreature(row) {
   const result = {
     id: row.id, name: row.publicName || (row.identity ? row.name : 'Unknown creature'),
     art: row.identity ? resolveCreatureArt(row) : {kind: 'generic'},
-    initiative: row.initiative, health: creatureHealth(row), conditions: [...row.conditions]
+    health: creatureHealth(row), conditions: [...row.conditions]
   };
   if (row.identity) result.identity = row.templateName;
   if (row.exact) {
@@ -203,11 +204,16 @@ export function publicCreature(row) {
 export function encounterProjection(encounter) {
   const {run} = encounter;
   const creatures = run.creatures.map(publicCreature).filter(Boolean);
-  const cursor = run.cursor?.id || '';
-  const current = creatures.some(row => row.id === cursor && row.health !== 'Defeated') ? cursor : '';
+  const cursor = run.cursor;
+  const scores = Object.fromEntries(run.creatures.filter(row => row.visible && activeCreature(row) && row.initiative != null)
+    .map(row => [row.id, row.initiative]));
+  // Hidden creatures only appear in the public order while taking a turn.
+  if (isCreatureId(cursor?.id) && !Object.hasOwn(scores, cursor.id)) scores[cursor.id] = cursor.score;
+  const ordered = initiativeOrder(Object.keys(scores).map(id => ({id})), {scores});
   return {
     id: encounter.id, runId: run.id, status: encounter.status, creatures,
-    current, started: !!cursor
+    creatureTurns: ordered.map(({id}) => scores[id]), current: ordered.findIndex(({id}) => id === cursor?.id),
+    started: !!cursor
   };
 }
 

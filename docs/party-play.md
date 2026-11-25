@@ -43,6 +43,8 @@ encounter. Open it and choose **Add creatures**. The compendium searches 341
 creature and form entries from the 2024 rules' SRD 5.2.1 by name, type, and
 Challenge Rating. Pick a creature, set the quantity, and customize the group's
 starting HP, AC, initiative modifier, visibility, name, portrait, and notes.
+New creatures start with their identities revealed. The DM can change this
+before adding them or when editing an individual creature.
 Each instance has its own ID and combat state. You can edit each card
 individually. Use **Create creature template** in the encounter library for
 homebrew stat blocks and reusable actions. Changes to a template apply to
@@ -53,18 +55,24 @@ players to enter initiative for their own characters. The DM can roll for one
 creature, roll selected creatures together, or enter a total when editing a
 creature. The group option gives instances of the same template and initiative
 modifier a shared roll. The Party page and Session Mode show the mixed turn
-order. It sorts ties by stable participant ID. A reinforcement with a slot
+order. The DM sees the specific creature in each slot. Players see generic
+creature turns, and hidden creatures only appear in their order during their
+turns. The order sorts ties by stable participant ID. A reinforcement with a slot
 after the current turn can act in the current round. Creatures at 0 HP and
 removed participants are skipped. Healing a creature above 0 HP returns it to
 the turn order. **Pause** holds turn advancement while allowing adjustments.
 
-Open a creature on the Party page or in Session Mode to manage HP, temporary
-HP, conditions, attack and damage rolls, checks, saves, recharge, and limited
-uses. Use **Edit / reveal creature** to change visibility, publish a display
-name, and optionally share exact HP, AC, and statistics. Unidentified
+The DM can open a creature on the Party page or in Session Mode to manage HP,
+temporary HP, conditions, attack and damage rolls, checks, saves, recharge,
+and limited uses. Use **Edit / reveal creature** to change visibility, publish
+a display name, and optionally share exact HP, AC, and statistics. Unidentified
 creatures use a silhouette. Revealed creatures default to Healthy, Injured,
 Bloodied (half HP or less), or Defeated. The DM can add reinforcements from the
 compendium at any point during the run.
+
+Players can open a revealed creature from the Party page and choose **Edit
+name and notes**. Their display name and notes stay on that device for the
+current encounter. Clear the display name to restore the DM's name.
 
 In **Roll / target** or **Record attack manually**, choose a shared character.
 Confirm the actual damage and type, then publish to the party activity feed.
@@ -79,9 +87,9 @@ generic source name or a public alias.
 **End encounter** keeps the final state for review and clears initiative.
 **Archive** marks a completed run in the library. **Reset for reuse** restores
 the prepared roster and clears the previous run. Duplicate the prepared
-encounter to keep a separate copy. Encounter changes require a live connection.
-During an interruption, the last known encounter stays visible while the
-client reconnects. Each encounter supports up to 30 creatures and a
+encounter to keep a separate copy. DM encounter controls require a live
+connection. During an interruption, the client shows the last known encounter
+while it reconnects. Each encounter supports up to 30 creatures and a
 600 KB private payload. Portrait uploads are resized to fit so they can travel
 with the encounter. The SRD catalog and built-in portraits are bundled offline.
 
@@ -144,12 +152,11 @@ remain available offline.
   blocks live in `creatureTemplates/{template}`. Firestore restricts both
   collections to the effective DM, including when the assignment falls back to
   the party owner. Player characters and creature instances share one turn
-  order. The current creature cursor is private so a hidden creature's ID and
-  initiative stay out of the public combat document.
+  order. Creature initiative and the current cursor stay with the private run.
 - `parties/{party}/session/encounter` contains the current status and a
-  projection of revealed creatures. The store constructs it from allowed
-  display fields. A transaction updates the private run, shared turn state
-  when it changes, and the public projection when it changes. Transactions
+  projection with revealed creature cards and an anonymous list of creature
+  initiative slots. The current creature is represented by a slot index. The
+  store updates the private run and public turn state together. Transactions
   reread current sheet initiative and preserve concurrent player scores.
   Initiative-only sessions from older parties continue to use
   `session/combat`.
@@ -244,7 +251,8 @@ creation, and recovery across this version mismatch.
 adds rules and browser coverage for private reads, player initiative, concurrent
 combat changes, reconnect, targeted damage, rest votes, store checkout, trading,
 Session Mode, and responsive layouts. The encounter scenario uses a DM and
-two connected players. Browser screenshots are written to
+two connected players to verify anonymous turns and private, temporary creature
+notes. Browser screenshots are written to
 `.tmp/browser-diagnostics/party/`.
 
 To regenerate `creature-data.js`, download the pinned 5e-bits monster JSON

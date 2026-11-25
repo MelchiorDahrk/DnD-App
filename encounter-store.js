@@ -222,7 +222,8 @@ export class EncounterStore {
       this.write(tx, encounterRef, next);
       if (isLiveEncounter(next)) {
         const projected = encounterProjection(next);
-        if (!live || JSON.stringify(projected) !== JSON.stringify(encounterProjection(before))) tx.set(publicRef, projected);
+        if (!live || command.kind === 'turn' || JSON.stringify(projected) !== JSON.stringify(encounterProjection(before)))
+          tx.set(publicRef, projected);
       }
       return id;
     }));

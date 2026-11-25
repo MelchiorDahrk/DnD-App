@@ -290,10 +290,12 @@ service cloud.firestore {
       match /session/encounter {
         allow read: if member(party);
         allow create, update: if dungeonMaster(party)
-          && request.resource.data.keys().hasOnly(['id','runId','status','creatures','current','started'])
+          && request.resource.data.keys().hasOnly(['id','runId','status','creatures','creatureTurns','current','started'])
           && request.resource.data.id.matches('[a-zA-Z0-9_-]{1,100}') && text(request.resource.data.runId,100)
-          && request.resource.data.status in ['active','paused'] && text(request.resource.data.current,100)
+          && request.resource.data.status in ['active','paused']
           && request.resource.data.creatures is list && request.resource.data.creatures.size()<=30
+          && request.resource.data.creatureTurns is list && request.resource.data.creatureTurns.size()<=31
+          && integer(request.resource.data.current,-1,request.resource.data.creatureTurns.size()-1)
           && request.resource.data.started is bool
           && getAfter(/databases/$(database)/documents/parties/$(party)/session/combat).data.encounterId==request.resource.data.runId
           && getAfter(/databases/$(database)/documents/parties/$(party)/session/combat).data.managed==true;

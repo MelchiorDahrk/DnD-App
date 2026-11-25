@@ -1,11 +1,11 @@
 import {ABILITIES, mod, rollDice, signed, uid} from './model.js';
 import {icon, conditionIcon} from './icons.js';
-import {turnOrder} from './party-model.js';
+import {initiativeOrder, turnOrder} from './party-model.js';
 import {attackOutcome, rollAttackDamage} from './attack-rules.js';
 import {CREATURE_ICONS, creatureArtPath, GENERIC_CREATURE, hasLEGOArt, readCreatureImage, resolveCreatureArt} from './creature-icons.js';
 import {
-  ABILITY_KEYS, ACTION_GROUPS, activeCreature, CREATURE_CONDITIONS, creatureHealth, encounterSummary,
-  ENCOUNTER_LIMIT, formatCR, isLiveEncounter
+  ABILITY_KEYS, ACTION_GROUPS, activeCreature, CREATURE_CONDITIONS, creatureHealth, DEFAULT_CREATURE_VISIBILITY,
+  encounterSummary, ENCOUNTER_LIMIT, formatCR, isLiveEncounter
 } from './encounter-model.js';
 
 const STAT_LABELS = {
@@ -16,24 +16,53 @@ const STAT_LABELS = {
 const STATUS_LABELS = {prepared: 'Prepared', active: 'Active', paused: 'Paused', completed: 'Completed', archived: 'Archived'};
 const visibleStatus = {hidden: 'Hidden', unknown: 'Revealed without identity', named: 'Identity revealed'};
 const toHit = bonus => `1d20${bonus ? signed(bonus) : ''}`;
+const creatureTurn = id => ({id, creature: {id, anonymous: true, name: 'Creature turn', art: {kind: 'generic'}}});
 
 export function encounterTurnView(party, privateEncounter) {
   const combat = party.combat;
   const projection = combat.managed && party.encounter?.runId === combat.encounterId ? party.encounter : null;
   const full = projection && privateEncounter?.run?.id === projection.runId ? privateEncounter : null;
+  const publicRows = projection?.creatures || [];
   const creatures = full ? full.run.creatures.map(row => ({
     id: row.id, name: row.name, art: resolveCreatureArt(row), initiative: row.initiative,
     health: creatureHealth(row), conditions: row.conditions, hp: row.hp, maxHp: row.maxHp, visible: row.visible
-  })) : projection?.creatures || [];
-  const current = full?.run.cursor?.id || projection?.current || combat.current;
+  })) : publicRows.map(({initiative, ...row}) => row);
+  let current = full?.run.cursor?.id || combat.current;
   const scores = {...combat.scores};
-  for (const row of creatures) if (row.initiative != null && row.health !== 'Defeated') scores[row.id] = row.initiative;
+  let creatureEntries = [];
+  let showUnknownTurn = false;
+  if (full) {
+    creatureEntries = creatures.filter(row => row.health !== 'Defeated').map(row => ({id: row.id, creature: row}));
+    for (const {id, creature} of creatureEntries) if (creature.initiative != null) scores[id] = creature.initiative;
+  } else if (projection) {
+    let turns = projection.creatureTurns;
+    let currentIndex = projection.current;
+    if (!Array.isArray(turns)) {
+      // An encounter already in progress may still have the older public format.
+      const legacyScores = Object.fromEntries(publicRows.filter(row => row.initiative != null && row.health !== 'Defeated')
+        .map(row => [row.id, row.initiative]));
+      const legacyOrder = initiativeOrder(Object.keys(legacyScores).map(id => ({id})), {scores: legacyScores});
+      turns = legacyOrder.map(({id}) => legacyScores[id]);
+      currentIndex = legacyOrder.findIndex(({id}) => id === projection.current);
+      showUnknownTurn = currentIndex < 0 && !current && projection.started;
+    }
+    creatureEntries = turns.map((score, index) => {
+      const id = `@turn-${String(index).padStart(2, '0')}`;
+      scores[id] = score;
+      if (index === currentIndex && !combat.current) current = id;
+      return creatureTurn(id);
+    });
+  }
+  const visibleCombat = {...combat, current, scores};
+  const ordered = turnOrder([...party.characters, ...creatureEntries], visibleCombat);
+  if (showUnknownTurn) {
+    const id = '@turn-current';
+    visibleCombat.current = id;
+    ordered.unshift(creatureTurn(id));
+  }
   return {
-    combat: {...combat, current, scores}, projection, full,
-    started: !!(full?.run.cursor || projection?.started || combat.current),
-    ordered: turnOrder([...party.characters, ...creatures.filter(row => row.health !== 'Defeated')
-      .map(row => ({id: row.id, creature: row}))], {...combat, current, scores}),
-    creatures
+    combat: visibleCombat, projection, full, ordered, creatures,
+    started: !!(full?.run.cursor || projection?.started || combat.current)
   };
 }
 
@@ -41,7 +70,7 @@ export function createEncounterUI(ui) {
   const {esc, btn, field, actions, setModal, modal, toast, party, store, user, isDM} = ui;
   let stop = () => {}, watched = '', active, catalog, library, busy = false;
   let privateError = '', attackDraft;
-  let viewedCreature = null;
+  let viewedCreature = null, annotations = null;
   const action = (id, label, attrs = '', classes = 'btn btn-sm') => btn('encounter-' + id, label, classes, attrs);
   const dataId = id => `data-id="${esc(id)}"`;
   const selected = (a, b) => String(a) === String(b) ? ' selected' : '';
@@ -55,6 +84,8 @@ export function createEncounterUI(ui) {
   const ready = () => navigator.onLine && party()?.encounterCached === false && !party()?.errors.encounters;
   const state = () => encounterTurnView(party(), isDM() ? active : null);
   const mayManage = () => !!party()?.name && (!party().dm || (party().charactersReady && party().membersReady)) && isDM();
+  const noteFor = row => annotations?.entries[row.id];
+  const playerName = row => noteFor(row)?.name || row.name;
   const portrait = art => `<span class="party-portrait encounter-portrait"><img class="character-portrait${art?.kind === 'image' || hasLEGOArt(art) ? '' : ' encounter-icon'}" src="${esc(creatureArtPath(art))}" alt="" width="128" height="128" loading="lazy"></span>`;
   document.addEventListener('error', event => {
     const image = event.target;
@@ -72,15 +103,31 @@ export function createEncounterUI(ui) {
     library = null;
     attackDraft = null;
     viewedCreature = null;
+    annotations = null;
     if (dialog()) modal.close();
   }
 
+  function syncAnnotations(p) {
+    const runId = p.encounter?.runId;
+    if (!runId && p.encounterCached !== false) return;
+    const key = `questlog.encounterNotes.${user().uid}.${p.id}`;
+    if (annotations?.key === key && annotations.runId === runId) return;
+    annotations = {key, runId, entries: {}};
+    try {
+      const saved = JSON.parse(localStorage.getItem(key));
+      if (runId && saved?.runId === runId && saved.entries && typeof saved.entries === 'object') annotations.entries = saved.entries;
+      else if (saved && p.encounterCached === false) localStorage.removeItem(key);
+    } catch {}
+  }
+
   function update(p) {
+    syncAnnotations(p);
     if (!mayManage() && modal.open && dialog()?.hasAttribute('data-encounter-dm')) modal.close();
-    if (modal.open && dialog()?.dataset.encounterDialog === 'public-creature' && viewedCreature) {
-      const row = p.encounter?.creatures.find(row => row.id === viewedCreature.id);
+    const view = modal.open && dialog()?.dataset.encounterDialog;
+    if (viewedCreature && (view === 'public-creature' || view === 'player-notes')) {
+      const row = publicCreatureInRun(viewedCreature.runId, viewedCreature.row.id);
       if (!row) modal.close();
-      else if (JSON.stringify(row) !== JSON.stringify(viewedCreature)) showCreature(row);
+      else if (view === 'public-creature' && JSON.stringify(row) !== JSON.stringify(viewedCreature.row)) showPublicCreature(row);
     }
     const id = mayManage() && p.charactersReady && p.encounter?.id;
     const key = id ? `${p.id}/${id}` : '';
@@ -137,11 +184,12 @@ export function createEncounterUI(ui) {
   function creatureCard(row, current = false, dm = false) {
     const summary = dm ? `${row.hp}/${row.maxHp} HP · ${row.health}` : row.exact ?
       `${row.exact.hp}/${row.exact.maxHp} HP · AC ${row.exact.ac}` : row.health;
+    const initiative = dm ? `<span>${row.initiative == null ? 'Awaiting initiative' : `Initiative ${esc(row.initiative)}`}</span>` : '';
+    const meta = initiative + (dm && !row.visible ? '<span class="badge">Hidden</span>' : '') + conditions(row);
     return `<article class="encounter-card${current ? ' is-current' : ''}">${action('creature',
-      portrait(row.art) + `<span><strong>${esc(row.name)}</strong><small>${esc(summary)}</small></span>`,
+      portrait(row.art) + `<span><strong>${esc(dm ? row.name : playerName(row))}</strong><small>${esc(summary)}</small></span>`,
       dataId(row.id), 'encounter-card-button')}
-      <div class="encounter-card-meta">${row.initiative != null ? `<span>Initiative ${esc(row.initiative)}</span>` : '<span>Awaiting initiative</span>'}
-      ${dm && !row.visible ? '<span class="badge">Hidden</span>' : ''}${conditions(row)}</div></article>`;
+      ${meta ? `<div class="encounter-card-meta">${meta}</div>` : ''}</article>`;
   }
 
   function markup() {
@@ -149,9 +197,9 @@ export function createEncounterUI(ui) {
     const view = state();
     if (!view.projection && !mayManage()) return hitsMarkup();
     const full = view.full;
-    const creatures = turnOrder(view.creatures, view.combat);
+    const creatures = full ? turnOrder(view.creatures, view.combat) : view.creatures;
     const waiting = p.combat.managed && !view.projection;
-    const scored = view.ordered.filter(row => Object.hasOwn(view.combat.scores, row.id));
+    const scored = view.ordered.filter(row => row.creature?.anonymous || Object.hasOwn(view.combat.scores, row.id));
     return `<section class="panel encounter-section" aria-label="Encounters">
       <div class="panel-heading"><h2>${icon('sword')}Encounters</h2>${mayManage() ? action('library', 'Manage encounters') : ''}</div>
       ${waiting ? '<p class="panel-body" role="status">Synchronizing the current encounter…</p>' : ''}
@@ -162,7 +210,7 @@ export function createEncounterUI(ui) {
         ${full && creatures.length ? `<p class="form-help">${creatures.length} creatures · ${esc(encounterSummary(full.run.creatures))}</p>` : ''}
         ${privateError ? '<p role="status">DM encounter details are unavailable. Retry the party connection.</p>' : ''}
         ${scored.length ? `<ol class="encounter-turns" aria-label="Encounter turn order">${scored.map(row =>
-          `<li${row.id === view.combat.current ? ' aria-current="true"' : ''}>${esc(row.creature?.name || row.sheet?.name)} · ${view.combat.scores[row.id]}</li>`).join('')}</ol>` : ''}
+          `<li${row.id === view.combat.current ? ' aria-current="true"' : ''}>${esc(row.creature?.name || row.sheet?.name)}${row.creature?.anonymous ? '' : ` · ${view.combat.scores[row.id]}`}</li>`).join('')}</ol>` : ''}
         <div class="encounter-cards">${creatures.map(row => creatureCard(row, row.id === view.combat.current, !!full)).join('')}</div>
         ${!creatures.length ? `<p class="form-help">${full ? 'Add a creature to build the encounter.' : 'Creatures appear here when your DM reveals them.'}</p>` : ''}
       </div>` : ''}
@@ -193,6 +241,8 @@ export function createEncounterUI(ui) {
 
   function sessionMember(row, combat) {
     const current = row.id === combat.current;
+    if (row.anonymous) return `<div class="session-member${current ? ' is-current' : ''}"${current ? ' aria-current="true"' : ''}>
+      ${portrait(row.art)}<span class="session-member-details"><strong>${esc(row.name)}</strong></span></div>`;
     const details = [row.initiative != null ? 'Init ' + row.initiative : '', row.health, ...row.conditions].filter(Boolean).join(' · ');
     return action('creature', `${portrait(row.art)}<span class="session-member-details"><strong>${esc(row.name)}</strong><small>${esc(details)}</small></span>`,
       dataId(row.id) + (current ? ' aria-current="true"' : ''), 'session-member' + (current ? ' is-current' : ''));
@@ -201,6 +251,7 @@ export function createEncounterUI(ui) {
   function turnStatus(view) {
     if (view.projection?.status === 'paused') return 'Encounter paused';
     const current = view.ordered.find(item => item.id === view.combat.current);
+    if (current?.creature?.anonymous) return current.creature.name;
     if (current) return esc(current.creature?.name || current.sheet?.name || 'Adventurer') + '’s turn';
     return view.started ? 'Turn in progress' : 'Roll initiative, then begin turns';
   }
@@ -331,7 +382,8 @@ export function createEncounterUI(ui) {
   }
 
   function addDialog(encounter, template) {
-    const row = {name: template.name, maxHp: template.stats.hp, ac: template.stats.ac, initiativeMod: template.stats.initiativeMod, art: template.art};
+    const row = {name: template.name, maxHp: template.stats.hp, ac: template.stats.ac, initiativeMod: template.stats.initiativeMod,
+      art: template.art, ...DEFAULT_CREATURE_VISIBILITY};
     setModal(esc(template.name), marker('add', `<div class="encounter-detail-title">${portrait(resolveCreatureArt(template))}
       <div><strong>${esc(template.stats.type)} · CR ${formatCR(template.stats.cr)}</strong><p>${esc(template.source)}</p></div></div>
       ${setupFields(row, true)}${statBlock(template.stats, false)}${actions('Add to encounter')}`), data =>
@@ -393,11 +445,52 @@ export function createEncounterUI(ui) {
       refreshCombat();
       return;
     }
-    viewedCreature = row;
-    setModal(esc(row.name), marker('public-creature', `<div class="encounter-detail-title">${portrait(row.art)}<div>
-      <strong>${esc(row.health)}</strong>${row.identity && row.identity !== row.name ? `<p>${esc(row.identity)}</p>` : ''}<p>${conditions(row)}</p></div></div>${row.exact ?
+    const runId = state().projection?.runId;
+    const publicRow = publicCreatureInRun(runId, row.id);
+    if (publicRow) showPublicCreature(publicRow);
+  }
+
+  function publicCreatureInRun(runId, id) {
+    const encounter = party()?.encounter;
+    if (encounter && encounter.runId === runId) return encounter.creatures.find(row => row.id === id);
+  }
+
+  function showPublicCreature(row) {
+    viewedCreature = {row, runId: party().encounter.runId};
+    const name = playerName(row);
+    const note = noteFor(row)?.notes;
+    const originalName = (row.identity || row.name) !== name ? `<p>${esc(row.identity || row.name)}</p>` : '';
+    setModal(esc(name), marker('public-creature', `<div class="encounter-detail-title">${portrait(row.art)}<div>
+      <strong>${esc(row.health)}</strong>${originalName}<p>${conditions(row)}</p></div></div>${row.exact ?
         `<p>${row.exact.hp}/${row.exact.maxHp} HP · ${row.exact.tempHp} temp · AC ${row.exact.ac}</p>${row.exact.scores ? statBlock(row.exact, false) : ''}` : ''}
-      <div class="modal-actions">${btn('close', 'Done', 'btn btn-primary')}</div>`, false));
+      ${note ? `<div class="encounter-notes"><strong>Your notes</strong><p>${esc(note)}</p></div>` : ''}
+      <div class="modal-actions">${!mayManage() ? action('edit-notes', 'Edit name and notes') : ''}${btn('close', 'Done', 'btn btn-primary')}</div>`, false));
+  }
+
+  function editPlayerNotes() {
+    if (mayManage() || !viewedCreature || dialog()?.dataset.encounterDialog !== 'public-creature') return;
+    const {row: opened, runId} = viewedCreature;
+    const row = publicCreatureInRun(runId, opened.id);
+    if (!row) return;
+    const saved = noteFor(row);
+    setModal('Edit name and notes', marker('player-notes', `
+      <p class="form-help">Only you can see these changes on this device during this encounter.</p>
+      ${field('Display name', 'creatureName', saved?.name || row.name, 'text', `maxlength="120" placeholder="${esc(row.name)}" autofocus`)}
+      ${area('Your notes', 'creatureNotes', saved?.notes)}${actions('Save changes')}`, false), data => {
+      const latest = publicCreatureInRun(runId, row.id);
+      if (!latest || annotations?.runId !== runId || mayManage()) { modal.close(); return; }
+      const displayName = data.get('creatureName').trim();
+      const name = displayName === row.name ? '' : displayName;
+      const notes = data.get('creatureNotes').trim();
+      if (name || notes) annotations.entries[row.id] = {name, notes};
+      else delete annotations.entries[row.id];
+      const {key, entries} = annotations;
+      try {
+        if (Object.keys(entries).length) localStorage.setItem(key, JSON.stringify({runId, entries}));
+        else localStorage.removeItem(key);
+      } catch { toast('Changes are saved until you leave or reload this page.', true); }
+      showPublicCreature(latest);
+    });
   }
 
   function refreshCombat() {
@@ -612,6 +705,10 @@ export function createEncounterUI(ui) {
     }
     if (command === 'creature') {
       showCreature(state().creatures.find(row => row.id === id));
+      return true;
+    }
+    if (command === 'edit-notes') {
+      editPlayerNotes();
       return true;
     }
     if (!mayManage()) return true;

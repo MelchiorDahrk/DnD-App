@@ -89,10 +89,13 @@ test('creature HP, conditions, manual overrides, and rechargeable resources', ()
 test('projection excludes hidden creatures, notes, and unidentified artwork and stats', () => {
   const img = 'data:image/webp;base64,YQ==';
   const [row] = addCreatures([], goblin, 1, {notes: 'Secret', art: {image: img}}).map(liveCreature);
-  assert.equal(publicCreature(row), null);
-  row.visible = true;
+  assert.equal(publicCreature(row).identity, 'Goblin Warrior');
+  assert.equal(publicCreature(row).exact, undefined);
+  const [hidden] = addCreatures([], goblin, 1, {visible: false}).map(liveCreature);
+  assert.equal(publicCreature(hidden), null);
+  row.identity = false;
   row.conditions.push('Prone');
-  assert.deepEqual(publicCreature(row), {id: row.id, name: 'Unknown creature', art: {kind: 'generic'}, initiative: null, health: 'Healthy', conditions: ['Prone']});
+  assert.deepEqual(publicCreature(row), {id: row.id, name: 'Unknown creature', art: {kind: 'generic'}, health: 'Healthy', conditions: ['Prone']});
   row.identity = row.exact = true;
   row.publicName = 'Cloaked scout';
   const visible = publicCreature(row);
@@ -126,20 +129,40 @@ test('mixed turns preserve deterministic ties and cursor after removal, defeat, 
   assert.equal(run.round, 2);
 });
 
-test('Party and Session Mode use the same mixed turn view without hidden creature IDs', () => {
-  const [row] = addCreatures([], goblin, 1).map(liveCreature);
-  row.initiative = 12;
+test('players get anonymous turns while the DM sees exact creature order', () => {
+  const creatures = addCreatures([], goblin, 2, {}, ['@scout', '@ambusher']).map(liveCreature);
+  const [scout, ambusher] = creatures;
+  scout.initiative = 9;
+  ambusher.initiative = 12;
   const encounter = {...encounterDefinition('raid', 'Secret title'), status: 'active', run: {
-    id: 'run', creatures: [row], cursor: {id: row.id, score: 12}
+    id: 'run', creatures, cursor: {id: scout.id, score: 9}
   }};
   const party = {combat: {managed: true, encounterId: 'run', scores: {pc: 9}, current: ''}, characters: [{id: 'pc'}], encounter: encounterProjection(encounter)};
-  assert.deepEqual(encounterTurnView(party).ordered.map(row => row.id), ['pc']);
-  assert.equal(encounterTurnView(party).combat.current, '');
-  assert.equal(encounterTurnView(party, encounter).combat.current, row.id);
-  row.visible = true;
+  const players = encounterTurnView(party);
+  assert.deepEqual(players.ordered.map(row => row.creature?.name || row.id), ['Creature turn', 'pc', 'Creature turn']);
+  assert.equal(players.combat.current, players.ordered[0].id);
+  assert.deepEqual(players.creatures.map(row => row.id), [scout.id, ambusher.id]);
+  assert.doesNotMatch(JSON.stringify(players.ordered), /Goblin|scout|ambusher/);
+  assert.ok(party.encounter.creatures.every(row => !Object.hasOwn(row, 'initiative')));
+  const dm = encounterTurnView(party, encounter);
+  assert.deepEqual(dm.ordered.map(row => row.id), [scout.id, 'pc', ambusher.id]);
+  assert.equal(dm.combat.current, scout.id);
+
+  scout.visible = false;
   party.encounter = encounterProjection(encounter);
-  assert.deepEqual(encounterTurnView(party).ordered.map(row => row.id), [row.id, 'pc']);
-  assert.equal(encounterTurnView(party).combat.scores[row.id], 12);
+  assert.doesNotMatch(JSON.stringify(party.encounter), /scout/);
+  assert.equal(encounterTurnView(party).ordered[0].creature.name, 'Creature turn');
+
+  encounter.run.cursor = null;
+  party.encounter = encounterProjection(encounter);
+  assert.deepEqual(party.encounter.creatureTurns, [12]);
+  const {creatureTurns, ...legacy} = party.encounter;
+  party.encounter = {...legacy, started: true, current: ambusher.id,
+    creatures: [{...legacy.creatures[0], initiative: creatureTurns[0]}]};
+  const previousFormat = encounterTurnView(party);
+  assert.equal(previousFormat.combat.current, previousFormat.ordered[0].id);
+  assert.equal(previousFormat.ordered[0].creature.name, 'Creature turn');
+  assert.equal(previousFormat.creatures[0].initiative, undefined);
 });
 
 test('portrait resolution prioritizes a custom upload, then curated name, type and generic art', async () => {

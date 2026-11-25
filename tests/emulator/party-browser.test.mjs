@@ -241,6 +241,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await alice.page.select('#modal [name="type"]','fey');
     await alice.page.select('#modal [name="cr"]','1/4');
     await press(alice.page,'[data-action="encounter-select"][data-template="srd-goblin-warrior"]');
+    assert.equal(await alice.page.$eval('#modal [name="visibility"]',node=>node.value),'named');
     await fill(alice.page,'quantity','2');await fill(alice.page,'notes','Hide the scout behind the cart.');
     await submit(alice.page);
     await alice.page.waitForFunction(()=>document.querySelector('[data-encounter-dialog="builder"]')?.textContent.includes('Goblin Warrior #2'));
@@ -251,7 +252,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
       await page.select('[data-initiative-method]','physical');
       await fill(page,'initiativeTotal',String(total));await submit(page);
     };
-    // Keep the first two turns ahead of the hidden goblin's rolled d20 + 2.
+    // Keep the first two turns ahead of the other goblin's rolled d20 + 2.
     const melchiorInitiative=30, scoutInitiative=25;
     await physical(bob.page,12);await physical(charlie.page,8);
     for(const [name,value] of [['Melchior',melchiorInitiative],['Teyla',5]]){
@@ -260,9 +261,9 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     }
     await closed(alice.page);
     for(const {page} of [bob,charlie]){
-      await page.waitForSelector('.encounter-section');
-      assert.equal(await page.$('.encounter-card'),null);
-      assert.doesNotMatch(await page.$eval('.encounter-section',node=>node.textContent),/Goblin|ambush|scout/);
+      await page.waitForFunction(()=>document.querySelectorAll('.encounter-card').length===2);
+      assert.deepEqual(await page.$$eval('.encounter-card strong',nodes=>nodes.map(n=>n.textContent)),['Goblin Warrior #1','Goblin Warrior #2']);
+      assert.doesNotMatch(await page.$eval('.encounter-section',node=>node.textContent),/ambush|scout/);
     }
 
     phase='open creature after initiative sync';
@@ -273,7 +274,8 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     },{},melchiorInitiative);
     const first=await alice.page.$$eval('.encounter-card [data-action="encounter-creature"]',nodes=>
       nodes.find(node=>node.querySelector('strong')?.textContent==='Goblin Warrior #1').dataset.id);
-    const firstCard=`.encounter-card [data-action="encounter-creature"][data-id="${first}"]`;
+    const firstCreature=`[data-action="encounter-creature"][data-id="${first}"]`;
+    const firstCard=`.encounter-card ${firstCreature}`;
     phase='bulk creature initiative';
     await click(alice.page,'encounter-initiative');
     const secondCreature=await alice.page.$$eval('[name="creature"]',nodes=>nodes[1].value);
@@ -325,18 +327,37 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await fill(alice.page,'publicName','Cloaked scout');await fill(alice.page,'initiative',String(scoutInitiative));
     await submit(alice.page);await closed(alice.page);
     for(const {page} of [bob,charlie]){
-      await page.waitForSelector(firstCard);
+      await page.waitForFunction(selector=>document.querySelector(selector)?.textContent.includes('Cloaked scout'),{},firstCard);
       assert.match(await page.$eval(firstCard,node=>node.textContent),/Cloaked scout.*Healthy/s);
       assert.match(await page.$eval(firstCard+' img',node=>node.src),/silhouette\.svg$/);
-      assert.equal(await page.$$eval('.encounter-card',cards=>cards.length),1);
+      assert.equal(await page.$$eval('.encounter-card',cards=>cards.length),2);
     }
+    phase='player creature notes';
+    await press(bob.page,firstCard);
+    await click(bob.page,'encounter-edit-notes');
+    await fill(bob.page,'creatureName','Cart lookout');
+    await fill(bob.page,'creatureNotes','Keep an eye on <the cart>.');
+    await submit(bob.page);
+    assert.equal(await bob.page.$eval('#modal-title',node=>node.textContent),'Cart lookout');
+    assert.equal(await bob.page.$eval('.encounter-notes p',node=>node.textContent),'Keep an eye on <the cart>.');
+    await click(bob.page,'close');
+    await bob.page.waitForFunction(selector=>document.querySelector(selector)?.textContent.includes('Cart lookout'),{},firstCard);
+    assert.match(await charlie.page.$eval(firstCard,node=>node.textContent),/Cloaked scout/);
+    assert.match(await alice.page.$eval(firstCard,node=>node.textContent),/Goblin Warrior #1/);
+
     phase='advance mixed encounter turns';
     await click(alice.page,'party-next-turn');
     const melchiorTurn='.party-player.is-current[data-party-character="alice-main"]';
     await Promise.all([bob,alice].map(({page})=>page.waitForSelector(melchiorTurn)));
     await click(alice.page,'party-next-turn');
-    await bob.page.waitForSelector(`.encounter-card.is-current [data-action="encounter-creature"][data-id="${first}"]`);
-    await bob.page.waitForSelector(`#party-session-header .session-member.is-current[data-action="encounter-creature"][data-id="${first}"]`);
+    await alice.page.waitForSelector(`.encounter-card.is-current ${firstCreature}`);
+    await bob.page.waitForFunction(()=>document.querySelector('.encounter-turns [aria-current="true"]')?.textContent==='Creature turn');
+    assert.doesNotMatch(await bob.page.$eval('.encounter-turns',node=>node.textContent),/Goblin|Cloaked scout|Cart lookout/);
+    assert.equal(await bob.page.$('.encounter-card.is-current'),null);
+    assert.equal(await bob.page.$eval('.party-encounter-status',node=>node.textContent),'Round 1 · Creature turn');
+    const sessionTurn='#party-session-header .session-member.is-current[aria-current="true"]';
+    assert.equal(await bob.page.$eval(sessionTurn,node=>node.textContent.trim()),'Creature turn');
+    assert.equal(await bob.page.$('#party-session-header [data-action="encounter-creature"]'),null);
     assert.equal(await bob.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
     await bob.page.screenshot({path:resolve(diagnostics,'encounter-playing-mobile.png'),fullPage:true});
     phase='creature damage and targeted notice';
@@ -359,7 +380,10 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await bob.page.waitForFunction(()=>!document.querySelector('.encounter-inbox'));
     await bob.page.reload();
     await bob.page.waitForSelector(firstCard);
-    assert.match(await bob.page.$eval(firstCard,node=>node.textContent),/Bloodied/);
+    assert.match(await bob.page.$eval(firstCard,node=>node.textContent),/Cart lookout.*Bloodied/s);
+    await press(bob.page,firstCard);
+    assert.equal(await bob.page.$eval('.encounter-notes p',node=>node.textContent),'Keep an eye on <the cart>.');
+    await click(bob.page,'close');
     const network=(page,online)=>page.evaluate(async online=>{
       const sdk=await import('./firebase-sdk/firebase.js');
       await sdk[online?'enableNetwork':'disableNetwork'](sdk.getFirestore());
@@ -376,6 +400,7 @@ test('party browser: layout, DM assignment, initiative, transfers, rests, stores
     await alice.page.waitForSelector('[data-action="encounter-pause"]');
     await click(alice.page,'encounter-end');await submit(alice.page);
     await Promise.all([bob,charlie].map(({page})=>page.waitForFunction(()=>!document.querySelector('.encounter-section'))));
+    await bob.page.waitForFunction(key=>localStorage.getItem(key)===null,{},`questlog.encounterNotes.${bob.uid}.${party}`);
     await click(alice.page,'encounter-library');await click(alice.page,'encounter-builder');await click(alice.page,'encounter-archive');
     await alice.page.waitForFunction(()=>document.querySelector('[data-encounter-dialog="builder"]')?.textContent.includes('Archived'));
     assert.deepEqual(errors,[]);

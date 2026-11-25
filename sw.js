@@ -4,7 +4,7 @@ import {CONDITION_ICON_FILES} from './icons.js';
 import {DEFAULT_PORTRAIT_IDS} from './portrait-defaults.js';
 import {SPELL_ICON_FILES} from './spell-icon-manifest.js';
 import {CREATURE_ART_FILES} from './creature-icons.js';
-const CACHE = 'questlog-app-v81-encounters';
+const CACHE = 'questlog-app-v82-encounters';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./model.js','./sheet-layout.js','./character-hero.js','./portrait.js','./portrait-ui.js','./catalog.js','./catalog-ui.js','./default-characters.js','./icons.js','./art.js','./manifest.webmanifest','./assets/icon.svg','./assets/icon-192.png','./assets/icon-512.png','./assets/portrait-adventurer.webp'];
 ASSETS.push('./firebase-config.js','./firebase-client.js','./firebase-sdk/firebase.js','./cloud-model.js','./cloud-store.js','./cloud-sync.js','./cloud-ui.js','./party-model.js','./party-store.js','./party-ui.js','./party.css');
 ASSETS.push('./shop-model.js','./shop-ui.js');
